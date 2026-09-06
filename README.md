@@ -1,6 +1,6 @@
 # BTS FED option C
 
-Site de classe, **produit automatiquement**. Ne rien modifier ici :
+Site **produit automatiquement**. Ne rien modifier ici :
 toute modification est effacee a la prochaine publication.
 
 La source vit dans le depot de cours, sur le poste de l'enseignant.
@@ -14,6 +14,6 @@ s'ajoutent au fil de l'annee.
 
 ## Donnees personnelles
 
-Aucune. Le suivi de lecture d'un eleve vit dans le `localStorage` de
-son navigateur et n'en sort pas : pas de compte, pas de cookie, pas de
-requete vers un serveur.
+Aucune. Le suivi de lecture vit dans le `localStorage` du navigateur
+et n'en sort pas : pas de compte, pas de cookie, pas de requete vers
+un serveur.
