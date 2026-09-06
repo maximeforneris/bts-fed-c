@@ -613,3 +613,24 @@ nav.somm::after{
   .tete.a-img{grid-template-columns:minmax(0,1fr)}
   .tete.a-img>.tete-img{grid-column:1;grid-row:auto;max-width:330px;margin-top:6px}
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LARGEUR — les pages de catalogue prennent l'écran, les pages de cours non
+   Sur un écran de 1900 px, la page en utilisait 1060 : 845 px de marge
+   perdue. Les grilles — frise, portes, outils, exercices, annales — n'ont
+   aucune raison de rester dans une colonne.
+
+   Les pages de SÉANCE, elles, gardent leur largeur : leur texte est borné à
+   660 px pour rester lisible, leurs figures à 760. Les élargir n'ajouterait
+   que du vide à droite du texte. On les reconnaît à data-page, que seule une
+   page de cours porte.
+   ═══════════════════════════════════════════════════════════════════════ */
+.page[data-site]:not([data-page]){max-width:min(1500px,94vw)}
+
+/* La prose garde sa mesure de lecture, où qu'elle se trouve.
+   kit.css ne borne que les enfants DIRECTS de .page : le mot de l'accueil,
+   lui, vit dans une section, et ses paragraphes passaient au travers — 1460 px
+   de longueur de ligne sur un grand écran, soit trois fois la mesure lisible. */
+.mot > p,
+.mot > h2, .mot > h3, .mot > ul, .mot > ol, .mot > blockquote{max-width:660px}
+.mot > .enveloppe-tbl, .mot table{max-width:760px}

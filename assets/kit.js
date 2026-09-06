@@ -700,8 +700,7 @@ SCHEMAS["topologies-bus"]=function(el){
     opacity:"0.13"}));
   svg.appendChild(S("rect",{x:14,y:176,width:58,height:26,rx:3,fill:"none",
     stroke:V("chaud"),"stroke-width":"1.6"}));
-  svg.appendChild(S("text",{x:43,y:193,"text-anchor":"middle","class":"s-tit",
-    fill:V("chaud")},"ALIM"));
+  svg.appendChild(S("text",{x:43,y:193,"text-anchor":"middle","class":"s-lab"},"ALIM"));
   trait(72,189,700,189);
   for(var j=0;j<6;j++)noeud(140+j*112,189);
   svg.appendChild(S("text",{x:140,y:212,"text-anchor":"middle","class":"s-nom"},
@@ -714,8 +713,7 @@ SCHEMAS["topologies-bus"]=function(el){
     var y=244+n*24;
     svg.appendChild(S("text",{x:14,y:y,"class":"s-nom",fill:V("froid")},r[0]+" \u2014"));
     svg.appendChild(S("text",{x:44,y:y,"class":"s-nom"},r[1]));
-    svg.appendChild(S("text",{x:700,y:y,"text-anchor":"end","class":"s-tit",
-      fill:V("chaud")},r[2]+" au maximum"));
+    svg.appendChild(S("text",{x:700,y:y,"text-anchor":"end","class":"s-lab"},r[2]+" au maximum"));
   });
   el.appendChild(svg);
 };
@@ -729,8 +727,7 @@ SCHEMAS["couches-protocole"]=function(el){
             ["DALI","violet"]];
   var LX=[152,304,456,608], LW=146;
   COLS.forEach(function(c,i){
-    svg.appendChild(S("text",{x:LX[i]+LW/2,y:22,"text-anchor":"middle","class":"s-tit",
-      fill:V(c[1])},c[0]));
+    svg.appendChild(S("text",{x:LX[i]+LW/2,y:22,"text-anchor":"middle","class":"s-lab"},c[0]));
   });
   var LIGNES=[
     ["APPLICATION","ce qu'on \u00e9change",
@@ -780,7 +777,7 @@ SCHEMAS["zonage-surete"]=function(el){
   /* perimetrique : le contour surveille */
   svg.appendChild(S("rect",{x:36,y:50,width:450,height:212,fill:"none",
     stroke:V("froid"),"stroke-width":"2","stroke-dasharray":"7 5"}));
-  svg.appendChild(S("text",{x:44,y:68,"class":"s-tit",fill:V("froid")},
+  svg.appendChild(S("text",{x:44,y:68,"class":"s-lab"},
     "P\u00c9RIM\u00c9TRIQUE"));
   /* les ouvertures surveillees */
   function contact(x,y){
@@ -793,21 +790,19 @@ SCHEMAS["zonage-surete"]=function(el){
   svg.appendChild(S("path",{d:"M330,190L216,262L444,262Z",fill:"none",
     stroke:V("tiede"),"stroke-width":"1.6"}));
   svg.appendChild(S("circle",{cx:330,cy:190,r:6,fill:V("tiede")}));
-  svg.appendChild(S("text",{x:330,y:180,"text-anchor":"middle","class":"s-tit",
-    fill:V("tiede")},"VOLUM\u00c9TRIQUE"));
+  svg.appendChild(S("text",{x:330,y:180,"text-anchor":"middle","class":"s-lab"},"VOLUM\u00c9TRIQUE"));
   svg.appendChild(S("text",{x:140,y:110,"class":"s-nom"},"zone 1 \u2014 bureaux"));
   svg.appendChild(S("text",{x:300,y:110,"class":"s-nom"},"zone 2 \u2014 stock"));
   svg.appendChild(S("text",{x:60,y:232,"class":"s-nom"},"zone 3 \u2014 accueil"));
   /* legende */
   var L=[["froid","contact d'ouverture \u2014 on surveille l'enveloppe"],
          ["tiede","d\u00e9tecteur de mouvement \u2014 on surveille le volume"],
-         ["chaud","le zonage d\u00e9coupe : on arme une zone, pas tout"]];
+         ["chaud","le zonage d\u00e9coupe \u2014 on arme une zone, pas tout"]];
   L.forEach(function(r,i){
     var y=64+i*46;
     svg.appendChild(S("rect",{x:528,y:y-9,width:12,height:12,rx:2,fill:V(r[0])}));
     r[1].split(" \u2014 ").forEach(function(m,k){
-      svg.appendChild(S("text",{x:548,y:y+k*17,"class":k?"s-nom":"s-tit",
-        fill:k?V("encre2"):V(r[0])},m));
+      svg.appendChild(S("text",{x:548,y:y+k*17,"class":k?"s-nom":"s-lab"},m));
     });
   });
   svg.appendChild(S("text",{x:528,y:238,"class":"s-nom"},
@@ -839,8 +834,7 @@ SCHEMAS["situations-e5"]=function(el){
       svg.appendChild(S("text",{x:x+w/2,y:80+k*16,"text-anchor":"middle",
         "class":"s-nom"},m));
     });
-    svg.appendChild(S("text",{x:x+w/2,y:113,"text-anchor":"middle","class":"s-tit",
-      fill:V("chaud")},quand));
+    svg.appendChild(S("text",{x:x+w/2,y:113,"text-anchor":"middle","class":"s-lab"},quand));
   }
   boite(46,268,"froid","SITUATION 1",
         "C7 \u2014 r\u00e9aliser des essais|et des mesures",
