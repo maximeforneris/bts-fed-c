@@ -449,3 +449,27 @@ input[type=range]::-moz-range-thumb{
     border:2px solid #000;color:#000;background:#fff;font-weight:600;
     font-size:11px;letter-spacing:.06em;text-transform:uppercase;
     text-align:center}}
+
+/* ══════════════════════════════════════════════════════ ecrans larges
+   Mesure faite au navigateur : a 1600 px de large, une page tenait dans
+   1060 px dont 660 utiles pour les blocs — un tableau de repli faisait
+   624 px pendant que 270 px restaient vides de chaque cote. On elargit
+   donc ce qui n'est PAS du texte courant : replis, tableaux, figures.
+   La mesure de lecture, elle, ne bouge pas : un paragraphe de mille
+   pixels ne se lit plus, et c'est pour cela que .corps est recadre --
+   sans lui, la prose d'un repli elargi suivrait le repli.
+   Les pages de formation (public: prof) gagnent 60 px de mesure en plus :
+   elles se lisent d'affilee, a un bureau, jamais sur un telephone. */
+@media (min-width:1180px){
+  .page{max-width:min(1240px,95vw)}
+  details.appro{max-width:min(1000px,95vw)}
+  .corps>p,.corps>ul,.corps>ol,.corps>h4,.corps>blockquote{max-width:660px}
+  .enveloppe-tbl,figure,figure.schema{max-width:900px}
+  .page[data-public="prof"]>p,.page[data-public="prof"]>h2,
+  .page[data-public="prof"]>h3,.page[data-public="prof"]>h4,
+  .page[data-public="prof"]>ul,.page[data-public="prof"]>ol,
+  .page[data-public="prof"]>blockquote,
+  .page[data-public="prof"] .corps>p,
+  .page[data-public="prof"] .corps>ul,
+  .page[data-public="prof"] .corps>ol{max-width:720px}
+}
