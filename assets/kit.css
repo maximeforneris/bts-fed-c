@@ -473,3 +473,22 @@ input[type=range]::-moz-range-thumb{
   .page[data-public="prof"] .corps>ul,
   .page[data-public="prof"] .corps>ol{max-width:720px}
 }
+
+/* ─────────────────────────────────────────────── le bilan d'une epreuve
+   Il n'apparait que sur une page « epreuve: oui ». Il compte, il ne corrige
+   pas : aucune valeur attendue n'y figure. */
+.bilan-epreuve{position:sticky;top:0;z-index:5;display:flex;align-items:center;
+  gap:14px;margin:26px 0 18px;padding:11px 16px;border-radius:var(--r);
+  background:var(--carte);border:1px solid var(--trait2);
+  box-shadow:var(--ombre);max-width:660px}
+.bilan-epreuve>i{flex:1;display:block;height:7px;border-radius:4px;
+  background:var(--trait2);overflow:hidden}
+.bilan-epreuve>i>b{display:block;height:100%;width:0;border-radius:4px;
+  background:var(--vert);transition:width .3s ease}
+.bilan-epreuve .compte{font-family:"Bricolage Grotesque",sans-serif;
+  font-size:13px;font-weight:600;letter-spacing:.02em;color:var(--encre2);
+  white-space:nowrap}
+@media (max-width:560px){
+  .bilan-epreuve{flex-direction:column;align-items:stretch;gap:8px}
+  .bilan-epreuve .compte{white-space:normal}
+}

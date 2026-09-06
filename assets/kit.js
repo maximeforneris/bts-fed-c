@@ -3753,6 +3753,48 @@ OUTILS.dispersion={
   if(!f){el.innerHTML="Schéma inconnu : "+el.getAttribute("data-schema");return;}
   f(el);
 });
+
+/* ─────────────────────────────────────────────── le bilan d'une epreuve
+   Sur une page qui se declare « epreuve: oui », un bandeau compte ce qui est
+   fait. Il ne donne AUCUNE reponse — juste combien de questions ont ete
+   validees et combien restent. Le compte se refait a chaque evenement « exo »
+   emis par exoNote, et au chargement, car les reponses precedentes sont dans
+   le localStorage de l'appareil.
+   Rien ici ne remonte nulle part : c'est le meme stockage que le suivi de
+   lecture, et il ne sort pas du navigateur. */
+(function(){
+  var page=document.querySelector('.page[data-epreuve]');
+  if(!page)return;
+  var exos=[].slice.call(document.querySelectorAll(".exo"));
+  if(!exos.length)return;
+
+  var bandeau=E("div",{"class":"bilan-epreuve",id:"bilan-epreuve"});
+  var jauge=E("i",{}); jauge.appendChild(E("b",{}));
+  var texte=E("span",{"class":"compte"},"");
+  bandeau.appendChild(jauge); bandeau.appendChild(texte);
+
+  /* pose juste avant le premier exercice : au-dessus du sujet, pas en tete
+     de page ou il serait lu avant meme d'avoir vu une question */
+  var premier=exos[0], hote=premier;
+  while(hote.parentNode&&hote.parentNode!==page)hote=hote.parentNode;
+  page.insertBefore(bandeau,hote);
+
+  function refaire(){
+    var t=exoLu(),justes=0,vus=0;
+    exos.forEach(function(ex){
+      var e=t[ex.getAttribute("data-exo")];
+      if(e==="juste")justes++; else if(e)vus++;
+    });
+    var reste=exos.length-justes-vus;
+    jauge.firstChild.style.width=Math.round(100*justes/exos.length)+"%";
+    texte.textContent=exos.length+" questions · "+justes+" juste"+(justes>1?"s":"")
+      +(vus?" · "+vus+" à revoir":"")+(reste?" · "+reste+" non traitée"
+      +(reste>1?"s":""):" · terminé");
+  }
+  document.addEventListener("exo",refaire);
+  refaire();
+})();
+
 /* le composeur de paroi peut être monté après le bilan : on repasse une fois */
 if(OUTILS.bilan._recalc)OUTILS.bilan._recalc();
 })();
