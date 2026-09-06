@@ -17,7 +17,7 @@
     <h1>De la conductivité<span>au coefficient U</span></h1>
   </div>
   <p class="accroche">D'où sortent les U qu'on vous donnait en séance 1 ? Ils ne se lisent nulle part. Ils se calculent, couche par couche, et c'est le calcul qui ouvre presque tous les sujets d'examen.</p>
-  <p class="contenu">2 outils · 7 questions · 10 replis · 4 figures</p>
+  <p class="contenu">2 outils · 7 questions · 11 replis · 4 figures</p>
   <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A2-3 Bilan thermique · niveau 2</span><span class="tag">A1-2 Composition des parois · niveau 2</span><span class="tag">A2-1 Vocabulaire du génie civil · niveau 2</span></div>
 </header>
 <nav class="somm"><div class="in"><a href="#ce-que-la-seance-a-regle">Ce que la séance a réglé</a><a href="#la-conductivite-propriete-du-materiau">La conductivité, propriété du matériau</a><a href="#de-a-la-paroi-complete">De λ à la paroi complète</a><a href="#ce-que-le-calcul-montre-vraiment">Ce que le calcul montre vraiment</a><a href="#dimensionner-un-isolant">Dimensionner un isolant</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
@@ -398,6 +398,48 @@
 <blockquote>
 <p><strong>Les seuils, les noms d’indicateurs et les dates ne se récitent pas.</strong> Ils changent de génération réglementaire en génération réglementaire, et le sujet d’épreuve fournit toujours l’extrait du texte applicable. Ce qui se retient, c’est la <strong>logique</strong> : besoin, puis consommation, puis confort d’été, puis carbone — et le fait que le U ne soit qu’une entrée parmi d’autres.</p>
 </blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides — quelle épaisseur sur une ligne d&#39;aspiration</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le calcul de cette séance sert tel quel sur un circuit frigorifique, et pour une raison qu’on ne rencontre pas sur un mur : <strong>empêcher la condensation</strong>.</p>
+<p>La ligne d’aspiration ramène au compresseur une vapeur à <strong>5 °C</strong>. Dans un local à <strong>30 °C et 60 %</strong>, l’air a un point de rosée de <strong>21,4 °C</strong>. Un tube nu à 5 °C ruisselle donc en permanence — sur le faux plafond, sur l’isolant du bâtiment, sur le tableau électrique en dessous.</p>
+<p><strong>Le critère n’est pas l’énergie perdue : c’est la température de surface de l’isolant</strong>, qui doit rester <strong>au-dessus de 21,4 °C</strong>.</p>
+<p><strong>Le calcul</strong>, sur un tube de 16 mm extérieur, isolant élastomère λ = 0,037, avec un coefficient d’échange extérieur de 8 W/(m²·K) :</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th style="text-align: right;">Épaisseur</th>
+<th style="text-align: right;">Température de surface</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">6 mm</td>
+<td style="text-align: right;">20,7 °C</td>
+<td><strong>condense</strong></td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>9 mm</strong></td>
+<td style="text-align: right;"><strong>23,4 °C</strong></td>
+<td>tenue, marge faible</td>
+</tr>
+<tr>
+<td style="text-align: right;">13 mm</td>
+<td style="text-align: right;">25,4 °C</td>
+<td>tenue confortable</td>
+</tr>
+<tr>
+<td style="text-align: right;">19 mm</td>
+<td style="text-align: right;">26,9 °C</td>
+<td>tenue, et 35 % de pertes en moins</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>C’est la condensation qui commande l’épaisseur, pas l’économie d’énergie.</strong> Et comme le point de rosée dépend de l’humidité du local, la même ligne demande 9 mm dans un bureau et bien davantage dans une buanderie ou une cuisine.</p>
+</div>
+<div class="piege">
+<p>L’isolant d’une ligne frigorifique est <strong>à cellules fermées</strong>. Une laine minérale prendrait l’eau, sa conductivité s’effondrerait, et l’épaisseur calculée ne vaudrait plus rien au bout d’une saison. Le raisonnement de la séance reste juste ; c’est le matériau qui ne tient pas.</p>
+</div>
+<p>Et la ligne liquide, elle, n’est <strong>pas</strong> isolée dans le cas courant : elle est plus chaude que l’ambiance, donc elle ne condense pas.</p></div></details>
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J2.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 2 — lire un dossier</span></a><a class="ap" href="J4.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 4 — déperditions</span></a></div><a class="vers-recap" href="SEQ1.html">Préparation au contrôle</a></nav>
 <p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
 </div>
