@@ -1,0 +1,296 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Séance 5 — besoin annuel</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/kit.css?v=619d2ece">
+<link rel="stylesheet" href="../assets/site.css?v=619d2ece">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/J5" data-rang="1">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 1 · Thermique du bâtiment</span><span class="fleches"><a class="fleche" href="J4.html" rel="prev" title="Séance 4 — déperditions" aria-label="Séance 4 — déperditions">&lsaquo;</a><a class="fleche" href="SEQ1.html" rel="next" title="Thermique du bâtiment, séances 1 à 5" aria-label="Thermique du bâtiment, séances 1 à 5">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J5">Marquer comme lu</button></div>
+<header class="tete">
+  <span class="num" aria-hidden="true">5</span>
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Le besoin<span>d'énergie</span></h1>
+  </div>
+  <p class="accroche">La séance 4 a donné une puissance, pour une heure de l'année. Celle-ci donne une énergie, pour toute la saison — et c'est elle qui décide si des travaux valent leur prix.</p>
+  <p class="contenu">1 outil · 8 questions · 3 exercices · 5 replis · 4 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">A2-4 DJU et besoin d'énergie utile d'un bâtiment · niveau 3</span><span class="tag">A2-3 Bilan thermique · niveau 2</span><span class="tag">C12-2 Extraire les informations</span></div>
+</header>
+<nav class="somm"><div class="in"><a href="#ce-que-la-seance-a-regle">Ce que la séance a réglé</a><a href="#des-watts-aux-kilowattheures">Des watts aux kilowattheures</a><a href="#les-apports-gratuits">Les apports gratuits</a><a href="#combien-ca-coute">Combien ça coûte</a><a href="#les-travaux-se-rentabilisent-ils">Les travaux se rentabilisent-ils</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#s-entrainer">S’entraîner</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="ce-que-la-seance-a-regle">Ce que la séance a réglé</h2>
+<p>La séance 4 a calculé une puissance : ce qu’il faut fournir au jour le plus froid. Elle ne dit rien de la facture, parce que ce jour-là ne dure pas.</p>
+<p>Cette séance passe de la puissance à l’énergie, et de l’énergie à l’argent. C’est le seul savoir de thermique du bâtiment que le référentiel place au <strong>niveau 3</strong> pour l’option C.</p>
+<figure>
+<img src="img/J5/fig1-dju.png" alt="Les degrés-jours cumulent, sur la saison, tout ce que le climat demande." />
+<figcaption aria-hidden="true">Les degrés-jours cumulent, sur la saison, tout ce que le climat demande.</figcaption>
+</figure>
+<h2 id="des-watts-aux-kilowattheures">Des watts aux kilowattheures</h2>
+<p>Le GV de la séance 4 ne dépend pas du temps qu’il fait. Il suffit donc de savoir combien de froid la saison a apporté — c’est ce que comptent les <strong>degrés-jours</strong>.</p>
+<div class="formule">
+<p><strong>Besoin brut = GV × DJU × 24 / 1 000</strong></p>
+<ul>
+<li><strong>GV</strong><span>la signature du bâtiment, en W/K</span></li>
+<li><strong>DJU</strong><span>degrés-jours unifiés de la saison, en K·jour</span></li>
+<li><strong>24</strong><span>pour passer des jours aux heures · <strong>1 000</strong> — pour passer en kWh</span></li>
+</ul>
+<blockquote>
+<p>Notre maison : 151 × 2 300 × 24 / 1 000 = <strong>8 320 kWh</strong> de besoin brut.</p>
+</blockquote>
+</div>
+<figure class="schema"><div class="dessin" data-schema="dju-villes"></div><figcaption>Les degrés-jours de huit villes : le même bâtiment ne consomme pas la même chose selon où il est posé.</figcaption></figure>
+<div class="cle">
+<p><strong>Le GV appartient au bâtiment, les DJU appartiennent au climat.</strong> Deux maisons identiques à Nice et à Strasbourg ont le même GV et des besoins très différents. C’est ce qui permet de comparer des bâtiments entre eux, une fois le climat retiré.</p>
+</div>
+<h2 id="les-apports-gratuits">Les apports gratuits</h2>
+<p>Le bâtiment ne se chauffe pas seulement avec sa chaudière. Le soleil entre par les vitrages, les occupants dégagent une centaine de watts chacun, et les appareils finissent tous en chaleur.</p>
+<div class="formule">
+<p><strong>Besoin net = besoin brut − apports gratuits</strong></p>
+<ul>
+<li>les apports couvrent de l’ordre de <strong>20 à 30 %</strong> du besoin brut</li>
+<li>notre maison, avec 25 % : 8 320 × 0,75 = <strong>6 240 kWh</strong></li>
+<li>soit <strong>69 kWh/m²/an</strong> sur 90 m²</li>
+</ul>
+</div>
+<div class="piege">
+<p><strong>Les apports gratuits ne se déduisent jamais d’un calcul de puissance.</strong> Au jour le plus froid, à six heures du matin, il n’y a ni soleil ni occupants. Ils n’entrent que dans le besoin annuel — la séance 4 les ignorait à juste titre.</p>
+</div>
+<h2 id="combien-ca-coute">Combien ça coûte</h2>
+<figure class="memo"><img src="img/J5/memo-besoin-annuel.png" alt="" /></figure>
+<p>Le besoin net est de l’énergie <strong>utile</strong>. Ce qu’on paie dépend ensuite du rendement de la production et du prix du vecteur choisi.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Vecteur</th>
+<th style="text-align: right;">Prix indicatif du kWh</th>
+<th style="text-align: right;">Facture annuelle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gaz</td>
+<td style="text-align: right;">0,12 €</td>
+<td style="text-align: right;">≈ <strong>750 €</strong></td>
+</tr>
+<tr>
+<td>Électricité</td>
+<td style="text-align: right;">0,25 €</td>
+<td style="text-align: right;">≈ <strong>1 560 €</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="outil" data-outil="energie">
+
+</div>
+<figure class="schema"><div class="dessin" data-schema="dpe-etiquette"></div><figcaption>La double étiquette : l’énergie d’un côté, le climat de l’autre.</figcaption></figure>
+<h2 id="les-travaux-se-rentabilisent-ils">Les travaux se rentabilisent-ils</h2>
+<div class="formule">
+<p><strong>Temps de retour = coût des travaux / économie annuelle</strong></p>
+<ul>
+<li>l’économie se calcule sur le <strong>GV évité</strong> : ΔGV × DJU × 24 / 1 000</li>
+<li>puis on retire la part des apports, et on multiplie par le prix du kWh</li>
+</ul>
+</div>
+<p>Isoler une toiture qui passe de U = 0,90 à 0,16 fait gagner 54,8 W/K, soit <strong>2 270 kWh</strong> par an. Doubler un isolant déjà bon, de 0,16 à 0,12, n’en fait gagner que <strong>123</strong>.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr>
+<th>Travaux</th>
+<th style="text-align: right;">Économie</th>
+<th style="text-align: right;">Coût</th>
+<th style="text-align: right;">Retour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Isoler une toiture nue</td>
+<td style="text-align: right;">2 270 kWh/an</td>
+<td style="text-align: right;">3 500 €</td>
+<td style="text-align: right;"><strong>6 à 13 ans</strong></td>
+</tr>
+<tr>
+<td>Doubler un isolant existant</td>
+<td style="text-align: right;">123 kWh/an</td>
+<td style="text-align: right;">1 500 €</td>
+<td style="text-align: right;"><strong>environ 50 ans</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>On isole d’abord ce qui n’est pas isolé.</strong> Les rendements de l’isolation sont décroissants : les dix premiers centimètres rapportent beaucoup, les dix suivants presque rien, parce qu’on ajoute une résistance à une résistance déjà grande.</p>
+</div>
+<h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
+<div class="etapes">
+<ol type="1">
+<li>Passer du GV de la séance 4 au besoin brut de la saison</li>
+<li>Comparer le même bâtiment sous huit climats, et lire l’écart</li>
+<li>Estimer les apports gratuits et en déduire le besoin net</li>
+<li>Convertir le besoin en facture, selon deux vecteurs d’énergie</li>
+<li>Calculer le temps de retour de deux travaux, et comprendre pourquoi ils diffèrent d’un facteur huit</li>
+</ol>
+</div>
+<div class="mission">
+<p><strong>À observer en entreprise</strong></p>
+<p>Relever la consommation annuelle de chauffage du bâtiment — sur une facture, un compteur d’énergie, ou auprès du service technique — ainsi que la surface chauffée.</p>
+<p>Calculer le ratio en kWh/(m²·an) et le situer sur l’échelle des classes énergétiques. Relever le prix du kWh effectivement payé. Identifier le poste de déperdition le plus improductif du bâtiment, et estimer ce que coûterait de le traiter.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Les degrés-jours mesurent : <strong>la rigueur du climat sur la saison</strong> | la température la plus froide</li>
+<li>Le GV dépend : <strong>du bâtiment seul</strong> | du bâtiment et du climat</li>
+<li>Dans besoin = GV × DJU × 24 / 1 000, le 24 sert à : <strong>passer des jours aux heures</strong> | convertir en kilowatts</li>
+<li>Les apports gratuits couvrent de l’ordre de : <strong>20 à 30 %</strong> | 60 à 70 %</li>
+<li>Les apports gratuits entrent dans : <strong>le besoin annuel seulement</strong> | le calcul de puissance aussi</li>
+<li>Doubler un isolant déjà performant se rentabilise : <strong>très lentement</strong> | aussi vite qu’isoler une paroi nue</li>
+<li>Le temps de retour se calcule en divisant le coût par : <strong>l’économie annuelle</strong> | l’économie totale</li>
+<li>Un ratio de 69 kWh/(m²·an) décrit un bâtiment : <strong>correctement isolé</strong> | non isolé</li>
+</ul>
+</div>
+<h2 id="s-entrainer">S’entraîner</h2>
+<section class="exo" id="J5-e1" data-exo="J5-e1" data-type="calcul" data-savoir="A2-4" data-a="IXgueGB4OTs2OS82eHZ4LHhgYmloanRqdnguNTZ4YGl0anZ4L3hgeDENMngn"><p class="k">Exercice · A2-4</p><h4>Le besoin brut d’une saison</h4><div class="enonce">
+
+<p>Un bâtiment de <strong>GV = 151 W/K</strong> est situé dans une zone à <strong>2 300 DJU</strong>. Quel est son besoin brut de chauffage sur la saison ?</p>
+</div><div class="indice" hidden>Besoin = GV × DJU × 24 / 1 000. Le 24 passe des jours aux heures, le 1 000 des watts aux kilowatts.</div></section>
+<section class="exo" id="J5-e2" data-exo="J5-e2" data-type="calcul" data-savoir="A2-4" data-a="IXgueGB4OTs2OS82eHZ4LHhgaWpoaXRqdnguNTZ4YG50anZ4L3hgeDENMngn"><p class="k">Exercice · A2-4</p><h4>Ce que rapporte une toiture isolée</h4><div class="enonce">
+
+<p>Isoler une toiture de <strong>74 m²</strong> fait passer son U de <strong>0,90</strong> à <strong>0,16</strong> W/(m²·K). Sous 2 300 DJU, quelle économie brute annuelle, en kWh ?</p>
+</div><div class="indice" hidden>Calculez d’abord le GV évité, ΔU × S, puis appliquez la formule du besoin. On raisonne sur la différence, pas sur le total.</div></section>
+<section class="exo" id="J5-e3" data-exo="J5-e3" data-type="justification" data-savoir="A2-4" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A2-4</p><h4>Deux devis, deux temps de retour</h4><div class="enonce">
+
+<p>Isoler une toiture nue se rembourse en une dizaine d’années ; doubler un isolant existant en une cinquantaine. Expliquez d’où vient cet écart.</p>
+</div><ul class="verifier" hidden><li>J’ai parlé de rendements décroissants de l’isolation.</li><li>J’ai dit qu’on ajoute une résistance à une résistance déjà grande.</li><li>J’ai comparé les deux gains de GV, pas les deux épaisseurs.</li><li>J’ai conclu par une règle d’ordre des travaux.</li></ul></section>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les degrés-jours : ce qu&#39;ils comptent, et pourquoi la base est 18</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un degré-jour n’est pas une température : c’est une <strong>accumulation</strong>. Pour chaque jour de la saison où il fait plus froid qu’un seuil, on compte l’écart entre ce seuil et la température moyenne du jour, puis on additionne tout.</p>
+<p>DJU = Σ (18 − θ moyenne du jour), pour les jours où θ moyenne &lt; 18 °C</p>
+<p><strong>Pourquoi 18 et non 20</strong>, alors qu’on chauffe à 20 ? Parce que les deux degrés manquants sont <strong>précisément les apports gratuits</strong>. La convention suppose que le soleil, les occupants et les appareils fournissent en permanence l’équivalent de 2 K. C’est une approximation, et elle est calibrée sur un bâtiment moyen.</p>
+<div class="piege">
+<p><strong>Le besoin calculé avec des DJU base 18 contient donc déjà une partie des apports.</strong> Retirer ensuite 25 % d’apports revient à les compter deux fois. Selon les usages, on retire une part plus faible, ou on part de DJU base 20. <strong>Le sujet dit toujours quelle convention il retient</strong> — et on ne mélange pas les deux.</p>
+</div>
+<p><strong>Les DJU se lisent, ils ne se calculent pas.</strong> Ils sont publiés par station météo et par saison, sur une moyenne de trente ans pour le dimensionnement, ou sur l’année réelle pour l’analyse d’une facture. Deux usages, deux valeurs.</p>
+<p><strong>Les ordres de grandeur français</strong>, à reconnaître :</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Zone</th>
+<th style="text-align: right;">DJU base 18</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Littoral méditerranéen</td>
+<td style="text-align: right;">1 200 à 1 600</td>
+</tr>
+<tr>
+<td>Façade atlantique</td>
+<td style="text-align: right;">1 900 à 2 300</td>
+</tr>
+<tr>
+<td>Bassin parisien, Normandie</td>
+<td style="text-align: right;">2 200 à 2 500</td>
+</tr>
+<tr>
+<td>Est, Massif central, montagne</td>
+<td style="text-align: right;">2 800 à 4 000</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Un facteur trois entre le sud et la montagne.</strong> Le même bâtiment y consomme trois fois plus — et c’est pourquoi une comparaison de consommations entre deux sites n’a aucun sens tant qu’on n’a pas corrigé du climat.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les apports gratuits : d&#39;où ils viennent et ce qui les limite</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Vingt-cinq pour cent du besoin d’un bâtiment sont couverts sans rien payer. Encore faut-il savoir d’où ça vient, parce que la part varie beaucoup d’un bâtiment à l’autre.</p>
+<p><strong>Trois sources, très inégales :</strong></p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Source</th>
+<th>Ordre de grandeur</th>
+<th>Ce qui la fait varier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Le soleil</strong></td>
+<td>souvent la moitié des apports</td>
+<td>l’orientation, la surface vitrée, les masques, les protections</td>
+</tr>
+<tr>
+<td><strong>Les occupants</strong></td>
+<td>≈ 100 W par personne</td>
+<td>la densité d’occupation et les horaires</td>
+</tr>
+<tr>
+<td><strong>Les équipements</strong></td>
+<td>tout ce qui consomme finit en chaleur</td>
+<td>l’usage : bureaux et cuisines en produisent beaucoup</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Pourquoi la part varie du simple au double.</strong> Un immeuble de bureaux dense, bien vitré au sud, peut voir ses apports couvrir 40 % de son besoin — au point d’avoir besoin de rafraîchir en mi-saison alors qu’il gèle dehors. Une maison peu occupée, orientée au nord, plafonne à 15 %.</p>
+<div class="cle">
+<p><strong>Plus un bâtiment est isolé, plus la part des apports grandit.</strong> Le besoin diminue, les apports ne changent pas : leur part relative monte. Sur un bâtiment passif, les apports peuvent couvrir l’essentiel de la saison — c’est même la définition du standard.</p>
+</div>
+<p><strong>Le revers, qu’un dossier mentionne toujours</strong> : ce qui chauffe gratuitement l’hiver surchauffe l’été. La grande baie sud qui apporte du gratuit en janvier impose une protection solaire en juillet, sans quoi le confort d’été s’effondre. <strong>Les apports ne sont pas un gain net</strong> : ils sont un gain saisonnier et une charge saisonnière, et c’est le même vitrage qui fait les deux.</p>
+<p><strong>Un apport n’est utile que s’il arrive au bon moment.</strong> Le soleil de midi dans un bâtiment vide ne sert à rien — la chaleur est perdue si la masse ne la stocke pas jusqu’au soir. C’est l’inertie de la séance 3 qui décide si un apport est utilisé ou gaspillé.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le temps de retour : la méthode, et les trois choses qu&#39;il ignore</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>C’est le calcul le plus demandé sur ce savoir, et il tient en une division. Sa simplicité est aussi sa limite.</p>
+<p><strong>La méthode, en quatre lignes :</strong></p>
+<ol type="1">
+<li><strong>le GV évité</strong> : ΔGV = ΔU × S pour une paroi, ou Δ(0,34 × Q) pour la ventilation ;</li>
+<li><strong>l’énergie évitée</strong> : ΔGV × DJU × 24 / 1 000, en kWh bruts ;</li>
+<li><strong>l’énergie réellement facturée en moins</strong> : on retire la part des apports, et on divise par le rendement de la production si le sujet le donne ;</li>
+<li><strong>l’argent</strong> : × le prix du kWh, puis le coût divisé par ce montant.</li>
+</ol>
+<div class="piege">
+<p><strong>Le prix du kWh change le résultat du simple au double.</strong> Notre toiture se rembourse en 13 ans au gaz et en 6 ans à l’électricité — pour les mêmes travaux et la même économie d’énergie. Un temps de retour sans le prix retenu ne veut rien dire : on l’écrit toujours.</p>
+</div>
+<p><strong>Les trois choses que ce calcul ignore</strong>, et qu’un bureau d’études réintroduit :</p>
+<ul>
+<li><strong>l’évolution du prix de l’énergie.</strong> Le calcul suppose un prix constant sur la durée. S’il monte, le retour se raccourcit ; le calcul simple est donc plutôt pessimiste ;</li>
+<li><strong>la durée de vie et l’entretien.</strong> Un isolant dure quarante ans sans entretien ; une pompe à chaleur quinze ans avec de la maintenance. Comparer leurs temps de retour sans dire cela fausse la décision ;</li>
+<li><strong>tout ce qui n’est pas de l’énergie</strong> : le confort gagné, la valeur du bien, les aides financières, et le fait que certains travaux ne se font qu’une fois — refaire une façade est l’occasion d’isoler, et ne se représentera pas avant trente ans.</li>
+</ul>
+<div class="cle">
+<p><strong>Le temps de retour classe des solutions ; il ne décide pas seul.</strong> Un travaux à retour long peut être le bon si l’échafaudage est déjà monté, et un travaux à retour court peut être mauvais s’il empêche un travaux meilleur plus tard. C’est la logique du <strong>bouquet de travaux</strong>, et elle vaut mieux que la somme des gestes isolés.</p>
+</div></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">L&#39;étiquette énergétique : ce qu&#39;elle dit, et ce qu&#39;elle ne dit pas</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le classement énergétique d’un logement est devenu un enjeu économique majeur — il conditionne la valeur d’un bien et, désormais, la possibilité de le louer. Il faut donc savoir ce qu’il mesure réellement.</p>
+<p><strong>Deux étiquettes, pas une.</strong> L’une classe la <strong>consommation</strong> d’énergie, l’autre les <strong>émissions de gaz à effet de serre</strong>. Un logement peut être bien classé sur l’une et mal sur l’autre : c’est le cas typique d’un bâtiment isolé mais chauffé au fioul, ou d’un bâtiment moyen chauffé par un réseau de chaleur biomasse.</p>
+<p><strong>Ce que l’étiquette agrège</strong>, et qui explique bien des surprises : elle ne mesure pas que le chauffage. Elle couvre aussi l’eau chaude sanitaire, le refroidissement, l’éclairage et les auxiliaires. <strong>Un bâtiment très bien isolé mais avec une production d’ECS médiocre peut être mal classé.</strong></p>
+<p><strong>Ce qu’elle ne dit pas :</strong></p>
+<ul>
+<li><strong>elle ne dit pas votre facture.</strong> Elle se calcule sur des conventions d’occupation et de climat, pas sur votre usage. Deux ménages dans le même logement auront des factures très différentes ;</li>
+<li><strong>elle ne dit pas le confort.</strong> Un logement bien classé peut être inconfortable l’été si son inertie et ses protections sont mauvaises — l’indicateur de confort d’été est séparé ;</li>
+<li><strong>elle ne dit pas quoi faire.</strong> Le classement est un résultat, pas un diagnostic. Ce sont les postes du bilan de la séance 4 qui disent où agir.</li>
+</ul>
+<blockquote>
+<p><strong>Les seuils de classes, les indicateurs retenus et le calendrier des obligations relèvent de la réglementation</strong> : ils ont déjà changé plusieurs fois et changeront encore. Le sujet d’épreuve fournit l’extrait applicable. Ce qui se retient, c’est la double étiquette, ce qu’elle agrège, et le fait qu’elle repose sur des conventions.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Quand la facture ne correspond pas au calcul</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un bureau d’études annonce 6 240 kWh, l’exploitant en relève 9 000. Ce n’est pas nécessairement une erreur de calcul : c’est le phénomène le plus documenté du bâtiment, et il a quatre causes qu’on sait démêler.</p>
+<p><strong>1 — Le climat réel n’est pas le climat moyen.</strong> Le calcul utilise des DJU de référence sur trente ans ; l’année écoulée a été plus froide ou plus douce. <strong>La correction se fait avant toute autre analyse :</strong></p>
+<p>consommation corrigée = consommation relevée × DJU de référence / DJU de l’année</p>
+<p>Une année à 1 950 DJU au lieu de 2 300 explique à elle seule <strong>15 %</strong> d’écart.</p>
+<p><strong>2 — L’usage n’est pas celui de la convention.</strong> La consigne réelle, les horaires d’occupation, les fenêtres ouvertes. Sur un écart moyen de 11 K pendant la saison, <strong>deux degrés de consigne en plus représentent de l’ordre de 18 % de consommation supplémentaire</strong> — sans qu’aucun équipement soit en cause.</p>
+<p><strong>3 — Les hypothèses du calcul étaient optimistes.</strong> Perméabilité à l’air supposée meilleure qu’elle n’est, ponts thermiques sous-estimés, débit de ventilation réglé au-dessus du dimensionnement.</p>
+<p><strong>4 — L’installation ne fonctionne pas comme prévu.</strong> Loi d’eau mal réglée, réduit qui ne s’applique pas, réseau déséquilibré compensé par une température de départ trop haute, deux batteries qui se combattent. <strong>C’est la cause la plus fréquente, et la seule qui se corrige sans travaux.</strong></p>
+<div class="cle">
+<p><strong>L’ordre du diagnostic est celui de cette liste.</strong> On corrige du climat, on vérifie l’usage, on relit les hypothèses, et <strong>on ne conclut à un défaut d’installation qu’après</strong>. Un exploitant qui saute les trois premières étapes règle des paramètres qui n’étaient pas en cause.</p>
+</div>
+<blockquote>
+<p>C’est là que cette séance rejoint la séquence 5 : la <strong>signature énergétique</strong> de la séance 19 est exactement l’outil qui permet de faire ce tri, en portant les consommations relevées face aux températures relevées. Le besoin calculé ici est la prévision ; la signature en est la vérification.</p>
+</blockquote></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J4.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 4 — déperditions</span></a><a class="ap" href="SEQ1.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Thermique du bâtiment, séances 1 à 5</span></a></div><a class="vers-recap" href="SEQ1.html">Préparation au contrôle</a></nav>
+<p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=619d2ece"></script>
+<script src="../assets/site.js?v=619d2ece"></script>

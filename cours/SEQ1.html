@@ -1,0 +1,521 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Thermique du bâtiment, séances 1 à 5</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/kit.css?v=619d2ece">
+<link rel="stylesheet" href="../assets/site.css?v=619d2ece">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/SEQ1" data-rang="1">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 1 · Thermique du bâtiment</span><span class="fleches"><a class="fleche" href="J5.html" rel="prev" title="Séance 5 — besoin annuel" aria-label="Séance 5 — besoin annuel">&lsaquo;</a><a class="fleche" href="FICHE-SYMBOLES.html" rel="next" title="Lire un circuit hydraulique" aria-label="Lire un circuit hydraulique">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/SEQ1">Marquer comme lu</button></div>
+<header class="tete">
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Récapitulatif et approfondissements - Thermique du bâtiment<span>séances 1 à 5</span></h1>
+  </div>
+  <p class="accroche">Les formules, les pièges, trois outils de calcul — et les approfondissements pour ceux qui veulent aller plus loin.</p>
+  <p class="contenu">6 outils · 14 questions · 4 exercices · 9 replis · 8 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A2-3 Bilan thermique · niveau 2</span><span class="tag n3">A2-4 DJU et besoin d'énergie · niveau 3</span><span class="tag">A1-2 Composition des parois · niveau 2</span><span class="tag">C12-2 Extraire les informations</span></div>
+</header>
+<nav class="somm"><div class="in"><a href="#les-formules-de-la-sequence">Les formules de la séquence</a><a href="#seance-1-puissance-et-energie">Séance 1 · puissance et énergie</a><a href="#seance-2-lire-un-dossier">Séance 2 · lire un dossier</a><a href="#seance-3-r-et-u">Séance 3 · λ, R et U</a><a href="#seance-4-deperditions-du-batiment">Séance 4 · déperditions du bâtiment</a><a href="#seance-5-besoin-et-cout">Séance 5 · besoin et coût</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a><a href="#s-entrainer">S’entraîner</a></div></nav>
+<h2 id="les-formules-de-la-sequence">Les formules de la séquence</h2>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ce que je cherche</th>
+<th>Formule</th>
+<th>Unités</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Énergie consommée</td>
+<td>E = P × t</td>
+<td>E en kWh, P en kW, t en h</td>
+</tr>
+<tr>
+<td>Puissance transportée par l’eau</td>
+<td>P = Q × 1 163 × ΔT</td>
+<td>P en W, Q en m³/h, ΔT en K</td>
+</tr>
+<tr>
+<td>Puissance transportée par l’air</td>
+<td>P = Q × 0,34 × ΔT</td>
+<td>idem</td>
+</tr>
+<tr>
+<td>Résistance d’une couche</td>
+<td>R = e / λ</td>
+<td>R en m²·K/W, e <strong>en m</strong></td>
+</tr>
+<tr>
+<td>Résistance d’une paroi</td>
+<td>R = Rsi + Σ(e/λ) + Rse</td>
+<td>Rsi = 0,13 · Rse = 0,04</td>
+</tr>
+<tr>
+<td>Coefficient de la paroi</td>
+<td>U = 1 / R</td>
+<td>U en W/(m²·K)</td>
+</tr>
+<tr>
+<td>Déperdition d’une paroi</td>
+<td>Φ = U × S × ΔT</td>
+<td>Φ en W, S en m²</td>
+</tr>
+<tr>
+<td>Déperdition d’un pont thermique</td>
+<td>Φ = Ψ × L × ΔT</td>
+<td>Ψ en W/(<strong>m</strong>·K), L en m</td>
+</tr>
+<tr>
+<td>Déperdition par l’air neuf</td>
+<td>Φ = 0,34 × Q × ΔT</td>
+<td>Q en m³/h</td>
+</tr>
+<tr>
+<td>Puissance à installer</td>
+<td>Φ total × 1,15</td>
+<td></td>
+</tr>
+<tr>
+<td>Signature du bâtiment</td>
+<td>GV = Φ / ΔT</td>
+<td>GV en W/K</td>
+</tr>
+<tr>
+<td>Besoin annuel brut</td>
+<td>GV × DJU × 24 / 1 000</td>
+<td>en kWh</td>
+</tr>
+<tr>
+<td>Temps de retour</td>
+<td>coût / économie annuelle</td>
+<td>en années</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le réflexe qui rapporte le plus : <strong>écrire la formule avant de remplacer par les nombres</strong>, vérifier les unités, puis se demander si le résultat est plausible.</p>
+</div>
+<h3 id="une-unité-contient-sa-formule">Une unité contient sa formule</h3>
+<p>Ce tableau paraît long à retenir. Il ne l’est pas, parce que <strong>les unités disent déjà ce qu’il faut faire</strong>.</p>
+<p>Chaque barre de fraction se lit « par », et chaque « par » désigne ce qu’il faut remultiplier pour revenir à des watts. U s’exprime en W/(m²·K) : il manque des mètres carrés et des kelvins, donc Φ = U × S × ΔT. Ψ s’exprime en W/(m·K) : il manque des mètres et des kelvins, donc Φ = Ψ × L × ΔT.</p>
+<p>Un étudiant qui lit ses unités retrouve la formule sans l’avoir apprise. Et il repère l’erreur : multiplier un Ψ par une surface donne des W·m, ce qui n’existe pas.</p>
+<div class="outil" data-outil="lire-unite">
+
+</div>
+<h2 id="seance-1-puissance-et-energie">Séance 1 · puissance et énergie</h2>
+<figure>
+<img src="img/SEQ1/fig1-puissance-energie.png" alt="Une puissance n’est pas une énergie : la durée compte autant." />
+<figcaption aria-hidden="true">Une puissance n’est pas une énergie : la durée compte autant.</figcaption>
+</figure>
+<p>Un appareil <strong>appelle</strong> une puissance en watts. Il <strong>consomme</strong> une énergie en wattheures. Ce ne sont pas les mêmes unités, ni la même question : la puissance dit ce que la machine peut faire à chaque instant, l’énergie ce qu’elle a fait pendant une durée.</p>
+<p>La conséquence surprend toujours : un sèche-serviettes de 500 W branché en permanence coûte plus cher qu’une plaque de 3 000 W utilisée une demi-heure. <strong>La durée compte autant que la puissance</strong>, et c’est la durée qu’on oublie.</p>
+<p>Sur un réseau d’eau, la puissance transportée ne dépend que de deux leviers : le débit et l’écart entre le départ et le retour. Doubler l’un ou l’autre double la puissance — c’est tout ce que dit P = Q × 1 163 × ΔT.</p>
+<div class="piege">
+<p>Un écart de température en degrés Celsius vaut le même écart en kelvins. De 70 à 50 °C, c’est 20 °C <strong>et</strong> 20 K. On n’ajoute pas 273.</p>
+</div>
+<figure class="schema"><div class="dessin" data-schema="trois-modes"></div><figcaption>Les trois modes coexistent dans une paroi réelle.</figcaption></figure>
+<p>Trois modes de transfert se partagent le travail : la <strong>conduction</strong> propage la chaleur dans la matière, de proche en proche ; la <strong>convection</strong> l’emporte avec un fluide qui se déplace ; le <strong>rayonnement</strong> la fait voyager par ondes, sans aucun support.</p>
+<p>Dans une paroi réelle les trois coexistent, et c’est ce qui fait la commodité du coefficient U : <strong>un seul nombre pour trois phénomènes</strong>. Conduction dans l’épaisseur, convection et rayonnement sur les deux faces.</p>
+<div class="outil" data-outil="unites">
+
+</div>
+<div class="outil" data-outil="reseau">
+
+</div>
+<h2 id="seance-2-lire-un-dossier">Séance 2 · lire un dossier</h2>
+<p>Sur les neuf derniers sujets, <strong>le calcul ne représente que 17 % des questions</strong>. Quatre sur dix consistent à trouver une information et à la relever avec son unité.</p>
+<figure>
+<img src="img/SEQ1/fig1-anatomie-dossier.png" alt="Chaque pièce du dossier répond à un type de question." />
+<figcaption aria-hidden="true">Chaque pièce du dossier répond à un type de question.</figcaption>
+</figure>
+<p>Deux chaînes se superposent dans toute installation pilotée. L’une transporte la puissance, l’autre la décision. Les séparer, c’est la compétence C2-2, évaluée à chaque session.</p>
+<figure class="schema"><div class="dessin" data-schema="deux-chaines"></div><figcaption>Appliquées à une sous-station de chauffage. Elles se rejoignent à la vanne motorisée.</figcaption></figure>
+<div class="etapes">
+<ol type="1">
+<li>Que me demande-t-on ? Un chiffre, un mot, une justification, un tracé ?</li>
+<li>Quelle pièce du dossier contient l’information ?</li>
+<li>Je relève la valeur <strong>avec son unité</strong></li>
+<li>Est-ce plausible ?</li>
+</ol>
+</div>
+<div class="piege">
+<p>Si une donnée semble manquer, c’est presque toujours qu’on ne l’a pas cherchée dans la bonne pièce. <strong>Les sujets sont complets.</strong></p>
+</div>
+<p>Un schéma de principe est un plan de liaisons, pas un plan d’implantation. Les longueurs n’y veulent rien dire. Et dans un échangeur, les deux fluides ne se mélangent jamais.</p>
+<h2 id="seance-3-r-et-u">Séance 3 · λ, R et U</h2>
+<p>Trois grandeurs à ne pas confondre. <strong>λ</strong> est une propriété du matériau seul : ni l’épaisseur ni la surface n’y changent rien. <strong>R</strong> est la résistance d’une couche, et elle dépend de l’épaisseur — c’est le seul levier une fois le matériau choisi. <strong>U</strong> caractérise la paroi complète, résistances superficielles comprises.</p>
+<p>Un isolant, c’est λ inférieur à 0,05 W/(m·K). En dessous de ce seuil, quelques centimètres suffisent à battre vingt centimètres de maçonnerie.</p>
+<figure class="schema"><div class="dessin" data-schema="paroi-coupe"></div><figcaption>La température ne chute pas régulièrement : elle chute là où la résistance est grande.</figcaption></figure>
+<div class="piege">
+<p>L’épaisseur se met <strong>en mètres</strong> dans R = e / λ. Une couche de 10 cm, c’est 0,10.</p>
+</div>
+<p>Pour dimensionner un isolant, on travaille à l’envers : le U visé donne R = 1/U, on retire ce qui n’est pas l’isolant, et e = R × λ.</p>
+<div class="outil" data-outil="paroi">
+
+</div>
+<h2 id="seance-4-deperditions-du-batiment">Séance 4 · déperditions du bâtiment</h2>
+<figure class="schema"><div class="dessin" data-schema="batiment-ecorche"></div><figcaption>Chaque poste part de son emplacement réel. L’épaisseur de la flèche vaut sa part.</figcaption></figure>
+<p>Quatre familles, et rien d’autre : les <strong>parois</strong> (U × S × ΔT), les <strong>ponts thermiques</strong> (Ψ × L × ΔT), l’<strong>air neuf</strong> (0,34 × Q × ΔT), la <strong>marge</strong> (× 1,15).</p>
+<p>Le classement des postes réserve souvent une surprise. Dans un bâtiment correctement isolé, l’air neuf et les ponts thermiques pèsent ensemble autant que toutes les parois : ce qui reste à gagner n’est plus dans le mur. C’est ce classement, et non le total, qui dit où mettre l’argent.</p>
+<div class="piege">
+<p>Chaque paroi a <strong>son propre écart de température</strong>. Un plancher sur vide sanitaire, un mur mitoyen, une paroi vers un local non chauffé ne voient pas l’extérieur.</p>
+</div>
+<p>Ψ se multiplie par une <strong>longueur</strong>, jamais par une surface. C’est ce qui trahit une copie qui a confondu les deux.</p>
+<div class="outil" data-outil="bilan">
+
+</div>
+<h2 id="seance-5-besoin-et-cout">Séance 5 · besoin et coût</h2>
+<figure class="schema"><div class="dessin" data-schema="dju-villes"></div><figcaption>Le degré-jour cumule les degrés manquants sous 18 °C, sur toute la saison.</figcaption></figure>
+<p>Le GV est la signature du bâtiment : sa déperdition par kelvin, indépendante de la météo. Le DJU apporte le climat. Le produit des deux donne l’énergie de la saison.</p>
+<p>Les apports gratuits — soleil, occupants, éclairage, matériel — couvrent 20 à 30 % du besoin brut. On retient 25 % en première approche. Un logiciel réglementaire les calcule heure par heure selon l’orientation et l’occupation ; notre forfait reste utile parce qu’il donne l’ordre de grandeur en trois minutes.</p>
+<p>Le temps de retour se lit ensuite sans difficulté : coût des travaux divisé par économie annuelle. Il compare bien deux scénarios sur un même bâtiment, et il ment dès qu’on le prend pour une prévision — le prix de l’énergie bouge, et tout ne se compte pas en euros.</p>
+<p>Reste à situer le résultat. C’est le rôle du diagnostic de performance énergétique, refondu en 2021 : <strong>deux étiquettes au lieu d’une</strong>, l’énergie et le carbone, et la classe retenue est la plus mauvaise des deux.</p>
+<figure class="schema"><div class="dessin" data-schema="dpe-etiquette"></div><figcaption>Entrez une consommation et des émissions : la classe se déduit des deux échelles.</figcaption></figure>
+<div class="cle">
+<p><strong>On isole d’abord ce qui n’est pas isolé.</strong> Doubler un isolant existant se rentabilise très lentement ; isoler une paroi nue se rentabilise en quelques années.</p>
+</div>
+<div class="outil" data-outil="energie">
+
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Un radiateur de 1 500 W allumé 8 h consomme : <strong>12 kWh</strong> | 1,5 kWh</li>
+<li>Entre 70/50 °C et 60/40 °C, à débit égal, la puissance transportée : <strong>ne change pas</strong> | diminue de moitié</li>
+<li>1 L/s vaut : <strong>3,6 m³/h</strong> | 0,36 m³/h</li>
+<li>Dans un sujet d’U41, la part des questions de calcul est d’environ : <strong>17 %</strong> | 60 %</li>
+<li>Un DR, dans un sujet, est un document : <strong>qu’on rend, même vide</strong> | qu’on garde</li>
+<li>L’épaisseur, dans R = e / λ, se met : <strong>en mètres</strong> | en centimètres</li>
+<li>Entre U = 0,20 et U = 0,35, la mieux isolée est : <strong>celle à 0,20</strong> | celle à 0,35</li>
+<li>Rsi = 0,13 vaut pour : <strong>un mur vertical</strong> | toutes les parois</li>
+<li>Ψ se multiplie par : <strong>une longueur</strong> | une surface</li>
+<li>Un plancher sur vide sanitaire à 8 °C, pour θi = 19 °C, a un ΔT de : <strong>11 K</strong> | 26 K</li>
+<li>La marge de dimensionnement usuelle est de : <strong>15 %</strong> | 50 %</li>
+<li>Le GV s’exprime en : <strong>W/K</strong> | kWh</li>
+<li>Le besoin brut se calcule avec : <strong>GV × DJU × 24 / 1 000</strong> | GV × DJU / 24</li>
+<li>Le meilleur temps de retour s’obtient en isolant : <strong>une paroi nue</strong> | une paroi déjà isolée</li>
+</ul>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">1 163 et 0,34 sont la même formule</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Vous croisez ces deux nombres toute l’année. Ce ne sont pas deux constantes à apprendre, c’est deux fois la même : la masse volumique du fluide multipliée par sa chaleur massique, divisée par 3 600 pour travailler en m³ par <em>heure</em>.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Fluide</th>
+<th>ρ (kg/m³)</th>
+<th>Cp (J/kg·K)</th>
+<th>ρ·Cp / 3 600</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eau</td>
+<td>1 000</td>
+<td>4 186</td>
+<td>1 163</td>
+</tr>
+<tr>
+<td>Air</td>
+<td>1,2</td>
+<td>1 005</td>
+<td>0,34</td>
+</tr>
+</tbody>
+</table></div>
+<p>Le rapport vaut environ <strong>3 400</strong>. À puissance et écart égaux, il faut 3 400 fois plus de volume d’air que d’eau. Pour 1 kW sous 20 K : 43 litres d’eau par heure, ou 147 m³ d’air.</p>
+<p>Voilà pourquoi on chauffe à l’eau et on ventile à l’air, et pourquoi une gaine fait Ø 125 quand un tube fait Ø 16.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Un kVA n&#39;est pas un kW</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le volt-ampère mesure la <em>puissance apparente</em> S = U × I : ce que le réseau doit fournir. Le watt mesure la <em>puissance active</em> P, celle qui travaille.</p>
+<p><strong>P = S × cos φ</strong></p>
+<p>Pour un radiateur, un ballon, une plaque — des résistances — cos φ vaut 1 : 6 kVA valent bien 6 kW. Pour un moteur, un circulateur, un compresseur, cos φ descend vers 0,8 : le réseau fournit 6 kVA mais 4,8 kW seulement travaillent.</p>
+<p>C’est pour ça qu’un abonnement se dimensionne en kVA. Et 6 kVA sous 230 V, c’est <strong>26 A</strong> : le calibre du disjoncteur de branchement.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">D&#39;où sortent Rsi = 0,13 et Rse = 0,04</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Chacun des trois modes a sa loi, et ce sont elles qui fixent les nombres que vous utilisez sans les recalculer.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Loi</th>
+<th>Ce qu’elle dit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Conduction</td>
+<td>φ = −λ · grad T</td>
+<td>loi de Fourier — c’est d’elle que sort R = e/λ</td>
+</tr>
+<tr>
+<td>Convection</td>
+<td>φ = h · (Ts − Tf)</td>
+<td>loi de Newton ; h en W/(m²·K)</td>
+</tr>
+<tr>
+<td>Rayonnement</td>
+<td>φ = ε · σ · T⁴</td>
+<td>loi de Stefan-Boltzmann</td>
+</tr>
+</tbody>
+</table></div>
+<p>Les résistances superficielles sont l’inverse du coefficient d’échange, convection et rayonnement confondus :</p>
+<p><strong>Rsi = 1 / 7,7 = 0,13 et Rse = 1 / 25 = 0,04</strong></p>
+<p>À l’extérieur, le vent brasse l’air : h est trois fois plus grand, donc la résistance trois fois plus petite.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi les résistances s&#39;additionnent</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>« Comme des résistances électriques en série » n’est pas une image : c’est la même équation.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th>Électricité</th>
+<th>Thermique</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ce qui pousse</td>
+<td>U (volts)</td>
+<td>ΔT (kelvins)</td>
+</tr>
+<tr>
+<td>Ce qui circule</td>
+<td>I (ampères)</td>
+<td>Φ (watts)</td>
+</tr>
+<tr>
+<td>Ce qui freine</td>
+<td>R (ohms)</td>
+<td>R (m²·K/W)</td>
+</tr>
+<tr>
+<td>La loi</td>
+<td>I = U / R</td>
+<td>Φ = ΔT / R</td>
+</tr>
+</tbody>
+</table></div>
+<p>Des couches empilées sont traversées par le même flux, l’une après l’autre : c’est une série, et les résistances s’ajoutent.</p>
+<p><strong>En parallèle ?</strong> Dès qu’une paroi n’est pas homogène — ossature bois avec isolant entre les montants. Deux chemins se partagent le flux, et ce sont les inverses qui s’ajoutent : 1/R = 1/R₁ + 1/R₂.</p>
+<p>Conséquence de chantier : les montants font passer la chaleur <em>à côté</em> de l’isolant. C’est un pont thermique intégré, et il dégrade le U de 10 à 15 %.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le coefficient b, la vraie méthode des locaux non chauffés</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>En séance, pour un plancher sur vide sanitaire à 8 °C, vous utilisez l’écart réel : 11 K. C’est juste. La norme, elle, garde partout l’écart avec l’extérieur et introduit un coefficient de réduction.</p>
+<p><strong>Φ = b × U × S × (θi − θe) avec b = (θi − θu) / (θi − θe)</strong></p>
+<p>Sur l’exemple : b = 11 / 26 = <strong>0,42</strong>. Les deux méthodes donnent le même résultat — l’une remplace l’écart, l’autre le pondère.</p>
+<p>L’intérêt du b apparaît quand on ne connaît pas θu, le cas le plus fréquent. La norme donne alors des valeurs tabulées.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Local non chauffé</th>
+<th>b usuel</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circulation, cage d’escalier</td>
+<td>0,2 à 0,3</td>
+</tr>
+<tr>
+<td>Vide sanitaire, cave</td>
+<td>0,4 à 0,5</td>
+</tr>
+<tr>
+<td>Garage, local très aéré</td>
+<td>0,8 à 0,9</td>
+</tr>
+<tr>
+<td>Comble perdu bien ventilé</td>
+<td>0,9 à 1,0</td>
+</tr>
+</tbody>
+</table></div>
+<p>Un b proche de 1 veut dire « ce local est pratiquement dehors ».</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Les Ψ : où on les trouve, et pourquoi l&#39;ITE gagne</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Les Ψ ne s’inventent pas : ils sont tabulés dans les <strong>règles Th-U, fascicule 5</strong>, par type de liaison et par mode d’isolation.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Configuration</th>
+<th>Ψ (W/m·K)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Isolation par l’intérieur, plancher béton traversant</td>
+<td>0,60 à 0,90</td>
+</tr>
+<tr>
+<td>ITI avec rupteur thermique</td>
+<td>0,25 à 0,40</td>
+</tr>
+<tr>
+<td>Isolation par l’extérieur, isolant continu</td>
+<td>0,05 à 0,15</td>
+</tr>
+<tr>
+<td>Liaison menuiserie, pose au nu de l’isolant</td>
+<td>0,05 à 0,15</td>
+</tr>
+</tbody>
+</table></div>
+<p>L’isolation par l’extérieur <strong>divise le pont thermique par cinq à dix</strong>. C’est sa vraie supériorité, bien plus que le gain de surface habitable.</p>
+<p>La raison est géométrique. En ITI, le plancher béton passe derrière l’isolant et ressort dehors : rien ne peut l’arrêter. En ITE, l’isolant est devant tout, y compris devant le plancher.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Du besoin utile à la facture : les quatre rendements</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le besoin net est un <strong>besoin utile</strong> : la chaleur à livrer dans les pièces. Ce n’est pas ce qui est facturé. Entre les deux, quatre rendements qui se multiplient.</p>
+<p><strong>Consommation = Besoin / (ηémission × ηdistribution × ηrégulation × ηgénération)</strong></p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Rendement</th>
+<th>Installation soignée</th>
+<th>Installation ancienne</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Émission</td>
+<td>0,95</td>
+<td>0,90</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td>0,95</td>
+<td>0,80</td>
+</tr>
+<tr>
+<td>Régulation</td>
+<td>0,97</td>
+<td>0,85</td>
+</tr>
+<tr>
+<td>Génération</td>
+<td>1,00 (condensation)</td>
+<td>0,75</td>
+</tr>
+<tr>
+<td><strong>Produit</strong></td>
+<td><strong>0,88</strong></td>
+<td><strong>0,46</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Le même bâtiment consomme presque deux fois plus selon l’installation qui le chauffe. Et ce chiffre ne se voit dans aucun calcul de U.</p>
+<p><strong>La pompe à chaleur</strong> mérite un mot : son rendement de génération dépasse 1. Un COP de 3 donne ηg = 3. Elle ne produit pas la chaleur, elle la déplace.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Énergie finale, énergie primaire, et le DPE</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La facture compte des kilowattheures <strong>d’énergie finale</strong> : ceux qui entrent dans le bâtiment. La réglementation raisonne en <strong>énergie primaire</strong> : ce qu’il a fallu prélever à la nature, transport et transformation compris.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Énergie</th>
+<th>Coefficient (RE2020)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Électricité</td>
+<td>2,3</td>
+</tr>
+<tr>
+<td>Gaz, fioul, bois, réseau de chaleur</td>
+<td>1,0</td>
+</tr>
+</tbody>
+</table></div>
+<p>Conséquence qui surprend : à consommation finale égale, <strong>un bâtiment chauffé à l’électricité affiche une étiquette DPE plus mauvaise</strong> qu’un bâtiment au gaz.</p>
+<p>Une pompe à chaleur change tout : un COP de 3 divise la consommation finale par 3, et ramène le coefficient effectif à 2,3 / 3 ≈ 0,77.</p>
+<p>Quand vous calculez un ratio en kWh/(m²·an), précisez toujours lequel : utile, final ou primaire. Les trois peuvent varier du simple au triple.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Ce que la méthode des DJU ne sait pas faire</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Elle est excellente pour comparer des scénarios sur un même bâtiment, et fausse dès qu’on lui en demande plus.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ce qu’elle ignore</th>
+<th>Pourquoi ça compte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L’inertie</td>
+<td>un bâtiment lourd amortit les pointes de froid</td>
+</tr>
+<tr>
+<td>L’orientation</td>
+<td>une façade sud n’a pas les apports d’une façade nord</td>
+</tr>
+<tr>
+<td>Le comportement</td>
+<td>l’écart entre deux occupants dépasse souvent celui entre deux isolations</td>
+</tr>
+<tr>
+<td>L’été</td>
+<td>le DJU ne parle que de chauffage</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Base 18 ou base 15 ?</strong> Le DJU unifié se compte sous 18 °C, en supposant que les apports gratuits fournissent les derniers degrés. Comparer deux DJU sans connaître leur base n’a aucun sens.</p>
+<p>Pour la conformité réglementaire, un moteur horaire simule les 8 760 heures de l’année. Mais il demande une heure de saisie, quand les DJU donnent l’ordre de grandeur en trois minutes.</p></div></details>
+</div><h2 id="s-entrainer">S’entraîner</h2>
+<p>Les valeurs attendues ne sont pas dans la page : elle vous dit si c’est juste et vous rappelle la méthode. Le corrigé reste dans le polycopié.</p>
+<section class="exo" id="SEQ1-e1" data-exo="SEQ1-e1" data-type="calcul" data-savoir="A1-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgb3Rta3Z4LjU2eGBodGp2eC94YHg3Bi9qajhoBi9qajhtEXUNeCc="><p class="k">Exercice · A1-2</p><h4>La résistance d’une couche</h4><div class="enonce">
+
+<p>Une couche de laine minérale de <strong>20 cm</strong> a une conductivité λ = 0,035 W/(m·K). Quelle est sa résistance thermique ?</p>
+</div><div class="indice" hidden>R = e / λ. Une seule chose à surveiller, et elle coûte des points à chaque session : l’épaisseur se met en mètres.</div></section>
+<section class="exo" id="SEQ1-e2" data-exo="SEQ1-e2" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgaWpudGp2eC41NnhgaXRqdngveGB4DXgn"><p class="k">Exercice · A2-3</p><h4>La déperdition d’un mur</h4><div class="enonce">
+
+<p>Un mur de <strong>45 m²</strong> a un coefficient U = 0,27 W/(m²·K). Il fait 20 °C dedans et −5 °C dehors. Quelle est sa déperdition ?</p>
+</div><div class="indice" hidden>Φ = U × S × ΔT. L’écart de température est celui entre les deux faces, et un écart en kelvins vaut le même nombre qu’en degrés.</div></section>
+<section class="exo" id="SEQ1-e3" data-exo="SEQ1-e3" data-type="lecture" data-savoir="C12-2" data-a="IXgueGB4Nj85Li8oP3h2eDt4YAF4Nj96KjY7NDkyPyh6ODspeHZ4KjY7NDkyPyh6ODspeHZ4Nj96KjY7NDkyPyh4dngqNjs0OTI/KHgHJw=="><p class="k">Exercice · C12-2</p><h4>Lire un tableau de coefficients</h4><div class="enonce">
+
+<p>Extrait du CCTP d’une maison individuelle.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Paroi</th>
+<th style="text-align: right;">Surface</th>
+<th style="text-align: right;">U — W/(m²·K)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Murs extérieurs</td>
+<td style="text-align: right;">96 m²</td>
+<td style="text-align: right;">0,24</td>
+</tr>
+<tr>
+<td>Plancher bas</td>
+<td style="text-align: right;">74 m²</td>
+<td style="text-align: right;">0,31</td>
+</tr>
+<tr>
+<td>Toiture</td>
+<td style="text-align: right;">74 m²</td>
+<td style="text-align: right;">0,16</td>
+</tr>
+<tr>
+<td>Menuiseries</td>
+<td style="text-align: right;">18 m²</td>
+<td style="text-align: right;">1,40</td>
+</tr>
+</tbody>
+</table></div>
+<p>En laissant les menuiseries de côté, <strong>quelle paroi opaque est la moins isolante ?</strong></p>
+</div><div class="indice" hidden>Plus U est grand, plus la paroi laisse passer. Ne confondez pas la paroi qui perd le plus — c’est la surface qui décide — avec celle qui isole le moins.</div></section>
+<section class="exo" id="SEQ1-e4" data-exo="SEQ1-e4" data-type="justification" data-savoir="A2-4" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A2-4</p><h4>Deux maisons, deux factures</h4><div class="enonce">
+
+<p>Deux maisons identiques ont le même GV. L’une est à Nice, l’autre à Strasbourg. Expliquez en trois lignes pourquoi leurs besoins annuels de chauffage diffèrent.</p>
+</div><ul class="verifier" hidden><li>Le mot « DJU » ou « degrés-jours » apparaît dans ma réponse.</li><li>J’ai dit que le GV ne dépend que du bâtiment, pas du climat.</li><li>J’ai nommé la ville qui consomme le plus, et pourquoi.</li></ul></section>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J5.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 5 — besoin annuel</span></a><a class="ap" href="FICHE-SYMBOLES.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Lire un circuit hydraulique</span></a></div></nav>
+<p class="pied">Cette page ne remplace pas les polycopiés et ne donne aucun corrigé. Les outils démarrent sur des cas voisins de ceux des activités, jamais identiques : ils servent vos missions chantier. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=619d2ece"></script>
+<script src="../assets/site.js?v=619d2ece"></script>
