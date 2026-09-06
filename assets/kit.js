@@ -3405,6 +3405,129 @@ OUTILS["symboles-hydro"]={
 };
 
 /* ─────────── le schema de principe d'une sous-station ─────────── */
+/* ─────────────────────────────────────────────── le cycle sur le diagramme
+   enthalpique (log p, h) — dit « diagramme de Mollier » en froid.
+   La courbe de saturation est SCHEMATIQUE : elle a la forme d'un vrai
+   diagramme — liquide raide, vapeur presque plate, point critique au
+   sommet — mais elle n'est celle d'aucun fluide. Les enthalpies portees
+   sont celles de l'exemple traite dans la page, et elles bouclent :
+   qk = qo + w. Un schema qui ne bouclerait pas apprendrait a ne pas
+   verifier. */
+/* Deux noms, un seul dessin. « cycle-mollier » porte les valeurs lues ;
+   « cycle-mollier-muet » ne porte que les symboles — c'est la version
+   qui accompagne une question, ou le diagramme donnerait la reponse. */
+function dessineMollier(el,chiffre){
+  var W=740,H=440,X0=64,X1=690,Y0=44,Y1=336;
+  var HMIN=190,HMAX=500,PMIN=1,PMAX=60;          /* kJ/kg et bar absolus */
+  var H1=425,H2=460,H3=270,BP=9.3,HP=30;         /* l'exemple de la page */
+
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Cycle frigorifique sur le diagramme enthalpique"});
+  el.appendChild(svg);
+
+  function px(h){return X0+(h-HMIN)/(HMAX-HMIN)*(X1-X0);}
+  function u(p){return (Math.log(p)-Math.log(PMIN))/(Math.log(PMAX)-Math.log(PMIN));}
+  function py(p){return Y1-u(p)*(Y1-Y0);}         /* l'axe des pressions est LOG */
+  /* La cloche est SCHEMATIQUE — forme d'un vrai diagramme, fluide d'aucun.
+     Les exposants sont cales pour que les quatre points du cycle tombent
+     dans la bonne zone : 3 en liquide sous-refroidi, 4 sous la cloche,
+     1 et 2 en vapeur surchauffee. Un schema ou le point 3 serait dans le
+     melange enseignerait le contraire de ce que dit le texte. */
+  function hL(p){return 200+140*Math.pow(u(p),2.692);}
+  function hV(p){return 430- 90*Math.pow(u(p),2.952);}
+
+  /* -- la grille */
+  [1,2,3,5,10,20,30,60].forEach(function(p){
+    svg.appendChild(S("line",{x1:X0,y1:py(p),x2:X1,y2:py(p),stroke:V("trait2"),
+      "stroke-width":"1"}));
+    svg.appendChild(S("text",{x:X0-9,y:py(p)+4,"text-anchor":"end","class":"s-pet"},
+      String(p)));
+  });
+  for(var h=200;h<=HMAX;h+=50){
+    svg.appendChild(S("line",{x1:px(h),y1:Y0,x2:px(h),y2:Y1,stroke:V("trait2"),
+      "stroke-width":"1"}));
+    svg.appendChild(S("text",{x:px(h),y:Y1+18,"text-anchor":"middle","class":"s-pet"},
+      String(h)));
+  }
+  svg.appendChild(S("text",{x:(X0+X1)/2,y:Y1+60,"text-anchor":"middle","class":"s-pet"},
+    "enthalpie massique h  (kJ/kg)"));
+  var lab=S("text",{x:0,y:0,"text-anchor":"middle","class":"s-pet",
+    transform:"translate(17,"+((Y0+Y1)/2)+") rotate(-90)"});
+  lab.textContent="pression absolue p  (bar, échelle log)";
+  svg.appendChild(lab);
+
+  /* -- la courbe de saturation, en une seule cloche */
+  var d="",p,k=0;
+  for(p=PMIN;p<=PMAX;p*=1.05) d+=(k++?"L":"M")+px(hL(p)).toFixed(1)+","+py(p).toFixed(1);
+  d+="L"+px(340).toFixed(1)+","+py(PMAX).toFixed(1);
+  for(p=PMAX;p>=PMIN;p/=1.05) d+="L"+px(hV(p)).toFixed(1)+","+py(p).toFixed(1);
+  svg.appendChild(S("path",{d:d,fill:"none",stroke:V("froid"),"stroke-width":"2.5"}));
+  svg.appendChild(S("circle",{cx:px(340),cy:py(PMAX),r:4,fill:V("froid")}));
+  svg.appendChild(S("text",{x:px(340),y:py(PMAX)-12,"text-anchor":"middle",
+    "class":"s-pet",fill:V("froid")},"point critique"));
+
+  /* -- les trois zones : la premiere lecture a savoir faire */
+  [[224,2.4,"liquide"],[330,2.4,"mélange liquide + vapeur"],[458,2.4,"vapeur surchauffée"]]
+    .forEach(function(z){
+      svg.appendChild(S("text",{x:px(z[0]),y:py(z[1]),"text-anchor":"middle",
+        "class":"s-pet",fill:V("encre2")},z[2]));
+    });
+
+  /* -- le cycle : 1 aspiration, 2 refoulement, 3 liquide, 4 apres detente */
+  var P1=[px(H1),py(BP)],P2=[px(H2),py(HP)],P3=[px(H3),py(HP)],P4=[px(H3),py(BP)];
+  function trait(a,b,coul){
+    svg.appendChild(S("line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:V(coul),
+      "stroke-width":"3.5","stroke-linecap":"round"}));
+  }
+  trait(P4,P1,"froid");            /* evaporation  */
+  trait(P1,P2,"chaud");            /* compression  */
+  trait(P2,P3,"chaud");            /* condensation */
+  trait(P3,P4,"encre");            /* detente      */
+
+  /* Chaque point porte SON enthalpie. Ce n'est pas une reponse — les
+     questions demandent des differences et des rapports — et sans elle on ne
+     lit qu'a la graduation de 50 kJ/kg, ce qui interdit tout calcul juste. */
+  [[P1,"1",9,16,H1,10,34],[P2,"2",9,-9,H2,10,-26],
+   [P3,"3",-16,-9,H3,-18,20],[P4,"4",-16,16,H3,-18,34]].forEach(function(q){
+    svg.appendChild(S("circle",{cx:q[0][0],cy:q[0][1],r:5.5,fill:V("carte"),
+      stroke:V("encre"),"stroke-width":"2.5"}));
+    svg.appendChild(S("text",{x:q[0][0]+q[2],y:q[0][1]+q[3],"class":"s-nom"},q[1]));
+    svg.appendChild(S("text",{x:q[0][0]+q[5],y:q[0][1]+q[6],"class":"s-pet",
+      "text-anchor":q[5]<0?"end":"start",fill:V("encre2")},q[4]+" kJ/kg"));
+  });
+
+  /* -- ce que chaque segment vaut. Les deux mesures horizontales sont posees
+        LOIN l'une de l'autre : cote a cote, elles se chevauchaient. */
+  function mesure(x1,x2,y,texte,coul,dessous){
+    svg.appendChild(S("line",{x1:x1,y1:y,x2:x2,y2:y,stroke:V(coul),"stroke-width":"1.5",
+      "stroke-dasharray":"5 4"}));
+    svg.appendChild(S("text",{x:(x1+x2)/2,y:y+(dessous?15:-7),"text-anchor":"middle",
+      "class":"s-pet",fill:V(coul)},texte));
+  }
+  mesure(px(H3),px(H1),Y1-16,chiffre?"qo = h1 − h4 = 155 kJ/kg":"qo","froid",false);
+  mesure(px(H3),px(H2),py(HP)-26,chiffre?"qk = h2 − h3 = 190 kJ/kg":"qk","chaud",false);
+  svg.appendChild(S("text",{x:(P1[0]+P2[0])/2+30,y:(P1[1]+P2[1])/2,"class":"s-pet",
+    fill:V("chaud")},chiffre?"w = h2 − h1 = 35":"w"));
+
+  /* -- la detente est VERTICALE : c'est la lecture qui surprend le plus */
+  svg.appendChild(S("text",{x:px(H3)-12,y:(py(BP)+py(HP))/2-4,"text-anchor":"end",
+    "class":"s-pet",fill:V("encre2")},"détente"));
+  if(chiffre)svg.appendChild(S("text",{x:px(H3)-12,y:(py(BP)+py(HP))/2+12,
+    "text-anchor":"end","class":"s-pet",fill:V("encre2")},"h constante"));
+
+  if(!chiffre)return;
+  var lect=E("div",{"class":"res",style:"margin-top:12px"});
+  lect.innerHTML="<strong>qk = qo + w</strong> — 190 = 155 + 35. Le condenseur évacue "+
+    "tout ce que l'évaporateur a pris, <em>plus</em> le travail du compresseur. "+
+    "Un relevé qui ne boucle pas est un relevé faux.<br>"+
+    "<strong>EER = qo / w = 4,43</strong> et <strong>COP = qk / w = 5,43</strong> : "+
+    "exactement une unité d'écart, et c'est la même relation que Q<sub>chaud</sub> = "+
+    "Q<sub>froid</sub> + W, lue sur le diagramme.";
+  el.appendChild(lect);
+}
+SCHEMAS["cycle-mollier"]     =function(el){dessineMollier(el,true);};
+SCHEMAS["cycle-mollier-muet"]=function(el){dessineMollier(el,false);};
+
 SCHEMAS["sous-station"]=function(el){
   var W=860,H=430;
   var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",

@@ -5,8 +5,8 @@
 <title>BTS FED option C</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
-<link rel="stylesheet" href="assets/kit.css?v=c3ba67c0">
-<link rel="stylesheet" href="assets/site.css?v=c3ba67c0">
+<link rel="stylesheet" href="assets/kit.css?v=9859cc66">
+<link rel="stylesheet" href="assets/site.css?v=9859cc66">
 
 <div class="page" data-site="bts-fed-c">
 <header class="tete">
@@ -14,9 +14,9 @@
   <h1>Étude des fluides<span>énergétiques</span></h1>
   <p class="accroche">Le cours séance par séance, les préparations aux contrôles, et les outils de calcul. Tout se calcule dans votre navigateur ; rien n'est enregistré, rien n'est envoyé.</p>
 </header>
-<ul class="chiffres"><li><b>22</b><span>séances</span></li><li><b>7</b><span>outils</span></li><li><b>18</b><span>exercices</span></li><li><b>9</b><span>sessions d’annales</span></li></ul>
+<ul class="chiffres"><li><b>22</b><span>séances</span></li><li><b>7</b><span>outils</span></li><li><b>40</b><span>exercices</span></li><li><b>9</b><span>sessions d’annales</span></li></ul>
 <div class="chercher"><input id="q" type="search" autocomplete="off" placeholder="Chercher dans tout le cours… (touche /)"><ul class="resultats" id="resultats"></ul></div>
-<nav class="portes"><a class="porte outils" href="outils.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 20 L12 12"/><path d="M11 9a4 4 0 1 0 4 4l6 6 3-3-6-6a4 4 0 0 0-7-1z"/></svg><span class="n">7 outils</span><span class="t">La boîte à outils</span><span class="d">Débit, pertes de charge, air humide, COP, loi d’eau — les calculateurs du cours, sortis de leur séance.</span></a><a class="porte exos" href="exercices.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="4"/><path d="M14 5V2M14 26v-3M5 14H2M26 14h-3"/></svg><span class="n">18 exercices</span><span class="t">S’entraîner</span><span class="d">Calcul, lecture de document, justification. La page dit si c’est juste et rappelle la méthode.</span></a><a class="porte annales" href="annales.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><path d="M6 5h12l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M18 5v5h5"/><path d="M9 15h9M9 19h6"/></svg><span class="n">37 parties</span><span class="t">Les annales U41</span><span class="d">Neuf sessions découpées partie par partie, filtrables par savoir du référentiel.</span></a></nav>
+<nav class="portes"><a class="porte outils" href="outils.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 20 L12 12"/><path d="M11 9a4 4 0 1 0 4 4l6 6 3-3-6-6a4 4 0 0 0-7-1z"/></svg><span class="n">7 outils</span><span class="t">La boîte à outils</span><span class="d">Débit, pertes de charge, air humide, COP, loi d’eau — les calculateurs du cours, sortis de leur séance.</span></a><a class="porte exos" href="exercices.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="9"/><circle cx="14" cy="14" r="4"/><path d="M14 5V2M14 26v-3M5 14H2M26 14h-3"/></svg><span class="n">40 exercices</span><span class="t">S’entraîner</span><span class="d">Calcul, lecture de document, justification. La page dit si c’est juste et rappelle la méthode.</span></a><a class="porte annales" href="annales.html"><svg class="ico" viewBox="0 0 28 28" aria-hidden="true"><path d="M6 5h12l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="M18 5v5h5"/><path d="M9 15h9M9 19h6"/></svg><span class="n">37 parties</span><span class="t">Les annales U41</span><span class="d">Neuf sessions découpées partie par partie, filtrables par savoir du référentiel.</span></a></nav>
 <p class="reprendre" id="reprendre" hidden></p>
 <p class="compteur" id="compteur-lu"></p>
 <section class="espace" id="cours">
@@ -89,7 +89,12 @@
 <li data-id="cours/TP1"><span class="vide"><span class="n">TP 1</span><span class="t">TP noté — la centrale de traitement d'air</span><span class="meta">page à produire</span></span></li>
 </ol></div>
 </section>
-<div class="fiches"><p class="chapeau-f">Fiches transversales</p><div class="grille-f"><a href="cours/FICHE-FLUIDES-FRIGORIGENES.html"><span class="k">Fiche transversale</span><span class="t">Aller plus loin les fluides frigorigènes</span><span class="d">Un kilogramme de fluide qui vaut deux tonnes de CO₂, un contrôle d'étanchéité dont la fréquence se calcule, un vide poussé jusqu'à faire bouillir l'eau à moins vingt-sept degrés. Ce qu'il y a derrière l'attestation d'aptitude, et pourquoi rien de tout cela ne s'improvise.</span></a><a href="cours/FICHE-SYMBOLES.html"><span class="k">Fiche transversale</span><span class="t">Lire un circuit hydraulique</span><span class="d">Quinze symboles, et le rôle de chacun. C'est la compétence C2-1, évaluée à chaque session — et celle qui bloque tout le reste quand elle manque.</span></a></div></div><section class="mot"><h2 id="se-servir-de-ce-site">Se servir de ce site</h2>
+<div class="fiches"><p class="chapeau-f">Fiches transversales</p><div class="grille-f"><a href="cours/FICHE-SYMBOLES.html"><span class="k">Fiche transversale</span><span class="t">Lire un circuit hydraulique</span><span class="d">Quinze symboles, et le rôle de chacun. C'est la compétence C2-1, évaluée à chaque session — et celle qui bloque tout le reste quand elle manque.</span></a></div></div>
+<section class="espace" id="habilitation">
+<h2>Aller plus loin — habilitation fluides</h2>
+
+</section>
+<div class="fiches"><div class="grille-f"><a href="habilitation/HAB1-LE-CADRE.html"><span class="k">Page 1</span><span class="t">Habilitation fluides le cadre</span><span class="d">Deux papiers qu'on confond, quatre catégories dont une seule vous concerne, et un nombre qui commande tout le reste : la charge en tonnes équivalent CO₂. Rien ici n'est difficile ; tout se calcule.</span></a><a href="habilitation/HAB2-LES-FLUIDES.html"><span class="k">Page 2</span><span class="t">Habilitation fluides les fluides</span><span class="d">Pourquoi un changement d'état transporte trente fois plus qu'un échauffement, pourquoi un manomètre suffit à donner une température, et pourquoi R32 ne s'appelle pas R122. Le cours théorique, puis trois exercices résolus avec la rédaction attendue.</span></a><a href="habilitation/HAB3-LE-CIRCUIT.html"><span class="k">Page 3</span><span class="t">Habilitation fluides le circuit</span><span class="d">Deux manomètres, deux thermomètres, et tout le diagnostic frigorifique est là. Surchauffe, sous-refroidissement, taux de compression : trois nombres qui disent lequel des quatre organes travaille mal, sans rien démonter.</span></a><a href="habilitation/HAB4-LES-GESTES.html"><span class="k">Page 4</span><span class="t">Habilitation fluides les gestes</span><span class="d">Braser sous azote, tirer au vide jusqu'à faire bouillir l'eau à moins vingt-sept degrés, ne jamais remplir une bouteille au-delà de quatre cinquièmes. Chaque geste a une raison physique, et c'est la raison qu'on retient — le geste, lui, s'apprend sur un banc.</span></a><a href="habilitation/HAB5-SE-TESTER.html"><span class="k">Page 5</span><span class="t">Habilitation fluides se tester</span><span class="d">Douze questions qui balayent les quatre pages précédentes. Chacune dit juste ou faux et rappelle la méthode ; aucune ne donne la réponse. Ce qui compte n'est pas votre score, c'est de savoir laquelle des quatre pages relire.</span></a></div></div><section class="mot"><h2 id="se-servir-de-ce-site">Se servir de ce site</h2>
 <p>Chaque séance a sa page : le raisonnement en bref, les formules avec leurs unités, les figures du polycopié et les outils de calcul. En fin de séquence, la <strong>préparation au contrôle</strong> rassemble les formules, les pièges et un quiz.</p>
 <p>Le bouton <strong>« Marquer comme lu »</strong>, en haut de chaque page, coche la séance sur l’accueil. C’est une aide à la révision, pour vous : cette marque reste dans le navigateur de cet appareil, personne d’autre ne la voit, et elle disparaît si vous changez d’appareil ou effacez vos données de navigation.</p>
 <p>La touche <strong><code>/</code></strong> met le curseur dans le champ de recherche, qui cherche dans le texte de toutes les pages, replis compris.</p>
@@ -98,6 +103,6 @@
 </section>
 <p class="pied-site">Ce site rappelle le cours. Il ne remplace pas les polycopiés et ne donne aucun corrigé.</p>
 </div>
-<script src="assets/kit.js?v=c3ba67c0"></script>
-<script src="recherche.js?v=c3ba67c0"></script>
-<script src="assets/site.js?v=c3ba67c0"></script>
+<script src="assets/kit.js?v=9859cc66"></script>
+<script src="recherche.js?v=9859cc66"></script>
+<script src="assets/site.js?v=9859cc66"></script>

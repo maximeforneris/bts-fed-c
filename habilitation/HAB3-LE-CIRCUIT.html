@@ -1,0 +1,313 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Hab 3 — le circuit</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<link rel="stylesheet" href="../assets/kit.css?v=9859cc66">
+<link rel="stylesheet" href="../assets/site.css?v=9859cc66">
+
+<div class="page" data-site="bts-fed-c" data-page="habilitation/HAB3-LE-CIRCUIT">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="HAB2-LES-FLUIDES.html" rel="prev" title="Hab 2 — les fluides" aria-label="Hab 2 — les fluides">&lsaquo;</a><a class="fleche" href="HAB4-LES-GESTES.html" rel="next" title="Hab 4 — les gestes" aria-label="Hab 4 — les gestes">&rsaquo;</a></span><button type="button" class="lu" data-lu="habilitation/HAB3-LE-CIRCUIT">Marquer comme lu</button></div>
+<header class="tete">
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · préparation hors diplôme</p>
+    <h1>Habilitation fluides<span>le circuit</span></h1>
+  </div>
+  <p class="accroche">Deux manomètres, deux thermomètres, et tout le diagnostic frigorifique est là. Surchauffe, sous-refroidissement, taux de compression : trois nombres qui disent lequel des quatre organes travaille mal, sans rien démonter.</p>
+  <p class="contenu">5 replis · 1 figure</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A5-1 Machine thermodynamique — schéma, composants, COP · niveau 2</span><span class="tag">A5-2 Cycles frigorifiques — tracé sur diagramme enthalpique · niveau 2</span></div>
+</header>
+<nav class="somm"><div class="in"><a href="#quatre-organes-deux-pressions-deux-roles">Quatre organes, deux pressions, deux rôles</a><a href="#le-diagramme-enthalpique-point-par-point">Le diagramme enthalpique, point par point</a><a href="#les-trois-nombres-du-diagnostic">Les trois nombres du diagnostic</a><a href="#ce-que-chaque-derive-designe">Ce que chaque dérive désigne</a><a href="#le-point-de-fonctionnement-comme-en-hydraulique">Le point de fonctionnement, comme en hydraulique</a><a href="#ou-cela-rejoint-votre-cours">Où cela rejoint votre cours</a><a href="#les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</a></div></nav>
+<h2 id="quatre-organes-deux-pressions-deux-roles">Quatre organes, deux pressions, deux rôles</h2>
+<p>Le circuit est connu depuis la séance 13. Ce qui change ici, c’est le <strong>point de vue</strong> : on ne cherche plus à comprendre le cycle, on cherche à <strong>diagnostiquer</strong> une machine avec ce qu’on peut lire dessus.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Organe</th>
+<th>Ce qu’il fait</th>
+<th>Où il est</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Compresseur</strong></td>
+<td>élève la pression de la vapeur</td>
+<td>entre BP et HP</td>
+</tr>
+<tr>
+<td><strong>Condenseur</strong></td>
+<td>évacue la chaleur, le fluide se liquéfie</td>
+<td>côté HP</td>
+</tr>
+<tr>
+<td><strong>Détendeur</strong></td>
+<td>fait chuter la pression</td>
+<td>entre HP et BP</td>
+</tr>
+<tr>
+<td><strong>Évaporateur</strong></td>
+<td>prend la chaleur, le fluide se vaporise</td>
+<td>côté BP</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Deux organes changent la pression, deux la subissent.</strong> Le compresseur et le détendeur découpent le circuit en deux ; le condenseur et l’évaporateur échangent à pression sensiblement constante. Toute lecture de manomètre commence par là — de quel côté du circuit suis-je ?</p>
+</div>
+<h2 id="le-diagramme-enthalpique-point-par-point">Le diagramme enthalpique, point par point</h2>
+<p>C’est <strong>le</strong> document de l’évaluation théorique. On l’appelle diagramme de Mollier, diagramme enthalpique ou diagramme (log p, h) : trois noms pour la même chose.</p>
+<figure class="schema"><div class="dessin" data-schema="cycle-mollier"></div><figcaption>Le cycle complet, avec ses quatre points et les trois longueurs qui se lisent.</figcaption></figure>
+<div class="cle">
+<p><strong>Deux axes, et le vertical est logarithmique.</strong> L’enthalpie en abscisse, en kJ/kg ; la pression en ordonnée, en bar absolus, sur une échelle log — c’est ce qui permet de faire tenir 1 bar et 45 bar sur la même feuille, et c’est ce qui surprend au premier regard.</p>
+</div>
+<p>La courbe en cloche découpe la feuille en <strong>trois zones</strong> : le liquide à gauche, le mélange liquide-vapeur sous la cloche, la vapeur surchauffée à droite. Le sommet est le <strong>point critique</strong> — au-dessus, plus de changement d’état.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Segment</th>
+<th>Transformation</th>
+<th>Ce qu’il vaut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>4 → 1</strong></td>
+<td>évaporation, à pression constante</td>
+<td><strong>qo = h₁ − h₄</strong></td>
+</tr>
+<tr>
+<td><strong>1 → 2</strong></td>
+<td>compression</td>
+<td><strong>w = h₂ − h₁</strong></td>
+</tr>
+<tr>
+<td><strong>2 → 3</strong></td>
+<td>condensation, à pression constante</td>
+<td><strong>qk = h₂ − h₃</strong></td>
+</tr>
+<tr>
+<td><strong>3 → 4</strong></td>
+<td>détente, <strong>à enthalpie constante</strong></td>
+<td>verticale, rien</td>
+</tr>
+</tbody>
+</table></div>
+<div class="piege">
+<p>La détente est <strong>verticale</strong> sur ce diagramme : le détendeur ne fournit ni ne retire d’énergie, il ne fait que chuter la pression. <strong>h₄ = h₃.</strong> L’erreur classique est de la tracer en biais, comme si le fluide se refroidissait en perdant de l’enthalpie — il se refroidit, mais en s’évaporant partiellement, à enthalpie constante.</p>
+</div>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le calcul complet, du diagramme à la puissance électrique</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Trois enthalpies se lisent sur le diagramme, et <strong>tout le reste s’en déduit</strong>. Pour le cycle dessiné ci-dessus :</p>
+<p>h₁ = <strong>425 kJ/kg</strong> · h₂ = <strong>460 kJ/kg</strong> · h₃ = h₄ = <strong>270 kJ/kg</strong></p>
+<p><strong>Les trois grandeurs massiques :</strong></p>
+<p>qo = 425 − 270 = <strong>155 kJ/kg</strong> — la production frigorifique massique w = 460 − 425 = <strong>35 kJ/kg</strong> — le travail du compresseur qk = 460 − 270 = <strong>190 kJ/kg</strong> — la chaleur rejetée au condenseur</p>
+<div class="cle">
+<p><strong>Le contrôle, avant tout autre calcul : qk = qo + w.</strong> Ici 190 = 155 + 35. Le condenseur évacue tout ce que l’évaporateur a pris, <strong>plus</strong> le travail du compresseur. Un relevé qui ne boucle pas est un relevé faux, et cette vérification prend trois secondes.</p>
+</div>
+<p><strong>Les deux coefficients de performance :</strong></p>
+<p>EER = qo / w = 155 / 35 = <strong>4,43</strong> — en froid COP = qk / w = 190 / 35 = <strong>5,43</strong> — en chaud</p>
+<p><strong>Exactement une unité d’écart</strong>, et ce n’est pas une coïncidence : c’est Q_chaud = Q_froid + W, divisé par W, lu sur le diagramme.</p>
+<p><strong>Et le passage aux puissances</strong>, qui est la dernière question du type. Une machine qui doit produire <strong>10 kW</strong> de froid :</p>
+<p>qm = 10 / 155 = <strong>0,0645 kg/s</strong>, soit 64,5 g/s Puissance absorbée = 0,0645 × 35 = <strong>2,26 kW</strong> Puissance au condenseur = 0,0645 × 190 = <strong>12,26 kW</strong></p>
+<p><strong>Contrôle final</strong> : 10 + 2,26 = 12,26. La boucle se referme sur les puissances comme sur les enthalpies.</p>
+<div class="piege">
+<p>La puissance absorbée calculée ici est celle du <strong>cycle</strong>, pas celle de la prise de courant. Le moteur du compresseur a un rendement, et les ventilateurs consomment aussi. La puissance électrique réelle est supérieure de 15 à 30 %, et c’est elle qui figure sur la plaque.</p>
+</div></div></details>
+</div><h2 id="les-trois-nombres-du-diagnostic">Les trois nombres du diagnostic</h2>
+<div class="formule">
+<p><strong>Surchauffe = T aspiration − T évaporation</strong></p>
+<ul>
+<li>se mesure <strong>en sortie d’évaporateur</strong>, avant le compresseur</li>
+<li>valeur usuelle : <strong>5 à 8 K</strong></li>
+<li>elle garantit qu’<strong>aucun liquide</strong> n’atteint le compresseur</li>
+</ul>
+</div>
+<div class="formule">
+<p><strong>Sous-refroidissement = T condensation − T liquide</strong></p>
+<ul>
+<li>se mesure <strong>en sortie de condenseur</strong>, avant le détendeur</li>
+<li>valeur usuelle : <strong>4 à 7 K</strong></li>
+<li>il garantit que le détendeur reçoit du <strong>liquide pur</strong>, sans bulles</li>
+</ul>
+</div>
+<div class="formule">
+<p><strong>Taux de compression = P haute absolue / P basse absolue</strong></p>
+<ul>
+<li>des pressions <strong>absolues</strong>, jamais des pressions relatives</li>
+<li>climatisation : <strong>2 à 4</strong> · froid négatif : jusqu’à <strong>8 ou 10</strong></li>
+<li>au-delà, le rendement du compresseur s’effondre</li>
+</ul>
+</div>
+<div class="piege">
+<p>Les températures d’évaporation et de condensation <strong>ne se mesurent pas</strong> : elles se <strong>lisent sur les manomètres</strong>, par la table du fluide. Ce sont des températures de saturation. Confondre une température de saturation avec une température mesurée au contact est l’erreur qui fausse tous les calculs suivants.</p>
+</div>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Un relevé complet, mené jusqu&#39;au diagnostic</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une machine au R410A, en climatisation. Les manomètres et deux thermomètres de contact donnent :</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th style="text-align: right;">Relevé</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pression basse, absolue</td>
+<td style="text-align: right;">9,3 bar</td>
+</tr>
+<tr>
+<td>Température d’évaporation correspondante</td>
+<td style="text-align: right;">5 °C</td>
+</tr>
+<tr>
+<td>Température à l’aspiration</td>
+<td style="text-align: right;">11 °C</td>
+</tr>
+<tr>
+<td>Pression haute, absolue</td>
+<td style="text-align: right;">30 bar</td>
+</tr>
+<tr>
+<td>Température de condensation correspondante</td>
+<td style="text-align: right;">45 °C</td>
+</tr>
+<tr>
+<td>Température du liquide en sortie de condenseur</td>
+<td style="text-align: right;">39 °C</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Surchauffe</strong> = 11 − 5 = <strong>6 K</strong> — dans la plage, l’évaporateur est bien rempli. <strong>Sous-refroidissement</strong> = 45 − 39 = <strong>6 K</strong> — dans la plage, le condenseur fait son travail. <strong>Taux de compression</strong> = 30 / 9,3 = <strong>3,2</strong> — normal en climatisation.</p>
+<div class="cle">
+<p><strong>Trois nombres, trois verdicts, et la machine est saine.</strong> C’est tout le diagnostic frigorifique de base : on ne cherche pas ce qui est cassé, on vérifie d’abord que les trois nombres sont dans leur plage. Ce qui en sort désigne l’organe.</p>
+</div>
+<p><strong>La vérification de plausibilité à ne jamais sauter</strong> : une surchauffe négative est <strong>impossible</strong> — cela voudrait dire du liquide plus froid que sa propre température d’ébullition. Un tel résultat signale une erreur de lecture, presque toujours une pression relative prise pour une pression absolue.</p></div></details>
+</div><h2 id="ce-que-chaque-derive-designe">Ce que chaque dérive désigne</h2>
+<p>Un relevé hors plage ne dit pas « telle pièce est morte ». Il dit <strong>où regarder</strong>, et c’est déjà l’essentiel du métier.</p>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le tableau des quatre dérives, et ce qu&#39;on va vérifier</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ce qu’on lit</th>
+<th>Ce que cela désigne d’abord</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Surchauffe forte</strong> (&gt; 10 K) et BP basse</td>
+<td><strong>manque de fluide</strong>, ou détendeur trop fermé, ou filtre bouché</td>
+</tr>
+<tr>
+<td><strong>Surchauffe faible</strong> (&lt; 3 K)</td>
+<td>détendeur trop ouvert — <strong>danger immédiat</strong> pour le compresseur</td>
+</tr>
+<tr>
+<td><strong>Sous-refroidissement faible</strong> (&lt; 2 K)</td>
+<td>manque de fluide, ou passage de bulles</td>
+</tr>
+<tr>
+<td><strong>Sous-refroidissement fort</strong> (&gt; 10 K) et HP haute</td>
+<td><strong>excès de charge</strong>, ou condenseur mal ventilé</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Manque de charge : surchauffe forte ET sous-refroidissement faible, ensemble.</strong> C’est la signature que l’évaluation attend. Une surchauffe forte toute seule désigne aussi bien un détendeur qu’un filtre — il faut les deux nombres pour conclure.</p>
+</div>
+<p><strong>La démarche, dans l’ordre, et elle ne se raccourcit pas :</strong></p>
+<ol type="1">
+<li>relever les <strong>quatre</strong> grandeurs — deux pressions, deux températures ;</li>
+<li>en tirer surchauffe, sous-refroidissement, taux de compression ;</li>
+<li>comparer chacun à sa plage ;</li>
+<li><strong>vérifier l’échange avant de soupçonner l’organe</strong> — un filtre à air, un ventilateur, un condenseur encrassé expliquent la plupart des relevés anormaux ;</li>
+<li>seulement alors, ouvrir le circuit — et il faut l’attestation.</li>
+</ol>
+<div class="piege">
+<p>Un condenseur sale et un excès de charge donnent <strong>le même</strong> symptôme : HP haute. Le premier se règle avec une brosse et un jet d’eau, le second demande de récupérer du fluide. <strong>Nettoyer d’abord, mesurer ensuite</strong> : c’est gratuit, et cela évite de retirer une charge correcte.</p>
+</div></div></details>
+</div><h2 id="le-point-de-fonctionnement-comme-en-hydraulique">Le point de fonctionnement, comme en hydraulique</h2>
+<p>Une machine frigorifique a un point de fonctionnement, et il se construit exactement comme celui d’un circuit d’eau vu en séance 9 : <strong>deux courbes qui se croisent</strong>.</p>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Compresseur contre détendeur — pourquoi les pressions bougent seules</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le <strong>compresseur</strong> aspire d’autant plus de masse que la pression d’aspiration est haute. Le <strong>détendeur</strong> laisse passer d’autant plus de masse que l’écart HP − BP est grand. Les deux courbes vont en sens contraire : elles se croisent en <strong>un seul point</strong>, et ce point fixe les deux pressions.</p>
+<p><strong>Ce que cela explique immédiatement.</strong> Un évaporateur encrassé échange moins : la BP tombe. Un condenseur sale évacue moins : la HP monte. Dans les deux cas, <strong>la machine se déplace le long de ses courbes</strong>, sans qu’aucun composant ne soit en panne.</p>
+<div class="cle">
+<p>Des pressions anormales sont d’abord le <strong>symptôme d’un déplacement du point de fonctionnement</strong>, pas une panne de machine. C’est le raisonnement qui évite de remplacer un compresseur pour rien.</p>
+</div>
+<p><strong>Et le rôle du détendeur électronique.</strong> Il ne subit plus ce déplacement : il mesure la surchauffe et corrige son ouverture pour la tenir. La machine garde donc une surchauffe correcte sur toute sa plage de charge, là où un détendeur thermostatique — un proportionnel pur, avec son erreur statique — dérive dès qu’on s’écarte du point nominal.</p></div></details>
+</div><h2 id="ou-cela-rejoint-votre-cours">Où cela rejoint votre cours</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les séances qui préparent déjà cette page</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Séance</th>
+<th>Ce qu’elle apporte ici</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>6 — la paroi mesurée</strong></td>
+<td>la frontière entre mesurer et ouvrir le circuit</td>
+</tr>
+<tr>
+<td><strong>9 — le point de fonctionnement</strong></td>
+<td>deux courbes qui se croisent, le même raisonnement</td>
+</tr>
+<tr>
+<td><strong>13 — la pompe à chaleur</strong></td>
+<td>le cycle, les quatre organes, le diagramme enthalpique</td>
+</tr>
+<tr>
+<td><strong>18 — les boucles de régulation</strong></td>
+<td>la surchauffe régulée, et pourquoi l’électronique a gagné</td>
+</tr>
+</tbody>
+</table></div></div></details>
+</div><h2 id="les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</h2>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th>Ordre de grandeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Surchauffe à l’aspiration</td>
+<td>5 à 8 K</td>
+</tr>
+<tr>
+<td>Sous-refroidissement en sortie de condenseur</td>
+<td>4 à 7 K</td>
+</tr>
+<tr>
+<td>Taux de compression, climatisation</td>
+<td>2 à 4</td>
+</tr>
+<tr>
+<td>Taux de compression, froid négatif</td>
+<td>jusqu’à 8 ou 10</td>
+</tr>
+<tr>
+<td>Écart évaporation / air repris</td>
+<td>15 à 20 K</td>
+</tr>
+<tr>
+<td>Écart condensation / air extérieur</td>
+<td>10 à 15 K</td>
+</tr>
+<tr>
+<td>Surchauffe négative</td>
+<td><strong>impossible</strong> — erreur de lecture</td>
+</tr>
+</tbody>
+</table></div>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="HAB2-LES-FLUIDES.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Hab 2 — les fluides</span></a><a class="ap" href="HAB4-LES-GESTES.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Hab 4 — les gestes</span></a></div></nav>
+<p class="pied">Parcours de préparation à l'attestation d'aptitude — hors programme de l'option C. Aucun corrigé ; tous les calculs se font dans votre navigateur, rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=9859cc66"></script>
+<script src="../assets/site.js?v=9859cc66"></script>
