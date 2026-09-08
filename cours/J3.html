@@ -5,8 +5,8 @@
 <title>Séance 3 — conductivité et U</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
-<link rel="stylesheet" href="../assets/kit.css?v=7ed2c655">
-<link rel="stylesheet" href="../assets/site.css?v=7ed2c655">
+<link rel="stylesheet" href="../assets/kit.css?v=816c96bb">
+<link rel="stylesheet" href="../assets/site.css?v=816c96bb">
 
 <div class="page" data-site="bts-fed-c" data-page="cours/J3" data-rang="1">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 1 · Thermique du bâtiment</span><span class="fleches"><a class="fleche" href="J2.html" rel="prev" title="Séance 2 — lire un dossier" aria-label="Séance 2 — lire un dossier">&lsaquo;</a><a class="fleche" href="J4.html" rel="next" title="Séance 4 — déperditions" aria-label="Séance 4 — déperditions">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J3">Marquer comme lu</button></div>
@@ -23,7 +23,7 @@
 <nav class="somm"><div class="in"><a href="#ce-que-la-seance-a-regle">Ce que la séance a réglé</a><a href="#la-conductivite-propriete-du-materiau">La conductivité, propriété du matériau</a><a href="#de-a-la-paroi-complete">De λ à la paroi complète</a><a href="#ce-que-le-calcul-montre-vraiment">Ce que le calcul montre vraiment</a><a href="#dimensionner-un-isolant">Dimensionner un isolant</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
 <h2 id="ce-que-la-seance-a-regle">Ce que la séance a réglé</h2>
 <p>En séance 1, on vous a donné deux nombres sans explication : U = 2,5 pour un mur non isolé, U = 0,35 pour le même mur isolé. Vous avez calculé des déperditions avec, sans savoir d’où ils sortaient.</p>
-<p>Ils ne se lisent nulle part. Aucun fabricant ne vend un mur « à U = 0,35 » : il vend du parpaing, de l’isolant, du plâtre. <strong>Le U se calcule à partir de la composition de la paroi</strong>, et c’est ce calcul qui occupe la première partie de presque tous les sujets d’U41 — 24 points sur 80 à la session 2026.</p>
+<p>Ils ne se lisent nulle part. Aucun fabricant ne vend un mur « à U = 0,35 » : il vend du parpaing, de l’isolant, du plâtre. <strong>Le U se calcule à partir de la composition de la paroi</strong>, et c’est ce calcul qui occupe la première partie de presque tous les sujets d’U41 : 24 points sur 80 à la session 2026.</p>
 <p>Tout part d’une seule propriété : la conductivité thermique du matériau.</p>
 <h2 id="la-conductivite-propriete-du-materiau">La conductivité, propriété du matériau</h2>
 <p>λ dit combien de chaleur traverse <strong>un mètre d’épaisseur</strong> de ce matériau pour un écart d’un kelvin. C’est une propriété du matériau seul : ni l’épaisseur de la couche, ni la surface du mur n’y changent quoi que ce soit. Un λ de 0,038 reste 0,038 qu’on en pose 5 cm ou 30.</p>
@@ -35,29 +35,29 @@
 <div class="formule">
 <p><strong>R = e / λ</strong></p>
 <ul>
-<li><strong>R</strong><span>résistance de la couche, en m²·K/W</span></li>
-<li><strong>e</strong><span>épaisseur, <strong>en mètres</strong></span></li>
-<li><strong>λ</strong><span>conductivité, en W/(m·K)</span></li>
+<li><strong>R</strong><span>: résistance de la couche, en m²·K/W</span></li>
+<li><strong>e</strong><span>: épaisseur, <strong>en mètres</strong></span></li>
+<li><strong>λ</strong><span>: conductivité, en W/(m·K)</span></li>
 </ul>
 <blockquote>
 <p>Plus R est grand, mieux la couche isole.</p>
 </blockquote>
 </div>
-<p>Contrairement à λ, R dépend de l’épaisseur — c’est le seul levier dont on dispose une fois le matériau choisi. Doubler l’épaisseur double la résistance de la couche.</p>
+<p>Contrairement à λ, R dépend de l’épaisseur, c’est le seul levier dont on dispose une fois le matériau choisi. Doubler l’épaisseur double la résistance de la couche.</p>
 <p>Une paroi est un empilement, et <strong>les résistances s’additionnent</strong>, comme des résistances électriques en série. S’y ajoutent deux résistances qu’on ne voit pas : les fines couches d’air qui adhèrent aux deux faces du mur.</p>
 <div class="formule">
 <p><strong>R total = Rsi + Σ (e / λ) + Rse</strong></p>
 <ul>
-<li><strong>Rsi</strong><span>0,13 à l’intérieur, où l’air est calme</span></li>
-<li><strong>Rse</strong><span>0,04 à l’extérieur, où le vent le brasse</span></li>
+<li><strong>Rsi</strong><span>: 0,13 à l’intérieur, où l’air est calme</span></li>
+<li><strong>Rse</strong><span>: 0,04 à l’extérieur, où le vent le brasse</span></li>
 </ul>
 </div>
-<p>Ces deux valeurs sont normalisées et ne se discutent pas. Elles paraissent négligeables — elles représentent pourtant <strong>40 % de la résistance d’un mur en béton nu</strong>, où il n’y a pas grand-chose d’autre pour freiner la chaleur.</p>
+<p>Ces deux valeurs sont normalisées et ne se discutent pas. Elles paraissent négligeables, elles représentent pourtant <strong>40 % de la résistance d’un mur en béton nu</strong>, où il n’y a pas grand-chose d’autre pour freiner la chaleur.</p>
 <p>Le coefficient de la paroi est enfin l’inverse de sa résistance totale.</p>
 <div class="formule">
 <p><strong>U = 1 / R total</strong></p>
 <ul>
-<li><strong>U</strong><span>en W/(m²·K)</span></li>
+<li><strong>U</strong><span>: en W/(m²·K)</span></li>
 </ul>
 <blockquote>
 <p>Plus U est faible, mieux la paroi est isolée. C’est l’inverse de R : ne pas les confondre.</p>
@@ -84,7 +84,7 @@
 </ol>
 </div>
 <div class="piege">
-<p>L’isolation a des <strong>rendements décroissants</strong>. Les dix premiers centimètres apportent beaucoup, les dix suivants nettement moins — parce qu’on ajoute une résistance à une résistance déjà grande. C’est ce qui fixe l’épaisseur économiquement raisonnable, bien avant la limite technique.</p>
+<p>L’isolation a des <strong>rendements décroissants</strong>. Les dix premiers centimètres apportent beaucoup, les dix suivants nettement moins, parce qu’on ajoute une résistance à une résistance déjà grande. C’est ce qui fixe l’épaisseur économiquement raisonnable, bien avant la limite technique.</p>
 </div>
 <div class="outil" data-outil="paroi">
 
@@ -93,7 +93,7 @@
 <h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
 <div class="etapes">
 <ol type="1">
-<li>Lire le graphique des λ — le plus isolant, le plus conducteur, et le rapport entre les deux</li>
+<li>Lire le graphique des λ, le plus isolant, le plus conducteur, et le rapport entre les deux</li>
 <li>Calculer la résistance de cinq couches, en surveillant l’unité de l’épaisseur</li>
 <li>Empiler les couches, ajouter les résistances superficielles, en déduire le U</li>
 <li>Chercher l’épaisseur d’isolant pour un U imposé, puis observer les rendements décroissants</li>
@@ -101,7 +101,7 @@
 </div>
 <div class="mission">
 <p><strong>À observer en entreprise</strong></p>
-<p>Relever la composition d’une paroi extérieure du bâtiment de l’entreprise, de l’intérieur vers l’extérieur. Chercher les λ sur les fiches produits ou les documents de chantier. Calculer R et U, comparer à la valeur réglementaire actuelle — de 0,20 à 0,25 W/(m²·K) pour un mur — et conclure sur ce qu’il faudrait ajouter.</p>
+<p>Relever la composition d’une paroi extérieure du bâtiment de l’entreprise, de l’intérieur vers l’extérieur. Chercher les λ sur les fiches produits ou les documents de chantier. Calculer R et U, comparer à la valeur réglementaire actuelle, de 0,20 à 0,25 W/(m²·K) pour un mur, et conclure sur ce qu’il faudrait ajouter.</p>
 <p>L’outil ci-dessus est fait pour ça : il donne aussi l’épaisseur manquante.</p>
 </div>
 <h2 id="vous-verifier">Vous vérifier</h2>
@@ -150,17 +150,17 @@
 </tbody>
 </table></div>
 <p>Des couches empilées sont traversées par <strong>le même flux</strong>, l’une après l’autre. C’est une série, et les résistances s’ajoutent. C’est aussi ce qui explique le profil de température de la coupe : la chute aux bornes d’une résistance vaut Φ × R, et comme Φ est le même partout, la chute est proportionnelle à R.</p>
-<p><strong>Et quand c’est en parallèle ?</strong> Ça arrive dès qu’une paroi n’est pas homogène — une ossature bois avec de l’isolant entre les montants. Deux chemins se partagent le flux côte à côte, et ce sont les <em>inverses</em> qui s’ajoutent :</p>
+<p><strong>Et quand c’est en parallèle ?</strong> Ça arrive dès qu’une paroi n’est pas homogène, une ossature bois avec de l’isolant entre les montants. Deux chemins se partagent le flux côte à côte, et ce sont les <em>inverses</em> qui s’ajoutent :</p>
 <p><strong>1 / R = 1 / R₁ + 1 / R₂</strong></p>
 <p>Exactement la formule des résistances électriques en parallèle. Les règles Th-U traitent ce cas par la méthode dite « des deux hypothèses » : on calcule un U maximal et un U minimal, et on prend la moyenne.</p>
 <p>Conséquence de chantier : dans une ossature bois, les montants font passer la chaleur <em>à côté</em> de l’isolant. On appelle ça un pont thermique intégré, et il dégrade le U de la paroi de 10 à 15 %.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">λ n&#39;est pas une constante</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le tableau de la séance donne des λ comme s’ils étaient gravés. En réalité un λ dépend de la <strong>température</strong>, de l’<strong>humidité</strong> et du <strong>vieillissement</strong>. D’où deux valeurs sur les fiches produits.</p>
 <ul>
-<li><strong>λ déclaré</strong> — mesuré en laboratoire, matériau sec, à 10 °C. Celui qui figure en gros sur l’emballage.</li>
-<li><strong>λ utile</strong> — corrigé pour les conditions réelles de pose (NF EN ISO 10456). Celui qu’un bureau d’études utilise.</li>
+<li><strong>λ déclaré</strong> : mesuré en laboratoire, matériau sec, à 10 °C. Celui qui figure en gros sur l’emballage.</li>
+<li><strong>λ utile</strong> : corrigé pour les conditions réelles de pose (NF EN ISO 10456). Celui qu’un bureau d’études utilise.</li>
 </ul>
 <p>L’écart n’est pas anecdotique : <strong>un isolant mouillé perd l’essentiel de sa résistance</strong>, parce que l’eau conduit vingt-cinq fois mieux que l’air immobile. Une laine minérale gorgée d’eau ne vaut guère mieux qu’un mur nu.</p>
-<p>C’est pour ça qu’on soigne le pare-vapeur — et c’est le lien avec le savoir A1-2, hygrothermie.</p>
+<p>C’est pour ça qu’on soigne le pare-vapeur, et c’est le lien avec le savoir A1-2, hygrothermie.</p>
 <p>La certification <strong>ACERMI</strong> garantit le λ annoncé et sa tenue dans le temps. Sur un chantier, un isolant non certifié se refuse : sa performance n’est pas opposable.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les Rsi qui changent, et la lame d&#39;air</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>0,13 et 0,04 valent pour <strong>une paroi verticale</strong>, flux horizontal. Sur un plancher ou une toiture, la convection ne se comporte plus pareil : l’air chaud monte, et il monte plus facilement qu’il ne descend.</p>
 <div class="enveloppe-tbl"><table>
@@ -216,7 +216,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>Épaissir une lame d’air au-delà de 25 mm n’apporte donc <strong>rien</strong>. Et si la lame est ventilée — façade rideau, bardage — sa résistance tombe à zéro : l’air extérieur y circule, la paroi s’arrête là.</p></div></details>
+<p>Épaissir une lame d’air au-delà de 25 mm n’apporte donc <strong>rien</strong>. Et si la lame est ventilée (façade rideau, bardage) sa résistance tombe à zéro : l’air extérieur y circule, la paroi s’arrête là.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">D&#39;où sortent 0,13 et 0,04</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Les résistances superficielles ne sont pas des conventions arbitraires. Ce sont les inverses du coefficient d’échange superficiel h, qui rassemble la convection et le rayonnement à la surface de la paroi :</p>
 <p><strong>Rsi = 1 / hi = 1 / 7,7 = 0,13 et Rse = 1 / he = 1 / 25 = 0,04</strong></p>
 <p>À l’intérieur, l’air est calme : il n’emporte la chaleur que par convection naturelle, lentement. À l’extérieur, le vent brasse en permanence la couche limite : h est trois fois plus grand, donc la résistance trois fois plus petite.</p>
@@ -226,22 +226,22 @@
 <p>Reste à savoir à partir de quand la buée apparaît. C’est le rôle du point de rosée, et il se lit sur le diagramme de l’air humide.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le point de rosée, et quand la paroi se couvre de buée</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>L’air d’une pièce contient une certaine masse de vapeur d’eau. En le refroidissant sans rien lui ajouter, on arrive à un point où il ne peut plus la contenir : la vapeur se condense. <strong>Cette température, c’est le point de rosée.</strong></p>
 <p>Déplacez le point : la construction se refait. On part du point, on va vers la gauche à humidité absolue constante, et l’endroit où l’on rencontre la courbe de saturation donne le point de rosée.</p>
-<figure class="schema"><div class="dessin" data-schema="air-humide"></div><figcaption>Diagramme allégé — température sèche, humidité absolue, humidité relative. Rien d’autre.</figcaption></figure>
-<p><strong>Le lien avec la séance est direct.</strong> Une pièce à 20 °C et 60 % a un point de rosée à 12 °C. Un mur dont la face intérieure descend sous 12 °C se couvre de buée — et un mur non isolé, par −7 °C dehors, y descend sans difficulté. C’est le savoir A1-2 de cette séance, et c’est aussi pourquoi les moisissures apparaissent d’abord dans les angles : la surface y est plus froide qu’au milieu du mur.</p>
+<figure class="schema"><div class="dessin" data-schema="air-humide"></div><figcaption>Diagramme allégé, température sèche, humidité absolue, humidité relative. Rien d’autre.</figcaption></figure>
+<p><strong>Le lien avec la séance est direct.</strong> Une pièce à 20 °C et 60 % a un point de rosée à 12 °C. Un mur dont la face intérieure descend sous 12 °C se couvre de buée, et un mur non isolé, par −7 °C dehors, y descend sans difficulté. C’est le savoir A1-2 de cette séance, et c’est aussi pourquoi les moisissures apparaissent d’abord dans les angles : la surface y est plus froide qu’au milieu du mur.</p>
 <p>Le bouton <em>les quatre évolutions</em> montre ce qu’on peut faire subir à cet air : le chauffer, le refroidir, l’humidifier à la vapeur ou par évaporation. Vous les retrouverez en deuxième année, sur les centrales de traitement d’air.</p></div></details>
-<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les ponts thermiques : ce que le coefficient U ne voit pas</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le U d’une paroi décrit une paroi <strong>courante</strong>, loin de ses bords. Aux endroits où deux parois se rencontrent — un plancher qui traverse un mur, un refend, un appui de fenêtre — la chaleur trouve un raccourci que le calcul de U ignore complètement.</p>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les ponts thermiques : ce que le coefficient U ne voit pas</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le U d’une paroi décrit une paroi <strong>courante</strong>, loin de ses bords. Aux endroits où deux parois se rencontrent, un plancher qui traverse un mur, un refend, un appui de fenêtre, la chaleur trouve un raccourci que le calcul de U ignore complètement.</p>
 <div class="formule">
 <p><strong>Φ = Ψ × L × ΔT</strong></p>
 <ul>
-<li><strong>Ψ</strong><span>coefficient linéique du pont, en <strong>W/(m·K)</strong> — un mètre, pas un mètre carré</span></li>
-<li><strong>L</strong><span>longueur du pont, en m</span></li>
-<li><strong>ΔT</strong><span>écart de température, en K</span></li>
+<li><strong>Ψ</strong><span>: coefficient linéique du pont, en <strong>W/(m·K)</strong>, un mètre, pas un mètre carré</span></li>
+<li><strong>L</strong><span>: longueur du pont, en m</span></li>
+<li><strong>ΔT</strong><span>: écart de température, en K</span></li>
 </ul>
 <blockquote>
 <p>Le Ψ se lit dans les tables réglementaires ou dans l’avis technique du procédé. Il ne se calcule pas à la main : il vient d’une simulation en deux dimensions.</p>
 </blockquote>
 </div>
-<p><strong>Ce que ça pèse réellement.</strong> Prenons la maison du CCTP de la banque d’exercices — 96 m² de murs à U = 0,24 ; 74 m² de toiture à 0,16 ; 74 m² de plancher bas à 0,31 ; 18 m² de menuiseries à 1,40. Les déperditions surfaciques totalisent <strong>83 W/K</strong>. Ajoutons 40 m de plancher intermédiaire et 25 m de refends.</p>
+<p><strong>Ce que ça pèse réellement.</strong> Prenons la maison du CCTP de la banque d’exercices, 96 m² de murs à U = 0,24 ; 74 m² de toiture à 0,16 ; 74 m² de plancher bas à 0,31 ; 18 m² de menuiseries à 1,40. Les déperditions surfaciques totalisent <strong>83 W/K</strong>. Ajoutons 40 m de plancher intermédiaire et 25 m de refends.</p>
 <div class="enveloppe-tbl"><table>
 <thead>
 <tr>
@@ -272,13 +272,13 @@
 <div class="cle">
 <p><strong>Un tiers des déperditions par les ponts thermiques en isolation intérieure.</strong> Ce n’est pas un détail de calcul : c’est le poste qui décide du niveau de performance atteignable, et c’est le premier argument technique en faveur de l’isolation par l’extérieur.</p>
 </div>
-<p><strong>Le paradoxe qu’il faut avoir compris</strong> : plus on isole les parois courantes, <strong>plus la part des ponts thermiques augmente</strong>. Sur un bâtiment ancien non isolé, ils sont négligeables devant les murs ; sur un bâtiment au standard passif, ils deviennent le poste dominant. C’est pourquoi la question des ponts n’apparaît que sur les projets performants — comme le bâtiment EnerPHit du sujet 2026.</p></div></details>
-<details class="appro"><summary><span class="niv"></span><span class="titre-appro">De la paroi au bâtiment : l&#39;inventaire des surfaces</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Passer d’un U à une déperdition demande une surface, et <strong>le relevé des surfaces est la partie du travail où l’on perd le plus de points</strong> — non parce qu’elle est difficile, mais parce qu’elle est fastidieuse et qu’on la bâcle.</p>
+<p><strong>Le paradoxe qu’il faut avoir compris</strong> : plus on isole les parois courantes, <strong>plus la part des ponts thermiques augmente</strong>. Sur un bâtiment ancien non isolé, ils sont négligeables devant les murs ; sur un bâtiment au standard passif, ils deviennent le poste dominant. C’est pourquoi la question des ponts n’apparaît que sur les projets performants, comme le bâtiment EnerPHit du sujet 2026.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">De la paroi au bâtiment : l&#39;inventaire des surfaces</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Passer d’un U à une déperdition demande une surface, et <strong>le relevé des surfaces est la partie du travail où l’on perd le plus de points</strong>, non parce qu’elle est difficile, mais parce qu’elle est fastidieuse et qu’on la bâcle.</p>
 <p><strong>La méthode, dans l’ordre :</strong></p>
 <ol type="1">
 <li><strong>Relever les cotes intérieures</strong> sur le plan, façade par façade. Le sujet donne les plans cotés ; les cotes sont dessus, il n’y a rien à mesurer ;</li>
 <li><strong>Calculer la surface brute</strong> de chaque paroi ;</li>
-<li><strong>Déduire les ouvertures</strong> — et c’est là que ça se joue : une fenêtre n’est pas du mur. On retranche sa surface du mur, et on la compte séparément à son propre U ;</li>
+<li><strong>Déduire les ouvertures</strong>, et c’est là que ça se joue : une fenêtre n’est pas du mur. On retranche sa surface du mur, et on la compte séparément à son propre U ;</li>
 <li><strong>Compter les menuiseries à part</strong>, avec leur U propre, dix fois supérieur à celui d’un mur isolé ;</li>
 <li><strong>Additionner les longueurs de ponts thermiques</strong>, ligne par ligne.</li>
 </ol>
@@ -320,7 +320,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Deux colonnes, deux unités.</strong> Les surfaciques en mètres carrés avec un U, les linéiques en mètres avec un Ψ. Mélanger les deux donne un résultat faux d’un facteur qui passe inaperçu — c’est l’erreur la plus discrète de tout le chapitre.</p>
+<p><strong>Deux colonnes, deux unités.</strong> Les surfaciques en mètres carrés avec un U, les linéiques en mètres avec un Ψ. Mélanger les deux donne un résultat faux d’un facteur qui passe inaperçu, c’est l’erreur la plus discrète de tout le chapitre.</p>
 <p><strong>Le contrôle de vraisemblance.</strong> Une maison individuelle correctement isolée se situe autour de 100 à 150 W/K. Un GV de 800 W/K sur une maison signale une erreur de surface ou d’unité ; un GV de 15 W/K aussi.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Isoler par l&#39;intérieur ou par l&#39;extérieur : ce que le choix change</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La question tombe sous forme de justification, et une réponse qui ne parle que de R passe à côté. Le R peut être identique dans les deux cas ; <strong>tout le reste diffère.</strong></p>
 <div class="enveloppe-tbl"><table>
@@ -339,8 +339,8 @@
 <tbody>
 <tr>
 <td>Ponts thermiques</td>
-<td><strong>subsistent</strong> — un tiers des pertes</td>
-<td><strong>traités</strong> — 7 %</td>
+<td><strong>subsistent</strong> : un tiers des pertes</td>
+<td><strong>traités</strong>, 7 %</td>
 </tr>
 <tr>
 <td>Inertie du mur</td>
@@ -360,7 +360,7 @@
 <tr>
 <td>Façade</td>
 <td>inchangée</td>
-<td><strong>modifiée</strong> — accord d’urbanisme</td>
+<td><strong>modifiée</strong> : accord d’urbanisme</td>
 </tr>
 <tr>
 <td>Coût</td>
@@ -369,37 +369,37 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Ce qui décide, en pratique.</strong> L’extérieur est techniquement supérieur sur presque tous les points, et il perd sur deux : le coût, et l’aspect de la façade. Sur un bâtiment classé ou en secteur protégé, l’intérieur est parfois la seule option — et c’est exactement le cas du musée du sujet 2024, un palais historique.</p>
+<p><strong>Ce qui décide, en pratique.</strong> L’extérieur est techniquement supérieur sur presque tous les points, et il perd sur deux : le coût, et l’aspect de la façade. Sur un bâtiment classé ou en secteur protégé, l’intérieur est parfois la seule option, et c’est exactement le cas du musée du sujet 2024, un palais historique.</p>
 <div class="cle">
-<p>Une bonne justification cite <strong>au moins deux critères de nature différente</strong> : un thermique — les ponts, l’inertie — et un non thermique — la surface, le coût, l’urbanisme. Une réponse qui n’invoque que la performance est incomplète, parce que la décision réelle ne se prend jamais sur la seule performance.</p>
+<p>Une bonne justification cite <strong>au moins deux critères de nature différente</strong> : un thermique (les ponts, l’inertie) et un non thermique, la surface, le coût, l’urbanisme. Une réponse qui n’invoque que la performance est incomplète, parce que la décision réelle ne se prend jamais sur la seule performance.</p>
 </div>
-<p><strong>Le cas de l’isolation répartie</strong>, qu’on rencontre en construction neuve : brique monomur, béton cellulaire. Le mur isole par lui-même, il n’y a plus de couche d’isolant. Les ponts thermiques y sont faibles par construction — pas de rupture dans le matériau — mais le R atteignable plafonne. C’est une troisième voie, et non un compromis entre les deux premières.</p></div></details>
+<p><strong>Le cas de l’isolation répartie</strong>, qu’on rencontre en construction neuve : brique monomur, béton cellulaire. Le mur isole par lui-même, il n’y a plus de couche d’isolant. Les ponts thermiques y sont faibles par construction, pas de rupture dans le matériau, mais le R atteignable plafonne. C’est une troisième voie, et non un compromis entre les deux premières.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">L&#39;inertie, le déphasage, et pourquoi R ne suffit pas l&#39;été</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Tout ce chapitre décrit un <strong>régime permanent</strong> : des températures figées, un flux constant. C’est le bon modèle pour le calcul de chauffage, qui se fait au jour le plus froid. Ce n’est plus le bon modèle pour l’été.</p>
-<p><strong>Ce qui change en été.</strong> La température extérieure oscille — 15 °C la nuit, 35 °C l’après-midi. Le flux n’est plus constant : il entre le jour et ressort la nuit. Une paroi ne se contente plus de résister, elle <strong>stocke</strong>.</p>
+<p><strong>Ce qui change en été.</strong> La température extérieure oscille, 15 °C la nuit, 35 °C l’après-midi. Le flux n’est plus constant : il entre le jour et ressort la nuit. Une paroi ne se contente plus de résister, elle <strong>stocke</strong>.</p>
 <p><strong>Deux grandeurs nouvelles</strong>, qu’aucun R ne contient :</p>
 <ul>
-<li>la <strong>capacité thermique</strong> — combien d’énergie la paroi peut absorber avant de monter en température. Elle dépend de la masse volumique et de la chaleur massique : un mur lourd stocke, un isolant léger ne stocke rien ;</li>
-<li>le <strong>déphasage</strong> — le retard entre le maximum de chaleur dehors et le maximum ressenti dedans. Une paroi qui déphase de dix à douze heures renvoie la chaleur de l’après-midi… au milieu de la nuit, quand on peut ventiler.</li>
+<li>la <strong>capacité thermique</strong> : combien d’énergie la paroi peut absorber avant de monter en température. Elle dépend de la masse volumique et de la chaleur massique : un mur lourd stocke, un isolant léger ne stocke rien ;</li>
+<li>le <strong>déphasage</strong> : le retard entre le maximum de chaleur dehors et le maximum ressenti dedans. Une paroi qui déphase de dix à douze heures renvoie la chaleur de l’après-midi… au milieu de la nuit, quand on peut ventiler.</li>
 </ul>
 <div class="piege">
 <p><strong>Deux parois de même R peuvent avoir des comportements d’été opposés.</strong> Une ossature bois avec laine minérale et un mur en béton avec le même R résistent identiquement en hiver ; l’un surchauffe l’après-midi, l’autre pas. Répondre « même R, donc même confort » est faux, et c’est une question de justification récurrente.</p>
 </div>
 <p><strong>Ce qu’un bureau d’études en fait.</strong> Le calcul en régime permanent ne sait pas traiter ça : il faut une <strong>simulation thermique dynamique</strong>, qui découpe l’année en pas de temps horaires et suit les températures de chaque paroi. C’est le savoir A2-2 du référentiel, au niveau 2 pour l’option C : on doit savoir de quoi il s’agit et pourquoi elle est nécessaire, sans avoir à la conduire.</p>
-<p><strong>L’ordre de grandeur à retenir</strong> : les matériaux denses et les isolants biosourcés déphasent nettement mieux que les isolants légers, à R égal. Les valeurs précises se lisent dans les fiches produit — elles ne s’apprennent pas.</p></div></details>
-<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que la réglementation regarde, et ce n&#39;est pas U</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un candidat qui sort de ce chapitre pense qu’on réglemente les U. C’est vrai pour les <strong>garde-fous</strong> — des valeurs plafond, paroi par paroi, à ne pas dépasser — mais ce n’est plus le cœur du dispositif depuis longtemps.</p>
+<p><strong>L’ordre de grandeur à retenir</strong> : les matériaux denses et les isolants biosourcés déphasent nettement mieux que les isolants légers, à R égal. Les valeurs précises se lisent dans les fiches produit, elles ne s’apprennent pas.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que la réglementation regarde, et ce n&#39;est pas U</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un candidat qui sort de ce chapitre pense qu’on réglemente les U. C’est vrai pour les <strong>garde-fous</strong>, des valeurs plafond, paroi par paroi, à ne pas dépasser, mais ce n’est plus le cœur du dispositif depuis longtemps.</p>
 <p><strong>Ce qui est réellement plafonné</strong>, ce sont des indicateurs globaux du bâtiment :</p>
 <ul>
 <li>un indicateur de <strong>besoin</strong>, qui mesure ce que l’enveloppe et la conception bioclimatique demandent, indépendamment des systèmes installés. C’est là que vivent l’isolation, l’orientation, les apports solaires, l’inertie ;</li>
 <li>un indicateur de <strong>consommation</strong>, qui ajoute le rendement des systèmes et le contenu en énergie primaire du vecteur choisi ;</li>
-<li>un indicateur de <strong>confort d’été</strong>, qui sanctionne les bâtiments qui surchauffent — et qui a rendu l’inertie et les protections solaires déterminantes ;</li>
+<li>un indicateur de <strong>confort d’été</strong>, qui sanctionne les bâtiments qui surchauffent, et qui a rendu l’inertie et les protections solaires déterminantes ;</li>
 <li>depuis la génération réglementaire actuelle, un indicateur d’<strong>impact carbone</strong> couvrant la construction et l’exploitation.</li>
 </ul>
-<p><strong>La conséquence pour vous</strong> : deux bâtiments peuvent avoir les mêmes U et des résultats réglementaires très différents, parce que l’un est bien orienté, compact et protégé du soleil, et l’autre non. <strong>La compacité</strong> — le rapport de la surface déperditive au volume chauffé — pèse autant que l’épaisseur d’isolant, et elle ne coûte rien : elle se décide au dessin.</p>
+<p><strong>La conséquence pour vous</strong> : deux bâtiments peuvent avoir les mêmes U et des résultats réglementaires très différents, parce que l’un est bien orienté, compact et protégé du soleil, et l’autre non. <strong>La compacité</strong>, le rapport de la surface déperditive au volume chauffé, pèse autant que l’épaisseur d’isolant, et elle ne coûte rien : elle se décide au dessin.</p>
 <blockquote>
-<p><strong>Les seuils, les noms d’indicateurs et les dates ne se récitent pas.</strong> Ils changent de génération réglementaire en génération réglementaire, et le sujet d’épreuve fournit toujours l’extrait du texte applicable. Ce qui se retient, c’est la <strong>logique</strong> : besoin, puis consommation, puis confort d’été, puis carbone — et le fait que le U ne soit qu’une entrée parmi d’autres.</p>
+<p><strong>Les seuils, les noms d’indicateurs et les dates ne se récitent pas.</strong> Ils changent de génération réglementaire en génération réglementaire, et le sujet d’épreuve fournit toujours l’extrait du texte applicable. Ce qui se retient, c’est la <strong>logique</strong> : besoin, puis consommation, puis confort d’été, puis carbone, et le fait que le U ne soit qu’une entrée parmi d’autres.</p>
 </blockquote></div></details>
-<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides — quelle épaisseur sur une ligne d&#39;aspiration</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le calcul de cette séance sert tel quel sur un circuit frigorifique, et pour une raison qu’on ne rencontre pas sur un mur : <strong>empêcher la condensation</strong>.</p>
-<p>La ligne d’aspiration ramène au compresseur une vapeur à <strong>5 °C</strong>. Dans un local à <strong>30 °C et 60 %</strong>, l’air a un point de rosée de <strong>21,4 °C</strong>. Un tube nu à 5 °C ruisselle donc en permanence — sur le faux plafond, sur l’isolant du bâtiment, sur le tableau électrique en dessous.</p>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, quelle épaisseur sur une ligne d&#39;aspiration</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le calcul de cette séance sert tel quel sur un circuit frigorifique, et pour une raison qu’on ne rencontre pas sur un mur : <strong>empêcher la condensation</strong>.</p>
+<p>La ligne d’aspiration ramène au compresseur une vapeur à <strong>5 °C</strong>. Dans un local à <strong>30 °C et 60 %</strong>, l’air a un point de rosée de <strong>21,4 °C</strong>. Un tube nu à 5 °C ruisselle donc en permanence, sur le faux plafond, sur l’isolant du bâtiment, sur le tableau électrique en dessous.</p>
 <p><strong>Le critère n’est pas l’énergie perdue : c’est la température de surface de l’isolant</strong>, qui doit rester <strong>au-dessus de 21,4 °C</strong>.</p>
 <p><strong>Le calcul</strong>, sur un tube de 16 mm extérieur, isolant élastomère λ = 0,037, avec un coefficient d’échange extérieur de 8 W/(m²·K) :</p>
 <div class="enveloppe-tbl"><table>
@@ -443,5 +443,5 @@
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J2.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 2 — lire un dossier</span></a><a class="ap" href="J4.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 4 — déperditions</span></a></div><a class="vers-recap" href="SEQ1.html">Préparation au contrôle</a></nav>
 <p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
 </div>
-<script src="../assets/kit.js?v=7ed2c655"></script>
-<script src="../assets/site.js?v=7ed2c655"></script>
+<script src="../assets/kit.js?v=816c96bb"></script>
+<script src="../assets/site.js?v=816c96bb"></script>

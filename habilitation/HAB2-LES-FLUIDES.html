@@ -5,8 +5,8 @@
 <title>Hab 2 — les fluides</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
-<link rel="stylesheet" href="../assets/kit.css?v=7ed2c655">
-<link rel="stylesheet" href="../assets/site.css?v=7ed2c655">
+<link rel="stylesheet" href="../assets/kit.css?v=816c96bb">
+<link rel="stylesheet" href="../assets/site.css?v=816c96bb">
 
 <div class="page" data-site="bts-fed-c" data-page="habilitation/HAB2-LES-FLUIDES">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="HAB1-LE-CADRE.html" rel="prev" title="Hab 1 — le cadre" aria-label="Hab 1 — le cadre">&lsaquo;</a><a class="fleche" href="HAB3-LE-CIRCUIT.html" rel="next" title="Hab 3 — le circuit" aria-label="Hab 3 — le circuit">&rsaquo;</a></span><button type="button" class="lu" data-lu="habilitation/HAB2-LES-FLUIDES">Marquer comme lu</button></div>
@@ -24,11 +24,11 @@
 <h2 id="pourquoi-un-fluide-et-pas-simplement-de-l-air">Pourquoi un fluide, et pas simplement de l’air</h2>
 <p>Une machine frigorifique pourrait fonctionner en comprimant et détendant de l’air. On ne le fait presque jamais, et la raison est un nombre.</p>
 <div class="formule">
-<p><strong>Chaleur sensible : Q = m × c × Δθ</strong> — on change la température</p>
-<p><strong>Chaleur latente : Q = m × L</strong> — on change l’état, à température constante</p>
+<p><strong>Chaleur sensible : Q = m × c × Δθ</strong>, on change la température</p>
+<p><strong>Chaleur latente : Q = m × L</strong>, on change l’état, à température constante</p>
 <ul>
-<li><strong>c</strong><span>chaleur massique, en kJ/(kg·K)</span></li>
-<li><strong>L</strong><span>chaleur latente, en kJ/kg, lue dans la table du fluide</span></li>
+<li><strong>c</strong><span>: chaleur massique, en kJ/(kg·K)</span></li>
+<li><strong>L</strong><span>: chaleur latente, en kJ/kg, lue dans la table du fluide</span></li>
 </ul>
 </div>
 <div class="cle">
@@ -36,7 +36,7 @@
 </div>
 <p>Sur un frigorigène, l’écart est plus violent encore. Avec une chaleur latente de 190 kJ/kg lue dans la table, vaporiser un kilogramme prend <strong>190 kJ</strong> ; surchauffer cette même vapeur de 6 K n’en prend que <strong>6</strong>.</p>
 <div class="piege">
-<p>Un rapport de <strong>32</strong>. C’est pourquoi l’évaporateur travaille sur le changement d’état et non sur la surchauffe, et pourquoi une machine qui n’évapore plus — par manque de charge — perd presque toute sa puissance alors que le fluide continue de circuler.</p>
+<p>Un rapport de <strong>32</strong>. C’est pourquoi l’évaporateur travaille sur le changement d’état et non sur la surchauffe, et pourquoi une machine qui n’évapore plus, par manque de charge, perd presque toute sa puissance alors que le fluide continue de circuler.</p>
 </div>
 <h2 id="saturation-une-pression-une-temperature">Saturation : une pression, une température</h2>
 <p>C’est le socle de toute la lecture d’un manomètre, et l’évaluation y revient sous dix formes.</p>
@@ -62,7 +62,7 @@
 </tbody>
 </table></div>
 <div class="piege">
-<p>Cette correspondance ne vaut <strong>que sous la cloche</strong>, là où liquide et vapeur coexistent. Sur la ligne liquide sous-refroidie ou sur la vapeur surchauffée, pression et température sont <strong>indépendantes</strong> — et c’est précisément l’écart entre les deux qui donne la surchauffe et le sous-refroidissement.</p>
+<p>Cette correspondance ne vaut <strong>que sous la cloche</strong>, là où liquide et vapeur coexistent. Sur la ligne liquide sous-refroidie ou sur la vapeur surchauffée, pression et température sont <strong>indépendantes</strong>, et c’est précisément l’écart entre les deux qui donne la surchauffe et le sous-refroidissement.</p>
 </div>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Relative ou absolue : l&#39;erreur qui traverse toute l&#39;épreuve</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un manomètre de terrain affiche une pression <strong>relative</strong> : il indique zéro à l’air libre. Les tables de fluides, elles, sont en pression <strong>absolue</strong>.</p>
 <p><strong>p absolue = p relative + 1 bar</strong> (à peu de chose près)</p>
@@ -89,17 +89,17 @@
 </tbody>
 </table></div>
 <div class="cle">
-<p>Un bar d’écart paraît négligeable sur la haute pression — 29 contre 30, trois pour cent. Il ne l’est pas sur la basse : <strong>1,5 contre 2,5, c’est 67 % d’erreur</strong>, et la température de saturation lue est fausse de plusieurs kelvins.</p>
+<p>Un bar d’écart paraît négligeable sur la haute pression, 29 contre 30, trois pour cent. Il ne l’est pas sur la basse : <strong>1,5 contre 2,5, c’est 67 % d’erreur</strong>, et la température de saturation lue est fausse de plusieurs kelvins.</p>
 </div>
-<p>C’est l’erreur la plus fréquente de toute l’épreuve théorique, et elle est sournoise : le résultat reste plausible. <strong>Écrivez « absolue » à côté de chaque pression</strong> avant de vous en servir — c’est le seul remède.</p></div></details>
+<p>C’est l’erreur la plus fréquente de toute l’épreuve théorique, et elle est sournoise : le résultat reste plausible. <strong>Écrivez « absolue » à côté de chaque pression</strong> avant de vous en servir, c’est le seul remède.</p></div></details>
 </div><h2 id="le-numero-se-calcule">Le numéro se calcule</h2>
 <p>On croit souvent que les numéros de fluides sont une nomenclature à apprendre par cœur. C’est faux pour la plupart : <strong>ils se déduisent de la formule chimique</strong>, et la règle tient en trois lignes.</p>
 <div class="formule">
-<p><strong>R — (C − 1) (H + 1) (F)</strong> — pour les hydrocarbures halogénés</p>
+<p><strong>R, (C − 1) (H + 1) (F)</strong>, pour les hydrocarbures halogénés</p>
 <ul>
-<li><strong>centaines</strong><span>nombre d’atomes de carbone <strong>moins un</strong> ; zéro, on ne l’écrit pas</span></li>
-<li><strong>dizaines</strong><span>nombre d’atomes d’hydrogène <strong>plus un</strong></span></li>
-<li><strong>unités</strong><span>nombre d’atomes de <strong>fluor</strong></span></li>
+<li><strong>centaines</strong><span>: nombre d’atomes de carbone <strong>moins un</strong> ; zéro, on ne l’écrit pas</span></li>
+<li><strong>dizaines</strong><span>: nombre d’atomes d’hydrogène <strong>plus un</strong></span></li>
+<li><strong>unités</strong><span>: nombre d’atomes de <strong>fluor</strong></span></li>
 </ul>
 <blockquote>
 <p>Le chlore ne compte pas : il se déduit, puisqu’il occupe les liaisons restantes.</p>
@@ -152,12 +152,12 @@
 </tr>
 </tbody>
 </table></div>
-<p>La lettre finale — le <strong>a</strong> de R134a — distingue les <strong>isomères</strong> : même formule, atomes rangés autrement. Plus la lettre est loin dans l’alphabet, plus la molécule est dissymétrique.</p>
-<p><strong>Premier prolongement : les HFO.</strong> Le R1234yf a <strong>quatre</strong> chiffres. Le premier compte les <strong>doubles liaisons</strong> carbone-carbone : un. Le reste suit la règle — C₃H₂F₄ donne 2, 3, 4. D’où <strong>1-234</strong>, plus les lettres d’isomérie.</p>
+<p>La lettre finale, le <strong>a</strong> de R134a, distingue les <strong>isomères</strong> : même formule, atomes rangés autrement. Plus la lettre est loin dans l’alphabet, plus la molécule est dissymétrique.</p>
+<p><strong>Premier prolongement : les HFO.</strong> Le R1234yf a <strong>quatre</strong> chiffres. Le premier compte les <strong>doubles liaisons</strong> carbone-carbone : un. Le reste suit la règle, C₃H₂F₄ donne 2, 3, 4. D’où <strong>1-234</strong>, plus les lettres d’isomérie.</p>
 <div class="cle">
 <p>Cette double liaison est ce qui rend les HFO fragiles dans l’atmosphère : ils s’y détruisent en quelques jours au lieu de quelques siècles. <strong>C’est de là que vient leur GWP de 4</strong>, et non d’une composition exotique.</p>
 </div>
-<p><strong>Second prolongement, et là la règle tombe.</strong> Le butane, C₄H₁₀, donnerait 3, 11, 0 — impossible à écrire sur deux chiffres. Les hydrocarbures au-delà du propane sont donc rangés dans une <strong>série arbitraire, la 600</strong> : butane R600, isobutane R600a.</p>
+<p><strong>Second prolongement, et là la règle tombe.</strong> Le butane, C₄H₁₀, donnerait 3, 11, 0, impossible à écrire sur deux chiffres. Les hydrocarbures au-delà du propane sont donc rangés dans une <strong>série arbitraire, la 600</strong> : butane R600, isobutane R600a.</p>
 <p><strong>Les séries à connaître</strong>, parce qu’elles se lisent d’un coup d’œil :</p>
 <div class="enveloppe-tbl"><table>
 <colgroup>
@@ -175,7 +175,7 @@
 <tbody>
 <tr>
 <td>10, 20, 100, 200</td>
-<td>hydrocarbures halogénés — la règle ci-dessus</td>
+<td>hydrocarbures halogénés : la règle ci-dessus</td>
 <td>R32, R134a, R290</td>
 </tr>
 <tr>
@@ -200,21 +200,21 @@
 </tr>
 <tr>
 <td>1000 et plus</td>
-<td><strong>insaturés</strong> — les HFO</td>
+<td><strong>insaturés</strong> : les HFO</td>
 <td>R1234yf, R1234ze</td>
 </tr>
 </tbody>
 </table></div>
 <div class="piege">
-<p>Les mélanges de la série 400 portent une <strong>majuscule finale</strong> — R407C, R410A — qui distingue des mélanges de mêmes composants dans des proportions différentes. Ce n’est pas une lettre d’isomérie, et l’écrire en minuscule est une faute de désignation.</p>
+<p>Les mélanges de la série 400 portent une <strong>majuscule finale</strong>. R407C, R410A, qui distingue des mélanges de mêmes composants dans des proportions différentes. Ce n’est pas une lettre d’isomérie, et l’écrire en minuscule est une faute de désignation.</p>
 </div></div></details>
 </div><h2 id="pur-azeotrope-zeotrope">Pur, azéotrope, zéotrope</h2>
-<p>Un corps <strong>pur</strong> change d’état à température constante sous une pression donnée. Un <strong>mélange</strong> ne le fait pas toujours — et c’est de là que viennent la plupart des erreurs de mise en service.</p>
+<p>Un corps <strong>pur</strong> change d’état à température constante sous une pression donnée. Un <strong>mélange</strong> ne le fait pas toujours, et c’est de là que viennent la plupart des erreurs de mise en service.</p>
 <div class="formule">
 <p><strong>Le glissement = T_rosée − T_bulle</strong>, à pression constante</p>
 <ul>
-<li><strong>T_bulle</strong><span>la première bulle de vapeur apparaît</span></li>
-<li><strong>T_rosée</strong><span>la dernière goutte de liquide disparaît</span></li>
+<li><strong>T_bulle</strong><span>: la première bulle de vapeur apparaît</span></li>
+<li><strong>T_rosée</strong><span>: la dernière goutte de liquide disparaît</span></li>
 <li>un <strong>azéotrope</strong> a un glissement nul ; un <strong>zéotrope</strong>, non</li>
 </ul>
 </div>
@@ -229,12 +229,12 @@
 <tbody>
 <tr>
 <td>R32, R134a, R290, R744</td>
-<td style="text-align: right;"><strong>0 K</strong> — corps purs</td>
+<td style="text-align: right;"><strong>0 K</strong> : corps purs</td>
 <td>rien de particulier</td>
 </tr>
 <tr>
 <td>R410A</td>
-<td style="text-align: right;">≈ 0,1 K — quasi-azéotrope</td>
+<td style="text-align: right;">≈ 0,1 K : quasi-azéotrope</td>
 <td>se traite comme un pur</td>
 </tr>
 <tr>
@@ -249,7 +249,7 @@
 </tr>
 </tbody>
 </table></div>
-<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Ce que le glissement casse, et pourquoi la bouteille se retourne</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Premier effet : la surchauffe ne se lit plus au même endroit.</strong> La surchauffe se mesure par rapport à la température de <strong>rosée</strong>, le sous-refroidissement par rapport à celle de <strong>bulle</strong>. Sur un corps pur, les deux se confondent. Sur du R407C, <strong>sept kelvins</strong> les séparent : lire la mauvaise ligne de la table fausse le réglage du détendeur de sept degrés — assez pour noyer le compresseur ou l’affamer.</p>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Ce que le glissement casse, et pourquoi la bouteille se retourne</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Premier effet : la surchauffe ne se lit plus au même endroit.</strong> La surchauffe se mesure par rapport à la température de <strong>rosée</strong>, le sous-refroidissement par rapport à celle de <strong>bulle</strong>. Sur un corps pur, les deux se confondent. Sur du R407C, <strong>sept kelvins</strong> les séparent : lire la mauvaise ligne de la table fausse le réglage du détendeur de sept degrés, assez pour noyer le compresseur ou l’affamer.</p>
 <p><strong>Second effet, et c’est le geste du métier : on charge en phase liquide.</strong></p>
 <p>Dans une bouteille de mélange zéotrope, le composant le plus volatil s’évapore en premier. La vapeur du ciel de bouteille est donc <strong>plus riche</strong> en ce composant que le liquide. Charger en vapeur revient à prélever d’abord les composants légers :</p>
 <ul>
@@ -258,7 +258,7 @@
 <li>les performances s’écartent, sans qu’aucun composant ne soit en panne.</li>
 </ul>
 <div class="cle">
-<p>D’où le geste : <strong>bouteille inversée, soutirage en phase liquide</strong>, et introduction par la ligne liquide ou à travers un dispositif qui vaporise avant l’aspiration — <strong>jamais de liquide direct dans un compresseur</strong>.</p>
+<p>D’où le geste : <strong>bouteille inversée, soutirage en phase liquide</strong>, et introduction par la ligne liquide ou à travers un dispositif qui vaporise avant l’aspiration, <strong>jamais de liquide direct dans un compresseur</strong>.</p>
 </div>
 <p><strong>Troisième effet : pas de complément de charge après fuite sur un zéotrope à fort glissement.</strong> Une fuite laisse partir les composants dans des proportions inégales ; ce qui reste n’a plus la composition d’origine. <strong>On récupère tout, et on recharge à neuf.</strong> C’est plus cher, et c’est la seule méthode juste.</p></div></details>
 </div><h2 id="les-classes-de-securite">Les classes de sécurité</h2>
@@ -300,15 +300,15 @@
 </tbody>
 </table></div>
 <div class="cle">
-<p>Le mouvement du marché va toujours dans le même sens : <strong>GWP en baisse, inflammabilité en hausse</strong>. Ce n’est pas un hasard — les molécules stables dans l’atmosphère sont précisément celles qui ne brûlent pas. On échange un risque climatique contre un risque d’incendie, et ce sont les règles d’implantation qui gèrent l’échange.</p>
+<p>Le mouvement du marché va toujours dans le même sens : <strong>GWP en baisse, inflammabilité en hausse</strong>. Ce n’est pas un hasard, les molécules stables dans l’atmosphère sont précisément celles qui ne brûlent pas. On échange un risque climatique contre un risque d’incendie, et ce sont les règles d’implantation qui gèrent l’échange.</p>
 </div>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Ce que la classe change sur le chantier</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>La quantité admissible dépend du local.</strong> Pour un fluide inflammable, la charge maximale se calcule à partir de la <strong>limite inférieure d’inflammabilité</strong> du fluide, de la surface du local et de la hauteur d’installation. Le même appareil est autorisé dans un séjour et refusé dans un cellier.</p>
 <div class="cle">
-<p>Ce calcul ne s’improvise pas : il se mène avec la norme d’installation en main. Ce qu’il faut retenir, c’est <strong>qu’il existe</strong> — et qu’un monobloc au R290 posé dehors échappe entièrement à la question. C’est la raison technique de sa percée, bien plus que son GWP.</p>
+<p>Ce calcul ne s’improvise pas : il se mène avec la norme d’installation en main. Ce qu’il faut retenir, c’est <strong>qu’il existe</strong>, et qu’un monobloc au R290 posé dehors échappe entièrement à la question. C’est la raison technique de sa percée, bien plus que son GWP.</p>
 </div>
-<p><strong>Les gestes qui changent</strong> avec un A2L ou un A3 : pas de flamme nue ni de source d’étincelle pendant l’intervention, <strong>détecteur adapté au fluide</strong> — un détecteur halogène ne voit pas le propane —, et ventilation du local avant ouverture.</p>
+<p><strong>Les gestes qui changent</strong> avec un A2L ou un A3 : pas de flamme nue ni de source d’étincelle pendant l’intervention, <strong>détecteur adapté au fluide</strong>, un détecteur halogène ne voit pas le propane, , et ventilation du local avant ouverture.</p>
 <p><strong>Le R744 pose un problème d’une autre nature.</strong> Ni inflammable ni vraiment toxique, il travaille entre <strong>80 et 120 bar</strong> et il est <strong>asphyxiant</strong> : à forte concentration il chasse l’oxygène sans donner l’alerte. Les risques sont la pression et le manque d’air, pas le feu. Un manifold de R410A ne tient pas 120 bar, et une bouteille de récupération non plus.</p>
-<p><strong>L’ammoniac</strong>, lui, se sent à des concentrations mille fois inférieures à celles qui blessent. Son odeur est sa meilleure protection — et c’est pourquoi il reste employé en froid industriel, jamais en bâtiment habité.</p></div></details>
+<p><strong>L’ammoniac</strong>, lui, se sent à des concentrations mille fois inférieures à celles qui blessent. Son odeur est sa meilleure protection, et c’est pourquoi il reste employé en froid industriel, jamais en bâtiment habité.</p></div></details>
 </div><h2 id="l-huile-qui-voyage-avec-le-fluide">L’huile, qui voyage avec le fluide</h2>
 <p>On l’oublie systématiquement, et l’évaluation la demande. Le compresseur envoie un peu de son huile dans le circuit ; elle doit revenir, et elle doit être <strong>compatible</strong> avec le fluide.</p>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Trois huiles, et la faute qui détruit une installation</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
@@ -327,12 +327,12 @@
 <tbody>
 <tr>
 <td><strong>Minérale</strong></td>
-<td>anciens CFC et HCFC — R22</td>
+<td>anciens CFC et HCFC : R22</td>
 <td>ne se mélange pas aux HFC</td>
 </tr>
 <tr>
 <td><strong>POE</strong> (polyolester)</td>
-<td><strong>HFC et HFO</strong> — R410A, R32, R134a</td>
+<td><strong>HFC et HFO</strong> : R410A, R32, R134a</td>
 <td><strong>très hygroscopique</strong></td>
 </tr>
 <tr>
@@ -349,7 +349,7 @@
 <p><strong>Ce que l’évaluation en attend</strong> tient en une ligne : <strong>l’huile fait partie du choix du fluide</strong>, et on ne change jamais l’un sans vérifier l’autre.</p></div></details>
 </div><h2 id="trois-exercices-resolus">Trois exercices résolus</h2>
 <p>Ceux-ci sont <strong>corrigés</strong>, et c’est volontaire : ils montrent la rédaction attendue, qu’aucun exercice auto-corrigé ne peut montrer. L’épreuve blanche de la page 5, elle, ne donne aucune réponse.</p>
-<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 1 — lire un manomètre, et en tirer une température</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Sur une machine au R410A, le manomètre basse pression indique <strong>8,3 bar</strong>. La table du fluide donne, pour <strong>9,3 bar absolus</strong>, une température de saturation de <strong>5 °C</strong>. Un thermomètre de contact posé sur la ligne d’aspiration indique <strong>11 °C</strong>. Que peut-on dire du fluide à cet endroit ?</p>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 1, lire un manomètre, et en tirer une température</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Sur une machine au R410A, le manomètre basse pression indique <strong>8,3 bar</strong>. La table du fluide donne, pour <strong>9,3 bar absolus</strong>, une température de saturation de <strong>5 °C</strong>. Un thermomètre de contact posé sur la ligne d’aspiration indique <strong>11 °C</strong>. Que peut-on dire du fluide à cet endroit ?</p>
 <p><strong>Résolution.</strong></p>
 <p><em>La pression absolue.</em> Le manomètre est en relatif : p = 8,3 + 1 = <strong>9,3 bar absolus</strong></p>
 <p><em>La température de saturation.</em> La table donne <strong>5 °C</strong>. C’est la température à laquelle le fluide s’évapore dans cet évaporateur.</p>
@@ -358,8 +358,8 @@
 <div class="cle">
 <p><strong>Ce qu’il faut rédiger à l’épreuve</strong>, et qui vaut plus que le nombre : « la pression relevée est relative, je la passe en absolu ; la table donne la température de saturation ; l’écart avec la température mesurée est la surchauffe ; elle vaut 6 K, donc dans la plage usuelle de 5 à 8 K, donc l’évaporateur est correctement rempli. » <strong>Quatre phrases, et la question entière est traitée.</strong></p>
 </div>
-<p><strong>L’erreur à ne pas faire</strong> : entrer dans la table avec 8,3 bar. On lirait une température de saturation trop basse, et l’on annoncerait une surchauffe trop forte — donc un manque de charge qui n’existe pas.</p></div></details>
-<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 2 — le calcul retourné : quelle charge maximale ?</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Un installateur veut rester <strong>sous le seuil de 5 tonnes</strong> équivalent CO₂, celui qui déclenche le contrôle périodique. Quelle charge maximale peut-il mettre, en <strong>R32</strong> (GWP 675) ? Et en <strong>R290</strong> (GWP 3) ?</p>
+<p><strong>L’erreur à ne pas faire</strong> : entrer dans la table avec 8,3 bar. On lirait une température de saturation trop basse, et l’on annoncerait une surchauffe trop forte, donc un manque de charge qui n’existe pas.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 2, le calcul retourné : quelle charge maximale ?</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Un installateur veut rester <strong>sous le seuil de 5 tonnes</strong> équivalent CO₂, celui qui déclenche le contrôle périodique. Quelle charge maximale peut-il mettre, en <strong>R32</strong> (GWP 675) ? Et en <strong>R290</strong> (GWP 3) ?</p>
 <p><strong>Résolution.</strong></p>
 <p><em>La relation, écrite dans le sens utile.</em> De tCO₂éq = m × GWP / 1 000, on tire</p>
 <p><strong>m = tCO₂éq × 1 000 / GWP</strong></p>
@@ -367,22 +367,22 @@
 <p><em>En R290.</em> m = 5 × 1 000 / 3 = <strong>1 667 kg</strong></p>
 <p><em>L’interprétation, qui est le vrai résultat.</em> 7,41 kg de R32, c’est une grosse pompe à chaleur : la contrainte est réelle. 1 667 kg de propane, <strong>aucune installation de bâtiment n’en contient</strong> : la contrainte n’existe pas.</p>
 <div class="cle">
-<p><strong>Ce qu’il faut rédiger</strong> : « les fluides naturels sortent de fait du régime des contrôles périodiques d’étanchéité, non par exemption réglementaire mais parce que leur GWP rend le seuil inatteignable. » <strong>C’est un raisonnement, pas une règle à réciter</strong> — et c’est exactement ce que l’évaluation cherche à voir.</p>
+<p><strong>Ce qu’il faut rédiger</strong> : « les fluides naturels sortent de fait du régime des contrôles périodiques d’étanchéité, non par exemption réglementaire mais parce que leur GWP rend le seuil inatteignable. » <strong>C’est un raisonnement, pas une règle à réciter</strong>, et c’est exactement ce que l’évaluation cherche à voir.</p>
 </div>
 <p><strong>Le contrôle de plausibilité</strong> : le rapport des deux charges doit valoir le rapport inverse des GWP, soit 675 / 3 = 225. Vérification : 1 667 / 7,41 = 225. <strong>La proportionnalité boucle</strong>, le calcul est bon.</p></div></details>
-<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 3 — choisir la méthode avant de calculer</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Une machine fonctionne au <strong>R407C</strong>, glissement 7 K. La table donne, pour la pression relevée, une température de <strong>bulle de 2 °C</strong> et une température de <strong>rosée de 9 °C</strong>. Le thermomètre à l’aspiration indique <strong>14 °C</strong>, celui de la ligne liquide <strong>35 °C</strong>, et la table donne côté haute pression une bulle à 42 °C et une rosée à 49 °C. Calculer la surchauffe et le sous-refroidissement.</p>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Exercice 3, choisir la méthode avant de calculer</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Énoncé.</strong> Une machine fonctionne au <strong>R407C</strong>, glissement 7 K. La table donne, pour la pression relevée, une température de <strong>bulle de 2 °C</strong> et une température de <strong>rosée de 9 °C</strong>. Le thermomètre à l’aspiration indique <strong>14 °C</strong>, celui de la ligne liquide <strong>35 °C</strong>, et la table donne côté haute pression une bulle à 42 °C et une rosée à 49 °C. Calculer la surchauffe et le sous-refroidissement.</p>
 <p><strong>Ce qu’il faut voir avant de calculer</strong>, et qui vaut la moitié des points : il y a <strong>deux températures de saturation</strong> par pression, et il faut choisir la bonne. Sur un corps pur la question ne se pose pas ; ici elle décide de tout.</p>
 <div class="formule">
-<p><strong>Surchauffe → température de ROSÉE</strong> — c’est là que la dernière goutte disparaît</p>
-<p><strong>Sous-refroidissement → température de BULLE</strong> — c’est là qu’apparaît la première bulle</p>
+<p><strong>Surchauffe → température de ROSÉE.</strong> C’est là que la dernière goutte disparaît</p>
+<p><strong>Sous-refroidissement → température de BULLE.</strong> C’est là qu’apparaît la première bulle</p>
 </div>
-<p><em>La surchauffe.</em> 14 − 9 = <strong>5 K</strong> — la rosée, pas la bulle.</p>
-<p><em>Le sous-refroidissement.</em> 42 − 35 = <strong>7 K</strong> — la bulle, pas la rosée.</p>
+<p><em>La surchauffe.</em> 14 − 9 = <strong>5 K</strong>, la rosée, pas la bulle.</p>
+<p><em>Le sous-refroidissement.</em> 42 − 35 = <strong>7 K</strong>, la bulle, pas la rosée.</p>
 <p><em>Ce qu’on aurait trouvé en se trompant :</em> 14 − 2 = 12 K de surchauffe, et 49 − 35 = 14 K de sous-refroidissement. <strong>Les deux valeurs sortent des plages</strong>, et l’on conclurait à un manque de charge sur une machine parfaitement réglée.</p>
 <div class="cle">
 <p><strong>Ce qu’il faut rédiger</strong> : « le R407C est un zéotrope de glissement 7 K ; la surchauffe se compte depuis la rosée et le sous-refroidissement depuis la bulle ; j’obtiens 5 K et 7 K, tous deux dans les plages usuelles, donc la charge est correcte. » Le raisonnement se voit dans <strong>le choix annoncé</strong>, avant le calcul.</p>
 </div>
-<p><strong>Et la conséquence de terrain</strong> : sur ce fluide, un technicien qui règle un détendeur avec la mauvaise ligne de table se trompe de sept kelvins. C’est assez pour noyer le compresseur — ou pour l’affamer, selon le sens de l’erreur.</p></div></details>
+<p><strong>Et la conséquence de terrain</strong> : sur ce fluide, un technicien qui règle un détendeur avec la mauvaise ligne de table se trompe de sept kelvins. C’est assez pour noyer le compresseur, ou pour l’affamer, selon le sens de l’erreur.</p></div></details>
 </div><h2 id="ou-cela-rejoint-votre-cours">Où cela rejoint votre cours</h2>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les séances qui préparent déjà cette page</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
 <colgroup>
@@ -397,21 +397,21 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>11 — les générateurs</strong></td>
+<td><strong>11 : les générateurs</strong></td>
 <td>GWP en baisse, inflammabilité en hausse : l’arbitrage</td>
 </tr>
 <tr>
-<td><strong>13 — la pompe à chaleur</strong></td>
+<td><strong>13 : la pompe à chaleur</strong></td>
 <td>le fluide qui tourne, et ce que le cycle en fait</td>
 </tr>
 <tr>
-<td><strong>15 — l’air humide</strong></td>
+<td><strong>15 : l’air humide</strong></td>
 <td>le point de rosée, exactement le raisonnement du glissement</td>
 </tr>
 </tbody>
 </table></div></div></details>
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="HAB1-LE-CADRE.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Hab 1 — le cadre</span></a><a class="ap" href="HAB3-LE-CIRCUIT.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Hab 3 — le circuit</span></a></div></nav>
-<p class="pied">Parcours de préparation à l'attestation d'aptitude — hors programme de l'option C, et non noté. Les trois exercices de fin de page sont résolus à dessein : ils montrent la rédaction attendue. L'épreuve blanche de la page 5, elle, ne donne aucune réponse.</p>
+<p class="pied">Parcours de préparation à l'attestation d'aptitude, hors programme de l'option C, et non noté. Les trois exercices de fin de page sont résolus à dessein : ils montrent la rédaction attendue. L'épreuve blanche de la page 5, elle, ne donne aucune réponse.</p>
 </div>
-<script src="../assets/kit.js?v=7ed2c655"></script>
-<script src="../assets/site.js?v=7ed2c655"></script>
+<script src="../assets/kit.js?v=816c96bb"></script>
+<script src="../assets/site.js?v=816c96bb"></script>

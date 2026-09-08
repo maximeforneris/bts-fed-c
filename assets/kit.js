@@ -102,6 +102,12 @@ function aplat(s){
   return (s.normalize?s.normalize("NFD").replace(/[\u0300-\u036f]/g,""):s)
          .toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
 }
+function memeTexte(a,b){
+  /* « 1,5 m », « 1,5m » et « 1.5 m » sont la meme reponse : l'eleve tape vite,
+     et l'espace avant l'unite n'est pas ce qu'on evalue. */
+  var x=aplat(a),y=aplat(b);
+  return x===y||x.replace(/ /g,"")===y.replace(/ /g,"");
+}
 function nombre(s){
   /* « 1 376 » et « 1,38 » et « 1.38e3 » : l'eleve tape comme il veut */
   var t=s.replace(/\s/g,"").replace(",",".");   /* \s couvre U+00A0 et U+202F */
@@ -197,6 +203,96 @@ function nombre(s){
 });
 
 
+
+/* ───────────────────────────────── series d'entrainement
+   Le pendant web du tableau a remplir du polycopie : une case par item, on
+   remplit, on verifie tout d'un coup. Meme regle que l'exercice — la page dit
+   juste ou faux et rappelle la methode, elle ne donne jamais la reponse.
+   Une case fausse GARDE ce qui a ete tape : on corrige, on ne recommence pas. */
+[].forEach.call(document.querySelectorAll(".serie"),function(se){
+  var sec;try{sec=JSON.parse(atob(se.getAttribute("data-a")).split("").map(
+    function(c){return String.fromCharCode(c.charCodeAt(0)^0x5A);}).join(""));}
+  catch(e){return;}
+  var id=se.getAttribute("data-serie");
+  var items=[].slice.call(se.querySelectorAll("ol.items > li"));
+  var indice=se.querySelector(".indice"), cases=[];
+
+  items.forEach(function(li,i){
+    var d=(sec.i||[])[i]||{};
+    var rep=E("span",{"class":"rep"});
+    var inp=E("input",{type:"text",autocomplete:"off",
+      inputmode:d.v!==undefined?"decimal":"text",
+      "class":d.v!==undefined?"":"texte",
+      "aria-label":"Réponse"});
+    rep.appendChild(inp);
+    if(sec.u)rep.appendChild(E("span",{"class":"unite"},sec.u));
+    var mq=E("span",{"class":"marque"},"");
+    rep.appendChild(mq);
+    li.appendChild(rep);
+    cases.push({e:inp,m:mq,d:d,li:li});
+    inp.addEventListener("input",function(){
+      li.classList.remove("juste","faux");mq.textContent="";
+    });
+    inp.addEventListener("keydown",function(ev){
+      if(ev.key!=="Enter")return;
+      ev.preventDefault();
+      if(i+1<cases.length)cases[i+1].e.focus();else juger();
+    });
+  });
+
+  function juste(d,txt){
+    if(!txt.trim())return null;                    /* non traite */
+    if(d.v!==undefined){
+      var v=nombre(txt);
+      if(isNaN(v))return false;
+      return Math.abs(v-d.v)<=Math.abs(d.v)*(sec.tol/100)+1e-9;
+    }
+    return !!txt.trim()&&(d.a||[]).some(function(a){return memeTexte(a,txt);});
+  }
+
+  var verdict=E("p",{"class":"verdict"},"");
+  var valider=E("button",{type:"button","class":"btn"},"Vérifier la série");
+  var barre=E("div",{"class":"barre"});
+  barre.appendChild(valider);
+  if(indice){
+    var bi=E("button",{type:"button","class":"btn creux"},"Voir l’indice");
+    bi.addEventListener("click",function(){
+      indice.hidden=!indice.hidden;
+      bi.textContent=indice.hidden?"Voir l’indice":"Masquer l’indice";
+    });
+    barre.appendChild(bi);
+  }
+  se.appendChild(barre);se.appendChild(verdict);
+  if(indice)se.appendChild(indice);
+
+  function juger(){
+    var bons=0,faux=0,vides=0;
+    cases.forEach(function(c){
+      var r=juste(c.d,c.e.value);
+      c.li.classList.remove("juste","faux");
+      if(r===null){vides++;c.m.textContent="";return;}
+      if(r){bons++;c.li.classList.add("juste");c.m.textContent="✓";}
+      else {faux++;c.li.classList.add("faux");c.m.textContent="✗";}
+    });
+    var tout=bons===cases.length;
+    verdict.className="verdict "+(tout?"juste":(faux?"faux":""));
+    var reste=[];
+    if(faux)reste.push(faux+" à reprendre");
+    if(vides)reste.push(vides+(vides>1?" non traitées":" non traitée"));
+    verdict.textContent=tout
+      ?"La série entière est juste."
+      :bons+" sur "+cases.length+(reste.length?" — "+reste.join(", "):"")+".";
+    if(tout)se.classList.add("fait");else se.classList.remove("fait");
+    exoNote(id,tout?"juste":"vu");
+    if(faux&&indice)indice.hidden=false;
+  }
+  valider.addEventListener("click",juger);
+
+  if(exoLu()[id]==="juste"){
+    se.classList.add("fait");
+    verdict.className="verdict deja";verdict.textContent="Déjà réussie.";
+  }
+});
 
 /* ═══════════════════════════════════════════════════ PSYCHROMETRIE
    Une seule implementation pour tout le depot. Pression atmospherique
@@ -1183,6 +1279,84 @@ OUTILS.unites={
     d.appendChild(E("p",{style:"font-size:14.5px;color:var(--encre2);margin:4px 0 0"},
       "Rappel qui ne se convertit pas : un <b>écart</b> en degrés Celsius vaut le même "+
       "écart en kelvins. De 70 à 50 °C, c'est 20 °C et c'est 20 K."));
+  }
+};
+
+/* ─────────── le diviseur de tension et la resistance de LED ───────────
+   Premier outil ecrit pour une classe de bac pro CIEL. Il ne remplace aucun
+   calcul : il permet d'en essayer dix en dix secondes, ce qu'une feuille ne
+   permet pas — et de VOIR que la tension se partage proportionnellement aux
+   resistances, au lieu de le lire. */
+OUTILS.diviseur={
+  titre:"Diviseur de tension, et résistance de LED",
+  intro:"Deux dipôles en série sous une même alimentation. Bougez les valeurs : "+
+        "la tension se partage, et le courant est le même partout.",
+  monte:function(d){
+    var P={E:5,R1:150,R2:100,mode:"deux"};
+
+    var seg=E("div",{"class":"segments",role:"group"});
+    [["deux","Deux résistances"],["led","Une LED et sa résistance"]].forEach(function(m){
+      var b=E("button",{type:"button","class":"seg"+(P.mode===m[0]?" on":""),},m[1]);
+      b.addEventListener("click",function(){
+        P.mode=m[0];
+        [].forEach.call(seg.children,function(x){x.className="seg";});
+        this.className="seg on";calcule();});
+      seg.appendChild(b);
+    });
+    d.appendChild(seg);
+
+    var ch={};
+    function champ(cle,nom,unite,pas){
+      var w=E("label",{style:"display:flex;align-items:center;gap:6px;font-size:14.5px;"+
+        "margin:9px 0"});
+      w.appendChild(E("span",{style:"min-width:150px"},nom));
+      var i=E("input",{type:"number",step:pas,value:String(P[cle])});
+      i.style.width="96px";
+      i.addEventListener("input",function(){
+        var v=parseFloat(this.value.replace(",","."));
+        if(isFinite(v))
+          {P[cle]=v;calcule();}
+      });
+      w.appendChild(i);
+      w.appendChild(E("span",{"class":"mono",style:"color:var(--encre2);font-size:13px"},unite));
+      ch[cle]=w;d.appendChild(w);
+    }
+    champ("E","Tension d'alimentation","V","any");
+    champ("R1","Résistance R1 (série)","Ω","any");
+    champ("R2","Résistance R2","Ω","any");
+
+    var res=E("div",{"class":"res",style:"margin-top:12px"});
+    d.appendChild(res);
+
+    function calcule(){
+      var E0=P.E,R1=P.R1,R2=P.R2,html="";
+      ch.R2.style.display=(P.mode==="led")?"none":"flex";
+      if(P.mode==="deux"){
+        if(R1+R2<=0){res.innerHTML="Entrez des résistances positives.";return;}
+        var I=E0/(R1+R2), U1=I*R1, U2=I*R2;
+        html="<b>I = "+frs(I*1000,2)+" mA</b> — le même dans les deux, ils sont en série."+
+          "<br><b>U1 = "+frs(U1,2)+" V</b> et <b>U2 = "+frs(U2,2)+" V</b>"+
+          "<br>Contrôle : U1 + U2 = "+frs(U1+U2,2)+" V, soit la tension d'alimentation."+
+          "<br>La tension se partage <b>proportionnellement aux résistances</b> : "+
+          "R1 vaut "+frs(100*R1/(R1+R2),0)+" % du total, et prend "+
+          frs(100*U1/E0,0)+" % de la tension.";
+      }else{
+        /* une LED : 2 V a ses bornes, on cherche ce que doit prendre la resistance */
+        var Uled=2, Iv=(E0-Uled)/R1;
+        if(R1<=0){res.innerHTML="Entrez une résistance positive.";return;}
+        html="Une LED témoin garde <b>2 V</b> à ses bornes quoi qu'il arrive.<br>"+
+          "La résistance encaisse donc <b>"+frs(E0-Uled,2)+" V</b>, et le courant vaut "+
+          "<b>"+frs(Iv*1000,1)+" mA</b>.";
+        if(Iv*1000>20) html+="<br><b>Au-delà des 20 mA admis</b> : la LED grille. "+
+          "Il faut une résistance plus grande.";
+        else if(Iv*1000<5) html+="<br>Moins de 5 mA : la LED s'allumera faiblement.";
+        else html+="<br>Entre 5 et 20 mA : la LED est correctement alimentée.";
+        html+="<br>Sans résistance du tout, plus rien ne limite le courant — "+
+          "c'est ce qui la détruit.";
+      }
+      res.innerHTML=html;
+    }
+    calcule();
   }
 };
 
@@ -2936,6 +3110,832 @@ SCHEMAS["poids-themes"]=function(el){
        aide:"nouveau en 2026 ; à surveiller sur les prochaines sessions"}
     ]});
 };
+
+/* ═══════════════════════════════════════════════════ SCHEMAS — CAP
+   Consolidation maths. Rien de thermique ici : ce sont les six images qui
+   manquaient aux fiches, et qu'aucun polycopie ne portait. Elles servent
+   plusieurs fiches chacune — la barre des fractions revient en proportion,
+   la droite graduee en lecture de graphique. */
+
+/* ─────────── le tableau des rangs, et la virgule qui glisse ─────────── */
+SCHEMAS["virgule-rangs"]=function(el){
+  var W=724,H=250,X0=64,CW=88,Y0=64,RH=52;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Tableau des rangs : multiplier par 10 décale les chiffres d'une colonne"});
+  var rangs=["centaines","dizaines","unités","dixièmes","centièmes"];
+  var i;
+  for(i=0;i<5;i++){
+    var x=X0+i*CW;
+    svg.appendChild(S("rect",{x:x,y:Y0,width:CW,height:RH*2,fill:"none",
+      stroke:V("trait"),"stroke-width":"1"}));
+    svg.appendChild(S("text",{x:x+CW/2,y:Y0-14,"text-anchor":"middle","class":"s-tit"},
+      rangs[i].toUpperCase()));
+  }
+  /* la virgule tombe entre unites et dixiemes */
+  var xv=X0+3*CW;
+  svg.appendChild(S("line",{x1:xv,y1:Y0-4,x2:xv,y2:Y0+RH*2+4,stroke:V("chaud"),
+    "stroke-width":"2.5"}));
+  svg.appendChild(S("text",{x:xv,y:Y0+RH*2+24,"text-anchor":"middle","class":"s-tit",
+    fill:V("chaud")},"LA VIRGULE NE BOUGE PAS"));
+
+  function pose(rang,chiffre,ligne,couleur){
+    svg.appendChild(S("text",{x:X0+rang*CW+CW/2,y:Y0+ligne*RH+RH/2+8,
+      "text-anchor":"middle","class":"s-lab",fill:V(couleur),
+      style:"font-size:24px"},chiffre));
+  }
+  /* ligne 1 : 3,45 */
+  pose(2,"3",0,"encre"); pose(3,"4",0,"encre"); pose(4,"5",0,"encre");
+  svg.appendChild(S("text",{x:X0-12,y:Y0+RH/2+8,"text-anchor":"end","class":"s-nom"},
+    "3,45"));
+  /* ligne 2 : 34,5 — chaque chiffre a saute d'une colonne vers la gauche */
+  pose(1,"3",1,"froid"); pose(2,"4",1,"froid"); pose(3,"5",1,"froid");
+  svg.appendChild(S("text",{x:X0-12,y:Y0+RH+RH/2+8,"text-anchor":"end","class":"s-nom",
+    fill:V("froid")},"34,5"));
+  for(i=2;i<5;i++){
+    var xa=X0+i*CW+CW/2, xb=xa-CW;
+    svg.appendChild(S("path",{d:"M "+(xa-14)+" "+(Y0+RH-8)+" q -"+(CW/2)+" 16 -"+
+      (CW-28)+" 0",fill:"none",stroke:V("froid"),"stroke-width":"1.5",
+      "marker-end":"url(#fl-cap)"}));
+  }
+  var defs=S("defs",{});
+  var mk=S("marker",{id:"fl-cap",viewBox:"0 0 10 10",refX:"9",refY:"5",
+    markerWidth:"6",markerHeight:"6",orient:"auto-start-reverse"});
+  mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V("froid")}));
+  defs.appendChild(mk); svg.appendChild(defs);
+  svg.appendChild(S("text",{x:X0+5*CW+34,y:Y0+RH+RH/2+8,"text-anchor":"start","class":"s-nom",
+    fill:V("froid")},"× 10"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Multiplier par 10, c'est faire monter <b>chaque chiffre d'une colonne</b>. "+
+    "Comme il est plus rapide de déplacer un seul signe que trois chiffres, on "+
+    "bouge la virgule dans l'autre sens — mais c'est le même mouvement."));
+};
+
+/* ─────────── poser : les virgules l'une sous l'autre ─────────── */
+SCHEMAS["poser-virgules"]=function(el){
+  var W=724,H=230;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Deux soustractions posées, l'une alignée sur la virgule, l'autre sur la droite"});
+  function bloc(x0,titre,coul,a,b,res,xv,barre){
+    svg.appendChild(S("text",{x:x0+96,y:30,"text-anchor":"middle","class":"s-tit",
+      fill:V(coul)},titre));
+    svg.appendChild(S("rect",{x:x0,y:44,width:250,height:H-70,rx:"8",fill:"none",
+      stroke:V(coul),"stroke-width":"1.5",opacity:"0.55"}));
+    svg.appendChild(S("line",{x1:x0+xv,y1:56,x2:x0+xv,y2:H-40,stroke:V(coul),
+      "stroke-width":"1.5","stroke-dasharray":"4 4"}));
+    [a,b].forEach(function(t,i){
+      svg.appendChild(S("text",{x:x0+220,y:92+i*36,"text-anchor":"end","class":"s-lab",
+        style:"font-size:22px"},t));
+    });
+    svg.appendChild(S("line",{x1:x0+40,y1:140,x2:x0+220,y2:140,stroke:V("encre2"),
+      "stroke-width":"1.5"}));
+    svg.appendChild(S("text",{x:x0+220,y:176,"text-anchor":"end","class":"s-lab",
+      fill:V(coul),style:"font-size:22px"},res));
+    if(barre){
+      svg.appendChild(S("line",{x1:x0+150,y1:158,x2:x0+224,y2:190,stroke:V("chaud"),
+        "stroke-width":"2.5"}));
+      svg.appendChild(S("line",{x1:x0+224,y1:158,x2:x0+150,y2:190,stroke:V("chaud"),
+        "stroke-width":"2.5"}));
+    }
+  }
+  bloc(40,"ALIGNÉ SUR LA VIRGULE","vert","40,0","−  3,6","36,4",148,false);
+  bloc(420,"ALIGNÉ SUR LA DROITE","chaud","40","−  3,6","?",210,true);
+  svg.appendChild(S("text",{x:88,y:H-14,"text-anchor":"start","class":"s-pet",
+    fill:V("vert")},"le zéro ajouté occupe la colonne"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "40 s'écrit <b>40,0</b> avant d'être posé. Le zéro n'ajoute aucune valeur : "+
+    "il occupe une colonne, pour que le calcul tombe juste."));
+};
+
+/* ─────────── decomposer un produit : le rectangle ─────────── */
+SCHEMAS["decomposer"]=function(el){
+  var W=724,H=304,X0=120,Y0=54,U=32;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"12 fois 15 vu comme deux rectangles, 12 fois 10 et 12 fois 5"});
+  var h=12*U/2, w10=10*U, w5=5*U;
+  svg.appendChild(S("rect",{x:X0,y:Y0,width:w10,height:h,fill:V("froid"),
+    opacity:"0.18",stroke:V("froid"),"stroke-width":"1.5"}));
+  svg.appendChild(S("rect",{x:X0+w10,y:Y0,width:w5,height:h,fill:V("vert"),
+    opacity:"0.18",stroke:V("vert"),"stroke-width":"1.5"}));
+  svg.appendChild(S("text",{x:X0+w10/2,y:Y0+h/2+8,"text-anchor":"middle",
+    "class":"s-lab",fill:V("froid"),style:"font-size:26px"},"120"));
+  svg.appendChild(S("text",{x:X0+w10+w5/2,y:Y0+h/2+8,"text-anchor":"middle",
+    "class":"s-lab",fill:V("vert"),style:"font-size:26px"},"60"));
+  svg.appendChild(S("text",{x:X0+w10/2,y:Y0-14,"text-anchor":"middle","class":"s-nom"},
+    "10"));
+  svg.appendChild(S("text",{x:X0+w10+w5/2,y:Y0-14,"text-anchor":"middle","class":"s-nom"},
+    "5"));
+  svg.appendChild(S("text",{x:X0-16,y:Y0+h/2+5,"text-anchor":"end","class":"s-nom"},
+    "12"));
+  svg.appendChild(S("text",{x:X0,y:Y0+h+40,"text-anchor":"start","class":"s-lab",
+    style:"font-size:20px"},"12 × 15   =   12 × 10   +   12 × 5   =   120 + 60   =   180"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Le rectangle entier fait 12 sur 15. On le coupe en deux morceaux faciles, "+
+    "et <b>on recolle</b> : c'est l'étape qu'on oublie le plus souvent."));
+};
+
+/* ─────────── la barre des fractions ─────────── */
+SCHEMAS["fractions-barre"]=function(el){
+  var W=724,H=312,X0=100,LB=520,Y0=48,BH=42,EC=22;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Une barre de 80 partagée en moitiés, en quarts et en tiers"});
+  function bande(y,n,etiq,coul,valeurs){
+    var i;
+    for(i=0;i<n;i++){
+      svg.appendChild(S("rect",{x:X0+i*LB/n,y:y,width:LB/n,height:BH,
+        fill:V(coul),opacity:i%2?"0.14":"0.26",stroke:V(coul),"stroke-width":"1.2"}));
+      svg.appendChild(S("text",{x:X0+(i+0.5)*LB/n,y:y+BH/2+6,"text-anchor":"middle",
+        "class":"s-lab"},valeurs));
+    }
+    svg.appendChild(S("text",{x:X0-16,y:y+BH/2+5,"text-anchor":"end","class":"s-nom"},
+      etiq));
+  }
+  svg.appendChild(S("rect",{x:X0,y:Y0,width:LB,height:BH,fill:V("encre2"),
+    opacity:"0.10",stroke:V("encre2"),"stroke-width":"1.2"}));
+  svg.appendChild(S("text",{x:X0+LB/2,y:Y0+BH/2+7,"text-anchor":"middle","class":"s-lab",
+    style:"font-size:20px"},"80"));
+  svg.appendChild(S("text",{x:X0-16,y:Y0+BH/2+5,"text-anchor":"end","class":"s-nom"},
+    "le tout"));
+  bande(Y0+BH+EC,2,"moitiés","froid","40");
+  bande(Y0+2*(BH+EC),4,"quarts","vert","20");
+  bande(Y0+3*(BH+EC),3,"tiers","violet","26,7");
+  svg.appendChild(S("text",{x:X0,y:Y0+3*(BH+EC)+BH+22,"text-anchor":"start",
+    "class":"s-pet",fill:V("violet")},"les tiers ne tombent jamais ronds"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Trois quarts, ce sont <b>trois cases sur quatre</b> — soit le tout moins un "+
+    "quart. La bande des tiers ne tombe pas ronde, et c'est normal."));
+};
+
+/* ─────────── la droite graduee : 0,75 contre 0,8 ─────────── */
+SCHEMAS["droite-graduee"]=function(el){
+  var W=724,H=200,X0=70,X1=660,Y=100;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Droite graduée de 0,70 à 0,90, avec 0,75 et 0,80 placés"});
+  function x(v){return X0+(v-0.70)/0.20*(X1-X0);}
+  svg.appendChild(S("line",{x1:X0,y1:Y,x2:X1,y2:Y,stroke:V("encre2"),
+    "stroke-width":"2"}));
+  var i;
+  for(i=0;i<=20;i++){
+    var v=0.70+i*0.01, gros=(i%5===0);
+    svg.appendChild(S("line",{x1:x(v),y1:Y-(gros?11:6),x2:x(v),y2:Y+(gros?11:6),
+      stroke:V(gros?"encre2":"trait"),"stroke-width":gros?"1.6":"1"}));
+    if(gros)svg.appendChild(S("text",{x:x(v),y:Y+32,"text-anchor":"middle",
+      "class":"s-pet"},frs(v,2)));
+  }
+  [[0.75,"0,75","chaud",-1],[0.80,"0,8","froid",1]].forEach(function(p){
+    svg.appendChild(S("circle",{cx:x(p[0]),cy:Y,r:"7",fill:V(p[2])}));
+    var yy=Y+(p[3]<0?-46:66);   /* en dessous : sous les graduations */
+    svg.appendChild(S("line",{x1:x(p[0]),y1:Y+p[3]*10,x2:x(p[0]),y2:yy-p[3]*8,
+      stroke:V(p[2]),"stroke-width":"1.4"}));
+    svg.appendChild(S("text",{x:x(p[0]),y:yy+(p[3]<0?0:6),"text-anchor":"middle",
+      "class":"s-lab",fill:V(p[2]),style:"font-size:20px"},p[1]));
+  });
+  svg.appendChild(S("text",{x:X1,y:Y-46,"text-anchor":"end","class":"s-tit",
+    fill:V("froid")},"0,8 EST À DROITE, DONC PLUS GRAND"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "0,8 s'écrit aussi <b>0,80</b>. Sur la droite, il n'y a plus à discuter : "+
+    "il est après 0,75, donc il est plus grand — malgré ses deux chiffres de moins."));
+};
+
+/* ─────────── arrondir : trois sens, une seule regle du 5 ─────────── */
+SCHEMAS["arrondir-sens"]=function(el){
+  var W=724,H=250,X0=140,X1=580,Y=86;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"24,3 entre 24 et 25, et les trois sens d'arrondi"});
+  svg.appendChild(S("line",{x1:X0-40,y1:Y,x2:X1+40,y2:Y,stroke:V("encre2"),
+    "stroke-width":"2"}));
+  [[X0,"24"],[X1,"25"]].forEach(function(b){
+    svg.appendChild(S("line",{x1:b[0],y1:Y-12,x2:b[0],y2:Y+12,stroke:V("encre2"),
+      "stroke-width":"2"}));
+    svg.appendChild(S("text",{x:b[0],y:Y-22,"text-anchor":"middle","class":"s-lab",
+      style:"font-size:19px"},b[1]));
+  });
+  var xv=X0+0.3*(X1-X0);
+  svg.appendChild(S("circle",{cx:xv,cy:Y,r:"7",fill:V("chaud")}));
+  svg.appendChild(S("text",{x:xv,y:Y-24,"text-anchor":"middle","class":"s-lab",
+    fill:V("chaud"),style:"font-size:19px"},"24,3"));
+  var lignes=[["au plus proche","24","vert",1],
+              ["pour COMMANDER","25","froid",2],
+              ["ce qui TIENT dedans","24","violet",3]];
+  lignes.forEach(function(l){
+    var y=Y+22+l[3]*38, cible=(l[1]==="24")?X0:X1;
+    svg.appendChild(S("line",{x1:xv,y1:y,x2:cible,y2:y,stroke:V(l[2]),
+      "stroke-width":"2","marker-end":"url(#fl-ar)"}));
+    svg.appendChild(S("text",{x:xv+(cible>xv?14:-14),y:y-8,
+      "text-anchor":cible>xv?"start":"end","class":"s-nom",fill:V(l[2])},l[0]));
+    svg.appendChild(S("text",{x:cible+(cible>xv?16:-16),y:y+5,
+      "text-anchor":cible>xv?"start":"end","class":"s-lab",fill:V(l[2])},l[1]));
+  });
+  var defs=S("defs",{});
+  var mk=S("marker",{id:"fl-ar",viewBox:"0 0 10 10",refX:"9",refY:"5",
+    markerWidth:"6",markerHeight:"6",orient:"auto-start-reverse"});
+  mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V("encre2")}));
+  defs.appendChild(mk); svg.appendChild(defs);
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "La règle du 5 donne le nombre le plus proche. <b>Elle ne dit pas ce qu'il "+
+    "faut faire</b> : c'est la situation qui décide, et une commande s'arrondit "+
+    "toujours au-dessus."));
+};
+
+/* ─────────── priorites : les memes touches, deux resultats ─────────── */
+SCHEMAS["priorites"]=function(el){
+  var W=724,H=250;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"12 + 8 divisé par 4, avec et sans parenthèses"});
+  function ligne(y,touches,ordre,res,coul,note){
+    var x=70,i;
+    touches.forEach(function(t,k){
+      var l=t.length*15+22;
+      svg.appendChild(S("rect",{x:x,y:y,width:l,height:44,rx:"6",
+        fill:V("carte2"),stroke:V("trait"),"stroke-width":"1"}));
+      svg.appendChild(S("text",{x:x+l/2,y:y+29,"text-anchor":"middle","class":"s-lab",
+        style:"font-size:20px"},t));
+      if(ordre[k]){
+        svg.appendChild(S("circle",{cx:x+l/2,cy:y-14,r:"11",fill:V(coul)}));
+        svg.appendChild(S("text",{x:x+l/2,y:y-10,"text-anchor":"middle","class":"s-tit",
+          fill:V("fond")},ordre[k]));
+      }
+      x+=l+8;
+    });
+    svg.appendChild(S("text",{x:x+18,y:y+29,"text-anchor":"start","class":"s-lab",
+      fill:V(coul),style:"font-size:22px"},"= "+res));
+    svg.appendChild(S("text",{x:70,y:y+66,"text-anchor":"start","class":"s-pet",
+      fill:V(coul)},note));
+  }
+  ligne(52,["12","+","8","÷","4"],["","","","1",""],"14","chaud",
+    "la machine divise d'abord : 8 ÷ 4 = 2, puis 12 + 2");
+  ligne(160,["(","12","+","8",")","÷","4"],["","","1","","","2",""],"5","vert",
+    "les parenthèses passent devant : 12 + 8 = 20, puis 20 ÷ 4");
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Les mêmes touches, dans le même ordre. <b>Seules les parenthèses changent</b>, "+
+    "et le résultat passe de 14 à 5."));
+};
+
+/* ─────────── B · milli, unité, kilo ─────────── */
+SCHEMAS["echelle-prefixes"]=function(el){
+  var W=724,H=236,Y=104;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Milli, unité et kilo, séparés par des facteurs mille"});
+  var cases=[[122,"milli","mA · mm · mL","froid"],[362,"l'unité","A · m · L","encre"],
+             [602,"kilo","kΩ · kg · km","chaud"]];
+  cases.forEach(function(c){
+    svg.appendChild(S("rect",{x:c[0]-92,y:Y-42,width:184,height:84,rx:"10",
+      fill:V("carte2"),stroke:V(c[3]),"stroke-width":"1.8"}));
+    svg.appendChild(S("text",{x:c[0],y:Y-8,"text-anchor":"middle","class":"s-lab",
+      fill:V(c[3]),style:"font-size:21px"},c[1]));
+    svg.appendChild(S("text",{x:c[0],y:Y+22,"text-anchor":"middle","class":"s-pet"},c[2]));
+  });
+  var defs=S("defs",{});
+  ["fl-pre-h","fl-pre-b"].forEach(function(id,i){
+    var mk=S("marker",{id:id,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",
+      markerHeight:"6",orient:"auto-start-reverse"});
+    mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V(i?"froid":"chaud")}));
+    defs.appendChild(mk);
+  });
+  svg.appendChild(defs);
+  [[122,362],[362,602]].forEach(function(p){
+    var m=(p[0]+p[1])/2;
+    svg.appendChild(S("path",{d:"M "+(p[0]+96)+" "+(Y-26)+" q "+((p[1]-p[0])/2-48)+" -34 "+
+      (p[1]-p[0]-192)+" 0",fill:"none",stroke:V("chaud"),"stroke-width":"2",
+      "marker-end":"url(#fl-pre-h)"}));
+    svg.appendChild(S("text",{x:m,y:Y-52,"text-anchor":"middle","class":"s-nom",
+      fill:V("chaud")},"÷ 1 000"));
+    svg.appendChild(S("path",{d:"M "+(p[1]-96)+" "+(Y+26)+" q -"+((p[1]-p[0])/2-48)+" 34 -"+
+      (p[1]-p[0]-192)+" 0",fill:"none",stroke:V("froid"),"stroke-width":"2",
+      "marker-end":"url(#fl-pre-b)"}));
+    svg.appendChild(S("text",{x:m,y:Y+70,"text-anchor":"middle","class":"s-nom",
+      fill:V("froid")},"× 1 000"));
+  });
+  svg.appendChild(S("text",{x:W/2,y:H-12,"text-anchor":"middle","class":"s-pet"},
+    "250 mA = 0,250 A   ·   1,8 kΩ = 1 800 Ω"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Un seul facteur à retenir : <b>mille</b>. Vers la droite le nombre <b>rétrécit</b> "+
+    "— 250 mA font 0,250 A ; vers la gauche il <b>grandit</b> — 1,8 kΩ font 1 800 Ω."));
+};
+
+/* ─────────── B · l'escalier des longueurs ─────────── */
+SCHEMAS["escalier-longueurs"]=function(el){
+  var W=724,H=250,Y=118,X=[110,290,470,650];
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Mètre, décimètre, centimètre, millimètre : un facteur dix à chaque marche"});
+  var noms=["m","dm","cm","mm"];
+  noms.forEach(function(n,i){
+    svg.appendChild(S("rect",{x:X[i]-46,y:Y-30,width:92,height:60,rx:"8",
+      fill:V("carte2"),stroke:V("trait"),"stroke-width":"1.5"}));
+    svg.appendChild(S("text",{x:X[i],y:Y+10,"text-anchor":"middle","class":"s-lab",
+      style:"font-size:24px"},n));
+  });
+  var defs=S("defs",{});
+  var mk=S("marker",{id:"fl-lon",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",
+    markerHeight:"6",orient:"auto-start-reverse"});
+  mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V("froid")}));
+  defs.appendChild(mk); svg.appendChild(defs);
+  for(var i=0;i<3;i++){
+    svg.appendChild(S("path",{d:"M "+(X[i]+50)+" "+(Y-18)+" q 44 -30 88 0",fill:"none",
+      stroke:V("froid"),"stroke-width":"2","marker-end":"url(#fl-lon)"}));
+    svg.appendChild(S("text",{x:(X[i]+X[i+1])/2,y:Y-42,"text-anchor":"middle",
+      "class":"s-nom",fill:V("froid")},"× 10"));
+  }
+  svg.appendChild(S("path",{d:"M "+(X[0])+" "+(Y+40)+" q 270 62 540 0",fill:"none",
+    stroke:V("chaud"),"stroke-width":"2","stroke-dasharray":"6 4"}));
+  svg.appendChild(S("text",{x:W/2,y:H-16,"text-anchor":"middle","class":"s-nom",
+    fill:V("chaud")},"du mètre au millimètre : × 1 000, en une fois"));
+  svg.appendChild(S("text",{x:X[0],y:Y-58,"text-anchor":"middle","class":"s-pet"},"2,45"));
+  svg.appendChild(S("text",{x:X[3],y:Y-58,"text-anchor":"middle","class":"s-pet"},"2 450"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Quatre marches, <b>un facteur dix à chaque fois</b>. Sauter directement du mètre "+
+    "au millimètre, c'est franchir trois marches d'un coup : × 1 000."));
+};
+
+/* ─────────── B · le mètre carré, découpé pour de vrai ─────────── */
+SCHEMAS["carre-cm"]=function(el){
+  var W=724,H=330,C=246,X0=180,Y0=44,N=10;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un mètre carré découpé en cent carrés de un décimètre de côté"});
+  var p=C/N,i;
+  svg.appendChild(S("rect",{x:X0,y:Y0,width:C,height:C,fill:V("froid"),opacity:"0.10",
+    stroke:V("froid"),"stroke-width":"2.5"}));
+  for(i=1;i<N;i++){
+    svg.appendChild(S("line",{x1:X0+i*p,y1:Y0,x2:X0+i*p,y2:Y0+C,stroke:V("froid"),
+      "stroke-width":"0.8",opacity:"0.75"}));
+    svg.appendChild(S("line",{x1:X0,y1:Y0+i*p,x2:X0+C,y2:Y0+i*p,stroke:V("froid"),
+      "stroke-width":"0.8",opacity:"0.75"}));
+  }
+  /* une case mise en avant : 1 dm² = 100 cm² */
+  svg.appendChild(S("rect",{x:X0,y:Y0,width:p,height:p,fill:V("chaud"),opacity:"0.5"}));
+  svg.appendChild(S("line",{x1:X0+p,y1:Y0+p/2,x2:X0+C+70,y2:Y0-6,stroke:V("chaud"),
+    "stroke-width":"1.2"}));
+  svg.appendChild(S("text",{x:X0+C+76,y:Y0-2,"text-anchor":"start","class":"s-nom",
+    fill:V("chaud")},"1 dm² = 100 cm²"));
+  svg.appendChild(S("text",{x:X0+C+76,y:Y0+24,"text-anchor":"start","class":"s-pet"},
+    "et il y en a cent"));
+  svg.appendChild(S("text",{x:X0+C/2,y:Y0-16,"text-anchor":"middle","class":"s-nom"},
+    "1 m = 100 cm"));
+  svg.appendChild(S("text",{x:X0-14,y:Y0+C/2+5,"text-anchor":"end","class":"s-nom"},
+    "1 m"));
+  svg.appendChild(S("text",{x:X0+C/2,y:Y0+C+34,"text-anchor":"middle","class":"s-lab",
+    fill:V("froid"),style:"font-size:21px"},"1 m² = 100 × 100 = 10 000 cm²"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Le côté est multiplié par 100, mais l'aire l'est <b>deux fois</b> : une fois en "+
+    "longueur, une fois en largeur. D'où les <b>quatre zéros</b>, et non deux."));
+};
+
+/* ─────────── B · le mètre cube et le litre ─────────── */
+SCHEMAS["cube-litre"]=function(el){
+  var W=724,H=320,ox=250,oy=250,A=170,F=64;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un mètre cube contient mille cubes d'un décimètre, soit mille litres"});
+  function P(x,y,z){return [ox+x*A+y*F*0.62, oy-z*A-y*F*0.5];}
+  var s=[P(0,0,0),P(1,0,0),P(1,0,1),P(0,0,1)],
+      t=[P(0,1,1),P(1,1,1),P(1,1,0)];
+  function poly(pts,f,o){
+    svg.appendChild(S("polygon",{points:pts.map(function(q){return q.join(",");}).join(" "),
+      fill:V(f),opacity:o,stroke:V("froid"),"stroke-width":"1.6"}));
+  }
+  poly([s[3],t[0],t[1],s[2]],"froid","0.10");        /* dessus */
+  poly([s[1],t[2],t[1],s[2]],"froid","0.16");        /* cote droit */
+  poly(s,"froid","0.22");                            /* face */
+  var i;
+  for(i=1;i<10;i++){
+    var a=P(i/10,0,0),b=P(i/10,0,1);
+    svg.appendChild(S("line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:V("froid"),
+      "stroke-width":"0.6",opacity:"0.7"}));
+    var c=P(0,0,i/10),d=P(1,0,i/10);
+    svg.appendChild(S("line",{x1:c[0],y1:c[1],x2:d[0],y2:d[1],stroke:V("froid"),
+      "stroke-width":"0.6",opacity:"0.7"}));
+  }
+  var q=[P(0,0,0),P(0.1,0,0),P(0.1,0,0.1),P(0,0,0.1)];
+  poly(q,"chaud","0.55");
+  svg.appendChild(S("text",{x:ox+A+96,y:oy-A/2-16,"text-anchor":"start","class":"s-lab",
+    style:"font-size:21px"},"1 m³ = 1 000 dm³"));
+  svg.appendChild(S("text",{x:ox+A+96,y:oy-A/2+14,"text-anchor":"start","class":"s-lab",
+    fill:V("froid"),style:"font-size:21px"},"1 m³ = 1 000 L"));
+  svg.appendChild(S("text",{x:ox+A+96,y:oy-A/2+48,"text-anchor":"start","class":"s-nom",
+    fill:V("chaud")},"1 dm³ = 1 litre"));
+  svg.appendChild(S("text",{x:ox+A/2,y:oy+28,"text-anchor":"middle","class":"s-nom"},
+    "1 m"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Dix cubes en longueur, dix en largeur, dix en hauteur : <b>mille au total</b>. "+
+    "Et le petit cube d'un décimètre de côté, c'est exactement <b>un litre</b>."));
+};
+
+/* ─────────── B · l'heure, en minutes et en décimal ─────────── */
+SCHEMAS["heure-decimale"]=function(el){
+  var W=724,H=250,X0=90,LB=544,Y=100,BH=52;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Une heure en minutes et la même en heures décimales"});
+  var i;
+  for(i=0;i<4;i++){
+    svg.appendChild(S("rect",{x:X0+i*LB/4,y:Y,width:LB/4,height:BH,
+      fill:V("froid"),opacity:i%2?"0.12":"0.22",stroke:V("froid"),"stroke-width":"1.2"}));
+    svg.appendChild(S("text",{x:X0+(i+0.5)*LB/4,y:Y+BH/2+6,"text-anchor":"middle",
+      "class":"s-lab"},"15 min"));
+  }
+  var reps=[[0,"0 min","0 h"],[1,"15 min","0,25 h"],[2,"30 min","0,5 h"],
+            [3,"45 min","0,75 h"],[4,"60 min","1 h"]];
+  reps.forEach(function(r){
+    var x=X0+r[0]*LB/4;
+    svg.appendChild(S("line",{x1:x,y1:Y-10,x2:x,y2:Y+BH+10,stroke:V("encre2"),
+      "stroke-width":"1.4"}));
+    svg.appendChild(S("text",{x:x,y:Y-20,"text-anchor":"middle","class":"s-pet"},r[1]));
+    svg.appendChild(S("text",{x:x,y:Y+BH+32,"text-anchor":"middle","class":"s-lab",
+      fill:V("vert")},r[2]));
+  });
+  svg.appendChild(S("text",{x:X0,y:H-24,"text-anchor":"start","class":"s-lab",
+    fill:V("chaud"),style:"font-size:19px"},"30 min ne s'écrit jamais 0,30 h"));
+  svg.appendChild(S("line",{x1:X0+266,y1:H-40,x2:X0+340,y2:H-18,stroke:V("chaud"),
+    "stroke-width":"2.5"}));
+  svg.appendChild(S("line",{x1:X0+340,y1:H-40,x2:X0+266,y2:H-18,stroke:V("chaud"),
+    "stroke-width":"2.5"}));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Une heure vaut <b>60</b> minutes, pas 100. La demi-heure s'écrit donc <b>0,5 h</b>, "+
+    "et le quart d'heure <b>0,25 h</b> — jamais 0,30 ni 0,15."));
+};
+
+/* ─────────── B · des km/h aux m/s ─────────── */
+SCHEMAS["kmh-ms"]=function(el){
+  var W=724,H=240,X0=90,X1=650,YA=76,YB=176,VMAX=130;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Deux axes parallèles : les kilomètres-heure et les mètres par seconde"});
+  function x(v){return X0+v/VMAX*(X1-X0);}
+  [[YA,"km/h","chaud"],[YB,"m/s","froid"]].forEach(function(a){
+    svg.appendChild(S("line",{x1:X0,y1:a[0],x2:X1,y2:a[0],stroke:V("encre2"),
+      "stroke-width":"2"}));
+    svg.appendChild(S("text",{x:X0-14,y:a[0]+5,"text-anchor":"end","class":"s-nom",
+      fill:V(a[2])},a[1]));
+  });
+  [[18,5],[36,10],[72,20],[90,25],[126,35]].forEach(function(p){
+    var xx=x(p[0]);
+    svg.appendChild(S("line",{x1:xx,y1:YA-8,x2:xx,y2:YA+8,stroke:V("chaud"),
+      "stroke-width":"1.6"}));
+    svg.appendChild(S("line",{x1:xx,y1:YB-8,x2:xx,y2:YB+8,stroke:V("froid"),
+      "stroke-width":"1.6"}));
+    svg.appendChild(S("line",{x1:xx,y1:YA+10,x2:xx,y2:YB-10,stroke:V("trait"),
+      "stroke-width":"1","stroke-dasharray":"3 3"}));
+    svg.appendChild(S("text",{x:xx,y:YA-16,"text-anchor":"middle","class":"s-lab"},
+      String(p[0])));
+    svg.appendChild(S("text",{x:xx,y:YB+28,"text-anchor":"middle","class":"s-lab",
+      fill:V("froid")},String(p[1])));
+  });
+  svg.appendChild(S("text",{x:W/2,y:(YA+YB)/2+6,"text-anchor":"middle","class":"s-lab",
+    fill:V("vert"),style:"font-size:20px"},"÷ 3,6"));
+  svg.appendChild(S("text",{x:X0,y:H-14,"text-anchor":"start","class":"s-pet"},
+    "90 km/h, c'est 25 m/s : en une seconde, un camion parcourt un quart de terrain de handball"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Un seul nombre à retenir : <b>3,6</b>. Des km/h vers les m/s on divise, dans "+
+    "l'autre sens on multiplie — et <b>36 km/h = 10 m/s</b> sert de repère."));
+};
+
+/* ─────────── C · le tableau de proportionnalité et son coefficient ─────────── */
+SCHEMAS["tableau-propo"]=function(el){
+  var W=724,H=250,X0=126,CW=96,Y0=62,RH=54;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un tableau de proportionnalité et son coefficient"});
+  var haut=["0","1","5","20","50"], bas=["0","2,40","12","48","120"];
+  var i;
+  for(i=0;i<5;i++){
+    var x=X0+i*CW, z=(i===0);
+    [0,1].forEach(function(r){
+      svg.appendChild(S("rect",{x:x,y:Y0+r*RH,width:CW,height:RH,
+        fill:V(z?"vert":"carte2"),opacity:z?"0.18":"1",
+        stroke:V("trait"),"stroke-width":"1.2"}));
+      svg.appendChild(S("text",{x:x+CW/2,y:Y0+r*RH+RH/2+7,"text-anchor":"middle",
+        "class":"s-lab",style:"font-size:19px"},r?bas[i]:haut[i]));
+    });
+  }
+  svg.appendChild(S("text",{x:X0-14,y:Y0+RH/2+5,"text-anchor":"end","class":"s-nom"},
+    "longueur (m)"));
+  svg.appendChild(S("text",{x:X0-14,y:Y0+RH+RH/2+5,"text-anchor":"end","class":"s-nom"},
+    "prix (€)"));
+  var defs=S("defs",{});
+  var mk=S("marker",{id:"fl-pro",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",
+    markerHeight:"6",orient:"auto-start-reverse"});
+  mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V("froid")}));
+  defs.appendChild(mk); svg.appendChild(defs);
+  for(i=1;i<5;i++){
+    var xx=X0+i*CW+CW-16;
+    svg.appendChild(S("line",{x1:xx,y1:Y0+RH-10,x2:xx,y2:Y0+RH+12,stroke:V("froid"),
+      "stroke-width":"1.6","marker-end":"url(#fl-pro)"}));
+  }
+  svg.appendChild(S("text",{x:X0+5*CW+16,y:Y0+RH+6,"text-anchor":"start","class":"s-lab",
+    fill:V("froid"),style:"font-size:20px"},"× 2,40"));
+  svg.appendChild(S("text",{x:X0+CW/2,y:Y0+2*RH+28,"text-anchor":"middle","class":"s-nom",
+    fill:V("vert")},"la colonne qui prouve tout"));
+  svg.appendChild(S("text",{x:X0,y:Y0+2*RH+56,"text-anchor":"start","class":"s-pet"},
+    "pour zéro mètre, on paie zéro euro — sinon ce n'est pas de la proportionnalité"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Un seul coefficient, <b>le même dans toutes les colonnes</b>. C'est la définition, "+
+    "et la colonne du zéro suffit souvent à démasquer une fausse proportionnalité."));
+};
+
+/* ─────────── C · forfait plus part variable ─────────── */
+SCHEMAS["forfait-variable"]=function(el){
+  var W=724,H=330,X0=112,X1=590,Y0=36,Y1=262,JMAX=10,EMAX=1000;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Deux offres de location : une proportionnelle, une avec forfait"});
+  function x(j){return X0+j/JMAX*(X1-X0);}
+  function y(e){return Y1-e/EMAX*(Y1-Y0);}
+  svg.appendChild(S("line",{x1:X0,y1:Y1,x2:X1+18,y2:Y1,stroke:V("encre2"),
+    "stroke-width":"1.8"}));
+  svg.appendChild(S("line",{x1:X0,y1:Y1,x2:X0,y2:Y0-8,stroke:V("encre2"),
+    "stroke-width":"1.8"}));
+  var j;
+  for(j=0;j<=JMAX;j+=2){
+    svg.appendChild(S("line",{x1:x(j),y1:Y1,x2:x(j),y2:Y1+6,stroke:V("encre2"),
+      "stroke-width":"1.2"}));
+    svg.appendChild(S("text",{x:x(j),y:Y1+24,"text-anchor":"middle","class":"s-pet"},
+      String(j)));
+  }
+  [0,250,500,750,1000].forEach(function(e){
+    svg.appendChild(S("line",{x1:X0-6,y1:y(e),x2:X0,y2:y(e),stroke:V("encre2"),
+      "stroke-width":"1.2"}));
+    svg.appendChild(S("text",{x:X0-12,y:y(e)+4,"text-anchor":"end","class":"s-pet"},
+      String(e)));
+  });
+  svg.appendChild(S("text",{x:X1+22,y:Y1+24,"text-anchor":"end","class":"s-nom"},"jours"));
+  svg.appendChild(S("text",{x:X0-12,y:Y0-14,"text-anchor":"end","class":"s-nom"},"€"));
+  /* A : 90 €/jour, passe par l'origine */
+  svg.appendChild(S("line",{x1:x(0),y1:y(0),x2:x(10),y2:y(900),stroke:V("vert"),
+    "stroke-width":"2.6"}));
+  /* B : 150 € puis 60 €/jour */
+  svg.appendChild(S("line",{x1:x(0),y1:y(150),x2:x(10),y2:y(750),stroke:V("chaud"),
+    "stroke-width":"2.6"}));
+  svg.appendChild(S("circle",{cx:x(0),cy:y(150),r:"6",fill:V("chaud")}));
+  svg.appendChild(S("text",{x:x(0)+14,y:y(150)-10,"text-anchor":"start","class":"s-nom",
+    fill:V("chaud")},"150 € avant d'avoir commencé"));
+  svg.appendChild(S("circle",{cx:x(0),cy:y(0),r:"6",fill:V("vert")}));
+  /* le croisement, a 5 jours et 450 € */
+  svg.appendChild(S("line",{x1:x(5),y1:y(450),x2:x(5),y2:Y1,stroke:V("trait"),
+    "stroke-width":"1","stroke-dasharray":"4 3"}));
+  svg.appendChild(S("circle",{cx:x(5),cy:y(450),r:"6",fill:V("froid")}));
+  svg.appendChild(S("text",{x:x(5)+12,y:y(450)+22,"text-anchor":"start","class":"s-nom",
+    fill:V("froid")},"5 jours : même prix"));
+  svg.appendChild(S("text",{x:X1+26,y:y(900)+6,"text-anchor":"start","class":"s-lab",
+    fill:V("vert")},"A"));
+  svg.appendChild(S("text",{x:X1+26,y:y(750)+6,"text-anchor":"start","class":"s-lab",
+    fill:V("chaud")},"B"));
+  svg.appendChild(S("text",{x:X0,y:H-14,"text-anchor":"start","class":"s-pet"},
+    "A — 90 €/jour, sans frais   ·   B — 150 € de forfait, puis 60 €/jour"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Les deux droites montent régulièrement. <b>Une seule part de zéro</b> — et c'est "+
+    "elle, et elle seule, qui est proportionnelle."));
+};
+
+/* ─────────── C · une remise puis une TVA ─────────── */
+SCHEMAS["pourcentage-barre"]=function(el){
+  var W=724,H=304,X0=140,LB=440,Y=[54,124,194],BH=44;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"2 400 euros, moins quinze pour cent, puis plus vingt pour cent de TVA"});
+  function barre(y,val,ref,coul,etiq,montant){
+    var w=LB*val/ref;
+    svg.appendChild(S("rect",{x:X0,y:y,width:w,height:BH,fill:V(coul),opacity:"0.24",
+      stroke:V(coul),"stroke-width":"1.6"}));
+    svg.appendChild(S("text",{x:X0+w/2,y:y+BH/2+7,"text-anchor":"middle","class":"s-lab",
+      style:"font-size:19px"},montant));
+    svg.appendChild(S("text",{x:X0-14,y:y+BH/2+5,"text-anchor":"end","class":"s-nom"},etiq));
+    return w;
+  }
+  var REF=2448;
+  barre(Y[0],2400,REF,"encre2","au départ","2 400 €");
+  var w1=barre(Y[1],2040,REF,"vert","− 15 %","2 040 €");
+  var w2=barre(Y[2],2448,REF,"chaud","+ 20 % de TVA","2 448 €");
+  /* le repere du depart, reporte sur la derniere barre */
+  var wd=LB*2400/REF;
+  svg.appendChild(S("line",{x1:X0+wd,y1:Y[0],x2:X0+wd,y2:Y[2]+BH+16,stroke:V("encre2"),
+    "stroke-width":"1.2","stroke-dasharray":"5 4"}));
+  svg.appendChild(S("text",{x:X0,y:Y[2]+BH+34,"text-anchor":"start","class":"s-lab",
+    fill:V("chaud"),style:"font-size:18px"},"48 € de plus qu'au départ, soit + 2 %"));
+  svg.appendChild(S("text",{x:X0,y:H-12,"text-anchor":"start","class":"s-pet"},
+    "0,85 × 1,20 = 1,02 — les deux pourcentages ne s'annulent pas"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Une remise de 15 % puis une TVA de 20 % ne se compensent pas : <b>on finit "+
+    "au-dessus du prix de départ</b>. Les pourcentages se multiplient, ils ne s'ajoutent pas."));
+};
+
+/* ─────────── C · ce que pèse un mètre cube ─────────── */
+SCHEMAS["masse-volumique"]=function(el){
+  var W=724,H=290,ox=[150,362,574],oy=196,A=92,F=38;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un mètre cube de terre, de sable et de gravier, et leurs masses"});
+  var mat=[["terre","1,4 t","vert"],["sable","1,5 t","tiede"],["gravier","1,6 t","chaud"]];
+  mat.forEach(function(m,k){
+    var X=ox[k];
+    function P(x,y,z){return [X+x*A+y*F*0.62, oy-z*A-y*F*0.5];}
+    function poly(pts,o){
+      svg.appendChild(S("polygon",{points:pts.map(function(q){return q.join(",");}).join(" "),
+        fill:V(m[2]),opacity:o,stroke:V(m[2]),"stroke-width":"1.5"}));
+    }
+    poly([P(0,0,1),P(0,1,1),P(1,1,1),P(1,0,1)],"0.16");
+    poly([P(1,0,0),P(1,1,0),P(1,1,1),P(1,0,1)],"0.26");
+    poly([P(0,0,0),P(1,0,0),P(1,0,1),P(0,0,1)],"0.38");
+    svg.appendChild(S("text",{x:X+A/2,y:oy-A/2+8,"text-anchor":"middle","class":"s-lab",
+      style:"font-size:22px"},m[1]));
+    svg.appendChild(S("text",{x:X+A/2,y:oy+30,"text-anchor":"middle","class":"s-nom"},m[0]));
+  });
+  svg.appendChild(S("text",{x:W/2,y:34,"text-anchor":"middle","class":"s-tit"},
+    "CE QUE PÈSE UN MÈTRE CUBE"));
+  svg.appendChild(S("text",{x:W/2,y:H-40,"text-anchor":"middle","class":"s-lab",
+    fill:V("froid"),style:"font-size:19px"},"masse = volume × masse volumique"));
+  svg.appendChild(S("text",{x:W/2,y:H-14,"text-anchor":"middle","class":"s-pet"},
+    "un camion à 13 t de charge utile ne prend que 8,1 m³ de gravier"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Trois cubes identiques, trois masses différentes. <b>C'est le volume qui remplit "+
+    "la benne, mais c'est la masse qui la limite</b> — et les deux ne se rencontrent presque jamais."));
+};
+
+/* ─────────── D · croiser une ligne et une colonne ─────────── */
+SCHEMAS["croiser-tableau"]=function(el){
+  var W=724,H=290,X0=190,CW=136,Y0=64,RH=52;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un tarif à double entrée, et la case au croisement de la ligne et de la colonne"});
+  var cols=["10 m","25 m","50 m"], lignes=["16 mm","20 mm","25 mm"];
+  var prix=[[34,85,170],[42,105,210],[56,140,280]];
+  var i,j;
+  for(j=0;j<3;j++)
+    svg.appendChild(S("text",{x:X0+j*CW+CW/2,y:Y0-16,"text-anchor":"middle","class":"s-nom"},
+      cols[j]));
+  for(i=0;i<3;i++){
+    svg.appendChild(S("text",{x:X0-104,y:Y0+i*RH+RH/2+5,"text-anchor":"end","class":"s-nom"},
+      lignes[i]));
+    for(j=0;j<3;j++){
+      var vise=(i===1&&j===1), sur=(i===1||j===1);
+      svg.appendChild(S("rect",{x:X0+j*CW,y:Y0+i*RH,width:CW,height:RH,
+        fill:V(vise?"chaud":(sur?"froid":"carte2")),opacity:vise?"0.42":(sur?"0.14":"1"),
+        stroke:V("trait"),"stroke-width":"1.2"}));
+      svg.appendChild(S("text",{x:X0+j*CW+CW/2,y:Y0+i*RH+RH/2+7,"text-anchor":"middle",
+        "class":"s-lab",style:"font-size:19px"},prix[i][j]+" €"));
+    }
+  }
+  var defs=S("defs",{});
+  var mk=S("marker",{id:"fl-cro",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",
+    markerHeight:"6",orient:"auto-start-reverse"});
+  mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V("chaud")}));
+  defs.appendChild(mk); svg.appendChild(defs);
+  svg.appendChild(S("line",{x1:X0-96,y1:Y0+RH+RH/2,x2:X0-16,y2:Y0+RH+RH/2,
+    stroke:V("chaud"),"stroke-width":"2","marker-end":"url(#fl-cro)"}));
+  svg.appendChild(S("line",{x1:X0+CW+CW/2,y1:Y0-46,x2:X0+CW+CW/2,y2:Y0-24,
+    stroke:V("chaud"),"stroke-width":"2","marker-end":"url(#fl-cro)"}));
+  svg.appendChild(S("text",{x:X0+3*CW+18,y:Y0+RH+RH/2+6,"text-anchor":"start","class":"s-lab",
+    fill:V("chaud"),style:"font-size:19px"},"105 €"));
+  svg.appendChild(S("text",{x:X0-140,y:Y0+3*RH+34,"text-anchor":"start","class":"s-pet"},
+    "25 m de gaine de 20 mm : la ligne, puis la colonne, puis la case"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Une case ne se lit jamais seule : <b>elle vaut par sa ligne et par sa colonne</b>. "+
+    "Relire les deux en-têtes avant d'écrire le nombre, c'est tout le travail."));
+};
+
+/* ─────────── D · l'échelle d'un plan ─────────── */
+SCHEMAS["echelle-plan"]=function(el){
+  var W=724,H=286,X0=110,X1=630,YA=88,YB=170;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un plan au centième : un centimètre sur le plan vaut un mètre en vrai"});
+  var N=10,p=(X1-X0)/N,i;
+  [[YA,"sur le plan","froid","cm"],[YB,"en vrai","chaud","m"]].forEach(function(a){
+    svg.appendChild(S("line",{x1:X0,y1:a[0],x2:X1,y2:a[0],stroke:V("encre2"),
+      "stroke-width":"2"}));
+    svg.appendChild(S("text",{x:X0-14,y:a[0]+5,"text-anchor":"end","class":"s-nom",
+      fill:V(a[2])},a[1]));
+    svg.appendChild(S("text",{x:X1+14,y:a[0]+5,"text-anchor":"start","class":"s-nom"},a[3]));
+  });
+  for(i=0;i<=N;i++){
+    var x=X0+i*p;
+    [YA,YB].forEach(function(y){
+      svg.appendChild(S("line",{x1:x,y1:y-8,x2:x,y2:y+8,stroke:V("encre2"),
+        "stroke-width":i%5?"1":"1.8"}));
+    });
+    if(i%5===0){
+      svg.appendChild(S("text",{x:x,y:YA-16,"text-anchor":"middle","class":"s-pet"},
+        String(i)));
+      svg.appendChild(S("text",{x:x,y:YB+26,"text-anchor":"middle","class":"s-pet"},
+        String(i)));
+    }
+    svg.appendChild(S("line",{x1:x,y1:YA+10,x2:x,y2:YB-10,stroke:V("trait"),
+      "stroke-width":"0.8","stroke-dasharray":"3 3"}));
+  }
+  /* le segment de 4,5 cm, mis en avant */
+  var xa=X0+4.5*p;
+  svg.appendChild(S("rect",{x:X0,y:YA-5,width:xa-X0,height:10,fill:V("froid"),
+    opacity:"0.5"}));
+  svg.appendChild(S("rect",{x:X0,y:YB-5,width:xa-X0,height:10,fill:V("chaud"),
+    opacity:"0.5"}));
+  /* les deux etiquettes sur une ligne a part : posees sur les regles, elles
+     tombaient sur les graduations */
+  svg.appendChild(S("text",{x:X0,y:YB+56,"text-anchor":"start","class":"s-lab",
+    style:"font-size:19px"},"le segment surligné :"));
+  svg.appendChild(S("text",{x:X0+186,y:YB+56,"text-anchor":"start","class":"s-lab",
+    fill:V("froid"),style:"font-size:19px"},"4,5 cm sur le plan"));
+  svg.appendChild(S("text",{x:X0+372,y:YB+56,"text-anchor":"start","class":"s-lab",
+    fill:V("chaud"),style:"font-size:19px"},"→   4,50 m en vrai"));
+  svg.appendChild(S("text",{x:W/2,y:34,"text-anchor":"middle","class":"s-tit"},
+    "ÉCHELLE 1/100 — UN CENTIMÈTRE POUR UN MÈTRE"));
+  svg.appendChild(S("text",{x:X0,y:H-12,"text-anchor":"start","class":"s-pet"},
+    "au 1/50, la même règle du bas irait deux fois moins loin : 4,5 cm ne vaudraient que 2,25 m"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Deux règles côte à côte, graduées différemment. <b>Le réel est toujours le plus "+
+    "grand</b> — si votre conversion le rapetisse, vous avez divisé au lieu de multiplier."));
+};
+
+/* ─────────── E · défaire les opérations dans l'ordre inverse ─────────── */
+SCHEMAS["defaire-operations"]=function(el){
+  var W=724,H=280,BW=104,BH=52,GAP=54;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Un programme de calcul et son programme inverse"});
+  var defs=S("defs",{});
+  [["fl-al","froid"],["fl-re","chaud"]].forEach(function(m){
+    var mk=S("marker",{id:m[0],viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",
+      markerHeight:"6",orient:"auto-start-reverse"});
+    mk.appendChild(S("path",{d:"M 0 0 L 10 5 L 0 10 z",fill:V(m[1])}));
+    defs.appendChild(mk);
+  });
+  svg.appendChild(defs);
+  function rangee(y,cases,ops,coul,mk,titre){
+    var X0=120,i;
+    svg.appendChild(S("text",{x:X0-16,y:y+BH/2+5,"text-anchor":"end","class":"s-tit",
+      fill:V(coul)},titre));
+    for(i=0;i<cases.length;i++){
+      var x=X0+i*(BW+GAP);
+      svg.appendChild(S("rect",{x:x,y:y,width:BW,height:BH,rx:"8",fill:V("carte2"),
+        stroke:V(coul),"stroke-width":"1.8"}));
+      svg.appendChild(S("text",{x:x+BW/2,y:y+BH/2+8,"text-anchor":"middle","class":"s-lab",
+        style:"font-size:23px"},cases[i]));
+      if(i<ops.length){
+        svg.appendChild(S("line",{x1:x+BW+6,y1:y+BH/2,x2:x+BW+GAP-6,y2:y+BH/2,
+          stroke:V(coul),"stroke-width":"2","marker-end":"url(#"+mk+")"}));
+        svg.appendChild(S("text",{x:x+BW+GAP/2,y:y+BH/2-12,"text-anchor":"middle",
+          "class":"s-nom",fill:V(coul)},ops[i]));
+      }
+    }
+  }
+  rangee(70,["x","25 x","140"],["× 25","+ 40"],"froid","fl-al","À L'ALLER");
+  rangee(186,["140","100","4"],["− 40","÷ 25"],"chaud","fl-re","AU RETOUR");
+  svg.appendChild(S("text",{x:120,y:H-12,"text-anchor":"start","class":"s-pet"},
+    "on défait dans l'ordre inverse : ce qui a été ajouté en dernier s'enlève en premier"));
+  el.appendChild(svg);
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Résoudre, c'est <b>remonter le programme à l'envers</b>. On enlève d'abord ce qui a "+
+    "été ajouté en dernier — le forfait — et on divise seulement après."));
+};
+
+/* ─────────── F · les trois morceaux d'une réponse ─────────── */
+SCHEMAS["phrase-reponse"]=function(el){
+  var W=724,H=236,Y=104;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Une phrase de réponse et ses trois morceaux obligatoires"});
+  svg.appendChild(S("text",{x:48,y:38,"text-anchor":"start","class":"s-tit"},
+    "UNE RÉPONSE COMPLÈTE, ET SES TROIS MORCEAUX"));
+  el.appendChild(svg);   /* dans le DOM avant de mesurer */
+  var mots=[["Le prix total de la tranchée","froid","ce qu'on a cherché"],
+            ["est de","encre2",""],
+            ["81,60","vert","le nombre"],
+            ["€.","chaud","l'unité"]];
+  /* Les largeurs se MESURENT : estimees au nombre de caracteres, les mots se
+     chevauchaient. Meme regle que pour les barres du diagramme des themes. */
+  var x=48;
+  mots.forEach(function(m){
+    var tx=S("text",{x:x,y:Y,"text-anchor":"start","class":"s-lab",
+      fill:V(m[1]==="encre2"?"encre2":"encre"),style:"font-size:21px"},m[0]);
+    svg.appendChild(tx);
+    var w=tx.getComputedTextLength?tx.getComputedTextLength():m[0].length*11;
+    if(m[2]){
+      var r=S("rect",{x:x-7,y:Y-26,width:w+14,height:38,rx:"6",
+        fill:V(m[1]),opacity:"0.16"});
+      svg.insertBefore(r,tx);
+      svg.appendChild(S("line",{x1:x+w/2,y1:Y+20,x2:x+w/2,y2:Y+48,
+        stroke:V(m[1]),"stroke-width":"1.5"}));
+      svg.appendChild(S("text",{x:x+w/2,y:Y+68,"text-anchor":"middle","class":"s-nom",
+        fill:V(m[1])},m[2]));
+    }
+    x+=w+14;
+  });
+  svg.appendChild(S("text",{x:48,y:H-16,"text-anchor":"start","class":"s-pet"},
+    "« 81,6 » tout seul n'est pas une réponse : c'est un nombre trouvé sur une calculatrice"));
+  (el.parentNode||el).appendChild(E("p",{"class":"leg-schema"},
+    "Trois morceaux, et il en manque presque toujours un. <b>L'unité est celui qu'on "+
+    "oublie le plus</b> — et c'est aussi celui qui coûte le plus de points."));
+};
+
+
+
+
+
 
 /* ─── PAC : le point de bivalence, et le piege de la puissance ─── */
 SCHEMAS["bivalence"]=function(el){
