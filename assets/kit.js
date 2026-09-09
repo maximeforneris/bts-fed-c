@@ -4173,6 +4173,343 @@ OUTILS.ecs={
   }
 };
 
+/* ─────────── ou passent les 100 unites de combustible ─────────── */
+SCHEMAS["pertes-chaudiere"]=function(el){
+  barres(el,{
+    titre:"Cent unités de PCI dans une chaudière standard bien réglée",
+    source:"Survolez une ligne. Les six unités de chaleur latente sont "+
+           "celles qu'une chaudière à condensation va chercher.",
+    max:100,
+    lignes:[
+      {n:"Chaleur utile à l'eau",v:88,unite:" %",accent:true,
+       aide:"c'est le rendement sur PCI — 88 %, chaudière standard"},
+      {n:"Fumées : chaleur latente",v:6,unite:" %",detail:"récupérable",
+       aide:"la vapeur d'eau formée par la combustion ; condenser, c'est la reprendre"},
+      {n:"Fumées : chaleur sensible",v:5,unite:" %",
+       aide:"les fumées sortent à 160 ou 180 °C ; c'est le terme de Siegert"},
+      {n:"Parois du corps de chauffe",v:0.8,unite:" %",
+       aide:"le corps rayonne dans le local technique — 3 à 5 % sur un appareil ancien"},
+      {n:"Imbrûlés",v:0.2,unite:" %",
+       aide:"CO et suies ; au-delà de 0,5 %, le brûleur est à régler"}
+    ]});
+};
+
+/* ─────────── la loi d'emission, et la droite qu'on croit suivre ─────────── */
+SCHEMAS["loi-emission"]=function(el){
+  var W=760,H=372,X0=84,X1=700,Y0=44,Y1=300,DMAX=60,FMAX=1.4;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Puissance émise selon l'écart moyen, en puissance 1,3 et en loi linéaire"});
+  el.appendChild(svg);
+  function px(d){return X0+d/DMAX*(X1-X0);}
+  function py(f){return Y1-f/FMAX*(Y1-Y0);}
+  function txt(x,y,t,cls,anc,coul){
+    svg.appendChild(S("text",{x:x,y:y,"text-anchor":anc||"middle",
+      "class":cls||"s-pet",fill:V(coul||"encre2")},t));
+  }
+
+  /* la grille */
+  [0,10,20,30,40,50,60].forEach(function(d){
+    svg.appendChild(S("line",{x1:px(d),y1:Y0,x2:px(d),y2:Y1,
+      stroke:V("trait2"),"stroke-width":"1",opacity:d?"0.5":"1"}));
+    txt(px(d),Y1+22,String(d),"s-pet");
+  });
+  [0,0.25,0.5,0.75,1,1.25].forEach(function(f){
+    svg.appendChild(S("line",{x1:X0,y1:py(f),x2:X1,y2:py(f),
+      stroke:V("trait2"),"stroke-width":"1",opacity:f?"0.5":"1"}));
+    txt(X0-12,py(f)+4,frs(f,2),"s-pet","end");
+  });
+  txt((X0+X1)/2,Y1+46,"écart moyen entre l'eau et l'air, en kelvins","s-nom");
+  txt(X0-4,Y0-16,"Φ / Φ nominal","s-nom","start");
+
+  /* la droite : la regle de trois */
+  var dr=[],co=[];
+  for(var d=0;d<=DMAX;d+=1){
+    dr.push(px(d).toFixed(1)+","+py(d/50).toFixed(1));
+    co.push(px(d).toFixed(1)+","+py(Math.pow(d/50,1.3)).toFixed(1));
+  }
+  svg.appendChild(S("polyline",{points:dr.join(" "),fill:"none",
+    stroke:V("encre2"),"stroke-width":"2","stroke-dasharray":"7 5"}));
+  svg.appendChild(S("polyline",{points:co.join(" "),fill:"none",
+    stroke:V("chaud"),"stroke-width":"3.2","stroke-linejoin":"round"}));
+
+  /* les trois reperes */
+  function point(d,f,coul){
+    svg.appendChild(S("circle",{cx:px(d),cy:py(f),r:"5",fill:V(coul),
+      stroke:V("carte"),"stroke-width":"1.5"}));
+  }
+  point(50,1,"chaud");
+  txt(px(50)-12,py(1)-12,"Δθ = 50 K : le catalogue","s-lab","end","chaud");
+  point(20,Math.pow(0.4,1.3),"chaud");
+  txt(px(20)+14,py(Math.pow(0.4,1.3))+18,"en 45/35 : 0,30","s-lab","start","chaud");
+  point(20,0.4,"encre2");
+  txt(px(20)-14,py(0.4)-12,"règle de trois : 0,40","s-lab","end","encre2");
+
+  /* la legende, dans le coin vide en haut a gauche */
+  svg.appendChild(S("line",{x1:X0+18,y1:Y0+22,x2:X0+58,y2:Y0+22,
+    stroke:V("chaud"),"stroke-width":"3.2"}));
+  txt(X0+66,Y0+27,"loi réelle, en puissance 1,3","s-pet","start");
+  svg.appendChild(S("line",{x1:X0+18,y1:Y0+48,x2:X0+58,y2:Y0+48,
+    stroke:V("encre2"),"stroke-width":"2","stroke-dasharray":"7 5"}));
+  txt(X0+66,Y0+53,"la proportionnalité, fausse ici","s-pet","start");
+
+  var lg=E("p",{"class":"leg-schema"},
+    "Les deux courbes se rejoignent au point catalogue et nulle part ailleurs. "+
+    "<b>En basse température l'écart atteint un tiers</b> : la règle de trois "+
+    "annonce 0,40 là où le radiateur ne donne que 0,30.");
+  (el.parentNode||el).appendChild(lg);
+};
+
+/* ─────────── simple flux et double flux ─────────── */
+SCHEMAS["flux-ventilation"]=function(el){
+  var W=980,H=468;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Ventilation simple flux et double flux : chemin de l'air et récupération"});
+  el.appendChild(svg);
+
+  function txt(x,y,t,cls,anc,coul){
+    svg.appendChild(S("text",{x:x,y:y,"text-anchor":anc||"middle",
+      "class":cls||"s-pet",fill:V(coul||"encre2")},t));
+  }
+  function fleche(x1,y,x2,coul){
+    svg.appendChild(S("line",{x1:x1,y1:y,x2:x2-9,y2:y,stroke:V(coul),
+      "stroke-width":"3","stroke-linecap":"round"}));
+    var s=x2>x1?1:-1;
+    svg.appendChild(S("path",{d:"M "+x2+" "+y+" L "+(x2-s*11)+" "+(y-6)+
+      " L "+(x2-s*11)+" "+(y+6)+" Z",fill:V(coul)}));
+  }
+  function boite(x,y,w,h,t,coul){
+    svg.appendChild(S("rect",{x:x,y:y,width:w,height:h,rx:"5",fill:V(coul),
+      opacity:"0.16",stroke:V(coul),"stroke-width":"1.6"}));
+    txt(x+w/2,y+h/2+5,t,"s-nom");
+  }
+  function ventilateur(cx,cy,coul){
+    svg.appendChild(S("circle",{cx:cx,cy:cy,r:"17",fill:V("carte"),
+      stroke:V(coul),"stroke-width":"1.8"}));
+    svg.appendChild(S("path",{d:"M "+(cx-8)+" "+(cy-8)+" L "+(cx+8)+" "+cy+
+      " L "+(cx-8)+" "+(cy+8)+" Z",fill:V(coul),opacity:"0.8"}));
+  }
+
+  /* ---------- simple flux ---------- */
+  txt(24,44,"SIMPLE FLUX","s-tit","start","tiede");
+  txt(24,66,"Un seul ventilateur, à l'extraction. L'air neuf entre par les menuiseries.","s-pet","start");
+  (function(){
+    var y=124;
+    boite(30,y-26,132,52,"entrée d'air","froid");
+    fleche(168,y,236,"froid");
+    boite(242,y-30,150,60,"logement","tiede");
+    fleche(398,y,462,"tiede");
+    boite(468,y-26,120,52,"bouche","tiede");
+    fleche(594,y,652,"tiede");
+    ventilateur(676,y,"tiede");
+    fleche(700,y,796,"tiede");
+    txt(806,y+5,"rejet","s-nom","start");
+    txt(96,y+46,"menuiserie, débit non traité","s-pet");
+    txt(676,y+38,"caisson","s-pet");
+  })();
+  txt(24,204,"La version hygroréglable est le même schéma : les bouches et les entrées "+
+    "se referment quand l'air est sec.","s-pet","start");
+
+  /* ---------- double flux ---------- */
+  txt(24,254,"DOUBLE FLUX","s-tit","start","vert");
+  txt(24,276,"Deux ventilateurs, et un récupérateur où les deux airs échangent sans se mélanger.","s-pet","start");
+  (function(){
+    var ys=326, yr=386, XR=250, XL=30;
+    /* le recuperateur, traverse par les deux flux */
+    svg.appendChild(S("rect",{x:XR,y:ys-32,width:96,height:(yr-ys)+64,rx:"5",
+      fill:V("vert"),opacity:"0.14",stroke:V("vert"),"stroke-width":"1.8"}));
+    svg.appendChild(S("line",{x1:XR,y1:ys-32,x2:XR+96,y2:yr+32,
+      stroke:V("vert"),"stroke-width":"1.2",opacity:"0.7"}));
+    svg.appendChild(S("line",{x1:XR,y1:yr+32,x2:XR+96,y2:ys-32,
+      stroke:V("vert"),"stroke-width":"1.2",opacity:"0.7"}));
+    txt(XR+48,yr+56,"récupérateur","s-nom","middle","vert");
+    /* le logement */
+    boite(742,ys-30,180,(yr-ys)+60,"logement","tiede");
+    /* soufflage : air neuf froid, puis prechauffe */
+    txt(XL,ys+5,"air neuf","s-nom","start","froid");
+    fleche(96,ys,244,"froid");
+    fleche(352,ys,448,"tiede");
+    ventilateur(474,ys,"tiede");
+    fleche(498,ys,736,"tiede");
+    txt(614,ys-16,"soufflage préchauffé","s-pet");
+    /* reprise : air chaud vers le recuperateur, rejet froid */
+    fleche(736,yr,504,"chaud");
+    ventilateur(478,yr,"chaud");
+    fleche(454,yr,352,"chaud");
+    fleche(244,yr,96,"froid");
+    txt(614,yr+22,"reprise","s-pet");
+    txt(XL,yr+5,"rejet","s-nom","start","froid");
+  })();
+
+  var lg=E("p",{"class":"leg-schema"},
+    "En simple flux, l'air neuf entre froid et rien n'est récupéré. "+
+    "<b>En double flux, l'air rejeté réchauffe l'air neuf</b> avant qu'il "+
+    "n'atteigne la batterie : c'est la puissance calculée au 8.4.");
+  (el.parentNode||el).appendChild(lg);
+};
+
+/* ─────────── boucle ouverte et boucle fermee ─────────── */
+SCHEMAS["boucle-regulation"]=function(el){
+  var W=940,H=384;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Boucle ouverte et boucle fermée : la seconde mesure sa sortie"});
+  el.appendChild(svg);
+
+  function txt(x,y,t,cls,anc,coul){
+    svg.appendChild(S("text",{x:x,y:y,"text-anchor":anc||"middle",
+      "class":cls||"s-pet",fill:V(coul||"encre2")},t));
+  }
+  function fleche(x1,y1,x2,y2,coul){
+    svg.appendChild(S("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:V(coul),
+      "stroke-width":"2.4","stroke-linecap":"round"}));
+    var dx=x2-x1, dy=y2-y1, n=Math.sqrt(dx*dx+dy*dy);
+    dx/=n; dy/=n;
+    var px=-dy, py=dx;
+    svg.appendChild(S("path",{d:"M "+x2+" "+y2+
+      " L "+(x2-10*dx+5*px)+" "+(y2-10*dy+5*py)+
+      " L "+(x2-10*dx-5*px)+" "+(y2-10*dy-5*py)+" Z",fill:V(coul)}));
+  }
+  function boite(x,y,w,h,t,coul){
+    svg.appendChild(S("rect",{x:x,y:y,width:w,height:h,rx:"5",fill:V(coul),
+      opacity:"0.16",stroke:V(coul),"stroke-width":"1.6"}));
+    txt(x+w/2,y+h/2+5,t,"s-nom");
+  }
+
+  /* ---------- boucle ouverte ---------- */
+  (function(){
+    var y=96;
+    txt(24,44,"BOUCLE OUVERTE","s-tit","start","tiede");
+    txt(24,66,"On agit d'après une information extérieure, sans vérifier le résultat.","s-pet","start");
+    txt(30,y+5,"météo","s-nom","start","froid");
+    fleche(96,y,166,y,"froid");
+    boite(172,y-24,146,48,"régulateur","tiede");
+    fleche(324,y,394,y,"tiede");
+    boite(400,y-24,150,48,"organe","tiede");
+    fleche(556,y,626,y,"tiede");
+    boite(632,y-24,150,48,"le local","chaud");
+    fleche(788,y,858,y,"chaud");
+    txt(866,y+5,"θ réelle","s-nom","start","chaud");
+  })();
+
+  /* ---------- boucle fermee ---------- */
+  (function(){
+    var y=264, yb=y+74;
+    txt(24,190,"BOUCLE FERMÉE","s-tit","start","vert");
+    txt(24,212,"On mesure la grandeur réglée et on agit sur l'écart à la consigne.","s-pet","start");
+    txt(30,y+5,"consigne","s-nom","start","froid");
+    fleche(106,y,138,y,"froid");
+    svg.appendChild(S("circle",{cx:154,cy:y,r:"16",fill:V("carte"),
+      stroke:V("encre2"),"stroke-width":"1.8"}));
+    txt(154,y+5,"−","s-nom");
+    txt(154,y-26,"écart","s-pet");
+    fleche(172,y,214,y,"tiede");
+    boite(220,y-24,140,48,"régulateur","tiede");
+    fleche(366,y,412,y,"tiede");
+    boite(418,y-24,140,48,"organe","tiede");
+    fleche(564,y,610,y,"tiede");
+    boite(616,y-24,150,48,"le local","chaud");
+    fleche(772,y,842,y,"chaud");
+    txt(850,y+5,"θ réelle","s-nom","start","chaud");
+    /* le retour de mesure */
+    svg.appendChild(S("polyline",{points:"806,"+y+" 806,"+yb+" 154,"+yb,
+      fill:"none",stroke:V("vert"),"stroke-width":"2.4","stroke-linejoin":"round"}));
+    fleche(154,yb,154,y+18,"vert");
+    txt(480,yb+22,"capteur : la mesure revient au comparateur","s-pet","middle","vert");
+  })();
+
+  var lg=E("p",{"class":"leg-schema"},
+    "<b>La boucle ouverte est rapide et stable</b>, mais aveugle à tout ce "+
+    "qu'elle ne mesure pas. <b>La boucle fermée corrige tout</b>, au prix d'un "+
+    "risque d'oscillation. Une installation correcte emploie les deux.");
+  (el.parentNode||el).appendChild(lg);
+};
+
+/* ─────────── bitube, monotube, pieuvre ─────────── */
+SCHEMAS["topologies-hydro"]=function(el){
+  var W=1020,H=330;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Trois architectures de distribution : bitube, monotube et pieuvre"});
+  el.appendChild(svg);
+
+  function txt(x,y,t,cls,anc,coul){
+    svg.appendChild(S("text",{x:x,y:y,"text-anchor":anc||"middle",
+      "class":cls||"s-pet",fill:V(coul||"encre2")},t));
+  }
+  function tube(x1,y1,x2,y2,coul,ep){
+    svg.appendChild(S("line",{x1:x1,y1:y1,x2:x2,y2:y2,stroke:V(coul),
+      "stroke-width":ep||3,"stroke-linecap":"round"}));
+  }
+  /* un emetteur : fond de carte d'abord, pour que le tube ne le traverse pas */
+  function radiateur(cx,cy,coul){
+    var w=46,h=34,x=cx-w/2,y=cy-h/2;
+    svg.appendChild(S("rect",{x:x,y:y,width:w,height:h,rx:"3",fill:V("carte")}));
+    svg.appendChild(S("rect",{x:x,y:y,width:w,height:h,rx:"3",fill:V(coul),
+      opacity:"0.18",stroke:V(coul),"stroke-width":"1.6"}));
+    for(var i=1;i<=3;i++)
+      svg.appendChild(S("line",{x1:x+i*w/4,y1:y+5,x2:x+i*w/4,y2:y+h-5,
+        stroke:V(coul),"stroke-width":"1.2"}));
+  }
+
+  var YT=40, YC=302, YD=96, YR=236, YM=166;
+
+  /* ---------- 1. bitube ---------- */
+  (function(){
+    var X0=24,X1=310, xs=[80,167,254];
+    txt((X0+X1)/2,YT,"BITUBE","s-tit","middle","chaud");
+    tube(X0,YD,X1,YD,"chaud");
+    tube(X0,YR,X1,YR,"froid");
+    txt(X0,YD-12,"départ","s-pet","start");
+    txt(X0,YR+22,"retour","s-pet","start");
+    xs.forEach(function(x){
+      tube(x,YD,x,YM-17,"chaud",2.2);
+      tube(x,YM+17,x,YR,"froid",2.2);
+      radiateur(x,YM,"chaud");
+    });
+    txt((X0+X1)/2,YC,"Tous reçoivent la même température de départ.");
+  })();
+
+  /* ---------- 2. monotube ---------- */
+  (function(){
+    var X0=356,X1=642, xs=[400,499,598], cs=["chaud","tiede","tiede"];
+    txt((X0+X1)/2,YT,"MONOTUBE","s-tit","middle","tiede");
+    /* la boucle : aller par les emetteurs, retour par le bas */
+    tube(X0,YM,xs[0]-23,YM,"chaud");
+    tube(xs[0]+23,YM,xs[1]-23,YM,"tiede");
+    tube(xs[1]+23,YM,xs[2]-23,YM,"tiede");
+    tube(xs[2]+23,YM,X1,YM,"froid");
+    tube(X1,YM,X1,YR,"froid");
+    tube(X1,YR,X0,YR,"froid");
+    txt(X0,YM-16,"départ","s-pet","start");
+    txt(X0,YR+22,"retour unique","s-pet","start");
+    xs.forEach(function(x,i){radiateur(x,YM,cs[i]);});
+    txt((X0+X1)/2,YC,"Le dernier reçoit une eau déjà refroidie.");
+  })();
+
+  /* ---------- 3. pieuvre ---------- */
+  (function(){
+    var X0=688,X1=996, xc=716, xr=948, ys=[106,166,226];
+    txt((X0+X1)/2,YT,"PIEUVRE","s-tit","middle","vert");
+    /* le collecteur : deux nourrices superposees */
+    svg.appendChild(S("rect",{x:xc-12,y:120,width:24,height:38,rx:"4",
+      fill:V("chaud"),opacity:"0.20",stroke:V("chaud"),"stroke-width":"1.6"}));
+    svg.appendChild(S("rect",{x:xc-12,y:176,width:24,height:38,rx:"4",
+      fill:V("froid"),opacity:"0.20",stroke:V("froid"),"stroke-width":"1.6"}));
+    txt(xc,112,"collecteur","s-pet");
+    ys.forEach(function(y){
+      tube(xc+12,139,xr-23,y-8,"chaud",2.2);
+      tube(xc+12,195,xr-23,y+8,"froid",2.2);
+      radiateur(xr,y,"chaud");
+    });
+    txt((X0+X1)/2,YC,"Une liaison par émetteur, aucun raccord noyé.");
+  })();
+
+  var lg=E("p",{"class":"leg-schema"},
+    "Les trois desservent les mêmes émetteurs. <b>Le bitube</b> est "+
+    "l'architecture normale ; <b>le monotube</b> économise du tube et impose "+
+    "de surdimensionner les derniers émetteurs ; <b>la pieuvre</b> s'équilibre "+
+    "au collecteur et ne noie aucun raccord.");
+  (el.parentNode||el).appendChild(lg);
+};
+
 /* ─────────── retour direct contre retour inverse ─────────── */
 SCHEMAS["retour-inverse"]=function(el){
   var W=760,H=300;

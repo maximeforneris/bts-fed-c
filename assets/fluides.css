@@ -1,0 +1,541 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FLUIDES — charte v2 du site BTS FED option C. Ne remplace rien : elle
+   vit dans _test-design/site-fed-v2, à côté du site en service.
+
+   Le monde est celui du génie climatique : le diagramme enthalpique, le
+   repérage normalisé des réseaux, le schéma de principe. Rien n'y est
+   décoratif — le cycle tracé en tête de l'accueil est un vrai cycle, les
+   couleurs de séquence sont un vrai code de réseau, et la frise est un
+   vrai sens d'écoulement.
+
+   Écrit le 8 septembre 2026.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(polices/barlow-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(polices/barlow-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(polices/barlow-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(polices/barlow-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(polices/barlow-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(polices/barlow-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(polices/barlow-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(polices/barlow-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(polices/barlow-semi-condensed-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(polices/barlow-semi-condensed-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(polices/barlow-semi-condensed-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(polices/barlow-semi-condensed-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(polices/barlow-semi-condensed-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(polices/barlow-semi-condensed-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(polices/chivo-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(polices/chivo-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  /* le fond de plan */
+  --fond:#e8eae6;
+  --carte:#f7f8f5;
+  --carte2:#eceee9;
+  --encre:#16181a;
+  --encre2:#535a5e;
+  --trait:#a9b0af;
+  --trait2:#ccd2cf;
+
+  /* Le repérage des réseaux. Cinq séquences, cinq fluides : ce n'est pas
+     une palette de série, c'est un code de tuyauterie. */
+  --r1:#c1392b;   /* chauffage, départ */
+  --r2:#2a6497;   /* chauffage, retour */
+  --r3:#1f8f97;   /* eau glacée */
+  --r4:#5a8a35;   /* air soufflé */
+  --r5:#7a4fa3;   /* fluide frigorigène */
+
+  --froid:#2a6497;
+  --tiede:#8a6414;
+  --chaud:#c1392b;
+  --vert:#2f7448;
+  --violet:#7a4fa3;
+  --ombre:0 1px 0 rgba(22,24,26,.12);
+  --r:0px;
+  --teinte:var(--r1);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#101314;--carte:#181c1d;--carte2:#1f2425;--encre:#e9edeb;--encre2:#98a2a4;
+    --trait:#39413f;--trait2:#262c2c;
+    --r1:#e2675a;--r2:#5d9ccd;--r3:#3fc0c7;--r4:#8cc45f;--r5:#b48ada;
+    --froid:#5d9ccd;--chaud:#e2675a;--vert:#5fbd82;--violet:#b48ada;
+    --ombre:0 1px 0 rgba(0,0,0,.6);
+  }
+}
+
+/* ─── les polices, reposées sélecteur par sélecteur ─── */
+body{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3,h4,.gro{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+.mono,code{font-family:"Chivo Mono",ui-monospace,monospace}
+header.tete .num{font-family:Barlow,sans-serif}
+.sur{font-family:"Chivo Mono",monospace}
+/* ce que la page contient — la meme information que sur les cartes de la frise */ .contenu{font-family:"Chivo Mono",monospace}
+.k-savoirs{font-family:"Chivo Mono",monospace}
+.tag{font-family:"Chivo Mono",monospace}
+nav.somm a{font-family:Barlow,sans-serif}
+.formule>p:first-child{font-family:"Chivo Mono",monospace}
+.formule li strong:first-child{font-family:"Chivo Mono",monospace}
+.piege::before{font-family:Barlow,sans-serif}
+.etapes li::before{font-family:"Chivo Mono",monospace}
+.mission>p:first-child strong{font-family:Barlow,sans-serif}
+figcaption{font-family:Barlow,sans-serif}
+.s-nom{font-family:Barlow,sans-serif}
+.s-pet{font-family:"Chivo Mono",monospace}
+.s-lab{font-family:"Chivo Mono",monospace}
+.s-tit{font-family:Barlow,sans-serif}
+.replis>.chapeau{font-family:Barlow,sans-serif}
+.titre-appro{font-family:Barlow,sans-serif}
+.etiq{font-family:"Chivo Mono",monospace}
+th{font-family:Barlow,sans-serif}
+.quiz>.chapeau{font-family:Barlow,sans-serif}
+.qq button{font-family:"Chivo Mono",monospace}
+.score{font-family:"Chivo Mono",monospace}
+.outil .k{font-family:"Chivo Mono",monospace}
+.chaine{font-family:"Chivo Mono",monospace}
+.champ .v{font-family:"Chivo Mono",monospace}
+input[type=number],select{font-family:"Chivo Mono",monospace}
+.bt{font-family:Barlow,sans-serif}
+.lignec .rr{font-family:"Chivo Mono",monospace}
+.entete-c{font-family:Barlow,sans-serif}
+.res .gros{font-family:"Chivo Mono",monospace}
+.res .gros b{font-family:Barlow,sans-serif}
+.barre .p{font-family:"Chivo Mono",monospace}
+.case-sym span{font-family:Barlow,sans-serif}
+.s-sym{font-family:"Chivo Mono",monospace}
+.s-rep{font-family:"Chivo Mono",monospace}
+.exo>.k{font-family:"Chivo Mono",monospace}
+.exo input[type=text]{font-family:"Chivo Mono",monospace}
+.exo textarea{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+.exo .unite{font-family:"Chivo Mono",monospace}
+.exo .btn{font-family:Barlow,sans-serif}
+.exo .indice::before{font-family:Barlow,sans-serif}
+.bilan-epreuve .compte{font-family:Barlow,sans-serif}
+/* ═══════════════════════════════════════════════════════════════════════    SITE — l'enveloppe de navigation autour des pages du kit.    Elle vient APRES kit.css et n'en redefinit aucune variable : les couleurs,    les polices et le mode sombre sont ceux du kit. Ne pas la dupliquer dans    un sous-projet. Voir GUIDE-SITE.md.    ═══════════════════════════════════════════════════════════════════════ */  /* ─────────────────────────────────────────────── barre de site    Elle defile avec la page : le sommaire de seance, lui, est colle en haut    (kit.css). Deux barres collantes se marchent dessus.     Elle s'appelait « barre » tout court, et kit.css nomme deja ainsi les    barres de ses graphiques : site.css etant chargee ensuite, elle ecrasait    leur grille a trois colonnes. Un nom de classe partage entre deux feuilles    ne pardonne pas — d'ou le suffixe. */ .barre-site{font-family:Barlow,sans-serif}
+/* .pas-pas : remplace par .fleches, plus bas */ .barre-site .lu{font-family:inherit}
+.chercher input{font-family:Barlow,sans-serif}
+.resultats a{font-family:Barlow,sans-serif}
+.resultats .ou{font-family:"Chivo Mono",monospace}
+.raccourcis a{font-family:Barlow,sans-serif}
+.espace>.compte{font-family:"Chivo Mono",monospace}
+.frise .n{font-family:"Chivo Mono",monospace}
+.frise .t{font-family:Barlow,sans-serif}
+.frise .meta{font-family:"Chivo Mono",monospace}
+.recap{font-family:Barlow,sans-serif}
+.outils-grille .t{font-family:Barlow,sans-serif}
+.outils-grille .ou{font-family:"Chivo Mono",monospace}
+/* ─────────────────────────────────────────────── banque d'exercices    Un repertoire, pas une copie : chaque ligne renvoie a la seance qui porte    l'exercice. */ .filtres{font-family:Barlow,sans-serif}
+.filtres select{font-family:inherit}
+.exo-ligne a{font-family:Barlow,sans-serif}
+.exo-ligne .ou{font-family:"Chivo Mono",monospace}
+.exo-ligne .etat{font-family:"Chivo Mono",monospace}
+.partie .n{font-family:"Chivo Mono",monospace}
+.partie .t{font-family:Barlow,sans-serif}
+.partie .meta{font-family:"Chivo Mono",monospace}
+.partie .sv{font-family:"Chivo Mono",monospace}
+.partie .rep{font-family:"Chivo Mono",monospace}
+.chiffres b{font-family:Barlow,sans-serif}
+.chiffres span{font-family:"Chivo Mono",monospace}
+.porte .n{font-family:"Chivo Mono",monospace}
+.porte .t{font-family:Barlow,sans-serif}
+/* ─────────────────────────────────────────────── reprendre la lecture */ .reprendre{font-family:Barlow,sans-serif}
+.sequence .rang{font-family:"Chivo Mono",monospace}
+/* l'avancement de lecture, posé par site.js */ .sequence .jauge{font-family:"Chivo Mono",monospace}
+.chapeau-f{font-family:"Chivo Mono",monospace}
+.grille-f .k{font-family:"Chivo Mono",monospace}
+.grille-f .t{font-family:Barlow,sans-serif}
+/* ─────────────────────────────────────────────── le fil de séquence */ .barre-site .fil{font-family:"Chivo Mono",monospace}
+.chapeau-s{font-family:"Chivo Mono",monospace}
+.pas-a-pas .k{font-family:"Chivo Mono",monospace}
+.pas-a-pas .t{font-family:Barlow,sans-serif}
+.vers-recap{font-family:Barlow,sans-serif}
+.theme-outils .rang{font-family:"Chivo Mono",monospace}
+/* ─────────────────────────────────────────────── exercices, par savoir */ .avancee{font-family:"Chivo Mono",monospace}
+.seg{font-family:Barlow,sans-serif}
+.titre-savoir .code{font-family:"Chivo Mono",monospace}
+.exo-ligne .genre{font-family:"Chivo Mono",monospace}
+.exo-ligne a{font-family:Barlow,sans-serif}
+.suggestions .ou{font-family:"Chivo Mono",monospace}
+.recap.tenu{font-family:Barlow,sans-serif}
+
+.page,table,.res,.champ .v,.frise .n,.compteur,.espace>.compte,.rang{
+  font-variant-numeric:tabular-nums;
+}
+
+/* ═══ PIÈCE 1 — LE DIAGRAMME ENTHALPIQUE ══════════════════════════════
+   Dessiné à la main, pas emprunté : la courbe de saturation, deux isobares
+   et le cycle 1-2-3-4 tracé dessus. Compression du point 1 vers 2,
+   condensation horizontale à haute pression, détente isenthalpique à la
+   verticale, évaporation horizontale à basse pression. C'est l'instrument
+   du diplôme, posé en tête de l'accueil — et il est juste. */
+.page[data-site]:not([data-page]) header.tete{
+  position:relative;padding-right:clamp(0px,26vw,330px);
+}
+.page[data-site]:not([data-page]) header.tete::after{
+  content:"";position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  width:clamp(0px,24vw,300px);aspect-ratio:16/10;
+  background-repeat:no-repeat;background-position:center;background-size:contain;
+  background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><g fill='none' stroke='%23a9b0af' stroke-width='1'><path d='M28 178 H300'/><path d='M28 178 V16'/></g><g fill='none' stroke='%23ccd2cf' stroke-width='1' stroke-dasharray='3 3'><path d='M28 70 H300'/><path d='M28 150 H300'/></g><path d='M70 170 C86 112 112 58 150 40 C190 58 228 112 245 170' fill='none' stroke='%2316181a' stroke-width='1.8'/><circle cx='150' cy='40' r='2.6' fill='%2316181a'/><g fill='none' stroke='%231f8f97' stroke-width='2.4' stroke-linejoin='round'><path d='M232 150 L268 70'/><path d='M268 70 H100'/><path d='M100 70 V150'/><path d='M100 150 H232'/></g><g fill='%231f8f97'><circle cx='232' cy='150' r='3.6'/><circle cx='268' cy='70' r='3.6'/><circle cx='100' cy='70' r='3.6'/><circle cx='100' cy='150' r='3.6'/></g><g font-family='monospace' font-size='10' fill='%2316181a'><text x='236' y='165'>1</text><text x='274' y='66'>2</text><text x='90' y='66'>3</text><text x='88' y='163'>4</text></g><g font-family='monospace' font-size='9' fill='%23535a5e'><text x='300' y='192' text-anchor='end'>h</text><text x='22' y='20' text-anchor='end'>p</text></g></svg>");
+  opacity:.92;pointer-events:none;
+}
+@media (max-width:780px){
+  .page[data-site]:not([data-page]) header.tete{padding-right:22px;padding-bottom:190px}
+  .page[data-site]:not([data-page]) header.tete::after{
+    right:auto;left:20px;top:auto;bottom:16px;transform:none;width:min(300px,80%);
+  }
+}
+
+/* ─── la plaque signalétique ─── */
+header.tete{
+  background:var(--carte);border:1px solid var(--encre);
+  border-top:5px solid var(--teinte);
+  padding:26px 22px 22px;margin-top:16px;
+}
+header.tete .sur{
+  font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;
+  font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--encre2);
+}
+header.tete h1{letter-spacing:-.015em}
+header.tete h1 span{color:var(--encre2)}
+
+/* ═══ PIÈCE 2 — LE REPÉRAGE DES RÉSEAUX ═══════════════════════════════
+   Chaque séquence est un réseau. La bande colorée et sa flèche de sens
+   sont le repérage normalisé qu'ils lisent sur une tuyauterie. */
+.sequence{position:relative;padding-left:26px;margin-top:34px}
+.sequence[data-rang="1"]{--teinte:var(--r1)}
+.sequence[data-rang="2"]{--teinte:var(--r2)}
+.sequence[data-rang="3"]{--teinte:var(--r3)}
+.sequence[data-rang="4"]{--teinte:var(--r4)}
+.sequence[data-rang="5"]{--teinte:var(--r5)}
+
+/* la conduite : bande de repérage pleine hauteur, avec le sens d'écoulement */
+.sequence::before{
+  content:"";position:absolute;left:0;top:6px;bottom:6px;width:11px;
+  background:var(--teinte);
+}
+.sequence::after{
+  content:"";position:absolute;left:0;top:6px;width:11px;height:11px;
+  background:var(--carte);
+  clip-path:polygon(0 0,100% 0,50% 100%);
+}
+.sequence>.rang{
+  font-family:"Barlow Semi Condensed",sans-serif;font-weight:700;
+  font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--teinte);margin:0 0 3px;
+}
+.sequence>.rang span{
+  font-weight:500;letter-spacing:.06em;color:var(--encre2);margin-left:9px;
+  text-transform:none;
+}
+.sequence>h3{
+  margin:0;font-size:23px;font-weight:700;letter-spacing:-.015em;color:var(--encre);
+}
+.sequence>.quoi{color:var(--encre2);max-width:66ch}
+
+/* ═══ PIÈCE 3 — LA FRISE COMME LIGNE DE CIRCUIT ═══════════════════════
+   Les séances sont des organes montés sur la conduite. Le raccord à gauche
+   les relie ; ce qui n'est pas produit est un tronçon non encore posé. */
+.frise{
+  display:block;grid-template-columns:none;gap:0;padding:0;margin:12px 0 0;
+  position:relative;
+}
+.frise li{position:relative;margin:0}
+.frise a,.frise .vide{
+  display:grid;grid-template-columns:104px 1fr;align-items:baseline;gap:0 16px;
+  height:auto;padding:12px 10px 12px 26px;border:0;border-radius:0;
+  background:none;box-shadow:none;text-decoration:none;
+  border-bottom:1px solid var(--trait2);
+}
+.frise li:last-child a,.frise li:last-child .vide{border-bottom:0}
+.frise a:hover{background:var(--carte)}
+
+/* le piquage : chaque organe est raccordé à la conduite */
+.frise li::before{
+  content:"";position:absolute;left:0;top:50%;width:16px;height:1px;
+  background:var(--trait);
+}
+.frise li::after{
+  content:"";position:absolute;left:15px;top:50%;width:7px;height:7px;
+  margin-top:-3.5px;border:1px solid var(--trait);border-radius:50%;
+  background:var(--carte);
+}
+.frise .n{
+  grid-column:1;font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;
+  font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);
+}
+.frise .t{grid-column:2;font-weight:600;font-size:16.5px;color:var(--encre)}
+.frise .meta{
+  grid-column:2;font-family:"Chivo Mono",monospace;font-size:11.5px;
+  color:var(--encre2);
+}
+
+/* ═══ PIÈCE 4 — LE REGARD DE LIQUIDE ══════════════════════════════════
+   L'état « lu » n'est pas une coche : c'est le voyant du circuit, un
+   regard dont le témoin a viré. Le geste existe sur une installation. */
+.frise li.lu::after{
+  border-color:var(--teinte);background:var(--teinte);
+  box-shadow:0 0 0 2px var(--carte),0 0 0 3px var(--teinte);
+}
+.frise li.lu .t{color:var(--encre2)}
+
+/* le tronçon non posé : hachure de plan, jamais un lien mort */
+.frise .vide{
+  background:repeating-linear-gradient(
+    45deg,var(--trait2) 0 5px,transparent 5px 10px);
+}
+.frise .vide .t{color:var(--encre2);font-weight:500}
+.frise .vide .meta{
+  display:inline-block;background:var(--carte);padding:1px 7px;
+  border:1px solid var(--trait);
+}
+.frise li:has(.vide)::after{border-style:dashed;background:transparent}
+
+/* le récapitulatif de séquence : une vanne en bout de ligne */
+.recap{
+  display:inline-block;margin-top:11px;border:1px solid var(--encre);
+  border-radius:0;background:var(--carte);padding:8px 14px;
+  font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;
+  letter-spacing:.06em;
+}
+.recap:hover{background:var(--carte2);border-color:var(--teinte)}
+
+/* ─── les portes et la recherche ─── */
+.chercher input{
+  min-height:52px;font-size:17px;background:var(--carte);color:var(--encre);
+  border:1px solid var(--encre);border-radius:0;padding:0 15px;
+}
+.chercher input::placeholder{color:var(--encre2);opacity:1}
+.chercher input:focus{outline:none;box-shadow:inset 0 0 0 2px var(--r3)}
+nav.portes .porte{
+  background:var(--carte);border:1px solid var(--encre);border-radius:0;
+  box-shadow:none;border-left:5px solid var(--r3);
+}
+nav.portes .porte::before{display:none}
+nav.portes .porte:hover{background:var(--carte2)}
+
+/* ─── les fiches transversales ─── */
+.espace>h2{
+  font-weight:700;letter-spacing:-.015em;
+  padding-bottom:9px;border-bottom:1px solid var(--encre);
+}
+.chapeau-f{
+  font-family:"Barlow Semi Condensed",sans-serif;font-weight:600;font-size:12.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--encre2);
+}
+.grille-f{grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:0}
+.grille-f a{
+  border:0;border-bottom:1px solid var(--trait2);border-radius:0;
+  background:none;box-shadow:none;padding:13px 16px 13px 0;
+}
+.grille-f a:hover{background:var(--carte)}
+.grille-f a .k{
+  font-family:"Barlow Semi Condensed",sans-serif;font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--encre2);
+}
+.grille-f a .t{font-weight:600;font-size:16.5px;color:var(--encre)}
+.grille-f a .d{color:var(--encre2);font-size:14.5px}
+
+/* ─── marquer comme lu : ouvrir la vanne ─── */
+.barre-site .lu{
+  border:1px solid var(--encre);border-radius:0;color:var(--encre);
+  background:var(--carte);min-height:38px;padding:6px 14px;
+}
+.barre-site .lu[aria-pressed="true"]{
+  background:var(--r3);border-color:var(--r3);color:#fff;
+}
+.barre-site .lu[aria-pressed="true"]::before{content:none}
+
+/* ─── surfaces du navigateur ─── */
+::selection{background:var(--r3);color:#fff}
+input,textarea{caret-color:var(--r3)}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--r3);outline-offset:2px;
+}
+a{text-underline-offset:3px;text-decoration-thickness:1px}
+html{scrollbar-color:var(--trait) var(--fond);scrollbar-width:thin}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important}
+}
+
+/* ═══ PIÈCE 5 — LE DIAGRAMME DE L'AIR HUMIDE ═══════════════════════════
+   Posé sur la séquence 4, « Traitement d'air », et sur elle seule. La courbe
+   de saturation, puis 50 % et 30 % obtenues en abaissant la teneur en eau à
+   température égale — c'est ainsi qu'un diagramme s'ouvre en éventail. Le
+   traitement d'hiver en trois temps : préchauffage à w constant, humidification
+   adiabatique vers la saturation, réchauffage. États repérés E, A, B, S.
+
+   Il n'apparaît qu'au-delà de 1040 px : en dessous la place manque, et un
+   schéma illisible vaut moins que pas de schéma. */
+@media (min-width:1040px){
+  .sequence[data-rang="4"]{
+    padding-right:352px;
+    background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><g fill='none' stroke='%23a9b0af' stroke-width='1'><path d='M34 182 H296'/><path d='M288 182 V26'/></g><g fill='none' stroke='%23ccd2cf' stroke-width='1'><path d='M40 178 C100 175 140 165 175 148 C210 130 248 116 270 106'/><path d='M40 178 C100 176 140 170 175 159 C210 148 248 140 270 135'/></g><path d='M40 178 C100 172 140 152 175 116 C210 80 245 52 268 34' fill='none' stroke='%2316181a' stroke-width='1.8'/><g fill='none' stroke='%235a8a35' stroke-width='2.4' stroke-linejoin='round'><path d='M72 172 H168'/><path d='M168 172 L140 152'/><path d='M140 152 H238'/></g><g fill='%235a8a35'><circle cx='72' cy='172' r='3.4'/><circle cx='168' cy='172' r='3.4'/><circle cx='140' cy='152' r='3.4'/><circle cx='238' cy='152' r='3.4'/></g><g font-family='monospace' font-size='10' fill='%2316181a'><text x='66' y='190'>E</text><text x='164' y='190'>A</text><text x='128' y='149'>B</text><text x='242' y='148'>S</text></g><g font-family='monospace' font-size='9' fill='%23535a5e'><text x='183' y='96'>100</text><text x='232' y='118'>50</text><text x='262' y='130'>30</text><text x='292' y='196' text-anchor='end'>t</text><text x='294' y='32'>w</text></g></svg>");
+    background-repeat:no-repeat;
+    background-position:right 6px top 4px;
+    background-size:322px auto;
+    min-height:216px;
+  }
+  .sequence[data-rang="4"]>.quoi{max-width:none}
+}
+
+/* La PIÈCE 6 — mon schéma de CTA — est retirée le 8 septembre 2026.
+   Il existe déjà une planche, dans BTS FED C/13-projet-banc-air/banc-cta-complet.html :
+   vingt et un repères sur deux lignes, récupérateur au milieu, extensions en tirets,
+   organes clicables. Elle est meilleure, et en dessiner une seconde était une erreur. */
+
+/* ═══ PIÈCE 6 — LA PHOTO, DANS LA GOUTTIÈRE ════════════════════
+   Détourée et déplacée le 9 septembre 2026 : en bas de la colonne elle coupait la lecture
+   en deux avec sa dalle blanche. Elle passe dans la gouttière de droite, sous
+   le diagramme de l'air humide — la colonne de texte redevient continue, et
+   les deux images de la séquence se lisent ensemble.
+   Le fond de studio est retiré : la machine se pose sur la chaussée au lieu
+   d'arriver dans un rectangle blanc. Remplissage par diffusion depuis les
+   quatre coins, seuil 26, alpha adouci de 0,6 px — 36,5 % de l'image était du
+   fond. L'ombre de studio est partie avec lui, ce qui est voulu : elle
+   appartenait à la photo, pas à la page.
+   Légende et crédit portés par le `content` du pseudo-élément. */
+@media (min-width:1040px){
+  .sequence[data-rang="4"]{min-height:498px}
+  .sequence[data-rang="4"] .frise::after{
+    content:"Centrale double flux Swegon GOLD E — caisson ouvert sur le "
+            "ventilateur et le récupérateur à plaques. Photo Swegon.";
+    position:absolute;top:246px;right:-338px;width:322px;
+    padding:212px 0 0;
+    background:url(img/cta-swegon-detouree.png) no-repeat top center/auto 200px;
+    font-size:12px;line-height:1.4;color:var(--encre2);
+  }
+}
+/* sous 1040 px il n'y a pas de gouttière : elle repasse en bas de bloc, mais
+   pleine largeur cette fois, ce qui évite la dalle blanche calée à gauche */
+@media (min-width:620px) and (max-width:1039px){
+  .sequence[data-rang="4"] .frise::after{
+    content:"Centrale double flux Swegon GOLD E. Photo Swegon.";
+    display:block;margin:18px 0 4px;padding:216px 0 0;
+    background:url(img/cta-swegon-detouree.png) no-repeat top center/auto 204px;
+    border-top:1px solid var(--trait2);
+    font-size:12px;color:var(--encre2);text-align:center;
+  }
+}
+
+/* ═══ PIÈCE 7 — LA GOUTTIÈRE DES CINQ SÉQUENCES ═══════════════════════
+   Ce qui n'était qu'une exception sur la séquence 4 devient la structure :
+   chaque séquence garde une colonne de droite où vit son image, légende et
+   crédit dessous. La colonne de gauche reste continue.
+
+   Les images de trait sont posées en `background-blend-mode: multiply` sur
+   la couleur de la chaussée : leur fond blanc disparaît sans détourage, et
+   le texte de la légende n'est pas affecté — c'est le fond du pseudo-élément
+   qui se mélange, pas l'élément entier.
+
+   Trois séquences sur cinq seulement : la 3 n'a pas d'image qui tienne, et
+   une mauvaise vaut moins que rien. Provenance dans img/CREDITS.md. */
+@media (min-width:1040px){
+  .sequence[data-rang="1"],
+  .sequence[data-rang="2"],
+  .sequence[data-rang="3"],
+  .sequence[data-rang="5"]{padding-right:352px}
+
+  .sequence[data-rang="1"] .frise::after,
+  .sequence[data-rang="2"] .frise::after,
+  .sequence[data-rang="3"] .frise::after,
+  .sequence[data-rang="5"] .frise::after{
+    position:absolute;right:-338px;top:6px;width:322px;
+    background-repeat:no-repeat;background-position:top center;
+    background-color:var(--fond);background-blend-mode:multiply;
+    font-size:12px;line-height:1.4;color:var(--encre2);
+  }
+
+  .sequence[data-rang="1"] .frise::after{
+    content:"Une paroi à trois couches : les conductivités et les épaisseurs en "
+            "haut, le profil de température qui la traverse, et dessous la même "
+            "paroi en résistances en série. Ellande, CC BY-SA 4.0.";
+    padding-top:240px;
+    background-image:url(img/seq1-paroi-resistances.jpg);
+    background-size:308px auto;
+  }
+  .sequence[data-rang="2"] .frise::after{
+    content:"Bouteille de découplage : deux chaudières à gauche, trois "
+            "circuits à droite, et le primaire séparé du secondaire. "
+            "Rainer Sielker, domaine public.";
+    padding-top:186px;
+    background-image:url(img/seq2-bouteille-decouplage.jpg);
+    background-size:318px auto;
+  }
+  .sequence[data-rang="5"] .frise::after{
+    content:"Le matériel derrière le mot GTB : régulateurs, sondes, "
+            "actionneurs et vannes motorisées. Mstucky2, CC BY-SA 3.0.";
+    padding-top:300px;
+    background-image:url(img/seq5-gtb-controleurs.jpg);
+    background-size:276px auto;
+  }
+
+  /* La séquence 3 : l'intérieur d'une unité extérieure de PAC air/eau. Photo
+     réelle, donc pas de `multiply` — elle n'a pas de fond blanc à faire
+     disparaître, et le cadre est entièrement rempli par la machine. */
+  .sequence[data-rang="3"] .frise::after{
+    content:"L'intérieur d'une unité extérieure de PAC air/eau : le compresseur "
+            "en bas, le faisceau de tubes cuivre et les vannes de service. "
+            "PeterEastern, CC BY-SA 4.0.";
+    padding-top:326px;
+    background-image:url(img/seq3-pac-compresseur.jpg);
+    background-size:284px auto;
+    background-blend-mode:normal;
+  }
+  .sequence[data-rang="3"]{min-height:420px}
+
+  /* la séquence doit être assez haute pour porter sa colonne */
+  .sequence[data-rang="1"]{min-height:340px}
+  .sequence[data-rang="2"]{min-height:290px}
+  .sequence[data-rang="5"]{min-height:400px}
+}
+
+/* ═══ PIÈCE 8 — LES QUATRE PORTES NE SE CASSENT PLUS EN 3 + 1 ═════════
+   Le kit pose `repeat(auto-fit, minmax(250px, 1fr))`. Quatre colonnes
+   demandent alors 4 × 250 + 3 × 12 = 1036 px, or la page n'en offre que
+   1013 à 1120 px de viewport : la grille tombe à trois colonnes et la
+   quatrième porte se retrouve seule sur son rang.
+
+   Mesuré : le déséquilibre couvre 866 à 1144 px de viewport — c'est-à-dire
+   la plage de la plupart des portables.
+
+   On sort donc d'`auto-fit`, qui décide seul, pour des comptes explicites :
+   quatre, puis deux, puis une. Jamais trois, donc jamais d'orphelin. */
+nav.portes{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:1150px){
+  nav.portes{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  nav.portes{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ═══ PIÈCE 9 — LA LECTURE DE NUIT ════════════════════════════════════
+   Vérifiée le 9 septembre 2026, et elle était cassée en deux endroits.
+
+   1. Les deux tracés SVG portaient leur encre en dur (#16181a) : sur fond
+      noir, la courbe de saturation et les axes disparaissaient, il ne
+      restait que le cycle coloré flottant dans le vide. Ils ont donc une
+      variante de nuit, même géométrie, encre claire.
+
+   2. Les trois images posées en `multiply` devenaient presque noires :
+      multiplier un dessin contre un fond sombre l'éteint. De nuit elles
+      reprennent donc leur fond clair et deviennent des planches de papier
+      posées sur le plan — ce qui est plus honnête qu'un dessin délavé. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .page[data-site]:not([data-page]) header.tete::after{
+    background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><g fill='none' stroke='%233a413f' stroke-width='1'><path d='M28 178 H300'/><path d='M28 178 V16'/></g><g fill='none' stroke='%232a3130' stroke-width='1' stroke-dasharray='3 3'><path d='M28 70 H300'/><path d='M28 150 H300'/></g><path d='M70 170 C86 112 112 58 150 40 C190 58 228 112 245 170' fill='none' stroke='%23e9edeb' stroke-width='1.8'/><circle cx='150' cy='40' r='2.6' fill='%23e9edeb'/><g fill='none' stroke='%233fc0c7' stroke-width='2.4' stroke-linejoin='round'><path d='M232 150 L268 70'/><path d='M268 70 H100'/><path d='M100 70 V150'/><path d='M100 150 H232'/></g><g fill='%233fc0c7'><circle cx='232' cy='150' r='3.6'/><circle cx='268' cy='70' r='3.6'/><circle cx='100' cy='70' r='3.6'/><circle cx='100' cy='150' r='3.6'/></g><g font-family='monospace' font-size='10' fill='%23e9edeb'><text x='236' y='165'>1</text><text x='274' y='66'>2</text><text x='90' y='66'>3</text><text x='88' y='163'>4</text></g><g font-family='monospace' font-size='9' fill='%2398a2a4'><text x='300' y='192' text-anchor='end'>h</text><text x='22' y='20' text-anchor='end'>p</text></g></svg>");
+  }
+  :root:not([data-theme="light"]) .sequence[data-rang="4"]{
+    background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'><g fill='none' stroke='%233a413f' stroke-width='1'><path d='M34 182 H296'/><path d='M288 182 V26'/></g><g fill='none' stroke='%232a3130' stroke-width='1'><path d='M40 178 C100 175 140 165 175 148 C210 130 248 116 270 106'/><path d='M40 178 C100 176 140 170 175 159 C210 148 248 140 270 135'/></g><path d='M40 178 C100 172 140 152 175 116 C210 80 245 52 268 34' fill='none' stroke='%23e9edeb' stroke-width='1.8'/><g fill='none' stroke='%238cc45f' stroke-width='2.4' stroke-linejoin='round'><path d='M72 172 H168'/><path d='M168 172 L140 152'/><path d='M140 152 H238'/></g><g fill='%238cc45f'><circle cx='72' cy='172' r='3.4'/><circle cx='168' cy='172' r='3.4'/><circle cx='140' cy='152' r='3.4'/><circle cx='238' cy='152' r='3.4'/></g><g font-family='monospace' font-size='10' fill='%23e9edeb'><text x='66' y='190'>E</text><text x='164' y='190'>A</text><text x='128' y='149'>B</text><text x='242' y='148'>S</text></g><g font-family='monospace' font-size='9' fill='%2398a2a4'><text x='183' y='96'>100</text><text x='232' y='118'>50</text><text x='262' y='130'>30</text><text x='292' y='196' text-anchor='end'>t</text><text x='294' y='32'>w</text></g></svg>");
+  }
+  :root:not([data-theme="light"]) .sequence[data-rang="1"] .frise::after,
+  :root:not([data-theme="light"]) .sequence[data-rang="2"] .frise::after,
+  :root:not([data-theme="light"]) .sequence[data-rang="5"] .frise::after{
+    background-blend-mode:normal;
+    background-color:#f4f4f0;
+    color:#41484a;
+    padding-left:10px;padding-right:10px;padding-bottom:10px;
+    background-position:top 10px center;
+  }
+}
