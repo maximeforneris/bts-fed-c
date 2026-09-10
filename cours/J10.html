@@ -1,0 +1,261 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Séance 10 — eau chaude sanitaire</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/J10" data-rang="2">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="J9.html" rel="prev" title="Séance 9 — point de fonctionnement" aria-label="Séance 9 — point de fonctionnement">&lsaquo;</a><a class="fleche" href="SEQ1.html" rel="next" title="Thermique du bâtiment, séances 1 à 5" aria-label="Thermique du bâtiment, séances 1 à 5">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J10">Marquer comme lu</button></div>
+<header class="tete">
+  <span class="num" aria-hidden="true">10</span>
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>L'eau chaude<span>sanitaire</span></h1>
+  </div>
+  <p class="accroche">L'énergie d'une journée d'eau chaude est une chose. La puissance à installer en est une autre, et c'est le stockage qui sépare les deux.</p>
+  <p class="contenu">1 outil · 8 questions · 9 replis · 2 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J1.html">L'énergie pour chauffer une masse d'eau</a></b><span class="ou">J1 · L'énergie dans le bâtiment</span><span class="car">E = m × 4,185 × Δθ en kilojoules, puis en kilowattheures ; c'est la seule formule de la séance.</span></li><li><b><a href="J5.html">Une puissance sur une durée</a></b><span class="ou">J5 · Le besoin d'énergie</span><span class="car">le besoin journalier d'ECS est une énergie, la pointe du matin est une puissance ; les confondre est l'erreur classique.</span></li><li><b><a href="J7.html">Débit et perte de chaleur d'un circuit</a></b><span class="ou">J7 · Les réseaux hydrauliques</span><span class="car">le bouclage est un circuit d'eau comme les autres, avec un débit, une longueur et une perte en ligne.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</a><a href="#la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</a><a href="#le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<div class="piege">
+<p><strong>Un savoir au niveau 3.</strong> Le référentiel classe B3-2 au niveau maîtrise d’outils pour l’option C : savoir faire, seul, sans guidage. L’ECS tombe presque à chaque session, souvent dans la même partie que la sous-station.</p>
+</div>
+<h2 id="l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</h2>
+<p>Chauffer un litre d’eau de 10 à 60 °C coûte la même chose, qu’on le fasse à six heures du matin ou étalé sur la journée. L’énergie d’une journée se calcule donc à partir du seul volume total.</p>
+<div class="formule">
+<p><strong>E = V × 1,163 × ΔT</strong></p>
+<ul>
+<li><strong>E</strong><span>: énergie, en Wh</span></li>
+<li><strong>V</strong><span>: volume puisé, en litres</span></li>
+<li><strong>ΔT</strong><span>: écart entre l’eau froide et l’eau chaude, en K</span></li>
+</ul>
+<blockquote>
+<p>Le 1,163 est le même qu’en chauffage (c’est ρ·Cp/3600) mais rapporté au litre et non au mètre cube.</p>
+</blockquote>
+</div>
+<figure>
+<img src="img/J10/fig1-profil-puisage.png" alt="Le profil de puisage d’un internat, heure par heure." />
+<figcaption aria-hidden="true">Le profil de puisage d’un internat, heure par heure.</figcaption>
+</figure>
+<h2 id="la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</h2>
+<p>C’est là que tout se joue. Si la production se fait <strong>au fil de l’eau</strong>, sans stockage, l’appareil doit couvrir seul l’heure la plus chargée. Sa puissance se calcule sur cette heure-là, pas sur la moyenne.</p>
+<p>Un ballon change la question. Il accumule pendant les heures creuses ce qui sera puisé pendant la pointe : la production peut alors être dimensionnée bien en dessous du maximum.</p>
+<div class="cle">
+<p><strong>Le stockage ne réduit pas l’énergie. Il réduit la puissance.</strong> La facture ne change pas ; l’appareil, si, et son prix, son encombrement, son abonnement.</p>
+</div>
+<div class="outil" data-outil="ecs">
+
+</div>
+<p>Mettez le stockage à zéro : la puissance grimpe. Montez-le jusqu’à absorber toute la pointe : la puissance s’effondre, et l’énergie du jour ne bouge pas d’un kilowattheure.</p>
+<h2 id="le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</h2>
+<p>Entre le ballon et le point de puisage le plus éloigné, l’eau refroidit dans le tube. Sans rien, l’usager laisserait couler plusieurs litres avant d’avoir chaud.</p>
+<figure class="memo"><img src="img/J10/memo-ecs.png" alt="" /></figure>
+<p>Une <strong>boucle de circulation</strong> maintient l’eau en mouvement dans la distribution. Le prix à payer est double : les pertes du bouclage tournent toute l’année, et le circulateur consomme en permanence.</p>
+<p>C’est aussi une <strong>exigence sanitaire</strong> : la légionelle prolifère entre 25 et 45 °C dans une eau stagnante. Les températures retenues ne sont donc pas négociables, <strong>60 °C au ballon, 55 °C en tout point de la boucle, 50 °C maximum au puisage</strong> pour éviter la brûlure.</p>
+<h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
+<div class="etapes">
+<ol type="1">
+<li>Lire le relevé horaire : volumes du soir, heure de pointe</li>
+<li>Expliquer l’écart entre la pointe du matin et celle du soir dans un internat</li>
+<li>Calculer l’énergie d’une journée complète</li>
+<li>Calculer la puissance d’une production instantanée, sur l’heure de pointe</li>
+<li>Comparer avec la solution à accumulation</li>
+</ol>
+</div>
+<div class="mission">
+<p><strong>Mission chantier n° 3</strong></p>
+<p>Repérer le mode de production d’ECS du bâtiment de l’entreprise : instantané, accumulation, semi-accumulation. Relever le volume du ballon s’il y en a un, et la puissance de l’échangeur ou de la résistance.</p>
+<p>Vérifier la présence d’une boucle de circulation, et relever la température de consigne. Demander si un carnet sanitaire est tenu.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>L’énergie d’une journée d’ECS dépend : <strong>du volume total</strong> | de l’heure de pointe</li>
+<li>La puissance d’une production instantanée se calcule sur : <strong>l’heure de pointe</strong> | la moyenne journalière</li>
+<li>Le stockage permet de réduire : <strong>la puissance</strong> | l’énergie</li>
+<li>Le coefficient 1,163 s’applique ici à un volume en : <strong>litres</strong> | mètres cubes</li>
+<li>Chauffer 100 L de 10 à 60 °C demande environ : <strong>5,8 kWh</strong> | 58 kWh</li>
+<li>La légionelle prolifère surtout entre : <strong>25 et 45 °C</strong> | 55 et 70 °C</li>
+<li>La température minimale à maintenir en tout point du bouclage est de : <strong>55 °C</strong> | 45 °C</li>
+<li>Le bouclage sert à : <strong>éviter d’attendre l’eau chaude</strong> | augmenter la pression</li>
+</ul>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Instantané, accumulation, semi-accumulation</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Trois familles, trois compromis entre puissance et volume.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Volume stocké</th>
+<th>Puissance</th>
+<th>Où on la rencontre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instantané</strong></td>
+<td>nul</td>
+<td>très élevée</td>
+<td>logement individuel, petits besoins, ou là où la légionelle interdit le stockage</td>
+</tr>
+<tr>
+<td><strong>Accumulation</strong></td>
+<td>grand</td>
+<td>faible</td>
+<td>collectif, internat, hôtel</td>
+</tr>
+<tr>
+<td><strong>Semi-accumulation</strong></td>
+<td>réduit</td>
+<td>moyenne</td>
+<td>tertiaire, quand la place manque</td>
+</tr>
+</tbody>
+</table></div>
+<p>La semi-accumulation est le compromis le plus fréquent en tertiaire : un ballon modeste, une puissance d’échange soutenue, et une régulation qui reconstitue le stock entre deux pointes.</p>
+<p><strong>Le choix n’est pas seulement technique.</strong> Le sujet U41 2026 impose une production instantanée pour les douches des ateliers, non pas pour la performance mais pour supprimer tout volume stagnant, donc tout risque de légionelle. L’inconvénient est assumé : une puissance de pointe très élevée, et un appel de puissance sur le réseau de chaleur qui se paie à l’abonnement.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que coûte vraiment un bouclage</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une boucle de distribution perd de la chaleur en permanence, chauffage arrêté compris. L’ordre de grandeur se calcule simplement : une longueur de tube calorifugé, une déperdition linéique de 8 à 15 W/m selon le diamètre et l’isolant, et <strong>8 760 heures par an</strong>.</p>
+<p>Cent mètres de boucle à 10 W/m, c’est 1 kW en continu, soit près de <strong>8 800 kWh par an</strong>, souvent davantage que l’eau chaude réellement puisée dans un petit tertiaire.</p>
+<p>Trois leviers, dans cet ordre :</p>
+<ol type="1">
+<li><strong>Raccourcir</strong> la boucle, en rapprochant la production des points de puisage. Une production décentralisée supprime le problème plutôt que de le traiter.</li>
+<li><strong>Calorifuger</strong> correctement, y compris les supports et les vannes, qui font des ponts thermiques ponctuels.</li>
+<li><strong>Réguler</strong> le circulateur de bouclage, l’arrêter la nuit est possible sous conditions sanitaires strictes, et se discute avec l’exploitant.</li>
+</ol>
+<p>C’est l’un des rares postes où la conception pèse plus que l’équipement : aucun ballon performant ne rattrape une boucle mal tracée.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le carnet sanitaire, et pourquoi il vous concerne</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Tout établissement recevant du public équipé d’un réseau d’eau chaude collectif doit tenir un <strong>carnet sanitaire</strong> : relevés de température, opérations d’entretien, analyses de légionelles.</p>
+<p>Les points de contrôle sont fixés par arrêté : température en sortie de production, au retour de boucle, et au point de puisage le plus éloigné. Un relevé hors tolérance déclenche une procédure, purge thermique, chloration, analyse.</p>
+<p>Pour un technicien de bureau d’études, cela se traduit par des obligations dès la conception : <strong>prévoir les points de mesure</strong>, rendre le fond de ballon vidangeable, proscrire les bras morts, ces antennes de tuyauterie où l’eau ne circule jamais.</p>
+<p>Un bras mort de quelques dizaines de centimètres suffit à contaminer un réseau entier. C’est le genre de détail qu’on ne voit pas sur un schéma de principe, et qui se paie sur le chantier.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Dimensionner une production d&#39;ECS, du relevé à la puissance</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le calcul complet tient en quatre lignes, et il se refait à l’identique quel que soit le bâtiment. Prenons un internat : <strong>2 400 litres par jour</strong>, eau froide à 10 °C, eau chaude à 60 °C, et une pointe de <strong>900 litres entre 19 et 20 heures</strong>.</p>
+<p><strong>1. L’énergie de la journée.</strong> Elle ne dépend que du volume total.</p>
+<p>E = 2 400 × 1,163 × 50 = 139 560 Wh = <strong>139,6 kWh</strong></p>
+<p><strong>2. La puissance en production instantanée.</strong> L’appareil doit couvrir seul l’heure la plus chargée, sans aucune réserve.</p>
+<p>P = 900 × 1,163 × 50 = 52 335 W = <strong>52,3 kW</strong></p>
+<p><strong>3. La puissance en semi-accumulation.</strong> Un ballon de <strong>500 litres</strong> est plein au début de la pointe. Il fournit ces 500 litres ; la production ne couvre que la différence.</p>
+<p>P = (900 − 500) × 1,163 × 50 = <strong>23,3 kW</strong>, soit <strong>56 % de moins</strong></p>
+<p><strong>4. La vérification qu’on oublie : le ballon doit se recharger.</strong> Reconstituer les 500 litres demande 29,1 kWh. À 23,3 kW, il faut <strong>1 h 15</strong>. Le profil de puisage laisse-t-il ce creux avant la pointe suivante ? Dans un internat, oui, la nuit est vide. Dans un hôtel avec deux pointes rapprochées, la réponse peut être non, et le ballon doit alors grossir.</p>
+<div class="cle">
+<p><strong>L’énergie de la journée est la même dans les deux cas : 139,6 kWh.</strong> Le ballon n’économise pas un kilowattheure, il divise la puissance par plus de deux. Puissance et énergie répondent à deux questions différentes, et les confondre est l’erreur qui coûte le plus cher sur ce savoir.</p>
+</div>
+<p><strong>Le contrôle de vraisemblance.</strong> Une puissance d’ECS se compte en dizaines de kilowatts pour un collectif, en quelques kilowatts pour un logement. Si vous trouvez 52 kW pour une maison individuelle, vous avez pris le volume de la journée pour celui de la pointe.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les températures ne sont pas des réglages de confort</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Trois nombres, trois raisons différentes, et un seul d’entre eux est un confort. C’est une question de justification classique, et elle se traite en trois phrases.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Température</th>
+<th>Où</th>
+<th>Pourquoi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>60 °C</strong></td>
+<td>au ballon</td>
+<td>détruire la légionelle, qui prolifère entre 25 et 45 °C</td>
+</tr>
+<tr>
+<td><strong>55 °C</strong></td>
+<td>en tout point de la boucle</td>
+<td>ne jamais retomber dans la plage de prolifération, même au point le plus éloigné</td>
+</tr>
+<tr>
+<td><strong>50 °C max</strong></td>
+<td>au puisage</td>
+<td><strong>éviter la brûlure</strong> : c’est le seul des trois qui protège l’usager</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Les deux premières s’opposent à la troisième</strong>, et c’est tout le problème : on stocke chaud pour la sécurité sanitaire, on distribue tiède pour la sécurité physique. La conciliation se fait par un <strong>mitigeur thermostatique</strong>, posé au plus près du point de puisage, jamais au départ du ballon, sinon toute la distribution retombe dans la plage à risque.</p>
+<div class="piege">
+<p>Baisser la consigne du ballon pour économiser est un raisonnement qui se tient sur le plan énergétique et qui est <strong>interdit</strong> sur le plan sanitaire. À l’épreuve comme en entreprise, une réponse qui propose de descendre sous 60 °C au stockage est fausse, quel que soit le gain calculé.</p>
+</div>
+<p><strong>Ce qu’un brûlure coûte en secondes</strong>, et qui explique le 50 °C : plus l’eau est chaude, plus la brûlure est rapide. C’est ce qui rend la protection indispensable dans les établissements accueillant des enfants, des personnes âgées ou handicapées, et ces établissements sont précisément ceux qu’on rencontre dans les sujets d’épreuve.</p>
+<blockquote>
+<p>Les valeurs exactes et les locaux concernés sont fixés par la réglementation sanitaire ; <strong>elles se lisent au CCTP ou dans le texte que le sujet cite</strong>, jamais de mémoire. Ce qui se retient, c’est le triangle des trois températures et la raison de chacune.</p>
+</blockquote></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">L&#39;échangeur d&#39;une sous-station ECS, et ce qu&#39;on lit dessus</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Dans un immeuble raccordé à un réseau de chaleur, l’ECS n’est pas produite par une chaudière mais par un <strong>échangeur</strong>, et la partie « sous-station et ECS » d’un sujet les traite ensemble. C’est 19 % de l’épreuve, et elle tombe à chaque session.</p>
+<p><strong>Le montage.</strong> Le primaire vient du réseau urbain, chaud et sous la pression de l’exploitant. Le secondaire est l’eau sanitaire du bâtiment. Ils ne se mélangent jamais : <strong>l’échangeur sépare les fluides</strong>, ce qu’une bouteille de découplage ne fait pas. C’est le prolongement direct de la séance 7.</p>
+<p><strong>Ce que le dossier donne, et ce qu’il demande de trouver :</strong></p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Donné</th>
+<th>À calculer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Régime primaire, par exemple 90/60</td>
+<td>le débit primaire</td>
+</tr>
+<tr>
+<td>Régime secondaire, 10/60</td>
+<td>le débit secondaire</td>
+</tr>
+<tr>
+<td>Puissance de l’échangeur</td>
+<td>ou l’inverse : la puissance à partir des débits</td>
+</tr>
+</tbody>
+</table></div>
+<p>La formule est celle de toujours, appliquée deux fois : <strong>P = Q × 1 163 × ΔT</strong>, une fois de chaque côté. Et <strong>la puissance est la même des deux côtés</strong>, c’est un échangeur, il ne crée rien. Ce sont les débits et les écarts qui diffèrent.</p>
+<div class="cle">
+<p>Un écart primaire large (90/60, soit 30 K) demande <strong>peu de débit</strong>. Un écart secondaire large aussi. C’est pourquoi l’exploitant du réseau impose une température de retour maximale : un retour trop chaud signifie que le bâtiment tire trop de débit pour la puissance qu’il consomme, et ça pénalise tout le réseau. Cette contrainte se retrouve au CCTP, et elle est justifiable à l’épreuve.</p>
+</div>
+<p><strong>Le comptage.</strong> Un compteur d’énergie thermique est posé au primaire : deux sondes de température et un débitmètre, dont le calculateur intègre Q × 1 163 × ΔT au fil du temps. C’est ce compteur qui fait la facture, et c’est le savoir B9 de la séance 20.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Dimensionner le ballon : la méthode des courbes cumulées</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le calcul de la partie « niveau attendu » suppose qu’on connaît déjà le volume du ballon. Un bureau d’études, lui, le <strong>détermine</strong>, et la méthode est graphique, élégante, et se comprend en une figure.</p>
+<p><strong>On trace deux courbes cumulées</strong> sur la même journée :</p>
+<ul>
+<li>le <strong>besoin cumulé</strong> : la somme, heure après heure, des volumes puisés. Elle monte par paliers, avec de grandes marches aux heures de pointe ;</li>
+<li>la <strong>production cumulée</strong> : une droite si la production tourne en continu, de pente égale à la puissance choisie.</li>
+</ul>
+<p><strong>Le volume du ballon est le plus grand écart vertical</strong> entre les deux courbes, mesuré quand le besoin est en avance sur la production. C’est exactement la réserve qu’il a fallu constituer pour ne jamais manquer.</p>
+<p><strong>Ce que la figure montre immédiatement</strong>, et qu’aucune formule ne dit :</p>
+<ul>
+<li>si la droite de production est <strong>trop plate</strong>, l’écart devient énorme : peu de puissance, beaucoup de stockage. C’est l’accumulation ;</li>
+<li>si elle est <strong>très pentue</strong>, l’écart s’annule : beaucoup de puissance, pas de stockage. C’est l’instantané ;</li>
+<li>entre les deux, il existe un <strong>couple optimal</strong> puissance / volume, et c’est lui que le BE cherche, en arbitrant sur le coût d’investissement et l’encombrement du local technique.</li>
+</ul>
+<p><strong>La contrainte que la méthode révèle</strong>, et qu’on oublie toujours : la droite de production doit <strong>rattraper</strong> le besoin avant la pointe suivante. Sinon le ballon part vide à la deuxième pointe, et le dimensionnement s’écroule. C’est la vérification de recharge, faite graphiquement.</p>
+<blockquote>
+<p>La méthode s’applique telle quelle à un autre problème du programme : le dimensionnement d’un stockage d’énergie sur une installation solaire, ou d’un ballon tampon sur une pompe à chaleur.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Solaire thermique et pompe à chaleur sur l&#39;ECS</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>L’eau chaude sanitaire est <strong>le meilleur terrain du solaire thermique</strong>, et pour une raison simple : le besoin existe toute l’année. Un chauffage solaire ne sert qu’en hiver, quand le soleil manque ; l’ECS se consomme en juillet comme en janvier.</p>
+<p><strong>Le montage type.</strong> Des capteurs, un ballon à <strong>deux échangeurs</strong>, le solaire en bas, où l’eau est la plus froide et où l’échange est donc le meilleur, l’appoint en haut, et une régulation différentielle : le circulateur solaire démarre quand le capteur est plus chaud que le bas du ballon d’un écart donné, et s’arrête sinon. Deux sondes, un comparateur : c’est la boucle la plus simple du programme, et c’est de la régulation, savoir B11.</p>
+<p><strong>Le taux de couverture.</strong> On ne dimensionne jamais le solaire pour tout couvrir : au-delà d’environ 60 % du besoin annuel, les capteurs surproduisent l’été, le ballon monte en surchauffe, et le surcoût ne se rentabilise plus. <strong>L’appoint n’est pas un aveu d’échec, c’est le dimensionnement juste.</strong></p>
+<p><strong>La pompe à chaleur sur ECS</strong>, elle, pose un problème inverse et intéressant : son COP chute quand la température de production monte, or l’ECS demande 60 °C , la température la plus défavorable de tout le bâtiment. C’est le lien avec la séance 13 : plus l’écart entre l’évaporateur et le condenseur est grand, plus le COP s’effondre.</p>
+<p>Deux réponses de bureau d’études : produire à 50 °C par la PAC et <strong>finir à 60 °C par un appoint électrique</strong>, ce qui préserve le COP sur l’essentiel de l’énergie ; ou choisir un fluide et un compresseur haute température, plus chers. Le sujet 2025 pose exactement cette question sous la forme du préchauffage de l’ECS par récupération sur les eaux grises, même logique : <strong>on préchauffe avec ce qui est gratuit, on finit avec ce qui est cher.</strong></p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, la pompe à chaleur à CO₂, faite pour l&#39;eau chaude</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Cette séance a montré que l’eau chaude sanitaire se prépare à <strong>60 °C</strong> et que le bouclage doit rester au-dessus de 50. C’est une contrainte sévère pour une pompe à chaleur, sauf pour une, qui est faite pour ça.</p>
+<p>Le <strong>R744</strong>, c’est-à-dire le CO₂, a un GWP de <strong>1</strong> et travaille entre <strong>80 et 120 bar</strong>. Au-dessus de 31 °C, il ne condense plus : il se refroidit sans changer d’état. On parle de cycle <strong>transcritique</strong>, et le condenseur devient un <strong>refroidisseur de gaz</strong>.</p>
+<div class="cle">
+<p>Là est tout l’intérêt. Un fluide qui condense cède sa chaleur à <strong>température constante</strong> : il chauffe mal une eau qui doit monter de 10 à 60 °C. Le CO₂, lui, se refroidit <strong>en glissant</strong> de 90 à 35 °C, ce qui épouse exactement la montée en température de l’eau sanitaire. Le mauvais élève du chauffage est le meilleur de l’eau chaude.</p>
+</div>
+<p><strong>La conséquence, contre-intuitive</strong> : le rendement d’une PAC au CO₂ s’améliore quand <strong>l’eau d’entrée est froide</strong>. Un bouclage qui renvoie de l’eau à 50 °C au bas du ballon dégrade son COP, là où il serait sans effet sur une PAC classique. C’est pourquoi ces machines sont associées à des ballons <strong>fortement stratifiés</strong>, et pourquoi le piquage du bouclage y est un point de vigilance.</p>
+<div class="piege">
+<p>Ces pressions changent les règles de l’intervention. Un manifold de R410A ne tient pas 120 bar, et une bouteille de récupération non plus. Le CO₂ est aussi <strong>asphyxiant</strong> en fosse ou en local fermé, sans donner d’alerte. Rien de tout cela ne s’improvise avec le matériel du froid classique.</p>
+</div></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J9.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 9 — point de fonctionnement</span></a><a class="ap" href="SEQ1.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Thermique du bâtiment, séances 1 à 5</span></a></div><a class="vers-recap" href="SEQ2.html">Préparation au contrôle</a></nav>
+<p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

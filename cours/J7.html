@@ -1,0 +1,327 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Séance 7 — réseaux hydrauliques</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/J7" data-rang="2">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="J6.html" rel="prev" title="Séance 6 — la paroi mesurée" aria-label="Séance 6 — la paroi mesurée">&lsaquo;</a><a class="fleche" href="J8.html" rel="next" title="Séance 8 — pertes de charge" aria-label="Séance 8 — pertes de charge">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J7">Marquer comme lu</button></div>
+<header class="tete">
+  <span class="num" aria-hidden="true">7</span>
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Les réseaux<span>hydrauliques</span></h1>
+  </div>
+  <p class="accroche">Trois façons de relier une chaudière à des radiateurs, et une question qui décide de tout : chaque émetteur reçoit-il le débit qu'il lui faut ?</p>
+  <p class="contenu">8 questions · 8 replis · 2 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">B4-1 Réseaux hydrauliques · niveau 2</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J4.html">Les déperditions pièce par pièce</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">le débit de chaque radiateur se déduit de la puissance à émettre, donc des déperditions de sa pièce.</span></li><li><b><a href="J1.html">Puissance, débit et écart de température</a></b><span class="ou">J1 · L'énergie dans le bâtiment</span><span class="car">Φ = qm × 4,185 × Δθ est la formule de la séance, avec la puissance en kW et l'écart en K.</span></li><li><b><a href="FICHE-SYMBOLES.html">Les symboles d'un schéma hydraulique</a></b><span class="ou">Lire un circuit hydraulique</span><span class="car">les trois typologies se dessinent avec les mêmes quinze symboles ; on les reconnaît avant de les comparer.</span></li><li><b>Aires, volumes et conversions de débit</b><span class="car">section d'un tube en m², débit en m³/h et en L/s ; la moitié des erreurs de la séance sont des conversions.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#trois-typologies-trois-compromis">Trois typologies, trois compromis</a><a href="#le-debit-et-la-vitesse-qu-il-impose">Le débit, et la vitesse qu’il impose</a><a href="#retour-direct-retour-inverse">Retour direct, retour inversé</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="trois-typologies-trois-compromis">Trois typologies, trois compromis</h2>
+<p>Un réseau de chauffage relie un générateur à des émetteurs. Il existe trois façons de le faire, et aucune n’est meilleure dans l’absolu : chacune échange quelque chose contre autre chose.</p>
+<figure>
+<img src="img/J7/fig1-typologies.png" alt="Bitube, monotube, pieuvre : les trois distributions." />
+<figcaption aria-hidden="true">Bitube, monotube, pieuvre : les trois distributions.</figcaption>
+</figure>
+<p>Le <strong>bitube</strong> donne à chaque émetteur son départ et son retour. Tous reçoivent de l’eau à la même température, et chacun se règle indépendamment. C’est la solution la plus répandue en tertiaire.</p>
+<p>Le <strong>monotube</strong> fait passer la même eau d’un radiateur au suivant. Elle se refroidit en chemin : le dernier émetteur reçoit une eau plus froide, et doit donc être plus grand pour émettre la même puissance. On économise du tube, on paie en surface d’émetteur.</p>
+<p>La <strong>pieuvre</strong> part d’un collecteur central et alimente chaque émetteur par son propre couple de tubes, sans raccord dans la dalle. Beaucoup plus de tube posé, mais aucun raccord noyé, et un réglage centralisé au collecteur.</p>
+<div class="cle">
+<p>Le choix ne se fait pas sur la longueur de tube. Il se fait sur <strong>ce qu’on veut pouvoir régler</strong>, et sur <strong>où passent les raccords</strong>.</p>
+</div>
+<h2 id="le-debit-et-la-vitesse-qu-il-impose">Le débit, et la vitesse qu’il impose</h2>
+<p>La puissance transportée par un réseau d’eau ne dépend que du débit et de l’écart départ / retour. C’est la formule de la séance 1, et elle sert ici à l’envers : on connaît la puissance des émetteurs, on cherche le débit.</p>
+<div class="formule">
+<p><strong>Q = P / (1 163 × ΔT)</strong></p>
+<ul>
+<li><strong>Q</strong><span>: débit, en m³/h</span></li>
+<li><strong>P</strong><span>: puissance des émetteurs, en W</span></li>
+<li><strong>ΔT</strong><span>: écart départ / retour, en K</span></li>
+</ul>
+</div>
+<p>Ce débit doit ensuite passer dans un tube. Plus le tube est étroit, plus l’eau va vite, et une eau trop rapide siffle.</p>
+<div class="formule">
+<p><strong>v = Q / (0,36 × S)</strong></p>
+<ul>
+<li><strong>v</strong><span>: vitesse, en m/s</span></li>
+<li><strong>Q</strong><span>: débit, en m³/h</span></li>
+<li><strong>S</strong><span>: section intérieure, en cm²</span></li>
+</ul>
+</div>
+<div class="piege">
+<p>En habitation, la vitesse se limite à <strong>1 m/s</strong>. Au-delà, le réseau devient audible, et le bruit d’un réseau ne se rattrape pas après coup.</p>
+</div>
+<h2 id="retour-direct-retour-inverse">Retour direct, retour inversé</h2>
+<p>Deux réseaux peuvent avoir exactement les mêmes émetteurs, le même tube et le même circulateur, et se comporter très différemment. Tout tient à l’endroit d’où part le collecteur de retour.</p>
+<figure class="schema"><div class="dessin" data-schema="retour-inverse"></div><figcaption>Le même réseau, raccordé de deux façons.</figcaption></figure>
+<p>L’eau, comme le courant électrique, emprunte le chemin qui lui résiste le moins. En retour direct, le premier émetteur offre le trajet le plus court : il capte l’essentiel du débit, et le dernier de la ligne reste tiède.</p>
+<p>Le retour inversé corrige cela sans aucun réglage : le collecteur de retour repart de l’autre extrémité, si bien que <strong>chaque circuit parcourt la même longueur totale</strong>. On pose un peu plus de tube et l’équilibrage se fait tout seul.</p>
+<h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
+<div class="etapes">
+<ol type="1">
+<li>Compter les tubes qui arrivent à chaque émetteur, dans les trois typologies</li>
+<li>Comprendre pourquoi le dernier radiateur d’un monotube reçoit une eau plus froide</li>
+<li>Comparer les trois distributions dans un tableau, critère par critère</li>
+<li>Repérer, sur deux schémas, lequel des quatre émetteurs sera mal alimenté</li>
+</ol>
+</div>
+<div class="mission">
+<p><strong>À observer en entreprise</strong></p>
+<p>Identifier la typologie du réseau de chauffage du bâtiment de l’entreprise : bitube, monotube ou pieuvre. Relever le diamètre d’un tronçon principal, le régime départ / retour, et repérer s’il existe des organes d’équilibrage, vannes de réglage, té de réglage, collecteur.</p>
+<p>Demander si un émetteur chauffe moins bien que les autres, et où il se situe sur le réseau.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>En bitube, le nombre de tubes qui arrivent à chaque émetteur est de : <strong>deux</strong> | un</li>
+<li>Dans un monotube, le dernier radiateur reçoit une eau : <strong>plus froide</strong> | à la même température</li>
+<li>Pour la même puissance, le dernier radiateur d’un monotube doit être : <strong>plus grand</strong> | plus petit</li>
+<li>La pieuvre se distingue par : <strong>aucun raccord noyé dans la dalle</strong> | l’économie de tube</li>
+<li>Doubler l’écart départ / retour, à puissance égale : <strong>divise le débit par deux</strong> | double le débit</li>
+<li>En habitation, la vitesse de l’eau se limite à : <strong>1 m/s</strong> | 3 m/s</li>
+<li>En retour direct, l’émetteur le mieux alimenté est : <strong>le premier</strong> | le dernier</li>
+<li>Le retour inversé sert à : <strong>égaliser les longueurs de circuit</strong> | économiser du tube</li>
+</ul>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi l&#39;eau choisit le chemin le plus court</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Ce n’est pas une intention, c’est une conséquence. Deux branches en parallèle subissent la <strong>même différence de pression</strong> entre le départ et le retour, c’est la définition d’un montage en parallèle.</p>
+<p>Chaque branche répond à cette pression par le débit que sa propre résistance autorise : Δp = k Q², donc Q = √(Δp / k). La branche dont le k est le plus petit prend le débit le plus grand.</p>
+<p>En retour direct, la branche du premier émetteur est courte : peu de tube, peu de singularités, k petit. Elle prend plus que sa part, et il en reste moins pour les autres. <strong>Le déséquilibre n’est pas un défaut de pose, c’est de la physique.</strong></p>
+<p>D’où deux façons de le corriger : égaliser les longueurs, c’est le retour inversé , ou ajouter artificiellement de la résistance aux branches trop favorisées, ce qu’on appelle l’<strong>équilibrage</strong>, et qui se fait au té de réglage ou à la vanne.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que le bureau d&#39;études regarde vraiment</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le choix de la typologie est souvent imposé avant l’étude thermique : par le type de bâtiment, par le mode constructif, parfois par le lot gros œuvre.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Contexte</th>
+<th>Ce qui se pose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logement neuf, dalle béton</td>
+<td>pieuvre : aucun raccord noyé, donc aucun risque de fuite inaccessible</td>
+</tr>
+<tr>
+<td>Tertiaire, faux plafond</td>
+<td>bitube : accessible, réglable zone par zone</td>
+</tr>
+<tr>
+<td>Rénovation légère</td>
+<td>monotube, quand il existe déjà : on ne refait pas la distribution</td>
+</tr>
+<tr>
+<td>Grande longueur, débits importants</td>
+<td>bitube à retour inversé</td>
+</tr>
+</tbody>
+</table></div>
+<p>Le vrai sujet du BE n’est pas la typologie mais l’<strong>équilibrage</strong> : garantir que chaque émetteur reçoit son débit nominal. Un réseau déséquilibré se traduit par des plaintes d’usagers, et la réponse habituelle, monter la température de départ , consomme davantage pour un confort qui reste inégal.</p>
+<p>C’est pourquoi les CCTP exigent un <strong>procès-verbal d’équilibrage</strong> à la réception : le relevé, émetteur par émetteur, du débit réellement mesuré.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Dimensionner un tronçon, du besoin au diamètre</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Voici la méthode complète, celle qu’un bureau d’études applique tronçon par tronçon. Elle ne change jamais ; seuls les nombres changent.</p>
+<p><strong>1. La puissance cumulée.</strong> Un tronçon transporte la puissance de <strong>tout ce qui est en aval de lui</strong>, pas celle du radiateur qu’il alimente. On part donc du bout du réseau et on remonte vers le générateur en additionnant.</p>
+<p><strong>2. Le débit.</strong> Q = P / (1 163 × ΔT). Prenons un tronçon principal qui porte <strong>24 kW</strong> en régime <strong>70/50</strong>, donc ΔT = 20 K :</p>
+<p>Q = 24 000 / (1 163 × 20) = <strong>1,03 m³/h</strong></p>
+<p><strong>3. Le diamètre, sur DEUX critères.</strong> C’est ici que tout se joue, et c’est ici que les candidats perdent des points.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Tube</th>
+<th style="text-align: right;">Vitesse</th>
+<th style="text-align: right;">Perte linéique</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DN 16</td>
+<td style="text-align: right;">1,43 m/s</td>
+<td style="text-align: right;">1 334 Pa/m</td>
+<td>les deux critères sautent</td>
+</tr>
+<tr>
+<td>DN 20</td>
+<td style="text-align: right;">0,91 m/s</td>
+<td style="text-align: right;">462 Pa/m</td>
+<td><strong>vitesse bonne, linéique trop forte</strong></td>
+</tr>
+<tr>
+<td>DN 25</td>
+<td style="text-align: right;">0,58 m/s</td>
+<td style="text-align: right;">160 Pa/m</td>
+<td>les deux passent</td>
+</tr>
+<tr>
+<td>DN 32</td>
+<td style="text-align: right;">0,36 m/s</td>
+<td style="text-align: right;">50 Pa/m</td>
+<td>correct, mais surdimensionné</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le DN 20 tient la vitesse et <strong>rate quand même</strong>. Un tronçon validé sur la seule vitesse est un tronçon qui coûtera en pompe pendant vingt ans : c’est exactement pourquoi la séquence retient <strong>deux critères, jamais un seul</strong>.</p>
+</div>
+<p><strong>4. La perte du tronçon.</strong> On multiplie la perte linéique par la longueur <strong>développée</strong> : la longueur réelle plus les longueurs équivalentes des singularités, coudes, tés, vannes. Sur 18 m de tube et 7 m équivalents :</p>
+<p>Δp = 160 × (18 + 7) = <strong>4 000 Pa</strong>, soit <strong>0,41 mCE</strong></p>
+<p><strong>5. Le tronçon le plus défavorisé.</strong> On refait le calcul sur chaque branche, et <strong>c’est la plus résistante qui fixe la hauteur manométrique du circulateur</strong>, pas la somme, pas la moyenne. Les autres branches seront freinées à l’équilibrage.</p>
+<blockquote>
+<p>Le DN 32 « pour être tranquille » n’est pas une sécurité : il coûte plus cher à l’achat, il contient plus d’eau donc l’installation est plus lente à réagir, et une eau trop lente laisse déposer les boues.</p>
+</blockquote></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le régime départ / retour commande tout le reste</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le régime n’est pas un réglage de confort qu’on choisit à la fin. C’est <strong>la première décision du projet</strong>, et elle se paie sur tout le reste.</p>
+<p>Reprenons les mêmes 24 kW, une fois en <strong>70/50</strong> (radiateurs) et une fois en <strong>40/30.</strong> Plancher chauffant.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">70/50</th>
+<th style="text-align: right;">40/30</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ΔT</td>
+<td style="text-align: right;">20 K</td>
+<td style="text-align: right;">10 K</td>
+</tr>
+<tr>
+<td>Débit</td>
+<td style="text-align: right;">1,03 m³/h</td>
+<td style="text-align: right;"><strong>2,06 m³/h</strong></td>
+</tr>
+<tr>
+<td>DN nécessaire</td>
+<td style="text-align: right;">DN 25</td>
+<td style="text-align: right;"><strong>DN 32</strong></td>
+</tr>
+<tr>
+<td>Vitesse en DN 25</td>
+<td style="text-align: right;">0,58 m/s</td>
+<td style="text-align: right;">1,17 m/s : trop</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Diviser l’écart par deux double le débit.</strong> Le débit est au dénominateur de la formule : c’est mécanique, et c’est la première chose à vérifier quand un ordre de grandeur surprend.</p>
+<p><strong>Ce que le basse température fait gagner ailleurs.</strong> Un régime 40/30 renvoie au générateur une eau à 30 °C : une chaudière à condensation y trouve de quoi condenser, et son rendement monte. Une pompe à chaleur y trouve un écart condenseur/évaporateur plus faible, et son COP monte. C’est le lien avec les séances 11 et 13.</p>
+<p><strong>Ce qu’il fait perdre.</strong> Un émetteur alimenté plus froid émet moins : à puissance égale il faut plus de surface, donc des radiateurs plus grands ou un plancher. C’est la loi d’émission de la séance 12.</p>
+<div class="piege">
+<p>Le régime écrit au CCTP est un <strong>régime nominal</strong>, atteint au jour le plus froid. Le reste de l’année, la loi d’eau fait travailler l’installation bien en dessous, c’est tout le sujet de la séance 19. Dimensionner sur le nominal, réguler sur le réel.</p>
+</div></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Équilibrer : le retour inversé ne suffit pas toujours</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Le retour inversé égalise les <strong>longueurs</strong>. Il n’égalise pas les <strong>résistances</strong> quand les branches n’ont ni le même diamètre, ni le même nombre de singularités, ni la même puissance à transporter. Sur un bâtiment réel, il faut donc des organes.</p>
+<p><strong>Les trois organes qu’on rencontre</strong>, du plus simple au plus complet :</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Organe</th>
+<th>Ce qu’il fait</th>
+<th>Où on le trouve</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Té de réglage</td>
+<td>freine le retour d’un émetteur, réglage grossier</td>
+<td>au pied d’un radiateur</td>
+</tr>
+<tr>
+<td>Vanne d’équilibrage</td>
+<td>freine une branche, avec <strong>deux prises de pression</strong> pour mesurer le débit réel</td>
+<td>en pied de colonne, en départ de circuit</td>
+</tr>
+<tr>
+<td>Robinet thermostatique à préréglage</td>
+<td>limite le débit maximal de l’émetteur en plus de réguler</td>
+<td>sur l’émetteur, en habitation</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Les deux prises de pression sont la raison d’être de la vanne d’équilibrage.</strong> Sans elles on règle à l’aveugle. Avec elles, un appareil lit le Δp aux bornes de la vanne, la courbe du fabricant donne le débit qui correspond au réglage affiché, et on compare au débit calculé.</p>
+<p><strong>La méthode proportionnelle</strong>, en une phrase : on repère la branche la plus défavorisée, on l’ouvre en grand, et on freine toutes les autres jusqu’à ce que chacune atteigne son débit de calcul. On ne freine jamais la plus défavorisée, elle a déjà tout ce qu’elle peut avoir.</p>
+<div class="cle">
+<p>Un réseau déséquilibré ne se rattrape pas en montant la température de départ. Ça réchauffe le dernier émetteur <strong>et</strong> surchauffe tous les autres, donc ça coûte, et ça ne règle rien. Le symptôme « un local froid, les autres trop chauds » est une signature d’équilibrage, jamais de puissance.</p>
+</div>
+<p><strong>À l’épreuve</strong>, la question prend presque toujours la même forme : un schéma, quatre émetteurs, et « justifier lequel sera mal alimenté » ou « proposer une solution ». La réponse attendue tient en deux phrases, le chemin le moins résistant capte le débit, et on corrige soit par le retour inversé soit par des organes d’équilibrage.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le découplage hydraulique : pourquoi le primaire et le secondaire ne se parlent pas</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une sous-station moderne n’a pas un circuit, elle en a deux : un <strong>primaire</strong> côté production (chaudière, réseau de chaleur, PAC) et un ou plusieurs <strong>secondaires</strong> côté distribution. Chacun a son circulateur, et chacun veut son débit.</p>
+<p>Le problème : ces débits ne sont <strong>pas égaux</strong>, et ils ne varient pas ensemble. Reprenons les 24 kW : un primaire en 70/50 demande 1,03 m³/h, un secondaire de plancher en 40/30 en demande 2,06. Deux fois plus. Et quand la loi d’eau ferme les vannes du secondaire, son débit chute pendant que la chaudière veut garder le sien.</p>
+<p><strong>Trois organes règlent ça</strong>, du plus rustique au plus courant :</p>
+<ul>
+<li><strong>la bouteille de découplage</strong> : un gros tube vertical où les deux circuits puisent. Le surplus de l’un y attend l’autre. Elle découple les débits, et au passage elle <strong>dégaze</strong> et <strong>décante</strong> ;</li>
+<li><strong>le té de découplage</strong> : la version minimale, un simple raccord en court- circuit entre départ et retour, très peu résistant ;</li>
+<li><strong>l’échangeur à plaques</strong> : quand il faut aussi séparer les fluides : pression du réseau urbain, qualité d’eau, glycol d’un côté et pas de l’autre.</li>
+</ul>
+<p><strong>Ce que la bouteille change sur les températures</strong>, et c’est la question d’épreuve : si le secondaire tire <strong>plus</strong> que le primaire, il aspire de l’eau de retour par la bouteille, et sa température de départ <strong>chute</strong> sous celle de la chaudière. S’il tire <strong>moins</strong>, l’excédent du primaire redescend et la température de retour au générateur <strong>monte</strong>, ce qui empêche une chaudière à condensation de condenser.</p>
+<blockquote>
+<p>Une sous-station de réseau de chaleur urbain n’a pas de bouteille : elle a un échangeur, parce que l’exploitant du réseau impose la séparation des fluides et facture au compteur d’énergie posé au primaire.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Vannes deux voies, pression différentielle, et la fin du by-pass</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Tout ce qui précède suppose un débit constant. Les installations récentes n’en ont plus, et pour la même raison qu’en aéraulique.</p>
+<p><strong>Vanne trois voies contre vanne deux voies.</strong> Une trois voies mélange : ce qui ne va pas à l’émetteur passe par le by-pass, et <strong>le débit du circuit ne change jamais</strong>. Une deux voies ferme : quand l’émetteur n’a plus besoin, le débit disparaît. C’est ce qu’on veut, mais ça déstabilise le réseau.</p>
+<p><strong>Ce qui se passe quand les vannes ferment.</strong> Le circulateur continue de pousser sur un réseau devenu plus résistant : la pression différentielle monte, les vannes encore ouvertes reçoivent trop, et elles deviennent bruyantes en fermeture. Deux parades :</p>
+<ol type="1">
+<li><strong>le circulateur à pression différentielle constante</strong>, un capteur, une consigne de Δp, un variateur. Le circulateur ralentit à mesure que les vannes ferment. C’est la suite directe de la séance 9 : le point de fonctionnement n’est plus un point, c’est une plage ;</li>
+<li><strong>le régulateur de pression différentielle</strong>, un organe mécanique posé en pied de colonne, qui maintient un Δp constant aux bornes de sa branche quoi que fassent les vannes.</li>
+</ol>
+<p><strong>Et l’économie ?</strong> Comme pour un ventilateur, la puissance d’un circulateur varie sensiblement comme le <strong>cube</strong> du débit. Tourner à 70 % du débit ne coûte pas 70 % mais de l’ordre de <strong>34 %</strong> de la puissance. C’est la même loi de similitude, et elle vaut sur les deux fluides.</p>
+<blockquote>
+<p>Le débit variable rend l’équilibrage <strong>plus</strong> important, pas moins : un réseau mal équilibré à débit fixe est inconfortable ; à débit variable il devient instable, les vannes chassent les unes contre les autres.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, trois lignes, trois diamètres, et l&#39;huile qui doit remonter</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un circuit frigorifique est un réseau, et il obéit aux mêmes règles que celui de cette séance, à trois différences près qui expliquent tout.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ligne</th>
+<th>Ce qu’elle transporte</th>
+<th>Diamètre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Liquide</strong></td>
+<td>du liquide sous haute pression</td>
+<td>le <strong>plus petit</strong></td>
+</tr>
+<tr>
+<td><strong>Aspiration</strong></td>
+<td>de la vapeur basse pression, peu dense</td>
+<td>le <strong>plus gros</strong></td>
+</tr>
+<tr>
+<td><strong>Refoulement</strong></td>
+<td>de la vapeur haute pression, plus dense</td>
+<td>intermédiaire</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>La raison tient en un mot : <strong>la masse volumique</strong>. Un kilogramme de liquide occupe moins d’un litre, un kilogramme de vapeur d’aspiration en occupe une trentaine. À débit massique égal, il faut donc une section bien plus grande côté aspiration, et c’est pourquoi une liaison frigorifique est toujours faite de <strong>deux tubes de diamètres différents</strong>.</p>
+</div>
+<p><strong>La contrainte que le réseau d’eau n’a pas : le retour d’huile.</strong> Le compresseur envoie un peu de son huile dans le circuit. Elle doit revenir, et rien ne la pousse sinon <strong>la vitesse de la vapeur</strong>. D’où une règle sans équivalent en hydraulique :</p>
+<ul>
+<li><strong>6 m/s</strong> au minimum dans les tronçons horizontaux ;</li>
+<li><strong>8 à 10 m/s</strong> dans les colonnes montantes, où l’huile doit vaincre la gravité.</li>
+</ul>
+<div class="piege">
+<p>En hydraulique, une vitesse trop faible n’est qu’un surcoût de tuyauterie. Ici, elle <strong>détruit le compresseur</strong> : l’huile s’accumule au point bas, le carter se vide, et le compresseur grippe. <strong>Une ligne trop grosse est plus grave qu’une ligne trop petite</strong>, c’est l’inverse de la séance 7.</p>
+</div>
+<p>D’où les colonnes montantes doubles, ou les siphons en pied de colonne : des dispositifs entièrement dédiés à faire remonter quelques centilitres d’huile.</p></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J6.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 6 — la paroi mesurée</span></a><a class="ap" href="J8.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 8 — pertes de charge</span></a></div><a class="vers-recap" href="SEQ2.html">Préparation au contrôle</a></nav>
+<p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

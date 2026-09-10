@@ -1,0 +1,291 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Séance 8 — pertes de charge</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/J8" data-rang="2">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="J7.html" rel="prev" title="Séance 7 — réseaux hydrauliques" aria-label="Séance 7 — réseaux hydrauliques">&lsaquo;</a><a class="fleche" href="J9.html" rel="next" title="Séance 9 — point de fonctionnement" aria-label="Séance 9 — point de fonctionnement">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J8">Marquer comme lu</button></div>
+<header class="tete">
+  <span class="num" aria-hidden="true">8</span>
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Les pertes<span>de charge</span></h1>
+  </div>
+  <p class="accroche">Faire circuler de l'eau coûte de la pression. Reste à savoir combien, et c'est ce nombre qui décide du circulateur.</p>
+  <p class="contenu">1 outil · 8 questions · 9 replis · 1 figure</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A3-1 Pertes de charge · niveau 2</span><span class="tag">A3-2 Caractéristique d'une pompe · niveau 2</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J7.html">Le débit et la vitesse dans un tube</a></b><span class="ou">J7 · Les réseaux hydrauliques</span><span class="car">la perte de charge dépend du carré de la vitesse ; il faut avoir le débit et le diamètre avant de la lire.</span></li><li><b>Lire une échelle logarithmique</b><span class="car">l'abaque des pertes de charge a deux axes en log ; entre 1 et 10 il y a neuf intervalles inégaux, et on se trompe d'un facteur deux en les croyant égaux.</span></li><li><b>Les carrés et la proportionnalité</b><span class="car">Δp est proportionnel à Q² ; doubler le débit quadruple la perte, et c'est ce que la séance fait vérifier sur l'abaque.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#ce-que-l-eau-perd-en-circulant">Ce que l’eau perd en circulant</a><a href="#l-abaque-a-deux-axes-logarithmiques">L’abaque a deux axes logarithmiques</a><a href="#calculer-plutot-que-lire">Calculer plutôt que lire</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="ce-que-l-eau-perd-en-circulant">Ce que l’eau perd en circulant</h2>
+<p>L’eau frotte contre la paroi du tube. Cette friction lui prend de la pression, et c’est le circulateur qui doit la lui rendre. Deux causes se cumulent.</p>
+<p>Les <strong>pertes linéiques</strong> viennent du tube droit. Elles s’expriment en pascals par mètre et dépendent du débit, du diamètre et de la rugosité. On les lit sur un abaque, ou on les calcule.</p>
+<p>Les <strong>pertes singulières</strong> viennent de tout ce qui n’est pas droit : coudes, tés, vannes, robinets, émetteurs. Plutôt que de les traiter une par une, on les convertit en <strong>longueur équivalente</strong>, la longueur de tube droit qui coûterait autant.</p>
+<figure>
+<img src="img/J8/fig1-abaque.png" alt="L’abaque donne la perte linéique en fonction du débit, pour chaque tube." />
+<figcaption aria-hidden="true">L’abaque donne la perte linéique en fonction du débit, pour chaque tube.</figcaption>
+</figure>
+<div class="formule">
+<p><strong>Δp = j × (L + Léq)</strong></p>
+<ul>
+<li><strong>Δp</strong><span>: perte de charge du tronçon, en Pa</span></li>
+<li><strong>j</strong><span>: perte linéique, en Pa/m</span></li>
+<li><strong>L</strong><span>: longueur droite, en m</span></li>
+<li><strong>Léq</strong><span>: somme des longueurs équivalentes, en m</span></li>
+</ul>
+</div>
+<div class="piege">
+<p>On additionne d’abord <strong>toutes</strong> les longueurs, puis on multiplie <strong>une seule fois</strong> par j. Multiplier chaque singularité séparément revient au même, mais fait perdre du temps et multiplie les occasions de se tromper.</p>
+</div>
+<h2 id="l-abaque-a-deux-axes-logarithmiques">L’abaque a deux axes logarithmiques</h2>
+<p>Les graduations ne sont pas régulières : entre 1 et 10 il y a la même distance qu’entre 10 et 100. C’est ce qui permet de lire sur un même graphique des débits de 0,05 et de 5 m³/h.</p>
+<p>Deux droites obliques traversent l’abaque : ce sont les <strong>iso-vitesses</strong>. Elles permettent de vérifier le second critère sans calcul (la vitesse) pendant qu’on lit le premier.</p>
+<div class="cle">
+<p>Un tronçon se valide sur <strong>deux critères, pas un</strong> : la vitesse sous 1 m/s en habitation, et la perte linéique sous 200 Pa/m environ. Un tube peut satisfaire l’un et pas l’autre.</p>
+</div>
+<h2 id="calculer-plutot-que-lire">Calculer plutôt que lire</h2>
+<p>L’abaque du polycopié couvre le cuivre courant. L’outil ci-dessous calcule la même chose, pour n’importe quel diamètre, par la formule de Blasius, celle qui vaut pour un tube lisse et un écoulement turbulent, c’est-à-dire tout le chauffage.</p>
+<div class="outil" data-outil="pertes">
+
+</div>
+<p>Faites varier le diamètre : le débit ne change pas, mais la vitesse et la perte linéique s’effondrent dès qu’on monte d’un calibre. Faites varier le nombre de robinets thermostatiques : leur longueur équivalente pèse souvent plus lourd que tout le tube droit du circuit.</p>
+<h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
+<div class="etapes">
+<ol type="1">
+<li>Lire l’abaque : perte linéique d’un 18 × 1 à 0,3 m³/h</li>
+<li>Chercher le plus petit tube qui reste sous 200 Pa/m pour 1 m³/h</li>
+<li>Comprendre les deux droites obliques de l’abaque</li>
+<li>Convertir les singularités d’un circuit réel en longueurs équivalentes</li>
+<li>Calculer la perte de charge totale, et en déduire ce que doit fournir le circulateur</li>
+</ol>
+</div>
+<div class="mission">
+<p><strong>À observer en entreprise</strong></p>
+<p>Sur une installation de l’entreprise, relever la plaque signalétique du circulateur : marque, modèle, hauteur manométrique et débit nominal. Photographier la courbe caractéristique si elle figure sur le corps de pompe.</p>
+<p>Compter, sur un tronçon accessible, le nombre de coudes, de tés et de vannes entre le générateur et un émetteur. Estimer la longueur droite.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>La perte linéique s’exprime en : <strong>Pa/m</strong> | Pa</li>
+<li>Une longueur équivalente représente : <strong>la longueur de tube droit qui coûterait autant</strong> | la longueur réelle de la singularité</li>
+<li>Sur un abaque à axes logarithmiques, la distance de 1 à 10 vaut : <strong>celle de 10 à 100</strong> | dix fois moins</li>
+<li>Les droites obliques de l’abaque donnent : <strong>les vitesses</strong> | les diamètres</li>
+<li>À débit égal, passer au diamètre supérieur fait que la vitesse : <strong>diminue</strong> | augmente</li>
+<li>Le robinet thermostatique, en longueur équivalente, pèse : <strong>plus qu’un coude</strong> | moins qu’un coude</li>
+<li>Le circulateur, dans le calcul des singularités : <strong>ne compte pas</strong> | compte comme un coude</li>
+<li>1 mCE vaut environ : <strong>9 810 Pa</strong> | 1 000 Pa</li>
+</ul>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">D&#39;où vient la formule de Blasius</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte linéique s’écrit toujours de la même façon, quel que soit le fluide :</p>
+<p><strong>j = λ × ρ v² / (2 d)</strong></p>
+<p>où λ est le <strong>coefficient de perte de charge</strong>, sans unité, ρ la masse volumique, v la vitesse et d le diamètre intérieur. Toute la difficulté tient dans λ, qui dépend du régime d’écoulement.</p>
+<p>Ce régime se caractérise par le <strong>nombre de Reynolds</strong> :</p>
+<p><strong>Re = v × d / ν</strong></p>
+<p>avec ν la viscosité cinématique, 0,474 × 10⁻⁶ m²/s pour l’eau à 60 °C.</p>
+<ul>
+<li><strong>Re &lt; 2 000</strong> : écoulement laminaire, λ = 64 / Re. On ne le rencontre presque jamais en chauffage.</li>
+<li><strong>Re &gt; 4 000</strong> : turbulent. Pour un tube lisse : cuivre, PER, multicouche, <strong>λ = 0,3164 / Re^0,25</strong>, c’est la formule de Blasius.</li>
+</ul>
+<p>Elle est valable jusqu’à Re ≈ 100 000, ce qui couvre tous les débits d’une installation de bâtiment. Au-delà, ou pour de l’acier rouillé, il faut passer par le diagramme de Moody.</p>
+<p>C’est cette formule qu’utilise l’outil de cette page. L’abaque du polycopié en est le tracé, pour quelques diamètres.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi 200 Pa/m, et pas une autre valeur</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Ce seuil n’est pas une loi de la physique : c’est un <strong>compromis économique</strong>.</p>
+<p>Descendre en dessous demande de gros tubes : plus de cuivre, plus de calorifuge, plus de main-d’œuvre, et un investissement qui grimpe vite. Monter au-dessus donne un réseau bon marché mais un circulateur puissant, qui consomme toute l’année et fait du bruit.</p>
+<p>L’optimum se situe entre <strong>100 et 250 Pa/m</strong> pour un réseau de bâtiment. On retient 200 comme repère. Sur de très longues distances (un réseau de chaleur urbain) on descend vers 50 à 100 Pa/m, parce que la longueur multiplie tout.</p>
+<p>Le second critère, la vitesse, n’est pas économique mais <strong>acoustique</strong> : au-delà d’environ 1 m/s en habitation, 1,5 en tertiaire, le réseau devient audible. Et sur un réseau ancien, une vitesse trop forte décolle les dépôts et les envoie boucher les corps de chauffe.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le tronçon le plus défavorisé</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un réseau réel ne comporte pas un circuit mais des dizaines, en parallèle. Le circulateur ne peut fournir qu’<strong>une seule</strong> hauteur manométrique, la même pour tous.</p>
+<p>Le bureau d’études calcule donc les pertes de charge de chaque branche, et retient la plus élevée : c’est le <strong>tronçon le plus défavorisé</strong>, presque toujours celui de l’émetteur le plus éloigné. La pompe est dimensionnée sur lui.</p>
+<p>Conséquence : toutes les autres branches reçoivent <strong>plus de pression qu’il ne leur en faut</strong>, et prendraient trop de débit. C’est exactement le problème de la séance 7, et c’est ce que l’équilibrage vient corriger, en ajoutant, à chaque branche favorisée, la résistance qui lui manque pour être aussi défavorisée que la pire.</p>
+<p>Équilibrer un réseau, c’est donc <strong>dégrader volontairement toutes les branches sauf une.</strong></p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le bilan de charge d&#39;un circuit, poste par poste</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte de charge d’un circuit ne se résume pas au tube. Voici le bilan complet du tronçon de la séance 7 : 24 kW en 70/50, DN 25, Q = 1,03 m³/h, j = 160 Pa/m, avec <strong>18 mètres aller et 18 mètres retour</strong>.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Poste</th>
+<th>Détail</th>
+<th style="text-align: right;">Perte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tube droit</td>
+<td>36 m × 160 Pa/m</td>
+<td style="text-align: right;">5 760 Pa</td>
+</tr>
+<tr>
+<td>Singularités</td>
+<td>10 m équivalents × 160 Pa/m</td>
+<td style="text-align: right;">1 610 Pa</td>
+</tr>
+<tr>
+<td>Générateur</td>
+<td>donné par le constructeur</td>
+<td style="text-align: right;">8 000 Pa</td>
+</tr>
+<tr>
+<td>Émetteurs et vannes</td>
+<td>donné par le constructeur</td>
+<td style="text-align: right;">10 000 Pa</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td></td>
+<td style="text-align: right;"><strong>25 400 Pa = 2,6 mCE</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Le tube et ses coudes ne font que 29 % du total.</strong> Les organes, générateur, émetteurs, vannes, font les 71 % restants, et leurs pertes ne se calculent pas : elles se <strong>lisent dans la documentation</strong>. Un candidat qui ne fait que le tube trouve un circulateur trois fois trop petit.</p>
+</div>
+<p><strong>Où trouver ces valeurs à l’épreuve.</strong> Elles sont au dossier technique, dans la fiche du constructeur, sous les noms <em>perte de charge</em>, <em>Δp</em> ou <em>résistance hydraulique</em>, souvent en mCE ou en kPa. Le sujet ne demande jamais de les inventer, il demande de les <strong>trouver et de les additionner</strong>. C’est de l’extraction d’information, la compétence qui pèse 40 % de l’épreuve.</p>
+<p><strong>Trois conversions à savoir de tête</strong>, parce que les documents mélangent les unités :</p>
+<ul>
+<li>1 mCE = 9 810 Pa ≈ <strong>10 kPa</strong> ;</li>
+<li>1 bar ≈ <strong>10 mCE</strong> ;</li>
+<li>100 mbar = 10 kPa ≈ <strong>1 mCE</strong>.</li>
+</ul>
+<p><strong>Et ensuite ?</strong> Ces 2,6 mCE sont la <strong>hauteur manométrique</strong> que le circulateur doit fournir au débit de 1,03 m³/h. Ce couple (un débit et une hauteur) est le point que la séance 9 va chercher sur la courbe du circulateur.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Les longueurs équivalentes : d&#39;où sortent les nombres</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>On ne les invente pas, et on ne les apprend pas par cœur non plus. Elles viennent d’un coefficient sans dimension, le <strong>ζ</strong> (zêta), propre à chaque singularité, que les constructeurs publient.</p>
+<div class="formule">
+<p><strong>L équivalente = ζ × d / λ</strong></p>
+<ul>
+<li><strong>ζ</strong><span>: coefficient de la singularité, sans unité</span></li>
+<li><strong>d</strong><span>: diamètre intérieur, en m</span></li>
+<li><strong>λ</strong><span>: coefficient de frottement du tube, celui de Blasius</span></li>
+</ul>
+<blockquote>
+<p>Sur notre DN 25, d / λ = 0,025 / 0,0239 ≈ <strong>1,05 m</strong>. Une longueur équivalente y vaut donc à peu près <strong>ζ mètres</strong>, la coïncidence est propre à ce diamètre, elle ne se généralise pas.</p>
+</blockquote>
+</div>
+<p><strong>Les ordres de grandeur qu’il faut reconnaître</strong>, et non retenir au chiffre près :</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 40%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>Singularité</th>
+<th style="text-align: right;">ζ typique</th>
+<th>Ce que ça dit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vanne d’arrêt grande ouverte</td>
+<td style="text-align: right;">0,2</td>
+<td>négligeable, et c’est voulu</td>
+</tr>
+<tr>
+<td>Té, passage direct</td>
+<td style="text-align: right;">0,3</td>
+<td>le fluide continue tout droit</td>
+</tr>
+<tr>
+<td>Coude 90°</td>
+<td style="text-align: right;">0,5 à 1,0</td>
+<td>dépend du rayon de courbure</td>
+</tr>
+<tr>
+<td>Té, passage en dérivation</td>
+<td style="text-align: right;">1,5</td>
+<td>tourner coûte cinq fois plus que continuer</td>
+</tr>
+<tr>
+<td>Clapet anti-retour</td>
+<td style="text-align: right;">2,5</td>
+<td>un organe cher en pression</td>
+</tr>
+<tr>
+<td>Robinet thermostatique</td>
+<td style="text-align: right;">8 à 10</td>
+<td><strong>à lui seul, dix mètres de tube</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ce que ce tableau apprend</strong>, et c’est le vrai contenu de la séance : un coude ne pèse presque rien, un organe de réglage pèse énormément. Sur un circuit de radiateurs, les robinets thermostatiques dominent le bilan, c’est normal, et c’est même leur fonction : <strong>freiner</strong>.</p>
+<div class="piege">
+<p>Un ζ ne se convertit en mètres qu’<strong>au diamètre du tronçon où il se trouve</strong>. Le même coude vaut 1 m en DN 25 et 1,6 m en DN 40. Convertir tous les ζ d’un circuit avec un seul diamètre est une erreur courante et invisible.</p>
+</div></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Lire l&#39;abaque sans se tromper de colonne</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>L’abaque du polycopié est un outil de terrain, et il se lit dans un ordre précis. Trois erreurs reviennent à chaque séance.</p>
+<p><strong>Entrer par le débit, sortir par le tube.</strong> On place le débit sur l’axe horizontal, on monte jusqu’à la courbe du tube envisagé, on lit la perte linéique à gauche. Puis (et seulement puis) on regarde <strong>où l’on se trouve par rapport aux droites obliques d’iso-vitesse</strong>. Deux lectures, deux critères, un seul geste.</p>
+<p><strong>Le tube n’est pas désigné par son diamètre intérieur.</strong> Un cuivre s’écrit <strong>18 × 1</strong> : 18 mm de diamètre <strong>extérieur</strong>, 1 mm d’épaisseur, donc <strong>16 mm intérieur</strong>. C’est l’intérieur qui compte dans tous les calculs. Un acier s’écrit en DN, qui est une désignation nominale et non une cote : un DN 20 en acier n’a pas exactement 20 mm intérieurs.</p>
+<p><strong>L’abaque vaut pour un matériau et une température.</strong> Celui du polycopié est établi pour le cuivre, à une température d’eau donnée. Le multicouche et le PER ont des rugosités et des sections différentes, et l’eau chaude est moins visqueuse que l’eau froide. Un écart de quelques pour cent, sans conséquence en avant-projet, mais ça explique pourquoi l’outil de calcul et l’abaque ne donnent jamais exactement le même nombre.</p>
+<div class="cle">
+<p>L’écart entre l’abaque et l’outil n’est pas une erreur de l’un des deux. À l’épreuve, <strong>on lit l’abaque fourni</strong>, et on ne recalcule pas : le corrigé attend la valeur lue, avec la tolérance de lecture.</p>
+</div></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Rugosité, Reynolds, et ce que Blasius ne couvre pas</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La formule de Blasius vaut pour un <strong>tube lisse en régime turbulent</strong>. C’est le cas de tout le chauffage neuf, et c’est pour ça qu’elle suffit ici. Elle cesse de valoir dans deux situations que rencontre un exploitant.</p>
+<p><strong>Le tube rugueux.</strong> Un acier galvanisé vieilli, un tube entartré, un réseau chargé de boues n’est plus lisse : sa rugosité relative ε/d devient sensible, et le coefficient de frottement λ ne dépend plus seulement de Reynolds. Il faut alors le <strong>diagramme de Moody</strong>, ou la formule de Colebrook dont il est le tracé.</p>
+<p>Concrètement, un réseau ancien peut voir sa perte linéique <strong>doubler</strong> par rapport au calcul neuf. Un circulateur dimensionné juste devient insuffisant au bout de quinze ans, non parce qu’il a faibli, mais parce que le réseau a durci. C’est un diagnostic classique en rénovation.</p>
+<p><strong>Le régime laminaire.</strong> Sous Re ≈ 2 000, l’écoulement n’est plus turbulent et λ = 64 / Re. On y tombe dans les très petits débits, un plancher chauffant en mi-saison, une boucle d’ECS bouclée. L’outil du kit bascule automatiquement, mais l’abaque du polycopié, lui, n’y descend pas.</p>
+<div class="formule">
+<p><strong>Re = v × d / ν</strong></p>
+<ul>
+<li><strong>Re</strong><span>: nombre de Reynolds, sans unité</span></li>
+<li><strong>v</strong><span>: vitesse, en m/s ; <strong>d</strong> : diamètre intérieur, en m</span></li>
+<li><strong>ν</strong><span>: viscosité cinématique de l’eau, ≈ 0,47 × 10⁻⁶ m²/s à 70 °C</span></li>
+</ul>
+<blockquote>
+<p>Sur notre tronçon : Re ≈ <strong>31 000</strong>. Franchement turbulent, Blasius s’applique.</p>
+</blockquote>
+</div>
+<p><strong>Pourquoi la viscosité compte.</strong> L’eau à 10 °C est trois fois plus visqueuse qu’à 80 °C. Un même circuit perd donc plus en eau glacée qu’en chauffage, et c’est une des raisons pour lesquelles on ne dimensionne pas un réseau de froid avec l’abaque du chaud.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">La cavitation, ou quand la pompe fait bouillir l&#39;eau à froid</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une pompe n’aspire pas : elle crée une dépression, et c’est la pression disponible en amont qui pousse l’eau dedans. Si cette pression tombe sous la <strong>pression de vapeur saturante</strong> du liquide à sa température, l’eau se vaporise à l’entrée de la roue.</p>
+<p>Les bulles ainsi formées sont ensuite recomprimées dans la roue et <strong>implosent</strong>. Chaque implosion arrache un peu de métal. Une pompe qui cavite fait un bruit de gravier, perd du débit, et s’use en quelques mois.</p>
+<p><strong>Trois causes, toujours les mêmes :</strong></p>
+<ul>
+<li>une <strong>pression statique insuffisante</strong> au point le plus haut du réseau : vase d’expansion mal gonflé, installation sous-remplie ;</li>
+<li>une <strong>température trop élevée</strong> : à 100 °C, il suffit d’une pression absolue de 1 bar pour que l’eau bouille ; la marge disparaît ;</li>
+<li>une <strong>aspiration trop résistante</strong> : filtre encrassé, vanne à moitié fermée côté aspiration. C’est la seule des trois qui se répare en cinq minutes.</li>
+</ul>
+<p><strong>La parade se joue à la conception</strong> : la pompe se place <strong>au refoulement du générateur</strong> et non à l’aspiration, le vase d’expansion se raccorde au point neutre, et on vérifie que le NPSH disponible de l’installation dépasse le NPSH requis de la pompe, avec une marge.</p>
+<blockquote>
+<p><strong>A3-5 Cavitation est au niveau 1 pour l’option C</strong>, information, pas maîtrise d’outil. On doit savoir de quoi il s’agit et reconnaître le symptôme ; le calcul de NPSH n’est pas exigible.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, une perte de charge qui se paie en kelvins</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte de charge d’un circuit frigorifique se calcule comme celle de cette séance. Ce qui change, c’est <strong>l’unité dans laquelle on la juge</strong> : on ne la compte pas en pascals, on la convertit en <strong>kelvins de température de saturation</strong>.</p>
+<div class="cle">
+<p>Une vapeur qui perd de la pression en revenant au compresseur y arrive <strong>moins dense</strong>. Le compresseur aspire un volume fixe ; moins dense veut dire moins de kilogrammes, donc moins de puissance frigorifique. <strong>La règle du métier : la ligne d’aspiration ne doit pas coûter plus de 1 K.</strong></p>
+</div>
+<p><strong>Le calcul de diamètre</strong>, mené comme en séance 8 mais avec la vitesse comme critère principal. Un évaporateur de <strong>10 kW</strong>, une différence d’enthalpie de <strong>200 kJ/kg</strong>, une vapeur aspirée à <strong>36 kg/m³</strong>, deux valeurs lues dans la table du fluide :</p>
+<p>qm = 10 / 200 = <strong>0,050 kg/s</strong> qv = 0,050 / 36 = <strong>1,39 × 10⁻³ m³/s</strong> = 5,0 m³/h</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Vitesse visée</th>
+<th style="text-align: right;">Section</th>
+<th style="text-align: right;">Diamètre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 m/s : horizontal</td>
+<td style="text-align: right;">2,31 cm²</td>
+<td style="text-align: right;"><strong>17,2 mm</strong></td>
+</tr>
+<tr>
+<td>8 m/s : colonne montante</td>
+<td style="text-align: right;">1,74 cm²</td>
+<td style="text-align: right;"><strong>14,9 mm</strong></td>
+</tr>
+<tr>
+<td>10 m/s</td>
+<td style="text-align: right;">1,39 cm²</td>
+<td style="text-align: right;">13,3 mm</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>On retient donc un tube de l’ordre de 16 mm</strong>, et l’on vérifie ensuite que la perte de charge tient sous le kelvin.</p>
+<div class="piege">
+<p>En hydraulique, on cherche à <strong>rester sous</strong> une vitesse. Ici, il y a un <strong>plancher et un plafond</strong> : trop lent, l’huile ne revient pas ; trop rapide, la perte de charge coûte de la puissance et le circuit siffle. Deux critères qui se contredisent, exactement comme les deux critères de diamètre de la séance 8.</p>
+</div></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J7.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 7 — réseaux hydrauliques</span></a><a class="ap" href="J9.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 9 — point de fonctionnement</span></a></div><a class="vers-recap" href="SEQ2.html">Préparation au contrôle</a></nav>
+<p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

@@ -1,0 +1,418 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Séance 6 — la paroi mesurée</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/J6">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="J5.html" rel="prev" title="Séance 5 — besoin annuel" aria-label="Séance 5 — besoin annuel">&lsaquo;</a><a class="fleche" href="J7.html" rel="next" title="Séance 7 — réseaux hydrauliques" aria-label="Séance 7 — réseaux hydrauliques">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J6">Marquer comme lu</button></div>
+<header class="tete">
+  <span class="num" aria-hidden="true">6</span>
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Ce que mesure<span>un thermomètre infrarouge</span></h1>
+  </div>
+  <p class="accroche">Trois séances de calcul, et voici la paroi réelle. Elle ne donne pas son coefficient : elle donne une température de surface, et c'est à vous d'en tirer quelque chose, ou de reconnaître que vous ne pouvez pas.</p>
+  <p class="contenu">2 outils · 8 questions · 3 exercices · 6 replis · 6 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">A1-2 Hygrothermie, condensation surfacique · niveau 2</span><span class="tag">A1-2 Composition des parois · niveau 2</span><span class="tag">A2-3 Bilan thermique · niveau 2</span><span class="tag">PC · Erreurs et incertitudes</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J3.html">Les résistances en série, de λ à U</a></b><span class="ou">J3 · De la conductivité au coefficient U</span><span class="car">la température de surface se calcule en partageant l'écart entre les résistances de la paroi ; c'est la séance 3 lue à l'envers.</span></li><li><b><a href="J4.html">Le coefficient U des parois du fil rouge</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">on mesure pour retrouver un U, puis on le compare à celui du calcul ; sans le calcul, la mesure ne dit rien.</span></li><li><b>Écrire une mesure avec son incertitude</b><span class="car">un thermomètre infrarouge lit à ± 1 K, et un écart de 1,5 K entre l'air et la paroi n'est pas un résultat sans cette barre d'erreur.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#ce-que-la-seance-a-regle">Ce que la séance a réglé</a><a href="#la-surface-interieure-est-plus-froide-que-l-air">La surface intérieure est plus froide que l’air</a><a href="#mesurer-et-remonter-au-coefficient">Mesurer, et remonter au coefficient</a><a href="#est-ce-que-ca-condense">Est-ce que ça condense</a><a href="#ce-que-la-mesure-ne-dit-pas">Ce que la mesure ne dit pas</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#s-entrainer">S’entraîner</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="ce-que-la-seance-a-regle">Ce que la séance a réglé</h2>
+<p>Les séances 3 à 5 calculaient des parois sur le papier. Celle-ci en mesure une, avec un thermomètre infrarouge, et découvre que la mesure a un domaine de validité.</p>
+<p>Sur une paroi mauvaise, l’écart est grand et la mesure parle. Sur une paroi bien isolée, il tombe sous l’incertitude de l’appareil, et le résultat ne veut plus rien dire.</p>
+<figure>
+<img src="img/J6/fig1-temperatures-paroi.png" alt="La température chute à travers la paroi, et aussi dans les couches d’air qui la bordent." />
+<figcaption aria-hidden="true">La température chute à travers la paroi, et aussi dans les couches d’air qui la bordent.</figcaption>
+</figure>
+<h2 id="la-surface-interieure-est-plus-froide-que-l-air">La surface intérieure est plus froide que l’air</h2>
+<p>Entre l’air du local et la surface du mur, il y a une couche d’air immobile qui résiste : c’est <strong>Rsi</strong>, la résistance superficielle intérieure. La chaleur qui la traverse y perd de la température.</p>
+<div class="formule">
+<p><strong>θi − θsi = U × Rsi × (θi − θe)</strong></p>
+<ul>
+<li><strong>θi</strong><span>: température de l’air intérieur · <strong>θsi</strong> : surface intérieure de la paroi</span></li>
+<li><strong>Rsi = 0,13</strong><span>m²·K/W côté intérieur · <strong>Rse = 0,04</strong> côté extérieur</span></li>
+<li><strong>U</strong><span>: le coefficient de la paroi, en W/(m²·K)</span></li>
+</ul>
+</div>
+<div class="cle">
+<p><strong>Plus la paroi est mauvaise, plus sa surface intérieure est froide.</strong> C’est tout le principe de la séance : la température de surface est un révélateur du U, parce que les deux sont liés par une relation simple.</p>
+</div>
+<p>Dans un local à 20 °C, par 5 °C dehors :</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Paroi</th>
+<th style="text-align: right;">U</th>
+<th style="text-align: right;">θi − θsi</th>
+<th style="text-align: right;">Surface à</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mur ancien non isolé</td>
+<td style="text-align: right;">2,00</td>
+<td style="text-align: right;">3,90 K</td>
+<td style="text-align: right;"><strong>16,1 °C</strong></td>
+</tr>
+<tr>
+<td>Mur peu isolé</td>
+<td style="text-align: right;">1,20</td>
+<td style="text-align: right;">2,34 K</td>
+<td style="text-align: right;">17,7 °C</td>
+</tr>
+<tr>
+<td>Mur isolé</td>
+<td style="text-align: right;">0,45</td>
+<td style="text-align: right;">0,88 K</td>
+<td style="text-align: right;">19,1 °C</td>
+</tr>
+<tr>
+<td>Mur performant</td>
+<td style="text-align: right;">0,25</td>
+<td style="text-align: right;"><strong>0,49 K</strong></td>
+<td style="text-align: right;">19,5 °C</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="schema"><div class="dessin" data-schema="paroi-coupe"></div><figcaption>Le profil de température suit le composeur de paroi : changez une couche et regardez la surface intérieure se déplacer.</figcaption></figure>
+<div class="outil" data-outil="paroi">
+
+</div>
+<h2 id="mesurer-et-remonter-au-coefficient">Mesurer, et remonter au coefficient</h2>
+<figure>
+<img src="img/J6/fig2-points-mesure.png" alt="Cinq points sur la paroi, à distance des angles et des jonctions." />
+<figcaption aria-hidden="true">Cinq points sur la paroi, à distance des angles et des jonctions.</figcaption>
+</figure>
+<p>La relation se retourne. Si l’on mesure θsi, on peut en déduire U, à condition de connaître les deux températures d’air.</p>
+<div class="formule">
+<p><strong>U = (θi − θsi) / (Rsi × (θi − θe))</strong></p>
+<ul>
+<li>une surface relevée à <strong>16,2 °C</strong>, dans un local à 20 °C, par 5 °C dehors</li>
+<li>U = 3,8 / (0,13 × 15) = <strong>1,95 W/(m²·K)</strong></li>
+</ul>
+</div>
+<div class="piege">
+<p><strong>L’infrarouge trouve les défauts ; il ne mesure pas un U.</strong> Sur la paroi performante, l’écart attendu est de 0,49 K. Une incertitude de ±0,5 K sur l’appareil représente alors <strong>plus de 100 %</strong> de la grandeur mesurée : le résultat n’a aucun sens.</p>
+</div>
+<figure>
+<img src="img/J6/fig3-profils-compares.png" alt="Deux profils comparés : celui qu’on prévoyait, et celui qu’on a relevé." />
+<figcaption aria-hidden="true">Deux profils comparés : celui qu’on prévoyait, et celui qu’on a relevé.</figcaption>
+</figure>
+<div class="outil" data-outil="dispersion">
+
+</div>
+<div class="cle">
+<p>Un point de mesure ne suffit pas. On relève <strong>cinq points</strong>, on prend la moyenne, et on regarde l’étendue : c’est elle qui dit si la paroi est homogène ou si l’on a attrapé un pont thermique.</p>
+</div>
+<h2 id="est-ce-que-ca-condense">Est-ce que ça condense</h2>
+<figure class="memo"><img src="img/J6/memo-condensation.png" alt="" /></figure>
+<p>Toute surface plus froide que le <strong>point de rosée</strong> de l’air qui la touche se couvre d’eau. Le point de rosée se lit dans un tableau, à partir de la température de l’air et de son humidité relative.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>θ air</th>
+<th style="text-align: right;">40 %</th>
+<th style="text-align: right;">50 %</th>
+<th style="text-align: right;">60 %</th>
+<th style="text-align: right;">70 %</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>18 °C</td>
+<td style="text-align: right;">4,2</td>
+<td style="text-align: right;">7,4</td>
+<td style="text-align: right;">10,1</td>
+<td style="text-align: right;">12,4</td>
+</tr>
+<tr>
+<td><strong>20 °C</strong></td>
+<td style="text-align: right;">6,0</td>
+<td style="text-align: right;">9,3</td>
+<td style="text-align: right;"><strong>12,0</strong></td>
+<td style="text-align: right;">14,4</td>
+</tr>
+<tr>
+<td>22 °C</td>
+<td style="text-align: right;">7,8</td>
+<td style="text-align: right;">11,1</td>
+<td style="text-align: right;">13,9</td>
+<td style="text-align: right;">16,3</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Il y a condensation dès que θsi descend au niveau de θ rosée.</strong> Dans un local à 20 °C et 60 %, la rosée est à 12,0 °C : le mur à 16,1 °C ne condense pas, mais un pont thermique à 11 °C se couvre de buée.</p>
+</div>
+<p>Pour l’éviter, deux leviers, et deux seulement : agir sur <strong>la paroi</strong>, l’isoler pour remonter θsi, ou sur <strong>l’air</strong>, le ventiler pour abaisser θ rosée.</p>
+<h2 id="ce-que-la-mesure-ne-dit-pas">Ce que la mesure ne dit pas</h2>
+<figure>
+<img src="img/J6/fig4-thermogramme.png" alt="Un thermogramme montre où ça chauffe, pas de combien la paroi est mauvaise." />
+<figcaption aria-hidden="true">Un thermogramme montre où ça chauffe, pas de combien la paroi est mauvaise.</figcaption>
+</figure>
+<p>Un thermogramme est une image de températures de surface. Il repère un défaut en une seconde, et il ne donne aucun coefficient.</p>
+<div class="piege">
+<p>Les couleurs d’un thermogramme sont <strong>relatives à l’échelle choisie</strong>. Un mur parfaitement sain paraît alarmant si l’échelle est resserrée sur un demi-degré. Une image sans son échelle ne prouve rien.</p>
+</div>
+<h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
+<div class="etapes">
+<ol type="1">
+<li>Prévoir la température de surface des quatre parois avant de mesurer quoi que ce soit</li>
+<li>Relever cinq points sur une paroi, calculer la moyenne et l’étendue</li>
+<li>Remonter de la mesure au coefficient U, et comparer à la valeur attendue</li>
+<li>Lire un point de rosée dans le tableau, et dire si la paroi condense</li>
+<li>Chercher le domaine où la mesure a un sens, et celui où elle n’en a plus</li>
+</ol>
+</div>
+<div class="mission">
+<p><strong>Mission chantier n° 2</strong></p>
+<p>Repérer, dans le bâtiment de l’entreprise, une paroi que l’on suspecte d’être mal isolée. Relever la température de l’air intérieur, celle de l’extérieur, et la température de surface en cinq points.</p>
+<p>En déduire un ordre de grandeur du coefficient U, et dire si le résultat est exploitable ou si l’écart est trop faible. Relever l’humidité relative du local et vérifier si la condensation est possible.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Rsi vaut : <strong>0,13 m²·K/W</strong> | 0,04 m²·K/W</li>
+<li>Plus la paroi est mauvaise, sa surface intérieure est : <strong>plus froide</strong> | plus chaude</li>
+<li>Sur une paroi performante, l’écart entre l’air et la surface est : <strong>inférieur à l’incertitude de l’appareil</strong> | facile à mesurer</li>
+<li>Un thermomètre infrarouge mesure : <strong>une température de surface</strong> | un coefficient U</li>
+<li>Il y a condensation dès que la surface descend : <strong>au point de rosée</strong> | à 0 °C</li>
+<li>Dans un local à 20 °C et 60 % d’humidité, la rosée est à : <strong>12,0 °C</strong> | 20,0 °C</li>
+<li>Pour éviter une condensation, on peut : <strong>isoler la paroi ou ventiler l’air</strong> | augmenter l’humidité</li>
+<li>Les couleurs d’un thermogramme sont : <strong>relatives à l’échelle choisie</strong> | absolues</li>
+</ul>
+</div>
+<h2 id="s-entrainer">S’entraîner</h2>
+<section class="exo" id="J6-e1" data-exo="J6-e1" data-type="calcul" data-savoir="A1-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2x0a3Z4LjU2eGBpdGp2eC94YHgGL2pqOGoZeCc="><p class="k">Exercice · A1-2</p><h4>La surface d’un mur ancien</h4><div class="enonce">
+
+<p>Un mur de coefficient <strong>U = 2,0</strong> W/(m²·K) sépare un local à <strong>20 °C</strong> d’un extérieur à <strong>5 °C</strong>. Quelle est la température de sa surface intérieure ?</p>
+</div><div class="indice" hidden>θi − θsi = U × Rsi × (θi − θe), avec Rsi = 0,13. Calculez d’abord la chute, puis retranchez-la à la température de l’air.</div></section>
+<section class="exo" id="J6-e2" data-exo="J6-e2" data-type="calcul" data-savoir="A1-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga3Rjb3Z4LjU2eGBvdGp2eC94YHgNdXI3Bi9qajhoBi9qajhtEXN4Jw=="><p class="k">Exercice · A1-2</p><h4>Remonter au coefficient</h4><div class="enonce">
+
+<p>Dans un local à <strong>20 °C</strong>, par <strong>5 °C</strong> dehors, on relève une surface intérieure à <strong>16,2 °C</strong>. Quel est le coefficient U de cette paroi ?</p>
+</div><div class="indice" hidden>La relation se retourne : U = (θi − θsi) / (Rsi × (θi − θe)). Rsi vaut 0,13.</div></section>
+<section class="exo" id="J6-e3" data-exo="J6-e3" data-type="justification" data-savoir="A1-2" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A1-2</p><h4>Le résultat est-il exploitable ?</h4><div class="enonce">
+
+<p>Sur une paroi performante, l’écart entre l’air et la surface vaut 0,49 K. Le thermomètre annonce une incertitude de ±0,5 K. Que concluez-vous ?</p>
+</div><ul class="verifier" hidden><li>J’ai comparé l’incertitude à la grandeur mesurée, pas à la température absolue.</li><li>J’ai dit que l’incertitude relative dépasse 100 %.</li><li>J’ai conclu que le U déduit n’a pas de sens sur cette paroi.</li><li>J’ai précisé sur quel type de paroi la mesure reste, elle, exploitable.</li></ul></section>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le domaine de validité de la mesure, chiffré</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>« Ça ne marche pas sur une paroi isolée » est une affirmation qu’on peut chiffrer, et le chiffrage est exactement ce que le savoir de physique-chimie appelle une <strong>incertitude relative</strong>.</p>
+<p><strong>Ce qu’on mesure réellement</strong>, c’est un écart : θi − θsi. Sa valeur dépend du U cherché.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th style="text-align: right;">U de la paroi</th>
+<th style="text-align: right;">Écart à mesurer</th>
+<th style="text-align: right;">Incertitude relative avec ±0,5 K</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">2,00</td>
+<td style="text-align: right;">3,90 K</td>
+<td style="text-align: right;"><strong>13 %</strong></td>
+</tr>
+<tr>
+<td style="text-align: right;">1,20</td>
+<td style="text-align: right;">2,34 K</td>
+<td style="text-align: right;">21 %</td>
+</tr>
+<tr>
+<td style="text-align: right;">0,45</td>
+<td style="text-align: right;">0,88 K</td>
+<td style="text-align: right;">57 %</td>
+</tr>
+<tr>
+<td style="text-align: right;">0,25</td>
+<td style="text-align: right;">0,49 K</td>
+<td style="text-align: right;"><strong>103 %</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Au-dessous de U ≈ 1, la mesure cesse d’être un mesurage et devient une indication.</strong> On peut encore dire « cette zone est plus froide que sa voisine » ; on ne peut plus dire « U vaut 0,45 ». La différence est celle d’un ordre de grandeur et d’une valeur.</p>
+</div>
+<p><strong>Trois façons d’élargir le domaine</strong>, et elles se cumulent :</p>
+<ol type="1">
+<li><strong>augmenter l’écart de température.</strong> Mesurer par 0 °C dehors plutôt que par 15 °C double l’écart à mesurer, donc divise l’incertitude relative par deux. C’est pourquoi les campagnes de thermographie se font en hiver, tôt le matin ;</li>
+<li><strong>multiplier les points.</strong> La moyenne de cinq relevés a une incertitude plus faible qu’un relevé unique, c’est exactement le sujet de la séquence 1 de maths et physique-chimie ;</li>
+<li><strong>changer de méthode.</strong> Pour mesurer réellement un U, il existe des <strong>fluxmètres</strong> : on colle un capteur de flux sur la paroi, on enregistre le flux et les deux températures pendant plusieurs jours, et on calcule U = Φ / (S × ΔT). C’est long, c’est cher, et c’est la seule méthode qui donne un U mesuré.</li>
+</ol>
+<p><strong>Ce que ça enseigne au-delà de la thermique.</strong> Un instrument a un domaine où il mesure et un domaine où il indique. <strong>Savoir dire « ma mesure ne permet pas de conclure » est une compétence professionnelle</strong>, pas un aveu d’échec, et c’est une réponse qui rapporte des points à l’épreuve.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Où poser le point de mesure, et pourquoi cinq valent mieux qu&#39;un</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La relation θi − θsi = U × Rsi × ΔT décrit une <strong>paroi courante</strong>. Elle cesse de valoir dès qu’on s’approche d’une singularité, et une paroi en est pleine.</p>
+<p><strong>Les endroits à éviter</strong>, et ce qu’on y lirait :</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Endroit</th>
+<th>Ce qu’on mesure vraiment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Un angle de murs</td>
+<td>deux parois à la fois, et un pont thermique géométrique</td>
+</tr>
+<tr>
+<td>Une jonction plancher-mur</td>
+<td>le pont thermique, pas le mur</td>
+</tr>
+<tr>
+<td>Un appui de fenêtre</td>
+<td>un pont, et souvent le plus froid de la pièce</td>
+</tr>
+<tr>
+<td>Derrière un meuble ou un rideau</td>
+<td>une surface qui ne voit pas l’air du local, donc un Rsi bien plus grand</td>
+</tr>
+<tr>
+<td>Au-dessus d’un radiateur</td>
+<td>un panache d’air chaud qui réchauffe la surface</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Où l’on mesure : au milieu d’un panneau courant</strong>, à plus d’un mètre de tout angle, de toute jonction et de toute source. Cinq points répartis, jamais alignés sur une même horizontale.</p>
+<p><strong>Ce que la moyenne et l’étendue disent ensemble :</strong></p>
+<ul>
+<li><strong>une étendue faible</strong> (quelques dixièmes de degré) signale une paroi homogène. La moyenne est alors exploitable ;</li>
+<li><strong>une étendue large</strong> signale une hétérogénéité : un isolant tassé, une ossature qui traverse, une humidité localisée. <strong>La moyenne n’a plus de sens physique</strong>, et c’est le relevé point par point qui devient intéressant.</li>
+</ul>
+<div class="piege">
+<p>Une étendue large n’est pas un défaut de mesure : <strong>c’est une information sur la paroi</strong>. La confondre avec une erreur d’opérateur fait passer à côté du seul résultat intéressant du relevé.</p>
+</div>
+<p><strong>Le lien avec les mathématiques de l’année</strong> est direct : moyenne, étendue, écart-type d’une série de relevés, et la question « combien de points sont hors tolérance ». C’est le même outil, appliqué à une paroi au lieu d’une régulation.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Décider face à une condensation : les deux leviers, et lequel choisir</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Constater qu’une paroi condense ne suffit pas ; il faut proposer. Deux leviers existent, et le bon dépend de ce qui a causé le problème.</p>
+<p><strong>Le levier « paroi » : remonter θsi.</strong> On isole, on traite le pont thermique, on double le vitrage. La surface devient plus chaude, elle repasse au-dessus de la rosée.</p>
+<p><strong>Le levier « air » : abaisser θ rosée.</strong> On ventile davantage, on traite la source d’humidité, une salle de bains sans extraction, du linge qui sèche, une cuisine. L’air contient moins d’eau, sa rosée descend.</p>
+<p><strong>Comment choisir</strong>, et c’est la question de justification :</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Le problème apparaît</th>
+<th>Cause probable</th>
+<th>Levier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sur toute une paroi, uniformément</td>
+<td>la paroi est mauvaise</td>
+<td><strong>isoler</strong></td>
+</tr>
+<tr>
+<td>Sur une bande, en pied de mur ou en angle</td>
+<td>un pont thermique</td>
+<td><strong>traiter le pont</strong></td>
+</tr>
+<tr>
+<td>Dans une pièce seulement, sur toutes les parois</td>
+<td>une source d’humidité locale</td>
+<td><strong>ventiler</strong></td>
+</tr>
+<tr>
+<td>Après des travaux d’étanchéité</td>
+<td>la ventilation ne suit plus</td>
+<td><strong>ventiler</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>Le dernier cas est le plus fréquent et le plus mal traité.</strong> On remplace des fenêtres, le bâtiment devient étanche, les infiltrations qui assuraient le renouvellement disparaissent, et l’humidité monte jusqu’à condenser. Le coupable apparent est la fenêtre neuve ; la cause est la ventilation absente.</p>
+</div>
+<p><strong>Le calcul qui tranche.</strong> On connaît θi et l’humidité relative, donc la rosée. On connaît θsi. <strong>Si la marge est inférieure à deux ou trois degrés, la paroi est à risque</strong> même si elle ne condense pas aujourd’hui : il suffira d’une journée plus froide ou d’une lessive qui sèche.</p>
+<p><strong>Et l’humidité n’est pas seulement une gêne.</strong> Une surface qui reste humide développe des moisissures, qui sont un problème sanitaire avant d’être un problème esthétique. C’est ce qui fait de la condensation surfacique un sujet réglementé, et non un simple défaut de confort.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">L&#39;émissivité, ou pourquoi un infrarouge ment sur le métal</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un thermomètre infrarouge ne mesure pas une température : il mesure un <strong>rayonnement</strong>, et il en déduit une température en supposant que la surface rayonne d’une certaine façon. Cette hypothèse s’appelle l’<strong>émissivité</strong>.</p>
+<p><strong>Une surface parfaite rayonne à ε = 1.</strong> La plupart des matériaux du bâtiment en sont proches : peinture, plâtre, bois, béton, brique, verre sont tous entre 0,90 et 0,95. C’est pourquoi les appareils sont réglés d’usine sur 0,95 et donnent de bons résultats sans qu’on y pense.</p>
+<p><strong>Les métaux nus, eux, sont catastrophiques.</strong> Un aluminium poli ou un acier inoxydable ont une émissivité de l’ordre de 0,05 à 0,10 : ils rayonnent peu, et surtout <strong>ils réfléchissent l’environnement</strong>. L’appareil pointé sur une gaine en tôle brillante mesure en réalité le rayonnement du plafond, des lampes, et de l’opérateur lui-même.</p>
+<div class="piege">
+<p><strong>Un relevé sur métal nu peut se tromper de dix ou vingt degrés</strong>, dans les deux sens, sans que rien ne le signale. La parade de terrain est simple : coller un morceau d’adhésif mat sur le métal, attendre qu’il prenne la température, et viser l’adhésif.</p>
+</div>
+<p><strong>Trois autres pièges de la mesure sans contact :</strong></p>
+<ol type="1">
+<li><strong>la distance et la tache de mesure.</strong> L’appareil moyenne sur un disque dont le diamètre croît avec la distance. À trois mètres, on mesure une zone de plusieurs dizaines de centimètres, impossible d’isoler un pont thermique étroit ;</li>
+<li><strong>l’angle de visée.</strong> Au-delà de 45 à 60° d’incidence, l’émissivité apparente chute et la mesure dérive. <strong>On vise perpendiculairement</strong> ;</li>
+<li><strong>les surfaces vitrées.</strong> Le verre est opaque à l’infrarouge lointain : on mesure la température du vitrage, jamais celle de ce qu’il y a derrière. Et il réfléchit, un thermogramme de fenêtre montre souvent l’opérateur.</li>
+</ol>
+<blockquote>
+<p><strong>Ce que la mesure sans contact fait très bien</strong>, malgré tout ça : comparer deux points voisins de même nature, dans les mêmes conditions. C’est précisément ce qu’on lui demande dans cette séance, trouver <strong>où</strong> c’est plus froid, pas de combien exactement.</p>
+</blockquote></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">La thermographie du bâtiment : les conditions de la prise de vue</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une caméra thermique produit des images spectaculaires, et des conclusions fausses dès que les conditions ne sont pas réunies. Un rapport de thermographie sérieux commence toujours par les décrire.</p>
+<p><strong>Les cinq conditions</strong>, et la raison de chacune :</p>
+<ol type="1">
+<li><strong>un écart de température suffisant</strong>, de l’ordre de 15 K minimum entre l’intérieur et l’extérieur. En dessous, les défauts ne ressortent pas du bruit. C’est le même argument que le domaine de validité vu plus haut ;</li>
+<li><strong>un régime stable</strong>, le bâtiment chauffé depuis au moins vingt-quatre heures, sans intermittence. Une paroi lourde en cours de relance affiche des températures qui ne reflètent pas son isolation mais son histoire récente ;</li>
+<li><strong>pas de soleil sur les façades</strong>, et pas depuis plusieurs heures. Une façade ensoleillée l’après-midi reste chaude longtemps : elle paraît fuir alors qu’elle stocke. <strong>D’où les campagnes avant le lever du jour</strong> ;</li>
+<li><strong>pas de pluie ni de vent fort.</strong> Une paroi mouillée se refroidit par évaporation ; le vent uniformise les températures de surface et efface les défauts ;</li>
+<li><strong>une échelle de couleurs annoncée</strong>, avec ses bornes. Sans elle, l’image n’est pas interprétable.</li>
+</ol>
+<p><strong>Ce qu’une thermographie sait faire, et fait mieux que tout :</strong></p>
+<ul>
+<li>localiser un <strong>pont thermique</strong>, un défaut de pose d’isolant, un tassement ;</li>
+<li>révéler un <strong>passage d’air</strong> : une infiltration se voit comme une traînée froide caractéristique, différente d’un défaut d’isolation ;</li>
+<li>suivre un <strong>réseau enterré</strong> ou un plancher chauffant sous la chape ;</li>
+<li>repérer une <strong>humidité</strong> dans une paroi, qui apparaît plus froide par évaporation.</li>
+</ul>
+<p><strong>Ce qu’elle ne sait pas faire :</strong> donner un U, quantifier une déperdition, comparer deux bâtiments photographiés dans des conditions différentes.</p>
+<div class="cle">
+<p><strong>L’infrarouge est un outil de localisation, pas de quantification.</strong> Il dit <em>où</em> aller chercher. Ce sont ensuite le calcul de la séance 4 et, si l’enjeu le justifie, une mesure par fluxmètre qui disent <em>combien</em>. Confondre les deux est l’erreur qui donne aux rapports de thermographie leur mauvaise réputation.</p>
+</div></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, la frontière exacte entre mesurer et intervenir</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Cette séance est entièrement construite sur un geste : <strong>mesurer une température de surface sans rien ouvrir</strong>. C’est exactement la frontière réglementaire du circuit frigorifique, et elle vaut d’être connue au mot près.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Geste</th>
+<th>Attestation exigée ?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relever une température de surface, au contact ou à l’infrarouge</td>
+<td><strong>non</strong></td>
+</tr>
+<tr>
+<td>Lire les pressions affichées par la machine ou la GTB</td>
+<td><strong>non</strong></td>
+</tr>
+<tr>
+<td>Ouvrir un capot, mesurer une intensité, relever un débit d’air</td>
+<td><strong>non</strong></td>
+</tr>
+<tr>
+<td><strong>Brancher un manifold</strong> sur les vannes de service</td>
+<td><strong>oui</strong></td>
+</tr>
+<tr>
+<td>Contrôler une étanchéité, récupérer, recharger, braser</td>
+<td><strong>oui</strong></td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Ce qui déclenche l’obligation, c’est <strong>l’ouverture du circuit contenant le fluide</strong>, pas la proximité de la machine, pas l’outil employé. Brancher un manifold ouvre le circuit, même si l’on ne fait que lire.</p>
+</div>
+<p><strong>Ce que la méthode de la séance permet quand même</strong>, et c’est beaucoup. En relevant les températures de surface aux quatre points du circuit, on retrouve sans rien ouvrir la température d’évaporation approchée, celle de condensation, et l’existence d’une surchauffe et d’un sous-refroidissement. C’est un prédiagnostic complet.</p>
+<div class="piege">
+<p>Une température de surface n’est <strong>pas</strong> la température du fluide : la paroi du tube, son isolant et le contact du capteur en écartent le relevé de un à trois kelvins. C’est exactement la remarque de la séance sur la paroi mesurée, et elle suffit à interdire d’en tirer une surchauffe au dixième près.</p>
+</div></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J5.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 5 — besoin annuel</span></a><a class="ap" href="J7.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 7 — réseaux hydrauliques</span></a></div></nav>
+<p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

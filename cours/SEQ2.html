@@ -1,0 +1,241 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Hydraulique et ECS, séances 7 à 10</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/SEQ2" data-rang="2">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="SEQ1.html" rel="prev" title="Thermique du bâtiment, séances 1 à 5" aria-label="Thermique du bâtiment, séances 1 à 5">&lsaquo;</a><a class="fleche" href="FICHE-CHAUFFERIE-EN-MOUVEMENT.html" rel="next" title="La chaufferie en mouvement" aria-label="La chaufferie en mouvement">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/SEQ2">Marquer comme lu</button></div>
+<header class="tete">
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Récapitulatif et approfondissements - Hydraulique et ECS<span>séances 7 à 10</span></h1>
+  </div>
+  <p class="accroche">Les formules, les pièges, quatre outils de calcul, et les approfondissements pour ceux qui veulent aller plus loin.</p>
+  <p class="contenu">3 outils · 14 questions · 4 exercices · 6 replis · 1 figure</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">B4-1 Réseaux hydrauliques · niveau 2</span><span class="tag">A3-1 Pertes de charge · niveau 2</span><span class="tag">A3-2 · A3-3 Pompe et point de fonctionnement · niveau 2</span><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J7.html">Les réseaux et leurs débits</a></b><span class="ou">J7 · Les réseaux hydrauliques</span><span class="car">tout part d'un débit calculé depuis une puissance ; sans lui, ni perte de charge ni pompe.</span></li><li><b><a href="J8.html">Les pertes de charge</a></b><span class="ou">J8 · Les pertes de charge</span><span class="car">la lecture de l'abaque et le calcul, avec les singularités ; c'est l'exercice à points de la séquence.</span></li><li><b><a href="J9.html">Le point de fonctionnement</a></b><span class="ou">J9 · Le point de fonctionnement</span><span class="car">l'intersection de deux courbes, et ce qu'on fait quand elle tombe au mauvais endroit.</span></li><li><b><a href="J10.html">L'eau chaude sanitaire</a></b><span class="ou">J10 · L'eau chaude sanitaire</span><span class="car">le besoin en énergie, la puissance de pointe et le ballon ; une question sur deux au contrôle les confond.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#les-formules-de-la-sequence">Les formules de la séquence</a><a href="#seance-7-les-reseaux">Séance 7 · les réseaux</a><a href="#seance-8-les-pertes-de-charge">Séance 8 · les pertes de charge</a><a href="#seance-9-le-point-de-fonctionnement">Séance 9 · le point de fonctionnement</a><a href="#seance-10-l-eau-chaude-sanitaire">Séance 10 · l’eau chaude sanitaire</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a><a href="#s-entrainer">S’entraîner</a></div></nav>
+<h2 id="les-formules-de-la-sequence">Les formules de la séquence</h2>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Ce que je cherche</th>
+<th>Formule</th>
+<th>Unités</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Débit d’un réseau, d’après la puissance</td>
+<td>Q = P / (1 163 × ΔT)</td>
+<td>Q en m³/h, P en W, ΔT en K</td>
+</tr>
+<tr>
+<td>Vitesse dans un tube</td>
+<td>v = Q / (0,36 × S)</td>
+<td>v en m/s, S en cm²</td>
+</tr>
+<tr>
+<td>Perte de charge d’un tronçon</td>
+<td>Δp = j × (L + Léq)</td>
+<td>Δp en Pa, j en Pa/m</td>
+</tr>
+<tr>
+<td>Courbe d’un réseau</td>
+<td>Δp = k × Q²</td>
+<td>Δp en mCE, Q en m³/h</td>
+</tr>
+<tr>
+<td>Énergie d’un volume d’eau chaude</td>
+<td>E = V × 1,163 × ΔT</td>
+<td>E en Wh, V <strong>en litres</strong></td>
+</tr>
+<tr>
+<td>Conversion de pression</td>
+<td>1 mCE = 9 810 Pa</td>
+<td>1 bar ≈ 10 mCE</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Deux critères valident un tronçon, jamais un seul : la <strong>vitesse</strong> sous 1 m/s en habitation, et la <strong>perte linéique</strong> sous 200 Pa/m environ.</p>
+</div>
+<h2 id="seance-7-les-reseaux">Séance 7 · les réseaux</h2>
+<p>Bitube, monotube, pieuvre. Le choix ne se joue pas sur la longueur de tube mais sur ce qu’on veut pouvoir régler, et sur l’endroit où passent les raccords.</p>
+<p>Le point qui compte pour l’épreuve tient en une phrase : <strong>l’eau emprunte le chemin qui lui résiste le moins.</strong> Deux branches en parallèle subissent la même différence de pression et répondent chacune par le débit que sa résistance autorise. La plus courte prend plus que sa part.</p>
+<figure class="schema"><div class="dessin" data-schema="retour-inverse"></div><figcaption>Le même réseau, raccordé de deux façons.</figcaption></figure>
+<p>Deux corrections possibles : égaliser les longueurs (c’est le retour inversé) ou ajouter de la résistance aux branches trop favorisées, ce qu’on appelle l’<strong>équilibrage</strong>.</p>
+<h2 id="seance-8-les-pertes-de-charge">Séance 8 · les pertes de charge</h2>
+<p>Le tube droit coûte une perte <strong>linéique</strong>, en pascals par mètre. Tout ce qui n’est pas droit coûte une perte <strong>singulière</strong>, convertie en longueur équivalente de tube. On additionne toutes les longueurs, puis on multiplie une seule fois.</p>
+<div class="piege">
+<p>Les singularités représentent couramment <strong>la moitié à deux tiers</strong> de la longueur totale d’un circuit de bâtiment. Un calcul qui les oublie se trompe d’un facteur deux ou trois.</p>
+</div>
+<div class="outil" data-outil="pertes">
+
+</div>
+<p>Montez d’un diamètre : le débit ne bouge pas, la vitesse et la perte linéique s’effondrent. C’est l’arbitrage permanent du bureau d’études, du cuivre contre du circulateur.</p>
+<h2 id="seance-9-le-point-de-fonctionnement">Séance 9 · le point de fonctionnement</h2>
+<p>La courbe du réseau monte comme le carré du débit, celle du circulateur descend. Elles se croisent en un point unique, et c’est là que l’installation travaille.</p>
+<div class="outil" data-outil="point-fonctionnement">
+
+</div>
+<div class="cle">
+<p>Le débit obtenu est presque toujours <strong>supérieur</strong> au débit nécessaire, même à la plus petite vitesse. Trop de débit écrase le ΔT, fait du bruit, et fait consommer le circulateur pour rien.</p>
+</div>
+<h2 id="seance-10-l-eau-chaude-sanitaire">Séance 10 · l’eau chaude sanitaire</h2>
+<p>L’énergie d’une journée dépend du <strong>volume total</strong>. La puissance à installer dépend de l’<strong>heure de pointe</strong>. Ce sont deux questions différentes, et c’est le stockage qui les sépare.</p>
+<div class="outil" data-outil="ecs">
+
+</div>
+<p>Les températures ne se négocient pas : <strong>60 °C au ballon, 55 °C en tout point du bouclage, 50 °C maximum au puisage</strong>. La légionelle prolifère entre 25 et 45 °C dans une eau stagnante ; au-dessus de 50 °C, on brûle en quelques secondes.</p>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>En bitube, chaque émetteur reçoit une eau : <strong>à la même température</strong> | de plus en plus froide</li>
+<li>Le retour inversé sert à : <strong>égaliser les longueurs de circuit</strong> | économiser du tube</li>
+<li>À puissance constante, doubler le ΔT fait que le débit : <strong>est divisé par deux</strong> | double</li>
+<li>La perte linéique s’exprime en : <strong>Pa/m</strong> | Pa</li>
+<li>Une longueur équivalente représente : <strong>la longueur de tube droit qui coûterait autant</strong> | la longueur de la singularité</li>
+<li>Le circulateur, dans le calcul des singularités : <strong>ne compte pas</strong> | compte comme un té</li>
+<li>La perte de charge d’un réseau varie comme : <strong>le carré du débit</strong> | le débit</li>
+<li>Doubler le débit multiplie la perte de charge par : <strong>quatre</strong> | deux</li>
+<li>Le point de fonctionnement est : <strong>imposé par les deux courbes</strong> | choisi par l’installateur</li>
+<li>Brider une vanne d’équilibrage fait que le débit : <strong>diminue</strong> | augmente</li>
+<li>L’énergie d’une journée d’ECS dépend : <strong>du volume total</strong> | de l’heure de pointe</li>
+<li>Le stockage permet de réduire : <strong>la puissance</strong> | l’énergie</li>
+<li>Chauffer 1 000 L de 10 à 60 °C demande environ : <strong>58 kWh</strong> | 5,8 kWh</li>
+<li>La température minimale en tout point du bouclage est de : <strong>55 °C</strong> | 45 °C</li>
+</ul>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">D&#39;où vient la formule de Blasius</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte linéique s’écrit toujours <strong>j = λ × ρ v² / (2 d)</strong>, quel que soit le fluide. Toute la difficulté tient dans λ, le coefficient de perte de charge, qui dépend du régime d’écoulement.</p>
+<p>Ce régime se caractérise par le <strong>nombre de Reynolds</strong> : <strong>Re = v × d / ν</strong>, avec ν = 0,474 × 10⁻⁶ m²/s pour l’eau à 60 °C.</p>
+<ul>
+<li><strong>Re &lt; 2 000</strong> : laminaire, λ = 64/Re. Presque jamais rencontré en chauffage.</li>
+<li><strong>Re &gt; 4 000</strong> : turbulent. Pour un tube lisse, <strong>λ = 0,3164 / Re^0,25</strong> : c’est Blasius, valable jusqu’à Re ≈ 100 000.</li>
+</ul>
+<p>L’abaque du polycopié n’est rien d’autre que le tracé de cette formule pour quelques diamètres. L’outil de cette page la calcule directement, ce qui permet des diamètres que l’abaque ne porte pas.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi le carré, alors que l&#39;exposant réel est 1,75</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La vitesse est proportionnelle au débit, donc <strong>v²</strong> donne déjà un carré. Mais λ dépend aussi du débit : par Blasius il varie comme Re^−0,25, donc comme Q^−0,25.</p>
+<p>Le produit λv² varie donc comme <strong>Q^1,75</strong>, et non comme Q².</p>
+<p>On retient 2 pour trois raisons : l’écart est faible sur la plage utile, de l’ordre de 5 % ; les pertes singulières, elles, sont bien en Q² ; et une parabole se trace à la main. Un logiciel garde l’exposant exact.</p>
+<p>C’est l’une des rares approximations du programme dont l’écart est mesurable, mais il reste sous l’incertitude des longueurs équivalentes, qui sont elles-mêmes des valeurs de catalogue.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le tronçon le plus défavorisé, et pourquoi on dégrade les autres</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un réseau réel comporte des dizaines de circuits en parallèle. Le circulateur ne peut fournir qu’<strong>une seule</strong> hauteur manométrique, la même pour tous.</p>
+<p>Le bureau d’études calcule donc les pertes de charge de chaque branche et retient la plus élevée, le <strong>tronçon le plus défavorisé</strong>, presque toujours l’émetteur le plus éloigné. La pompe est dimensionnée sur lui.</p>
+<p>Conséquence directe : toutes les autres branches reçoivent plus de pression qu’il ne leur en faut. <strong>Équilibrer un réseau, c’est dégrader volontairement toutes les branches sauf une</strong>, en leur ajoutant, au té de réglage ou à la vanne, la résistance qui leur manque pour être aussi défavorisées que la pire.</p>
+<p>C’est pour cela que les CCTP exigent un <strong>procès-verbal d’équilibrage</strong> à la réception : le débit réellement mesuré, émetteur par émetteur.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le circulateur à vitesse variable</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Tout ce qui précède suppose trois vitesses fixes. Les circulateurs posés aujourd’hui sont <strong>à vitesse variable</strong>, la réglementation l’impose depuis 2013 en chauffage.</p>
+<p>Un tel circulateur suit une <strong>famille de courbes</strong>, et son électronique choisit celle qui tient une consigne. Deux lois :</p>
+<ul>
+<li><strong>Pression constante</strong> : la hauteur est maintenue quel que soit le débit. Pour un réseau à forte perte de charge fixe.</li>
+<li><strong>Pression proportionnelle</strong> : la consigne baisse avec le débit. Pour un réseau à robinets thermostatiques, où les branches se ferment une à une.</li>
+</ul>
+<p>L’enjeu est la consommation : la puissance absorbée varie comme le <strong>cube</strong> du débit. Réduire le débit de 20 % réduit la consommation de moitié.</p>
+<p>Sans cette régulation, la fermeture des thermostatiques en mi-saison fait monter la pression dans les branches restées ouvertes, d’où les sifflements de novembre.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Instantané, accumulation, semi-accumulation</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Volume stocké</th>
+<th>Puissance</th>
+<th>Où on la rencontre</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Instantané</strong></td>
+<td>nul</td>
+<td>très élevée</td>
+<td>logement individuel, ou là où la légionelle interdit tout stockage</td>
+</tr>
+<tr>
+<td><strong>Accumulation</strong></td>
+<td>grand</td>
+<td>faible</td>
+<td>collectif, internat, hôtel</td>
+</tr>
+<tr>
+<td><strong>Semi-accumulation</strong></td>
+<td>réduit</td>
+<td>moyenne</td>
+<td>tertiaire, quand la place manque</td>
+</tr>
+</tbody>
+</table></div>
+<p>Le sujet U41 2026 impose une production <strong>instantanée</strong> pour les douches des ateliers, non pour la performance, mais pour supprimer tout volume stagnant. L’ inconvénient est assumé : une puissance de pointe très élevée, qui se paie sur l’abonnement au réseau de chaleur.</p>
+<p>C’est un bon exemple de contrainte non technique qui décide d’un choix technique.</p></div></details>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que coûte vraiment un bouclage</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une boucle de distribution perd de la chaleur en permanence, chauffage arrêté compris. Le calcul est simple : une longueur, une déperdition linéique de 8 à 15 W/m selon le diamètre et le calorifuge, et <strong>8 760 heures par an</strong>.</p>
+<p>Cent mètres de boucle à 10 W/m, c’est 1 kW en continu, soit près de <strong>8 800 kWh par an</strong>, souvent davantage que l’eau chaude réellement puisée dans un petit tertiaire.</p>
+<p>Trois leviers, dans cet ordre : <strong>raccourcir</strong> la boucle en rapprochant la production des points de puisage, <strong>calorifuger</strong> correctement y compris les supports et les vannes, puis seulement <strong>réguler</strong> le circulateur.</p>
+<p>C’est l’un des rares postes où la conception pèse plus que l’équipement : aucun ballon performant ne rattrape une boucle mal tracée.</p></div></details>
+</div><h2 id="s-entrainer">S’entraîner</h2>
+<p>Les valeurs attendues ne sont pas dans la page : elle vous dit si c’est juste et vous rappelle la méthode. Le corrigé reste dans le polycopié.</p>
+<section class="exo" id="SEQ2-e1" data-exo="SEQ2-e1" data-type="calcul" data-savoir="A3-1" data-a="IXgueGB4OTs2OS82eHZ4LHhga3RpbWx2eC41NnhgaXRqdngveGB4NwYvamo4aXUyeCc="><p class="k">Exercice · A3-1</p><h4>Le débit d’un départ</h4><div class="enonce">
+
+<p>Un départ de sous-station transporte <strong>24 kW</strong> en régime <strong>70/55</strong>. Quel débit d’eau faut-il ?</p>
+</div><div class="indice" hidden>Q = P / (1 163 × ΔT). Le régime donne l’écart : c’est la différence entre le départ et le retour. Attention, la formule veut P en watts.</div></section>
+<section class="exo" id="SEQ2-e2" data-exo="SEQ2-e2" data-type="lecture" data-savoir="C12-2" data-a="IXgueGB4Nj85Li8oP3h2eDt4YAF4HhRob3h2eB4UemhveHZ4aG94dng+NGhveHZ4Nj96HhR6aG94Byc="><p class="k">Exercice · C12-2</p><h4>Choisir le diamètre</h4><div class="enonce">
+
+<p>Ce départ transporte 1,38 m³/h. On veut rester <strong>sous 1 m/s</strong>.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Tube cuivre</th>
+<th style="text-align: right;">Diamètre intérieur</th>
+<th style="text-align: right;">Section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DN 16</td>
+<td style="text-align: right;">16 mm</td>
+<td style="text-align: right;">2,01 cm²</td>
+</tr>
+<tr>
+<td>DN 20</td>
+<td style="text-align: right;">20 mm</td>
+<td style="text-align: right;">3,14 cm²</td>
+</tr>
+<tr>
+<td>DN 25</td>
+<td style="text-align: right;">25 mm</td>
+<td style="text-align: right;">4,91 cm²</td>
+</tr>
+<tr>
+<td>DN 32</td>
+<td style="text-align: right;">32 mm</td>
+<td style="text-align: right;">8,04 cm²</td>
+</tr>
+</tbody>
+</table></div>
+<p>Quel est le <strong>plus petit DN</strong> qui respecte le critère ?</p>
+</div><div class="indice" hidden>v = Q / (0,36 × S), avec S en cm² et Q en m³/h. Essayez le plus petit, montez d’un cran tant que la vitesse dépasse 1 m/s.</div></section>
+<section class="exo" id="SEQ2-e3" data-exo="SEQ2-e3" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2tsaWp0anZ4LjU2eGBodGp2eC94YHgNMngn"><p class="k">Exercice · B3-2</p><h4>L’énergie d’un ballon</h4><div class="enonce">
+
+<p>Un ballon de <strong>200 litres</strong> est réchauffé de 10 °C à 60 °C. Quelle énergie faut-il lui fournir ?</p>
+</div><div class="indice" hidden>E = V × 1,163 × ΔT, avec V en litres et E en Wh. Le 1,163 est la capacité de l’eau exprimée en Wh par litre et par kelvin.</div></section>
+<section class="exo" id="SEQ2-e4" data-exo="SEQ2-e4" data-type="justification" data-savoir="A3-3" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A3-3</p><h4>Le circulateur va trop vite</h4><div class="enonce">
+
+<p>Sur une installation en service, on constate que le débit mesuré dépasse le débit calculé. Expliquez comment c’est possible, et ce qu’on regarde d’abord.</p>
+</div><ul class="verifier" hidden><li>J’ai parlé du croisement de deux courbes, celle du réseau et celle du circulateur.</li><li>J’ai dit que le réseau réel oppose moins de résistance que prévu.</li><li>J’ai proposé une action concrète : vitesse du circulateur, équilibrage, ou vanne.</li></ul></section>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="SEQ1.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Thermique du bâtiment, séances 1 à 5</span></a><a class="ap" href="FICHE-CHAUFFERIE-EN-MOUVEMENT.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">La chaufferie en mouvement</span></a></div></nav>
+<p class="pied">Cette page ne remplace pas les polycopiés et ne donne aucun corrigé. Les outils démarrent sur des cas voisins de ceux des activités. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>
