@@ -1,0 +1,103 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Essai · Une saison de PAC</title>
+<link rel="stylesheet" href="../assets/kit.css?v=361ec7a3">
+<link rel="stylesheet" href="../assets/site.css?v=361ec7a3">
+<link rel="stylesheet" href="../assets/fluides.css?v=361ec7a3">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/TEST-SAISON-PAC">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="TEST-LECTURE.html" rel="prev" title="Essai · Quinze minutes de lecture" aria-label="Essai · Quinze minutes de lecture">&lsaquo;</a></span><button type="button" class="lu" data-lu="cours/TEST-SAISON-PAC">Marquer comme lu</button></div>
+<header class="tete a-img">
+  <div class="tete-img" data-schema="journee-embleme"></div>
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Essai · Une saison<span>de pompe à chaleur</span></h1>
+  </div>
+  <p class="accroche">Une journée ne dit rien d'une pompe à chaleur. Son COP change avec l'extérieur et avec l'eau qu'on lui demande, sa puissance tombe quand il fait froid, et l'appoint prend le relais sous le point de bivalence. Il faut une saison, jour par jour, et c'est un cours qui suit le calendrier.</p>
+  <p class="contenu">1 outil · 8 questions · 1 repli</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B1-1 La pompe à chaleur comme générateur · niveau 3</span><span class="tag">A5-1 Machine thermodynamique, COP · niveau 2</span><span class="tag n3">B11 Régulation, loi d'eau · niveau 3</span><span class="tag">A2-4 Besoin d'énergie sur une saison · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b>La pompe à chaleur et son COP</b><span class="ou">J13 · La pompe à chaleur et son cycle · à venir</span><span class="car">le COP est un rapport de puissances qui dépend des deux températures ; ici il change tous les jours, et la saison en fait un SCOP.</span></li><li><b><a href="J4.html">Les déperditions et le coefficient G</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">le besoin de chaque jour est G fois l'écart avec l'extérieur ; G est le premier curseur.</span></li><li><b>La loi d'eau</b><span class="ou">J19 · La loi d'eau · à venir</span><span class="car">la température d'eau demandée à la PAC suit l'extérieur avec une pente qui dépend des émetteurs, et c'est elle qui fait ou défait le COP.</span></li><li><b><a href="J5.html">Le besoin annuel et les degrés-jours</a></b><span class="ou">J5 · Le besoin d'énergie</span><span class="car">la saison simulée est la somme des jours ; les degrés-jours de la séance 5 en sont le raccourci.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#comment-ce-cours-est-fait">Comment ce cours est fait</a><a href="#octobre-la-pac-seule-et-le-cop-qui-ne-dit-pas-tout">Octobre. La PAC seule, et le COP qui ne dit pas tout</a><a href="#decembre-le-point-de-bivalence">Décembre. Le point de bivalence</a><a href="#janvier-l-appoint-et-ce-qu-il-coute">Janvier. L’appoint, et ce qu’il coûte</a><a href="#mars-le-cop-remonte-et-ce-que-font-les-emetteurs">Mars. Le COP remonte, et ce que font les émetteurs</a><a href="#avril-le-scop-et-la-question-de-la-puissance">Avril. Le SCOP, et la question de la puissance</a><a href="#comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</a><a href="#vous-verifier">Vous vérifier</a></div></nav>
+<h2 id="comment-ce-cours-est-fait">Comment ce cours est fait</h2>
+<p>Le simulateur ci-dessous fait passer <strong>une saison de chauffe</strong> en vingt secondes : le bâtiment du fil rouge, 3 kW/K, une pompe à chaleur air-eau dimensionnée en part de la puissance de base, des émetteurs, un appoint. Chaque mois du cours dit quel scénario charger et ce qu’on y lit.</p>
+<div class="cle">
+<p>Le simulateur est <strong>le tableau du cours</strong>. Il ne calcule pas à votre place : il confirme ce que le mois vous a fait calculer à la main, un COP, un point de bivalence, une part de couverture.</p>
+</div>
+<div class="outil" data-outil="saison-pac">
+
+</div>
+<p>Deux dessins. En haut, <strong>l’extérieur jour par jour</strong>, avec le point de bivalence en pointillé rouge et, en fond rose, les jours où l’appoint a marché. En bas, <strong>la chaleur de chaque mois</strong>, PAC en bleu, appoint en rouge, et le COP du mois au-dessus.</p>
+<h2 id="octobre-la-pac-seule-et-le-cop-qui-ne-dit-pas-tout">Octobre. La PAC seule, et le COP qui ne dit pas tout</h2>
+<p><strong>Chargez le scénario 1</strong>, Fréjus, radiateurs 55/45, PAC à 50 % de la base. Avancez d’un mois.</p>
+<div class="formule">
+<p><strong>COP ≈ 0,40 × (θ départ + 273) / (θ départ − θ extérieur)</strong></p>
+<ul>
+<li>40 % du COP de Carnot, en kelvins : une PAC réelle n’en prend pas plus</li>
+<li>30 °C d’eau par 15 °C dehors : <strong>COP 8 par la formule, 5,5 en butée</strong> ; 55 °C par −5 °C : <strong>2,2</strong></li>
+</ul>
+</div>
+<div class="cle">
+<p>En octobre la PAC fournit tout et le COP du mois est en butée, 5,5 : 15 °C dehors, 25 °C d’eau. Ce n’est pas le COP de la plaque, donné à +7/35 : c’est celui des jours qu’il a fait, avec l’eau demandée. <strong>Le COP n’est pas une propriété de la machine, mais du couple machine-installation.</strong></p>
+</div>
+<h2 id="decembre-le-point-de-bivalence">Décembre. Le point de bivalence</h2>
+<div class="formule">
+<p><strong>Point de bivalence : la température extérieure où P PAC(θe) = G × (θ seuil − θe)</strong></p>
+<ul>
+<li>la puissance d’une PAC air-eau perd <strong>3 % par kelvin</strong> sous +7 °C</li>
+<li>le besoin monte quand il fait froid, la puissance descend : les deux droites se croisent une fois</li>
+</ul>
+</div>
+<div class="piege">
+<p>Une PAC à 50 % de la base n’a pas 50 % de couverture : à Fréjus elle fournit <strong>100 % de la chaleur</strong>, l’appoint marche <strong>un jour</strong>, la base n’arrive presque jamais. Scénario 7, 35 % de la base : bivalence à 4 °C, onze jours d’appoint, encore 98 % par la PAC. Le dimensionnement cherche <strong>le point de bivalence, pas la puissance de base.</strong></p>
+</div>
+<h2 id="janvier-l-appoint-et-ce-qu-il-coute">Janvier. L’appoint, et ce qu’il coûte</h2>
+<p><strong>Chargez le scénario 2</strong>, la même PAC à Lille, et lisez la saison entière.</p>
+<div class="cle">
+<p>À Lille le besoin double, 141 MWh contre 77, le point de bivalence descend à −2,9 °C et il est franchi trois jours ; le SCOP tombe de 4,1 à <strong>3,1</strong>, et la facture de 4 700 à <strong>11 500 €</strong>. <strong>La même machine n’a pas le même rendement selon le climat</strong>, et une plaque ne le dit pas.</p>
+</div>
+<p><strong>Puis le scénario 6</strong>, appoint gaz en alternatif : sous le point de bivalence la PAC s’arrête et la chaudière fait tout.</p>
+<div class="piege">
+<p>À Fréjus l’alternatif ne change rien, l’appoint ne marche qu’un jour. Il se justifie quand la PAC est mauvaise par grand froid, radiateurs existants et climat rude : mettez Lille dans le scénario 6 et comparez la facture aux 11 500 € du parallèle. C’est le choix qu’un CCTP doit trancher.</p>
+</div>
+<h2 id="mars-le-cop-remonte-et-ce-que-font-les-emetteurs">Mars. Le COP remonte, et ce que font les émetteurs</h2>
+<p><strong>Chargez le scénario 3</strong>, plancher chauffant, puis le scénario 4, radiateurs existants 65/55.</p>
+<div class="cle">
+<p>La loi d’eau décide du COP. Le plancher laisse la PAC sous 40 °C toute la saison : SCOP <strong>5,1</strong>, 3 800 €. Les radiateurs 65/55 demandent 65 °C par grand froid, le COP tombe à 2,1 quand le besoin est le plus grand : SCOP <strong>3,7</strong>, 5 250 €. <strong>Changer les émetteurs vaut plus que changer la PAC.</strong></p>
+</div>
+<h2 id="avril-le-scop-et-la-question-de-la-puissance">Avril. Le SCOP, et la question de la puissance</h2>
+<p><strong>Chargez le scénario 5</strong>, PAC dimensionnée à 100 % de la base.</p>
+<div class="formule">
+<p><strong>SCOP = chaleur fournie par la PAC sur la saison / électricité de la PAC</strong></p>
+<p><strong>Coût = (électricité PAC + appoint électrique) × prix + gaz d’appoint × prix</strong></p>
+</div>
+<div class="cle">
+<p>À 100 % de la base, la PAC de 112 kW fait ce que faisait celle de 56 : un jour d’appoint en moins, 14 € gagnés, une machine deux fois plus chère. La base n’arrive presque jamais ; le reste du temps la grosse PAC cyclerait. <strong>On dimensionne une PAC entre 50 et 70 % de la base</strong>, et l’appoint fait le reste.</p>
+</div>
+<h2 id="comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Un jour à la fois, une loi de COP, et quatre hypothèses avouées</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>Le climat</strong> est fait de moyennes mensuelles d’octobre à avril, interpolées, avec des vagues de froid déterministes de quelques jours : la même saison se rejoue à l’identique, ce qui permet de comparer des réglages.</p>
+<p><strong>Le bâtiment</strong> perd G kW/K, la consigne est 19 °C, et les apports gratuits valent 3 K : le chauffage ne commence que sous 16 °C de moyenne journalière. Le besoin du jour est G × (16 − θe) × 24, en kilowattheures.</p>
+<p><strong>La PAC</strong> est définie par sa puissance à +7/35, déduite de la part de la base demandée. Sa puissance perd 3 % par kelvin sous +7 °C ; son COP vaut 40 % du COP de Carnot entre l’eau de départ et l’extérieur, borné entre 1,3 et 5,5, avec 10 % de moins entre −3 et +5 °C pour le givrage. La température de départ suit la loi d’eau des émetteurs choisis.</p>
+<p><strong>L’appoint</strong> est électrique, COP 1, ou gaz à 95 %. En parallèle, il complète la PAC ; en alternatif, il la remplace sous le point de bivalence.</p>
+<p><strong>Ce que le modèle ne fait pas.</strong> Il n’a pas d’inertie : chaque jour se règle seul. Il ne cycle pas : une PAC surdimensionnée ne perd rien ici, alors qu’elle perd en vrai. Il ne compte ni l’ECS ni les auxiliaires. Et sa loi de COP est une droite raisonnable, pas la courbe d’un constructeur.</p></div></details>
+</div><h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Le COP d’une PAC dépend : <strong>de l’extérieur et de l’eau demandée</strong> | de la machine seulement</li>
+<li>Sous +7 °C, la puissance d’une PAC air-eau : <strong>baisse</strong> | reste constante</li>
+<li>Le point de bivalence est : <strong>la température où la PAC ne suffit plus</strong> | la température de base</li>
+<li>Une PAC à 50 % de la base couvre : <strong>bien plus de 50 % de la chaleur</strong> | 50 % de la chaleur</li>
+<li>Un plancher chauffant, par rapport à des radiateurs 65/55 : <strong>fait monter le COP</strong> | ne change rien</li>
+<li>Le SCOP est : <strong>la chaleur de la saison sur l’électricité de la saison</strong> | le COP à +7/35</li>
+<li>En bivalence alternative, sous le point de bivalence : <strong>l’appoint seul marche</strong> | la PAC et l’appoint marchent</li>
+<li>On dimensionne une PAC : <strong>entre 50 et 70 % de la base</strong> | à 100 % de la base</li>
+</ul>
+</div>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="TEST-LECTURE.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Essai · Quinze minutes de lecture</span></a></div></nav>
+<p class="pied">Page d'essai du 10 septembre 2026, à juger. Les calculs se font dans votre navigateur ; rien n'est enregistré. Le modèle est simple et ses hypothèses sont dites en fin de page.</p>
+</div>
+<script src="../assets/kit.js?v=361ec7a3"></script>
+<script src="../assets/site.js?v=361ec7a3"></script>
