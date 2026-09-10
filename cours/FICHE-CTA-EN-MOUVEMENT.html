@@ -1,0 +1,319 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>La CTA en mouvement</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/FICHE-CTA-EN-MOUVEMENT">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="FICHE-CHAUFFERIE-EN-MOUVEMENT.html" rel="prev" title="La chaufferie en mouvement" aria-label="La chaufferie en mouvement">&lsaquo;</a><a class="fleche" href="FICHE-FROID-EN-MOUVEMENT.html" rel="next" title="Le froid en mouvement" aria-label="Le froid en mouvement">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/FICHE-CTA-EN-MOUVEMENT">Marquer comme lu</button></div>
+<header class="tete a-img">
+  <div class="tete-img" data-schema="cta-embleme"></div>
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>La CTA en mouvement<span>le cours d'une journée</span></h1>
+  </div>
+  <p class="accroche">La salle polyvalente du DS n° 8, vue autrement. À six heures la centrale démarre, à neuf heures la salle se remplit et le CO₂ monte, à dix heures le récupérateur rend ce qu'il peut, à midi les gens ont mouillé l'air, l'après-midi le soleil, le soir une remise de diplômes. Chaque heure a sa formule, son scénario, et un calcul que le simulateur confirme. Puis cinq thermomètres le long de la centrale, et à vous de trouver la panne.</p>
+  <p class="contenu">2 outils · 16 questions · 9 exercices · 1 repli</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B2-2 Centrale de traitement d'air · niveau 3</span><span class="tag n3">A4-2 Évolutions de l'air et bilans · niveau 3</span><span class="tag n3">B2-1 Ventilation · niveau 3</span><span class="tag n3">B11 Régulation · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b>Le débit d'air neuf et le CO₂</b><span class="ou">J14 · La ventilation · à venir</span><span class="car">la centrale ouvre son air neuf sur le CO₂ ; le débit d'équilibre est celui de la séance 14.</span></li><li><b>Le diagramme de l'air humide</b><span class="ou">J15 · Le diagramme de l'air humide · à venir</span><span class="car">la teneur en eau, l'humidité relative et l'enthalpie que le compte rendu affiche sont les grandeurs de la séance 15.</span></li><li><b>Les évolutions de l'air</b><span class="ou">J16 · Les évolutions de l'air et les bilans · à venir</span><span class="car">chauffer, refroidir, humidifier, mélanger ; chaque caisson du simulateur fait une évolution de la séance 16.</span></li><li><b>La centrale complète</b><span class="ou">J17 · La centrale de traitement d'air · à venir</span><span class="car">l'ordre des caissons du simulateur est celui du banc de la séance 17, et le jeu de diagnostic suit le même ordre.</span></li><li><b>Le régulateur proportionnel</b><span class="ou">J18 · Les boucles de régulation · à venir</span><span class="car">la température de soufflage suit un régulateur P sur l'ambiance, avec sa bande et son écart statique.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#comment-ce-cours-est-fait">Comment ce cours est fait</a><a href="#6-h-la-centrale-demarre">6 h. La centrale démarre</a><a href="#9-h-la-salle-se-remplit-le-co2-commande-l-air-neuf">9 h. La salle se remplit : le CO₂ commande l’air neuf</a><a href="#10-h-le-recuperateur-rend-ce-qu-il-peut">10 h. Le récupérateur rend ce qu’il peut</a><a href="#11-h-l-eau-que-les-gens-apportent">11 h. L’eau que les gens apportent</a><a href="#14-h-le-soleil-et-l-air-qu-on-prend-dehors">14 h. Le soleil, et l’air qu’on prend dehors</a><a href="#18-h-la-soiree-d-ete-la-batterie-froide-et-le-latent">18 h. La soirée d’été : la batterie froide et le latent</a><a href="#20-h-la-centrale-s-arrete-le-programme-horaire">20 h. La centrale s’arrête : le programme horaire</a><a href="#24-h-paye-et-gratuit">24 h. Payé et gratuit</a><a href="#acte-2-lire-la-centrale">Acte 2. Lire la centrale</a><a href="#comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</a><a href="#les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</a><a href="#vous-verifier">Vous vérifier</a></div></nav>
+<h2 id="comment-ce-cours-est-fait">Comment ce cours est fait</h2>
+<p>Vous connaissez cette centrale : c’est celle du DS n° 8, la salle polyvalente de Puget-Théniers. Le devoir la calculait <strong>à un instant</strong> — l’hiver à −5 °C, l’été à 31 °C. Ici elle vit <strong>une journée</strong>, et le cours suit l’horloge.</p>
+<div class="cle">
+<p>Le simulateur ci-dessous est <strong>le tableau du cours</strong>. Chaque heure dit quel scénario charger, donne sa formule, et pose un calcul à faire à la main dont le simulateur affiche la valeur. Il ne calcule pas à votre place : il <strong>confirme</strong> le vôtre.</p>
+</div>
+<div class="outil" data-outil="journee-cta">
+
+</div>
+<p>Deux courbes, une barre. <strong>La température</strong> de la salle en bleu, l’extérieur en pointillé. <strong>Le CO₂</strong> en vert, avec la ligne des 1 000 ppm. Et sous le graphe, la <strong>barre de la centrale</strong> : rouge quand elle chauffe, bleue quand elle refroidit, verte en free-cooling, grise quand elle souffle sans rien faire.</p>
+<h2 id="6-h-la-centrale-demarre">6 h. La centrale démarre</h2>
+<p><strong>Chargez le scénario 1, la nuit d’hiver, salle vide.</strong> Personne, une centrale qui tourne 24 heures sur 24. Avancez d’une heure à la fois jusqu’à 6 h.</p>
+<div class="cle">
+<p>La salle est vide et la centrale chauffe quand même : elle souffle 1,8 kg/s d’air qu’elle doit maintenir à la température de la salle, et elle prend son air neuf minimal dehors à −5 °C. <strong>Une centrale qui tourne à vide coûte deux fois</strong> : ses ventilateurs, et l’air neuf qu’elle réchauffe pour personne.</p>
+</div>
+<div class="formule">
+<p><strong>Ce que coûte l’air neuf : Φ = qm × 1,02 × (θ soufflage − θ après récupérateur)</strong></p>
+<ul>
+<li><strong>qm</strong><span>en kg d’air sec par seconde, <strong>1,02</strong> kJ/(kg·K) pour l’air humide</span></li>
+<li>Le récupérateur a déjà fait une partie du chemin : voir 10 h</li>
+</ul>
+</div>
+<div class="piege">
+<p>Regardez la barre de la centrale entre 0 h et 6 h : rouge en continu. Puis comparez au scénario 6, où elle est arrêtée la nuit : la salle descend d’un ou deux degrés, et la relance de 6 h coûte moins que six heures de marche à vide. C’est la question du programme horaire, et elle se chiffre à 20 h.</p>
+</div>
+<h2 id="9-h-la-salle-se-remplit-le-co2-commande-l-air-neuf">9 h. La salle se remplit : le CO₂ commande l’air neuf</h2>
+<p><strong>Chargez le scénario 2, la journée d’hiver.</strong> Soixante personnes entrent à 9 h. Regardez la courbe verte monter, puis se stabiliser sous la ligne des 1 000 ppm.</p>
+<div class="formule">
+<p><strong>Débit d’équilibre : Qv = production de CO₂ / (C intérieur − C extérieur)</strong></p>
+<ul>
+<li>une personne assise produit <strong>18 L/h</strong> de CO₂</li>
+<li>l’extérieur est à <strong>420 ppm</strong>, on vise <strong>1 000 ppm</strong> au plus</li>
+</ul>
+</div>
+<div class="cle">
+<p>La centrale ne connaît pas le nombre de personnes : elle lit <strong>le CO₂ à la reprise</strong> et ouvre son registre d’air neuf en proportion. C’est la ventilation à la demande : à salle vide elle ne prend que le minimum, à salle pleine elle monte jusqu’à 0,80 kg/s. Le compte rendu affiche l’air neuf du moment.</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e1" data-exo="FICHE-CTA-EN-MOUVEMENT-e1" data-type="calcul" data-savoir="B2-1" data-a="IXgueGB4OTs2OS82eHZ4LHhga2JsaHRqdnguNTZ4YGl0anZ4L3hgeDcGL2pqOGl1Mngn"><p class="k">Exercice · B2-1</p><h4>Le débit qui tient 1 000 ppm</h4><div class="enonce">
+
+<p>Soixante personnes en réunion, 18 L/h de CO₂ chacune, extérieur à 420 ppm. Quel débit d’air neuf tient la salle à 1 000 ppm en régime établi ?</p>
+</div><div class="indice" hidden>La production totale en litres par heure, divisée par l’écart de concentration exprimé en fraction, 580 ppm soit 0,000 58, donne des litres par heure. Le simulateur affiche l’air neuf en kg/s : divisez votre résultat par 3 000 pour comparer.</div></section>
+<div class="piege">
+<p>Le CO₂ <strong>monte avant</strong> que l’air neuf ne suive, et <strong>redescend après</strong> que la salle se vide. Cette traînée est le temps de réponse de la salle : 960 m³ ne se renouvellent pas en une minute. Un régulateur trop nerveux sur le CO₂ fait battre le registre ; un régulateur trop lent laisse passer 1 200 ppm à 10 h.</p>
+</div>
+<h2 id="10-h-le-recuperateur-rend-ce-qu-il-peut">10 h. Le récupérateur rend ce qu’il peut</h2>
+<p>Restez sur le scénario 2, puis <strong>chargez le scénario 3, la même journée sans récupérateur.</strong> Comparez les deux barres « Chaud » en fin de journée.</p>
+<div class="formule">
+<p><strong>Efficacité : ε = (θ après récupérateur − θ extérieur) / (θ reprise − θ extérieur)</strong></p>
+<p><strong>Puissance récupérée : Φ = qm air neuf × 1,02 × ε × (θ reprise − θ extérieur)</strong></p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e2" data-exo="FICHE-CTA-EN-MOUVEMENT-e2" data-type="calcul" data-savoir="B2-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2h0aHZ4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · B2-2</p><h4>Ce que le récupérateur rend à 10 h</h4><div class="enonce">
+
+<p>Air neuf <strong>0,80 kg/s</strong>, efficacité <strong>60 %</strong>, reprise à <strong>20 °C</strong>, extérieur à <strong>−5 °C</strong>. Quelle puissance le récupérateur rend-il ?</p>
+</div><div class="indice" hidden>Le récupérateur ne travaille que sur l’air neuf, pas sur les 1,8 kg/s soufflés. Efficacité fois l’écart total donne le gain de température ; multipliez par le débit et par 1,02.</div></section>
+<div class="cle">
+<p>En vert dans les postes, <strong>« Récupéré »</strong> est ce que la batterie n’a pas eu à fournir. Sur la journée d’hiver il rend <strong>un quart du chaud</strong> : sans lui, le poste « Chaud » monte d’un tiers, de 272 à 363 kWh. C’est la justification du double flux, chiffrée sur une journée réelle plutôt qu’à un point de calcul.</p>
+</div>
+<h2 id="11-h-l-eau-que-les-gens-apportent">11 h. L’eau que les gens apportent</h2>
+<p>Deux heures de réunion, et l’air de la salle s’est chargé : chaque personne expire <strong>65 g d’eau par heure</strong>. En hiver, c’est pourtant le contraire qui inquiète : l’air neuf entre très sec, et la salle passe sous 30 %.</p>
+<div class="formule">
+<p><strong>Vapeur des occupants : m = n × 65 g/h</strong></p>
+<p><strong>Humidificateur à vapeur : Φ = qm × Δr × 2 700</strong>, Δr en kg d’eau par kg d’air sec, Φ en kW — soit 0,75 kWh par litre</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e3" data-exo="FICHE-CTA-EN-MOUVEMENT-e3" data-type="calcul" data-savoir="A4-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgaXRjdnguNTZ4YGh0anZ4L3hgeDE9dTJ4Jw=="><p class="k">Exercice · A4-2</p><h4>L’eau des soixante personnes</h4><div class="enonce">
+
+<p>Soixante personnes assises, 65 g d’eau par heure chacune. Quelle masse d’eau entre dans l’air de la salle chaque heure ?</p>
+</div><div class="indice" hidden>Un simple produit, puis les grammes en kilogrammes. Comparez à l’eau que l’humidificateur ajoute dans le compte rendu : les gens en apportent moins que la machine.</div></section>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e4" data-exo="FICHE-CTA-EN-MOUVEMENT-e4" data-type="calcul" data-savoir="A4-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgbXRidnguNTZ4YGl0anZ4L3hgeDENeCc="><p class="k">Exercice · A4-2</p><h4>La puissance de l’humidificateur</h4><div class="enonce">
+
+<p>Pour tenir la salle à 35 %, l’humidificateur porte le soufflage de <strong>3,8 à 5,4 g/kg</strong>, sur <strong>1,8 kg/s</strong> d’air. Quelle puissance électrique consomme-t-il ?</p>
+</div><div class="indice" hidden>L’écart d’humidité absolue en kg par kg, multiplié par le débit, donne un débit d’eau en kg/s ; multipliez par 2 700 kJ/kg pour la vapeur. Le poste « Vapeur » du simulateur cumule cette puissance sur la journée.</div></section>
+<div class="piege">
+<p>L’humidificateur est le poste <strong>le plus cher au kilowattheure</strong> de toute la centrale, parce qu’il vaporise à l’électricité. Coupez-le dans le scénario 2 et regardez ce que la salle perd en confort : elle descend à 25 %. C’est un arbitrage, pas une évidence, et beaucoup de salles s’en passent.</p>
+</div>
+<h2 id="14-h-le-soleil-et-l-air-qu-on-prend-dehors">14 h. Le soleil, et l’air qu’on prend dehors</h2>
+<p><strong>Chargez le scénario 4, la mi-saison.</strong> Il fait 14 °C dehors en moyenne, 18 °C l’après-midi, et le soleil donne 12 kW sur la salle. Regardez la barre de la centrale passer au <strong>vert</strong> vers 14 h.</p>
+<div class="formule">
+<p><strong>Free-cooling : Φ gratuit = qm × 1,02 × (θ salle − θ extérieur)</strong></p>
+<p>Condition : extérieur <strong>plus froid</strong> que la salle d’au moins 2 K, et la salle au-dessus de sa consigne. La centrale ouvre alors l’air neuf en grand et <strong>contourne le récupérateur</strong>.</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e5" data-exo="FICHE-CTA-EN-MOUVEMENT-e5" data-type="calcul" data-savoir="B2-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga250bXZ4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · B2-2</p><h4>Ce que le free-cooling rafraîchit</h4><div class="enonce">
+
+<p>La centrale souffle <strong>1,8 kg/s</strong> d’air extérieur à <strong>16 °C</strong> dans une salle à <strong>24 °C</strong>. Quelle puissance de refroidissement obtient-on sans machine frigorifique ?</p>
+</div><div class="indice" hidden>Le débit, fois 1,02, fois l’écart entre la salle et l’air soufflé. Le poste « Free-cooling » le cumule en vert : c’est la seule chose gratuite qui refroidit.</div></section>
+<div class="cle">
+<p>Le récupérateur est l’ennemi du free-cooling : en mi-saison il <strong>réchaufferait</strong> l’air neuf sur l’air repris, exactement ce qu’on ne veut pas. D’où le <strong>bipasse motorisé</strong> sur toute double flux : le même registre sert au givre en hiver et au free-cooling au printemps.</p>
+</div>
+<h2 id="18-h-la-soiree-d-ete-la-batterie-froide-et-le-latent">18 h. La soirée d’été : la batterie froide et le latent</h2>
+<p><strong>Chargez le scénario 5, l’été.</strong> Deux réunions, puis une remise de diplômes à 18 h : cent personnes, 30 °C dehors à 15 h, 55 % d’humidité. Regardez la barre passer au <strong>bleu</strong>, et le poste « Froid » grimper.</p>
+<div class="formule">
+<p><strong>Batterie froide : Φ = qm × (h entrée − h sortie)</strong>, en enthalpies</p>
+<p><strong>Sensible seulement : Φ = qm × 1,02 × (θ entrée − θ sortie)</strong></p>
+<p>La différence entre les deux est le <strong>latent</strong> : l’eau que la batterie condense.</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e6" data-exo="FICHE-CTA-EN-MOUVEMENT-e6" data-type="calcul" data-savoir="A4-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgaGJ0YnZ4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · A4-2</p><h4>La batterie froide à 18 h</h4><div class="enonce">
+
+<p>L’air mélangé arrive à la batterie avec une enthalpie de <strong>58 kJ/kg</strong> et en sort à <strong>42 kJ/kg</strong>, à <strong>1,8 kg/s</strong>. Quelle est la puissance frigorifique totale ?</p>
+</div><div class="indice" hidden>Débit fois écart d’enthalpie, directement en kilowatts. Calculez ensuite le seul sensible avec 1,02 × Δθ, et l’écart entre les deux est ce que la batterie a condensé.</div></section>
+<div class="piege">
+<p>Cent personnes apportent <strong>6,5 kg d’eau par heure</strong>. En été, cette eau ne se retire qu’en refroidissant l’air <strong>sous son point de rosée</strong> : c’est le tiers de la puissance de la batterie froide, invisible au thermomètre. Une batterie dimensionnée sur les seules températures manque son été.</p>
+</div>
+<h2 id="20-h-la-centrale-s-arrete-le-programme-horaire">20 h. La centrale s’arrête : le programme horaire</h2>
+<p><strong>Chargez le scénario 6, l’hiver avec un programme horaire de 6 h à 20 h.</strong> Comparez le poste « Ventilateurs » et le poste « Chaud » à ceux du scénario 2.</p>
+<div class="formule">
+<p><strong>Ventilateurs : P = SFP × Qv</strong>, avec <strong>SFP ≈ 0,4 W par m³/h</strong> pour une bonne centrale — ici 2,2 kW pour 5 400 m³/h</p>
+<p><strong>Économie d’un arrêt : E = P × heures d’arrêt</strong></p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e7" data-exo="FICHE-CTA-EN-MOUVEMENT-e7" data-type="calcul" data-savoir="B2-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgaGt0bHZ4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · B2-2</p><h4>Ce que rapporte l’arrêt de nuit</h4><div class="enonce">
+
+<p>Les ventilateurs consomment <strong>2,16 kW</strong>. La centrale passe de 24 heures de marche à 14. Quelle énergie électrique l’arrêt économise-t-il par jour ?</p>
+</div><div class="indice" hidden>La puissance multipliée par les dix heures d’arrêt. Sur 180 jours de chauffe, c’est près de 4 000 kWh, pour un réglage de dix minutes dans la GTB.</div></section>
+<div class="cle">
+<p>La salle perd un ou deux degrés la nuit et les rattrape en une heure le matin. <strong>L’arrêt ne coûte qu’une relance</strong>, et la relance coûte moins que dix heures de marche à vide. C’est la fonction la plus rentable d’une GTB, et le simulateur la chiffre sur une journée.</p>
+</div>
+<h2 id="24-h-paye-et-gratuit">24 h. Payé et gratuit</h2>
+<p>Laissez la journée se finir. Le compte rendu sépare <strong>ce qui a été payé</strong> — le chaud, le froid, la vapeur, les ventilateurs — de <strong>ce qui a été rendu</strong> — le récupérateur, le free-cooling.</p>
+<div class="cle">
+<p>Sur la journée d’hiver, le gratuit vaut un quart du payé. Sur la mi-saison, le free-cooling fait plus de la moitié du froid et la batterie finit le travail. Sur l’été, rien n’est gratuit : la batterie froide et le latent paient tout. <strong>Une centrale se juge sur l’année</strong>, et l’année est faite de ces trois journées-là dans des proportions variables.</p>
+</div>
+<div class="piege">
+<p><strong>La bande proportionnelle.</strong> Baissez-la à 1 K dans le scénario 2 : la centrale souffle à 35 °C dès que la salle perd un demi-degré, puis à 14 °C dès qu’elle en gagne un. Montez-la à 10 K : la salle s’installe <strong>un degré sous la consigne</strong> et n’y revient jamais. C’est l’écart statique du chapitre 12, et il se voit ici sur une courbe.</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e8" data-exo="FICHE-CTA-EN-MOUVEMENT-e8" data-type="justification" data-savoir="B11" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · B11</p><h4>La salle qui reste à 19 °C</h4><div class="enonce">
+
+<p>Dans le scénario 2 avec une bande proportionnelle de 8 K, la salle se stabilise à 19 °C pour une consigne de 20 en plein après-midi, sans jamais la rejoindre. Expliquez, et dites ce que vous changez.</p>
+</div><div class="indice" hidden>Un régulateur proportionnel ne rejoint jamais sa consigne en charge : il lui faut un écart pour tenir sa sortie ouverte. Ce qui annule cet écart sans resserrer la bande porte un nom, et il a un temps de réglage.</div><ul class="verifier" hidden><li>J’ai nommé l’écart statique d’un régulateur proportionnel.</li><li>J’ai expliqué qu’il faut un écart pour que la sortie ne soit pas nulle, et que cet écart est proportionnel à la charge.</li><li>J’ai écarté la solution « réduire la bande » en citant le risque d’oscillation.</li><li>J’ai proposé l’action intégrale, avec un ordre de grandeur de temps d’intégrale pour un local.</li></ul></section>
+<h2 id="acte-2-lire-la-centrale">Acte 2. Lire la centrale</h2>
+<p>Un technicien devant une double flux relève <strong>cinq températures le long de l’air</strong>, un débit, une perte de charge au filtre et le CO₂ à la reprise. Avant d’ouvrir un caisson, il sait lequel ne fait pas son travail.</p>
+<div class="formule">
+<p><strong>Le profil sain, en hiver à −5 °C :</strong></p>
+<p>extérieur <strong>−5</strong> → après récupérateur <strong>9,4</strong> → mélange <strong>14,7</strong> → après batterie <strong>29</strong> → soufflage <strong>30</strong></p>
+<p>Chaque caisson ajoute ce qu’il ajoute d’habitude : <strong>14 K</strong> au récupérateur, une moyenne au mélange, le reste à la batterie, <strong>1 K</strong> au ventilateur.</p>
+</div>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Panne</th>
+<th>Le caisson qui trahit</th>
+<th>Ce qu’on lit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Filtre colmaté</td>
+<td>aucun, c’est <strong>le débit</strong></td>
+<td>débit 70 %, filtre 270 Pa, batterie plus chaude</td>
+</tr>
+<tr>
+<td>Récupérateur givré</td>
+<td><strong>après récupérateur</strong> ≈ extérieur</td>
+<td>rien de récupéré, mélange froid</td>
+</tr>
+<tr>
+<td>Registre d’air neuf fermé</td>
+<td><strong>mélange</strong> = reprise</td>
+<td>CO₂ à 1 900 ppm</td>
+</tr>
+<tr>
+<td>Registre d’air neuf ouvert</td>
+<td><strong>mélange</strong> = après récupérateur</td>
+<td>CO₂ à 520 ppm</td>
+</tr>
+<tr>
+<td>Vanne de batterie fermée</td>
+<td><strong>après batterie</strong> = mélange</td>
+<td>salle froide, régulateur en butée</td>
+</tr>
+<tr>
+<td>Courroie cassée</td>
+<td><strong>tout se rejoint</strong></td>
+<td>débit 0, filtre 0 Pa, CO₂ qui grimpe</td>
+</tr>
+</tbody>
+</table></div>
+<div class="outil" data-outil="diagnostic-cta">
+
+</div>
+<div class="cle">
+<p>La méthode tient en une phrase : <strong>suivez l’air de gauche à droite, et arrêtez-vous au premier caisson qui n’ajoute pas ce qu’il devrait.</strong> Les trois cadrans confirment. Deux pannes ne se voient pas sur les températures — le filtre et le registre fermé — et c’est le débit ou le CO₂ qui les désigne.</p>
+</div>
+<section class="exo" id="FICHE-CTA-EN-MOUVEMENT-e9" data-exo="FICHE-CTA-EN-MOUVEMENT-e9" data-type="justification" data-savoir="B2-2" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · B2-2</p><h4>Un relevé, un diagnostic</h4><div class="enonce">
+
+<p>Sur une double flux en hiver, vous relevez : extérieur −5 °C, après récupérateur −4 °C, mélange 8 °C, après batterie 29 °C, soufflage 30 °C, débit normal, CO₂ normal. La facture de chauffage a doublé. Rédigez votre diagnostic.</p>
+</div><div class="indice" hidden>Un caisson sain ajoute un écart connu. Comparez l’écart au récupérateur, 1 K ici, aux 14 K attendus, et demandez-vous pourquoi la salle ne s’en aperçoit pas.</div><ul class="verifier" hidden><li>J’ai suivi l’air caisson par caisson et repéré que le récupérateur n’ajoute presque rien.</li><li>J’ai conclu que rien n’est récupéré : givre, ou bipasse resté ouvert.</li><li>J’ai expliqué que la batterie compense, d’où la facture, sans que la salle ne se plaigne.</li><li>J’ai proposé une vérification : registre de bipasse, sonde antigel, séquence de dégivrage.</li></ul></section>
+<h2 id="comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Un nœud, un CO₂, une teneur en eau, et quatre hypothèses avouées</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un simulateur est un choix d’hypothèses, et une page honnête les montre.</p>
+<p><strong>La salle</strong> est un seul nœud thermique de 9 000 kJ/K — l’air, les sièges, la peau des parois — avec 0,6 kW/K de déperditions vers l’extérieur, infiltration comprise. Sa constante de temps est de quatre heures : c’est pourquoi elle perd deux degrés la nuit et pas dix. Elle porte aussi une <strong>teneur en eau</strong>, alimentée par les gens et par le soufflage, et un <strong>CO₂</strong>, alimenté par les gens et vidé par l’air neuf.</p>
+<p><strong>La centrale</strong> souffle 1,8 kg/s en permanence quand elle marche. Son air neuf va de 0,2 à 0,8 kg/s, proportionnellement au CO₂ entre 800 et 1 200 ppm. Le récupérateur est sensible seulement, à l’efficacité réglée. Le mélange est un barycentre. La température de soufflage suit un <strong>régulateur proportionnel</strong> sur l’ambiance, dont la bande est un curseur, et elle est bornée entre 14 et 35 °C. La batterie froide sort l’air à 90 % d’humidité relative ; l’humidificateur vise 35 % dans la salle ; le ventilateur ajoute son kelvin. Le free-cooling s’enclenche si l’extérieur est plus froid que la salle de 2 K, au-dessus de 12 °C, et si la salle demande du froid.</p>
+<p><strong>L’extérieur</strong> est une sinusoïde : la moyenne et l’amplitude sont des curseurs, le maximum à 15 h. L’humidité relative extérieure est constante. Le soleil est une bosse de 7 h à 18 h.</p>
+<p><strong>Ce que le modèle ne fait pas.</strong> Il n’a pas d’inertie lourde : un gymnase en béton réagirait deux fois plus lentement. Il ne connaît ni les pertes de charge ni la vitesse variable des ventilateurs. Son régulateur est un P pur, sans intégrale, ce qui est justement ce que la page veut faire voir. Et il ne dégivre pas son récupérateur : c’est la panne du jeu, pas une fonction du simulateur.</p>
+<p><strong>Pourquoi ces limites ne gênent pas.</strong> Elles déplacent les courbes de quelques dixièmes de degré. Elles ne changent rien aux quatre choses que le cours veut faire voir : le CO₂ qui commande l’air neuf, le récupérateur qui rend un quart du chaud, le free-cooling qui fait plus de la moitié du froid en mi-saison, et l’arrêt de nuit qui ne coûte qu’une relance.</p></div></details>
+</div><h2 id="les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</h2>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CO₂ produit par une personne assise</td>
+<td><strong>18 L/h</strong></td>
+</tr>
+<tr>
+<td>Eau produite par une personne assise</td>
+<td><strong>65 g/h</strong></td>
+</tr>
+<tr>
+<td>Chaleur sensible d’une personne assise</td>
+<td>70 W</td>
+</tr>
+<tr>
+<td>Air neuf d’une salle de réunion, par personne</td>
+<td>30 m³/h</td>
+</tr>
+<tr>
+<td>Constante de temps de la salle</td>
+<td>≈ 4 h</td>
+</tr>
+<tr>
+<td>Efficacité d’un récupérateur à plaques</td>
+<td>60 à 85 %</td>
+</tr>
+<tr>
+<td>Gain du récupérateur sur l’air neuf, hiver</td>
+<td>≈ 14 K</td>
+</tr>
+<tr>
+<td>Échauffement dû au ventilateur</td>
+<td>1 K</td>
+</tr>
+<tr>
+<td>Plage de soufflage</td>
+<td>14 à 35 °C</td>
+</tr>
+<tr>
+<td>SFP d’une bonne centrale</td>
+<td><strong>0,4 W par m³/h</strong></td>
+</tr>
+<tr>
+<td>Coût de l’humidification à vapeur</td>
+<td>0,75 kWh par litre</td>
+</tr>
+<tr>
+<td>Sortie d’une batterie froide</td>
+<td>90 % d’humidité relative</td>
+</tr>
+<tr>
+<td>Condition du free-cooling</td>
+<td>extérieur plus froid de 2 K, et au-dessus de 12 °C</td>
+</tr>
+<tr>
+<td>Perte d’un filtre, propre à colmaté</td>
+<td>120 à 270 Pa</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le contrôle qui rejette une lecture en une seconde : <strong>un mélange plus chaud que la reprise, ou plus froid que la sortie du récupérateur, est impossible</strong>. Un barycentre est toujours entre ses deux extrémités, et une valeur qui en sort désigne une sonde, pas un caisson.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Une centrale qui tourne à vide la nuit coûte : <strong>ses ventilateurs et son air neuf</strong> | seulement ses ventilateurs</li>
+<li>La centrale ouvre son air neuf d’après : <strong>le CO₂ à la reprise</strong> | le nombre de personnes</li>
+<li>Le CO₂ se stabilise sous 1 000 ppm parce que : <strong>l’air neuf suit</strong> | la salle est grande</li>
+<li>Le récupérateur ne travaille que sur : <strong>l’air neuf</strong> | tout l’air soufflé</li>
+<li>Sans récupérateur, le poste « Chaud » : <strong>monte d’un tiers</strong> | ne change pas</li>
+<li>Les gens apportent à l’air : <strong>de l’eau</strong> | de la sécheresse</li>
+<li>En hiver, la salle passe sous 30 % parce que : <strong>l’air neuf entre sec</strong> | les gens respirent</li>
+<li>L’humidificateur à vapeur coûte : <strong>0,75 kWh par litre</strong> | presque rien</li>
+<li>Le free-cooling exige un extérieur : <strong>plus froid que la salle</strong> | plus sec</li>
+<li>Il contourne : <strong>le récupérateur</strong> | la batterie froide</li>
+<li>En été, le tiers de la batterie froide sert à : <strong>condenser l’eau des gens</strong> | refroidir les murs</li>
+<li>L’arrêt de nuit coûte : <strong>une relance</strong> | dix degrés perdus</li>
+<li>Une bande proportionnelle large laisse : <strong>un écart statique</strong> | une oscillation</li>
+<li>Le premier caisson qui n’ajoute pas ce qu’il devrait : <strong>désigne la panne</strong> | est toujours le filtre</li>
+<li>Un registre d’air neuf bloqué fermé se voit : <strong>au CO₂</strong> | à la température</li>
+<li>Un mélange plus chaud que la reprise : <strong>désigne une sonde</strong> | est normal en hiver</li>
+</ul>
+</div>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="FICHE-CHAUFFERIE-EN-MOUVEMENT.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">La chaufferie en mouvement</span></a><a class="ap" href="FICHE-FROID-EN-MOUVEMENT.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Le froid en mouvement</span></a></div></nav>
+<p class="pied">Fiche complémentaire au DS n° 8 et aux chapitres 8, 10 et 11 du manuel. Les calculs se font dans votre navigateur ; rien n'est enregistré, et le jeu de diagnostic ne révèle jamais la panne.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

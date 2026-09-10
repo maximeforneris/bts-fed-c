@@ -1,0 +1,614 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>La machine frigo</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/FICHE-MACHINE-FRIGO">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="FICHE-FROID-METIER.html" rel="prev" title="Le métier du froid" aria-label="Le métier du froid">&lsaquo;</a><a class="fleche" href="FICHE-SYMBOLES.html" rel="next" title="Lire un circuit hydraulique" aria-label="Lire un circuit hydraulique">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/FICHE-MACHINE-FRIGO">Marquer comme lu</button></div>
+<header class="tete a-img">
+  <div class="tete-img" data-schema="frigo-embleme"></div>
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>La machine frigorifique<span>organes, cycle et dangers</span></h1>
+  </div>
+  <p class="accroche">Quatre organes font le cycle, une douzaine d'autres protègent la machine. Pourquoi un fluide qui bout transporte trente fois plus qu'un litre d'eau, ce que chaque réglage fait au COP, et les cinq dangers qu'un frigorigène apporte avec lui. Tout se manipule ici, curseur par curseur.</p>
+  <p class="contenu">4 outils · 14 questions · 4 exercices · 3 replis · 1 figure</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A5-1 Machine thermodynamique · schéma, composants, COP</span><span class="tag">A5-2 Cycles frigorifiques · tracé sur diagramme enthalpique</span><span class="tag n3">B1-1 La pompe à chaleur comme générateur · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b>La pompe à chaleur et son cycle</b><span class="ou">J13 · La pompe à chaleur et son cycle · à venir</span><span class="car">la machine frigorifique est la même machine, regardée du côté froid ; les quatre organes sont ceux de la séance 13.</span></li><li><b><a href="J1.html">Puissance et énergie</a></b><span class="ou">J1 · L'énergie dans le bâtiment</span><span class="car">le COP, la puissance frigorifique et la puissance absorbée sont des kilowatts ; on les compare comme en séance 1.</span></li><li><b>Pression et température de saturation</b><span class="car">un fluide bout à une température qui dépend de sa pression ; la fiche le montre sur six fluides, et tout le cycle en découle.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#pourquoi-cette-fiche-existe">Pourquoi cette fiche existe</a><a href="#la-machine-ne-fabrique-pas-de-froid">La machine ne fabrique pas de froid</a><a href="#pourquoi-un-fluide-qui-bout">Pourquoi un fluide qui bout</a><a href="#une-pression-une-temperature">Une pression, une température</a><a href="#le-circuit-complet">Le circuit complet</a><a href="#le-cycle-et-ce-que-chaque-reglage-lui-fait">Le cycle, et ce que chaque réglage lui fait</a><a href="#le-compresseur">Le compresseur</a><a href="#les-deux-echangeurs">Les deux échangeurs</a><a href="#le-detendeur">Le détendeur</a><a href="#les-organes-annexes">Les organes annexes</a><a href="#ce-qu-on-demande-a-un-fluide">Ce qu’on demande à un fluide</a><a href="#les-cinq-dangers">Les cinq dangers</a><a href="#ce-qu-un-local-peut-contenir">Ce qu’un local peut contenir</a><a href="#ce-qu-on-ne-fait-jamais">Ce qu’on ne fait jamais</a><a href="#vous-entrainer">Vous entraîner</a><a href="#vous-verifier">Vous vérifier</a><a href="#les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="pourquoi-cette-fiche-existe">Pourquoi cette fiche existe</h2>
+<p>Le référentiel de l’option C place les compresseurs, les détendeurs et les fluides frigorigènes aux niveaux les plus bas : <strong>on ne vous demandera pas d’être frigoriste</strong>. Mais la pompe à chaleur, elle, est au niveau 3.</p>
+<div class="cle">
+<p>Une pompe à chaleur <strong>est</strong> une machine frigorifique, retournée. Comprendre ses organes et son cycle rend le chapitre 7 du manuel évident au lieu d’être une liste à retenir. Cette fiche va donc un peu plus loin que le cours, sans jamais devenir un cours de frigoriste.</p>
+</div>
+<p>Le parcours <strong>habilitation fluides</strong> couvre ce que cette fiche ne traite pas : le cadre réglementaire, le GWP, les contrôles d’étanchéité et les gestes du métier.</p>
+<h2 id="la-machine-ne-fabrique-pas-de-froid">La machine ne fabrique pas de froid</h2>
+<p>Le froid n’existe pas : il n’y a que de la chaleur, plus ou moins abondante. Refroidir un local, c’est <strong>en sortir de la chaleur</strong> et la mettre ailleurs.</p>
+<div class="piege">
+<p>« Produire du froid » est une expression de métier, pas une description. Une machine frigorifique <strong>déplace</strong> de la chaleur, du froid vers le chaud, c’est-à-dire dans le sens que la nature ne prend jamais seule. C’est pour cela qu’elle consomme de l’énergie.</p>
+</div>
+<p>Le sens du transfert est le seul point qui sépare un réfrigérateur d’une pompe à chaleur. La machine est la même ; ce qui change est <strong>le côté qui nous intéresse</strong>.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Réfrigérateur, climatiseur</th>
+<th>Pompe à chaleur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ce qu’on veut</td>
+<td>le froid de l’évaporateur</td>
+<td>le chaud du condenseur</td>
+</tr>
+<tr>
+<td>Ce qu’on jette</td>
+<td>la chaleur du condenseur</td>
+<td>le froid de l’évaporateur</td>
+</tr>
+<tr>
+<td>L’indice</td>
+<td><strong>EER</strong></td>
+<td><strong>COP</strong></td>
+</tr>
+<tr>
+<td>Et ils sont liés par</td>
+<td><strong>COP = EER + 1</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="pourquoi-un-fluide-qui-bout">Pourquoi un fluide qui bout</h2>
+<p>On pourrait transporter la chaleur avec de l’eau, comme au chapitre 2 du manuel. On ne le fait pas, et deux mots disent pourquoi.</p>
+<p><strong>Sensible</strong> veut dire « que le thermomètre sent ». Chauffer une casserole d’eau de 20 à 80 °C, c’est de la chaleur sensible : la température monte, et on la voit monter.</p>
+<p><strong>Latente</strong> veut dire « cachée ». Une fois l’eau à 100 °C, elle continue d’absorber de la chaleur <strong>sans monter d’un degré</strong> : cette énergie sert à séparer les molécules les unes des autres, pas à les agiter davantage. Le thermomètre ne la voit pas, d’où son nom.</p>
+<div class="formule">
+<p><strong>Chaleur sensible : Φ = qm × c × Δθ</strong></p>
+<ul>
+<li><strong>Φ</strong><span>: puissance transportée, en <strong>W</strong></span></li>
+<li><strong>qm</strong><span>: débit massique, en <strong>kg/s</strong></span></li>
+<li><strong>c</strong><span>: chaleur massique, en <strong>J/(kg·K)</strong> : 4 185 pour l’eau</span></li>
+<li><strong>Δθ</strong><span>: écart de température imposé au fluide, en <strong>K</strong></span></li>
+</ul>
+<p><strong>Chaleur latente : Φ = qm × Lv</strong></p>
+<ul>
+<li><strong>Lv</strong><span>: chaleur latente de vaporisation, en <strong>J/kg</strong>. C’est ce qu’un kilogramme absorbe pour passer <strong>entièrement</strong> de l’état liquide à l’état vapeur, <strong>sans changer de température</strong></span></li>
+</ul>
+</div>
+<div class="cle">
+<p>Les deux formules ont la même forme : un débit, multiplié par ce qu’un kilogramme emporte. Tout se joue donc sur ce second facteur, et l’écart entre les deux est considérable.</p>
+</div>
+<h3 id="un-kilogramme-deux-façons-de-le-charger">Un kilogramme, deux façons de le charger</h3>
+<p><strong>Avec de l’eau</strong>, refroidie de 5 K, comme sur un circuit d’eau glacée en 7/12 :</p>
+<p>1 × 4 185 × 5 = 20 925 J, soit <strong>21 kJ</strong>.</p>
+<p><strong>Avec du R134a</strong>, évaporé à 0 °C :</p>
+<p>1 × 198 600 = <strong>199 kJ</strong>.</p>
+<p><strong>Neuf fois et demie plus, pour la même masse.</strong> Et pour tirer 199 kJ d’un kilogramme d’eau, il faudrait le refroidir de <strong>47 K</strong> : aucun circuit d’eau glacée ne travaille sur un tel écart.</p>
+<div class="outil" data-outil="latent-sensible">
+
+</div>
+<div class="cle">
+<p>Deux conséquences, et elles décident de la machine. Le <strong>débit</strong> s’effondre : quelques dizaines de kilogrammes par heure au lieu de plusieurs centaines, donc des tubes de 10 ou 12 mm. Et l’échange se fait <strong>sans écart de température le long de l’échangeur</strong>, ce qui permet de refroidir un local à 5 °C avec un fluide qui reste à 0 °C d’un bout à l’autre.</p>
+</div>
+<div class="piege">
+<p>La chaleur latente <strong>dépend de la température à laquelle on évapore</strong>. Celle du R134a vaut 199 kJ/kg à 0 °C, mais seulement 164 à 40 °C : plus on s’approche du point critique, moins un kilogramme emporte. C’est une des raisons pour lesquelles une machine perd de la puissance quand la condensation monte.</p>
+</div>
+<h2 id="une-pression-une-temperature">Une pression, une température</h2>
+<p>Tant que le liquide et sa vapeur coexistent, on ne peut pas choisir les deux : <strong>fixer l’une fixe l’autre</strong>. C’est la propriété qui rend la machine pilotable.</p>
+<div class="outil" data-outil="saturation-fluides">
+
+</div>
+<div class="cle">
+<p>C’est pourquoi un manomètre de frigoriste porte, autour de son cadran, <strong>une échelle de température par fluide</strong>. Lire 2,0 bar au manomètre sur du R134a, c’est lire −10 °C dans l’évaporateur, sans y mettre le moindre thermomètre.</p>
+</div>
+<div class="piege">
+<p>Cette correspondance <strong>ne vaut que sous la cloche</strong>, là où il reste du liquide. Après l’évaporateur, la vapeur est seule : sa température monte sans que la pression bouge. C’est exactement ce qu’on appelle la <strong>surchauffe</strong>, et c’est ce qui permet de la mesurer.</p>
+</div>
+<h2 id="le-circuit-complet">Le circuit complet</h2>
+<figure class="schema"><div class="dessin" data-schema="circuit-frigo"></div><figcaption>Le circuit et ses organes : quatre pour le cycle, les autres pour que la machine survive.</figcaption></figure>
+<div class="formule">
+<p><strong>Deux pressions, deux frontières.</strong></p>
+<p>Le <strong>compresseur</strong> fait passer de la basse à la haute pression. Le <strong>détendeur</strong> fait le chemin inverse.</p>
+<p>Tout ce qui est entre les deux, dans un sens, est à la haute pression ; tout ce qui est entre les deux dans l’autre sens est à la basse.</p>
+</div>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Point</th>
+<th>Où</th>
+<th>État du fluide</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1</strong></td>
+<td>entrée du compresseur</td>
+<td>vapeur BP, un peu surchauffée</td>
+</tr>
+<tr>
+<td><strong>2</strong></td>
+<td>sortie du compresseur</td>
+<td>vapeur HP, chaude, jusqu’à 90 °C</td>
+</tr>
+<tr>
+<td><strong>3</strong></td>
+<td>sortie du condenseur</td>
+<td>liquide HP, un peu sous-refroidi</td>
+</tr>
+<tr>
+<td><strong>4</strong></td>
+<td>sortie du détendeur</td>
+<td>mélange liquide + vapeur, froid</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="le-cycle-et-ce-que-chaque-reglage-lui-fait">Le cycle, et ce que chaque réglage lui fait</h2>
+<div class="outil" data-outil="cycle-frigo">
+
+</div>
+<div class="cle">
+<p>Trois enseignements sortent de ce seul outil. <strong>Descendre l’évaporation coûte cher</strong> : le taux de compression monte et le COP tombe. <strong>Monter la condensation coûte tout autant.</strong> Et <strong>le sous-refroidissement est gratuit</strong> : il augmente la production frigorifique sans rien demander au compresseur.</p>
+</div>
+<div class="piege">
+<p>Le <strong>taux de compression</strong>, rapport de la haute à la basse pression, est le nombre qui décide de la technologie. Au-delà de <strong>8</strong>, un compresseur à piston s’échauffe, son rendement volumétrique s’effondre et il faut deux étages. C’est la vraie limite d’une machine, bien avant les températures.</p>
+</div>
+<h2 id="le-compresseur">Le compresseur</h2>
+<p>C’est le seul organe qui consomme, et le seul qui tombe en panne de façon définitive. On le classe deux fois : par sa <strong>construction</strong>, et par sa <strong>technologie</strong>.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Construction</th>
+<th>Moteur et compression</th>
+<th>Réparable</th>
+<th>Où</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hermétique</strong></td>
+<td>dans une même enveloppe soudée</td>
+<td>non, on remplace</td>
+<td>domestique, petits split</td>
+</tr>
+<tr>
+<td><strong>Semi-hermétique</strong></td>
+<td>même enveloppe, boulonnée</td>
+<td><strong>oui</strong>, culasses démontables</td>
+<td>tertiaire, froid commercial</td>
+</tr>
+<tr>
+<td><strong>Ouvert</strong></td>
+<td>moteur séparé, arbre traversant</td>
+<td>oui</td>
+<td>ammoniac, marine, transport</td>
+</tr>
+</tbody>
+</table></div>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Technologie</th>
+<th>Principe</th>
+<th>Plage</th>
+<th>Particularité</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Piston</strong></td>
+<td>va-et-vient, clapets</td>
+<td>0,5 à 300 kW</td>
+<td>robuste, bruyant, sensible au taux</td>
+</tr>
+<tr>
+<td><strong>Scroll</strong></td>
+<td>deux spirales imbriquées</td>
+<td>3 à 100 kW</td>
+<td>silencieux, peu de pièces, le standard</td>
+</tr>
+<tr>
+<td><strong>Vis</strong></td>
+<td>deux rotors hélicoïdaux</td>
+<td>50 à 1 500 kW</td>
+<td>continu, tolère les fortes charges</td>
+</tr>
+<tr>
+<td><strong>Centrifuge</strong></td>
+<td>roue à grande vitesse</td>
+<td>&gt; 500 kW</td>
+<td>grandes puissances, faible taux</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le moteur d’un compresseur hermétique est <strong>refroidi par la vapeur aspirée</strong>. Une surchauffe trop forte le prive de ce refroidissement et le brûle ; une surchauffe nulle lui envoie du liquide, qui ne se comprime pas et casse les clapets. <strong>La surchauffe correcte, 5 à 8 K, protège des deux côtés.</strong></p>
+</div>
+<h2 id="les-deux-echangeurs">Les deux échangeurs</h2>
+<p>Ce sont les mêmes objets que les batteries du chapitre 11 du manuel, avec une différence : <strong>le fluide y change d’état</strong>, donc sa température ne bouge pas pendant l’essentiel de l’échange.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>Condenseur</th>
+<th>Évaporateur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ce qui s’y passe</td>
+<td>la vapeur se liquéfie</td>
+<td>le liquide bout</td>
+</tr>
+<tr>
+<td>Le fluide y est</td>
+<td><strong>chaud</strong>, 35 à 55 °C</td>
+<td><strong>froid</strong>, −15 à +10 °C</td>
+</tr>
+<tr>
+<td>Côté air</td>
+<td>batterie ailetée, ventilateur</td>
+<td>idem, plus un bac à condensats</td>
+</tr>
+<tr>
+<td>Côté eau</td>
+<td>à plaques, ou coaxial</td>
+<td>à plaques, ou noyé</td>
+</tr>
+<tr>
+<td>Ce qui le dégrade</td>
+<td>encrassement, non-condensables</td>
+<td>givre, huile qui s’y accumule</td>
+</tr>
+</tbody>
+</table></div>
+<div class="piege">
+<p>Un condenseur encrassé fait monter la haute pression, donc le taux de compression, donc la consommation. <strong>Un nettoyage de batterie extérieure rend 5 à 15 % de COP</strong>, et c’est l’entretien le plus rentable d’une pompe à chaleur.</p>
+</div>
+<h2 id="le-detendeur">Le détendeur</h2>
+<p>Il fait deux choses à la fois, et c’est ce qui le rend délicat : il <strong>abaisse la pression</strong> et il <strong>dose le débit</strong> de fluide envoyé à l’évaporateur.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>Type</th>
+<th>Comment</th>
+<th>Régule la surchauffe</th>
+<th>Où</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capillaire</strong></td>
+<td>un tube très fin, très long</td>
+<td>non</td>
+<td>réfrigérateur, petit climatiseur</td>
+</tr>
+<tr>
+<td><strong>Thermostatique</strong></td>
+<td>un bulbe sur l’aspiration ouvre une aiguille</td>
+<td><strong>oui</strong>, mécaniquement</td>
+<td>froid commercial</td>
+</tr>
+<tr>
+<td><strong>Électronique</strong></td>
+<td>un moteur pas à pas, piloté</td>
+<td><strong>oui</strong>, finement</td>
+<td>pompes à chaleur récentes</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>La détente est <strong>isenthalpique</strong> : l’enthalpie ne change pas. La pression chute, une partie du liquide se vaporise instantanément, et cette vaporisation prend sa chaleur latente <strong>au liquide qui reste</strong>, qui se refroidit d’autant. <strong>Le froid naît là</strong>, pas dans l’évaporateur.</p>
+</div>
+<h2 id="les-organes-annexes">Les organes annexes</h2>
+<p>Aucun ne participe au cycle. Tous existent parce qu’une machine réelle tombe en panne autrement.</p>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Organe</th>
+<th>Ce qu’il fait</th>
+<th>Ce qui arrive sans lui</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Filtre déshydrateur</strong></td>
+<td>retient l’eau et les particules</td>
+<td>l’eau gèle au détendeur et le bouche</td>
+</tr>
+<tr>
+<td><strong>Voyant liquide</strong></td>
+<td>montre bulles et humidité</td>
+<td>on charge à l’aveugle</td>
+</tr>
+<tr>
+<td><strong>Bouteille de liquide</strong></td>
+<td>tampon entre condenseur et détendeur</td>
+<td>le débit varie avec la charge</td>
+</tr>
+<tr>
+<td><strong>Bouteille anti-coups</strong></td>
+<td>retient le liquide à l’aspiration</td>
+<td>des coups de liquide au compresseur</td>
+</tr>
+<tr>
+<td><strong>Séparateur d’huile</strong></td>
+<td>renvoie l’huile au carter</td>
+<td>l’huile part et le compresseur grippe</td>
+</tr>
+<tr>
+<td><strong>Pressostat HP</strong></td>
+<td>arrête sur haute pression</td>
+<td>le circuit s’ouvre par sa soupape</td>
+</tr>
+<tr>
+<td><strong>Pressostat BP</strong></td>
+<td>arrête sur basse pression</td>
+<td>on aspire de l’air par une fuite</td>
+</tr>
+<tr>
+<td><strong>Vanne 4 voies</strong></td>
+<td>inverse le cycle</td>
+<td>pas de dégivrage, pas de réversibilité</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p><strong>L’huile voyage avec le fluide.</strong> Elle sort du compresseur en gouttelettes, traverse tout le circuit et doit revenir. C’est pourquoi les vitesses minimales dans les tuyauteries et les pièges à huile sur les colonnes montantes ne sont pas négociables : une machine qui perd son huile se détruit en quelques heures.</p>
+</div>
+<h2 id="ce-qu-on-demande-a-un-fluide">Ce qu’on demande à un fluide</h2>
+<p>Il n’existe pas de bon frigorigène : il existe des compromis. Le cahier des charges est contradictoire, et chaque fluide en sacrifie une partie.</p>
+<div class="etapes">
+<ol type="1">
+<li><strong>Bouillir à la bonne pression</strong> : au-dessus de la pression atmosphérique en basse pression, pour qu’une fuite fasse sortir du fluide et non entrer de l’air.</li>
+<li><strong>Emporter beaucoup par kilogramme</strong> : une chaleur latente élevée réduit le débit, donc la taille de tout le circuit.</li>
+<li><strong>Ne pas être toxique</strong>, ni inflammable.</li>
+<li><strong>Ne pas détruire l’ozone</strong>, ni réchauffer le climat.</li>
+<li><strong>Être compatible</strong> avec les huiles, les cuivres, les joints.</li>
+<li><strong>Coûter peu</strong>, et rester disponible.</li>
+</ol>
+</div>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Fluide</th>
+<th>Ce qu’il gagne</th>
+<th>Ce qu’il perd</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>R134a</strong></td>
+<td>sûr, connu, pressions basses</td>
+<td>GWP 1 430, en voie d’interdiction</td>
+</tr>
+<tr>
+<td><strong>R410A</strong></td>
+<td>compact, très employé</td>
+<td>GWP 2 088, hautes pressions</td>
+</tr>
+<tr>
+<td><strong>R32</strong></td>
+<td>GWP 675, très performant</td>
+<td><strong>A2L</strong>, faiblement inflammable</td>
+</tr>
+<tr>
+<td><strong>R290</strong>, propane</td>
+<td>GWP 3, excellent thermiquement</td>
+<td><strong>A3</strong>, très inflammable</td>
+</tr>
+<tr>
+<td><strong>R717</strong>, ammoniac</td>
+<td>GWP 0, le meilleur en latent</td>
+<td><strong>toxique</strong>, attaque le cuivre</td>
+</tr>
+<tr>
+<td><strong>R744</strong>, CO₂</td>
+<td>GWP 1, ininflammable</td>
+<td>70 bar, et transcritique dès 31 °C</td>
+</tr>
+</tbody>
+</table></div>
+<div class="piege">
+<p>Le mouvement réglementaire pousse vers les <strong>bas GWP</strong>, donc vers des fluides <strong>inflammables ou à haute pression</strong>. La sécurité ne disparaît pas : elle change de nature. C’est exactement pour cela que la section suivante existe.</p>
+</div>
+<h2 id="les-cinq-dangers">Les cinq dangers</h2>
+<div class="etapes">
+<ol type="1">
+<li><strong>L’asphyxie.</strong> Tous ces fluides sont <strong>plus lourds que l’air</strong>. Une fuite remplit le local par le bas et chasse l’oxygène, sans odeur et sans couleur pour les fluides de la famille A1.</li>
+<li><strong>La brûlure par le froid.</strong> Un liquide détendu à l’air libre tombe à <strong>−26 °C</strong> pour le R134a, <strong>−33 °C</strong> pour l’ammoniac. Une projection dans l’œil est irréversible : lunettes et gants, toujours.</li>
+<li><strong>La haute pression.</strong> 25 bar au condenseur, davantage au CO₂. Une bouteille laissée au soleil monte en pression ; elle ne se remplit <strong>jamais au-delà de 80 %</strong> de son volume.</li>
+<li><strong>La décomposition thermique.</strong> Un fluide halogéné qui touche une flamme ou une surface au rouge donne de l’<strong>acide fluorhydrique</strong> et des composés apparentés au phosgène. On ne brase <strong>jamais</strong> sur un circuit en charge.</li>
+<li><strong>L’inflammabilité.</strong> Le propane s’enflamme dès <strong>2,1 %</strong> dans l’air. Quelques centaines de grammes suffisent à rendre un petit local explosif : c’est la raison des charges limitées et des détecteurs.</li>
+</ol>
+</div>
+<h2 id="ce-qu-un-local-peut-contenir">Ce qu’un local peut contenir</h2>
+<p>La norme EN 378 traduit ces dangers en un seul nombre par fluide : la <strong>limite pratique</strong>, en kilogrammes par mètre cube de local.</p>
+<div class="outil" data-outil="charge-local">
+
+</div>
+<div class="cle">
+<p>Le raisonnement est toujours le même : <strong>on suppose que toute la charge s’échappe dans le local</strong>, et on compare la concentration obtenue à la limite. C’est ce qui explique pourquoi une pompe à chaleur au propane se pose dehors, et pourquoi une salle des machines à l’ammoniac est un local dédié, ventilé et détecté.</p>
+</div>
+<h2 id="ce-qu-on-ne-fait-jamais">Ce qu’on ne fait jamais</h2>
+<div class="piege">
+<p><strong>Relâcher du fluide dans l’atmosphère.</strong> C’est un délit, et c’est aussi plusieurs tonnes équivalent CO₂ pour quelques kilogrammes.</p>
+<p><strong>Braser sur un circuit en charge.</strong> Décomposition thermique, et surpression.</p>
+<p><strong>Remplir une bouteille au-delà de 80 %.</strong> Le liquide se dilate ; au-dessus, il n’y a plus de place pour cette dilatation.</p>
+<p><strong>Mélanger deux fluides dans une bouteille de récupération.</strong> Le mélange devient irrécupérable, et le retraitement est refusé.</p>
+<p><strong>Compléter la charge d’un fluide zéotrope en phase vapeur.</strong> La composition se déséquilibre, et la machine ne retrouve jamais ses performances.</p>
+</div>
+<div class="cle">
+<p>Aucun de ces gestes ne s’apprend sur une page web. <strong>La manipulation d’un fluide frigorigène demande une attestation d’aptitude</strong>, un équipement de récupération et une pratique encadrée : c’est l’objet du parcours habilitation, et sa partie pratique ne se travaille que sur un banc.</p>
+</div>
+<h2 id="vous-entrainer">Vous entraîner</h2>
+<section class="exo" id="FICHE-MACHINE-FRIGO-e1" data-exo="FICHE-MACHINE-FRIGO-e1" data-type="calcul" data-savoir="A5-1" data-a="IXgueGB4OTs2OS82eHZ4LHhgbnRqdnguNTZ4YGl0anZ4L3hgeCk7NCl6LzQzLgYvamo/Y3gn"><p class="k">Exercice · A5-1</p><h4>Le taux de compression</h4><div class="enonce">
+
+<p>Une machine au R410A évapore à <strong>−5 °C</strong> et condense à <strong>45 °C</strong>. Les pressions de saturation valent <strong>6,80 bar</strong> et <strong>27,20 bar</strong>. Quel est le taux de compression ?</p>
+</div><div class="indice" hidden>Le taux de compression est le rapport de la haute pression à la basse pression, toutes deux en pression absolue. C’est un rapport : il n’a pas d’unité.</div></section>
+<section class="exo" id="FICHE-MACHINE-FRIGO-e2" data-exo="FICHE-MACHINE-FRIGO-e2" data-type="calcul" data-savoir="A5-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgaW5tdGp2eC41NnhgbnRqdngveGB4MT11Mngn"><p class="k">Exercice · A5-2</p><h4>Le débit de fluide</h4><div class="enonce">
+
+<p>Un évaporateur produit <strong>14 kW</strong> de froid. La production frigorifique massique du cycle vaut <strong>145 kJ/kg</strong>. Quel débit de fluide le compresseur doit-il aspirer ?</p>
+</div><div class="indice" hidden>Le débit massique en kilogrammes par seconde vaut la puissance divisée par la production massique. Multipliez ensuite par 3 600 pour l’avoir par heure.</div></section>
+<section class="exo" id="FICHE-MACHINE-FRIGO-e3" data-exo="FICHE-MACHINE-FRIGO-e3" data-type="calcul" data-savoir="B1-1" data-a="IXgueGB4OTs2OS82eHZ4LHhganRraWl2eC41NnhgbnRqdngveGB4MT11NwYvamo4aXgn"><p class="k">Exercice · B1-1</p><h4>La concentration après une fuite</h4><div class="enonce">
+
+<p>Une installation contient <strong>6 kg</strong> de R32. Le local fait <strong>45 m³</strong>. Quelle concentration atteint-on si toute la charge s’échappe ?</p>
+</div><div class="indice" hidden>Divisez la charge par le volume du local. Comparez ensuite à la limite pratique du R32, 0,061 kg par mètre cube, pour conclure.</div></section>
+<section class="exo" id="FICHE-MACHINE-FRIGO-e4" data-exo="FICHE-MACHINE-FRIGO-e4" data-type="justification" data-savoir="A5-1" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A5-1</p><h4>Une pompe à chaleur qui consomme trop l’été</h4><div class="enonce">
+
+<p>Sur une pompe à chaleur air-eau réversible, la consommation d’été est bien supérieure à l’annonce. Vous relevez une batterie extérieure très encrassée et une haute pression anormalement élevée. Expliquez l’enchaînement en quatre lignes.</p>
+</div><div class="indice" hidden>La température de condensation suit la pression de saturation. Demandez-vous ce qui arrive à cette pression quand la batterie n’arrive plus à céder sa chaleur à l’air, puis ce que le compresseur doit faire de plus.</div><ul class="verifier" hidden><li>J’ai relié l’encrassement à une mauvaise évacuation de la chaleur, donc à une condensation plus chaude.</li><li>J’ai dit que la haute pression monte, donc le taux de compression aussi.</li><li>J’ai relié ce taux au travail du compresseur, donc à la consommation.</li><li>J’ai proposé le nettoyage et donné un ordre de grandeur du gain.</li></ul></section>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Une machine frigorifique : <strong>déplace de la chaleur</strong> | fabrique du froid</li>
+<li>Le froid naît, dans le circuit : <strong>à la détente</strong> | dans le compresseur</li>
+<li>Sous la cloche, une pression correspond à : <strong>une seule température</strong> | plusieurs</li>
+<li>La surchauffe se mesure : <strong>après l’évaporateur</strong> | après le condenseur</li>
+<li>Le sous-refroidissement se mesure : <strong>après le condenseur</strong> | avant le détendeur</li>
+<li>Le taux de compression est le rapport : <strong>HP sur BP</strong> | HP moins BP</li>
+<li>Au-delà de 8, un compresseur à piston : <strong>s’échauffe et perd son rendement</strong> | fonctionne mieux</li>
+<li>Un compresseur hermétique est refroidi : <strong>par la vapeur aspirée</strong> | par un ventilateur</li>
+<li>Le filtre déshydrateur protège : <strong>le détendeur</strong> | le condenseur</li>
+<li>L’huile du compresseur : <strong>fait le tour du circuit</strong> | reste dans le carter</li>
+<li>Un condenseur encrassé fait : <strong>monter la haute pression</strong> | baisser la haute pression</li>
+<li>Le R290 est classé : <strong>A3, très inflammable</strong> | A1, non inflammable</li>
+<li>Le CO₂ ne condense plus au-dessus de : <strong>31 °C</strong> | 100 °C</li>
+<li>Une bouteille se remplit au maximum à : <strong>80 %</strong> | 100 %</li>
+</ul>
+</div>
+<h2 id="les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</h2>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Surchauffe à l’aspiration</td>
+<td><strong>5 à 8 K</strong></td>
+</tr>
+<tr>
+<td>Sous-refroidissement au condenseur</td>
+<td>3 à 6 K</td>
+</tr>
+<tr>
+<td>Taux de compression, un seul étage</td>
+<td><strong>jusqu’à 8</strong></td>
+</tr>
+<tr>
+<td>Écart évaporation / air repris</td>
+<td>5 à 8 K</td>
+</tr>
+<tr>
+<td>Écart condensation / air extérieur</td>
+<td>8 à 15 K</td>
+</tr>
+<tr>
+<td>Température de refoulement, maximum</td>
+<td>110 à 120 °C</td>
+</tr>
+<tr>
+<td>Chaleur latente à 0 °C, R134a · R290 · R717</td>
+<td>199 · 375 · 1 262 kJ/kg</td>
+</tr>
+<tr>
+<td>COP d’une PAC air/eau à 7 °C et 35 °C</td>
+<td>4,5 à 5,0</td>
+</tr>
+<tr>
+<td>Part de la limite de Carnot atteinte</td>
+<td><strong>40 à 55 %</strong></td>
+</tr>
+<tr>
+<td>Gain d’un nettoyage de batterie</td>
+<td>5 à 15 %</td>
+</tr>
+<tr>
+<td>Limite pratique, R134a · R32 · R290</td>
+<td>0,25 · 0,061 · 0,008 kg/m³</td>
+</tr>
+<tr>
+<td>Limite inférieure d’inflammabilité du propane</td>
+<td>2,1 % en volume</td>
+</tr>
+<tr>
+<td>Remplissage maximal d’une bouteille</td>
+<td>80 %</td>
+</tr>
+<tr>
+<td>Température critique du CO₂</td>
+<td>31 °C</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le contrôle qui refuse un relevé en une seconde : <strong>une surchauffe de 20 K signale un manque de fluide</strong>, une surchauffe nulle signale un excès et un danger pour le compresseur. Entre les deux, 5 à 8 K, la machine est réglée.</p>
+</div>
+<h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi le dégivrage existe, et ce qu&#39;il coûte</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Sous 5 °C d’air extérieur, l’évaporateur d’une pompe à chaleur travaille à −5 ou −8 °C : il est donc <strong>sous le point de rosée de l’air, et sous 0 °C</strong>. La vapeur d’eau de l’air s’y dépose en givre, qui bouche le passage et fait chuter l’échange.</p>
+<p><strong>Comment on le retire.</strong> La <strong>vanne quatre voies</strong> inverse le cycle : le condenseur devient évaporateur et l’évaporateur devient condenseur. La machine chauffe alors l’extérieur pendant deux à cinq minutes, en prenant sa chaleur au circuit d’eau du bâtiment.</p>
+<p><strong>Ce que cela coûte.</strong> L’énergie du dégivrage, plus l’arrêt du chauffage pendant l’opération, plus la remontée en température ensuite : <strong>5 à 15 % de l’énergie saisonnière</strong>, selon l’humidité du climat. C’est l’écart principal entre le COP affiché et le SCOP mesuré.</p>
+<p><strong>Ce qui déclenche le dégivrage</strong> est un point de conception : un simple minuteur dégivre trop souvent, un capteur de pression différentielle sur l’air ou une mesure d’écart entre la température d’évaporation et celle de l’air dégivrent <strong>à la demande</strong>. La différence vaut 2 à 4 points de SCOP.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Le zéotrope, le glissement, et pourquoi on charge en liquide</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un fluide <strong>pur</strong> bout à température constante. Un <strong>mélange zéotrope</strong> n’a pas cette politesse : ses composants ne bouent pas à la même température, donc la température monte pendant l’évaporation. Cet écart s’appelle le <strong>glissement</strong>.</p>
+<p><strong>Ce que cela change au relevé.</strong> Il n’y a plus une température de saturation mais deux : celle du début d’évaporation, dite <strong>bulle</strong>, et celle de la fin, dite <strong>rosée</strong>. Une surchauffe se calcule à partir de la <strong>rosée</strong>, un sous-refroidissement à partir de la <strong>bulle</strong>. Se tromper de colonne sur le manomètre donne une erreur de plusieurs kelvins, et un réglage faux.</p>
+<p><strong>Pourquoi on charge en phase liquide.</strong> Dans une bouteille, la phase vapeur n’a pas la même composition que la phase liquide : le composant le plus volatil y est surreprésenté. Charger en vapeur revient donc à <strong>prélever le mélange en le déséquilibrant</strong>, et à laisser dans la bouteille un fluide qui n’est plus le bon.</p>
+<p><strong>Le R410A est presque un cas à part</strong> : son glissement est inférieur à 0,2 K, ce qui le fait traiter comme un fluide pur — on dit <strong>quasi-azéotrope</strong>. Le R407C, lui, glisse de 6 à 7 K, et se charge impérativement en liquide.</p></div></details>
+<details class="appro"><summary><span class="niv"></span><span class="titre-appro">Trois formulations à ne pas reprendre</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p><strong>« Le gaz frigorigène produit du froid. »</strong> Il n’en produit aucun : il <strong>transporte</strong> de la chaleur, en bouillant d’un côté et en se condensant de l’autre. La formulation cache exactement ce qu’il faut comprendre, et elle empêche de répondre à la question « où le froid apparaît-il ».</p>
+<p><strong>« Il manque du gaz, la machine ne fait plus de froid. »</strong> Une machine qui manque de fluide fait encore du froid, mais moins, et <strong>sa surchauffe explose</strong>. Le bon énoncé est chiffré : une surchauffe de 20 K au lieu de 6 signale un manque, et c’est cela qui se relève, pas une impression.</p>
+<p><strong>« Le fluide, on le vide et on recharge. »</strong> On <strong>récupère</strong>, on pèse, on retraite. Vider dans l’atmosphère est un délit, et le fluide récupéré vaut cher : un kilogramme de R410A, ce sont deux tonnes équivalent CO₂ et une ligne sur un registre.</p></div></details>
+</div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="FICHE-FROID-METIER.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Le métier du froid</span></a><a class="ap" href="FICHE-SYMBOLES.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Lire un circuit hydraulique</span></a></div></nav>
+<p class="pied">Fiche complémentaire. La technologie du froid est hors du périmètre de l'option C ; elle éclaire la pompe à chaleur, qui est au programme. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

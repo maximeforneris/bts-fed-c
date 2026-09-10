@@ -1,0 +1,344 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>Le froid en mouvement</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/FICHE-FROID-EN-MOUVEMENT">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="FICHE-CTA-EN-MOUVEMENT.html" rel="prev" title="La CTA en mouvement" aria-label="La CTA en mouvement">&lsaquo;</a><a class="fleche" href="FICHE-FROID-METIER.html" rel="next" title="Le métier du froid" aria-label="Le métier du froid">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/FICHE-FROID-EN-MOUVEMENT">Marquer comme lu</button></div>
+<header class="tete a-img">
+  <div class="tete-img" data-schema="journee-embleme"></div>
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>Le froid en mouvement<span>le cours d'une journée</span></h1>
+  </div>
+  <p class="accroche">Un cours qui ne suit pas le programme mais l'horloge. À minuit les parois, à six heures la première porte, à sept heures la livraison, à midi le dégivrage, l'après-midi deux vitesses, à minuit le bilan. Chaque heure a sa formule, son scénario à charger, et un calcul que le simulateur confirme. Puis on retourne le problème : quatre nombres, et à vous de trouver la panne.</p>
+  <p class="contenu">2 outils · 18 questions · 6 exercices · 2 replis</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A2-3 Bilan thermique · niveau 2</span><span class="tag">A5-1 Machine thermodynamique · lecture d'un relevé</span><span class="tag n3">B11 Régulation · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="FICHE-MACHINE-FRIGO.html">Le cycle et ses organes</a></b><span class="ou">La machine frigo</span><span class="car">le simulateur fait vivre une machine dont on connaît déjà les quatre organes.</span></li><li><b><a href="FICHE-FROID-METIER.html">Le bilan d'une chambre froide</a></b><span class="ou">Le métier du froid</span><span class="car">les postes du bilan sont ceux de la fiche métier ; ici ils bougent heure par heure.</span></li><li><b><a href="J4.html">Déperditions et inertie</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">la chambre perd par ses parois et stocke dans ses denrées ; c'est le bilan thermique de la séance 4 en dynamique.</span></li><li><b>Le tout ou rien et son différentiel</b><span class="ou">J18 · Les boucles de régulation · à venir</span><span class="car">le groupe s'arrête et repart sur un thermostat ; les cycles du simulateur sont ceux de la séance 18.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#comment-ce-cours-est-fait">Comment ce cours est fait</a><a href="#0-h-la-nuit-ce-que-coute-le-simple-fait-d-exister">0 h. La nuit : ce que coûte le simple fait d’exister</a><a href="#6-h-la-premiere-porte">6 h. La première porte</a><a href="#7-h-la-livraison">7 h. La livraison</a><a href="#8-h-les-gens-et-la-lumiere">8 h. Les gens et la lumière</a><a href="#12-h-le-degivrage">12 h. Le dégivrage</a><a href="#l-apres-midi-deux-vitesses">L’après-midi. Deux vitesses</a><a href="#24-h-le-bilan-et-ce-qu-on-installe">24 h. Le bilan, et ce qu’on installe</a><a href="#acte-2-lire-la-machine">Acte 2. Lire la machine</a><a href="#comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</a><a href="#les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</a><a href="#vous-verifier">Vous vérifier</a></div></nav>
+<h2 id="comment-ce-cours-est-fait">Comment ce cours est fait</h2>
+<p>Les autres pages rangent le savoir par thème. Celle-ci le range <strong>par heure</strong>. Une chambre froide vit dans le temps, et chaque moment de sa journée fait entrer une chaleur différente, par un chemin différent.</p>
+<div class="cle">
+<p>Le simulateur ci-dessous est <strong>le tableau du cours</strong>. Chaque section vous dit quel scénario charger, ce que vous allez voir, et vous donne le calcul à faire à la main. Le simulateur ne fait pas le calcul à votre place : il <strong>confirme</strong> le vôtre. Si les deux nombres ne se rejoignent pas, c’est qu’il y a quelque chose à comprendre.</p>
+</div>
+<div class="outil" data-outil="journee-chambre-froide">
+
+</div>
+<p>Le bouton <strong>+ 1 h</strong> est le geste de classe : on avance d’une heure, on lit, on note, on avance encore. <em>Lire</em> déroule la journée entière en une minute.</p>
+<h2 id="0-h-la-nuit-ce-que-coute-le-simple-fait-d-exister">0 h. La nuit : ce que coûte le simple fait d’exister</h2>
+<p><strong>Chargez le scénario 1, la nuit seule.</strong> Personne, pas de porte, pas de livraison. La chambre est fermée et pourtant le groupe démarre régulièrement : la courbe de l’air est une scie.</p>
+<div class="formule">
+<p><strong>Parois : Φ = U × S × (θ local − θ chambre)</strong></p>
+<ul>
+<li><strong>U</strong><span>= 1 / (0,13 + e/λ + 0,04), avec λ = 0,023 W/(m·K) pour le polyuréthane</span></li>
+<li><strong>S</strong><span>: la surface totale, six faces pour une chambre cubique de côté V^(1/3)</span></li>
+</ul>
+</div>
+<div class="cle">
+<p>La scie, c’est le <strong>thermostat</strong>. Il démarre le groupe à consigne + 1 K et l’arrête à consigne − 1 K. Entre deux, la chambre se réchauffe par ses parois et par ses propres ventilateurs, qui chauffent l’air qu’ils brassent. La pente de remontée dit la puissance qui entre ; la pente de descente dit celle du groupe.</p>
+</div>
+<section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e1" data-exo="FICHE-FROID-EN-MOUVEMENT-e1" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgbmxidGp2eC41NnhgaXRqdngveGB4DXgn"><p class="k">Exercice · A2-3</p><h4>La puissance des parois</h4><div class="enonce">
+
+<p>La chambre du scénario 1 : 60 m³, donc 92 m² de parois, panneaux de 100 mm, local à 25 °C, consigne 2 °C. Quelle puissance traverse les parois ?</p>
+</div><div class="indice" hidden>Calculez d’abord U avec les deux résistances superficielles et l’épaisseur en mètres, puis multipliez par la surface et par l’écart de 23 K. Le simulateur affiche ce poste en kW cumulés : sur 24 heures il doit valoir ce nombre multiplié par 24 et divisé par mille.</div></section>
+<h2 id="6-h-la-premiere-porte">6 h. La première porte</h2>
+<p><strong>Chargez le scénario 2, les portes seules.</strong> Quatre-vingts ouvertures dans la journée, aucune livraison. Regardez les tirets en haut du graphe et ce que fait l’air à chacun.</p>
+<div class="formule">
+<p><strong>Une ouverture : E = fraction × V × ρ × Δh</strong></p>
+<ul>
+<li><strong>fraction</strong><span>: part du volume échangée, environ un tiers en deux minutes</span></li>
+<li><strong>ρ</strong><span>: masse volumique de l’air froid, 1,28 kg/m³ à 2 °C</span></li>
+<li><strong>Δh</strong><span>: différence d’<strong>enthalpies</strong> entre l’air du local et celui de la chambre, pas de températures</span></li>
+</ul>
+</div>
+<div class="piege">
+<p>L’air qui entre est chaud <strong>et humide</strong>. Sa vapeur va givrer sur l’évaporateur, et cette part latente ne se voit sur aucun thermomètre. Compter la porte en degrés plutôt qu’en enthalpies sous-estime ce poste d’un facteur deux, et c’est ce qui explique la fréquence des dégivrages.</p>
+</div>
+<section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e2" data-exo="FICHE-FROID-EN-MOUVEMENT-e2" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhga2pqb3RqdnguNTZ4YGl0anZ4L3hgeDEQeCc="><p class="k">Exercice · A2-3</p><h4>Ce que coûte une ouverture</h4><div class="enonce">
+
+<p>Une ouverture de deux minutes échange un tiers des 60 m³ de la chambre. L’air froid pèse <strong>1,28 kg/m³</strong>, et l’écart d’enthalpie entre le local et la chambre vaut <strong>43,6 kJ/kg</strong>. Quelle énergie entre à chaque ouverture ?</p>
+</div><div class="indice" hidden>Un tiers de 60 m³, multiplié par la masse volumique, donne des kilogrammes d’air ; multipliés par l’écart d’enthalpie, des kilojoules. Comparez au poste « Porte » du simulateur après 80 ouvertures, en kWh.</div></section>
+<div class="cle">
+<p>Sur une petite chambre très ouverte, <strong>la porte bat les parois</strong>. Aucun isolant n’y peut rien : la parade est un rideau à lanières, un sas, ou une porte rapide qui ferme en deux secondes au lieu de quinze.</p>
+</div>
+<h2 id="7-h-la-livraison">7 h. La livraison</h2>
+<p><strong>Chargez le scénario 3, la livraison.</strong> Une tonne et demie de fruits à 15 °C entre dans une chambre à 2 °C. Avancez d’une heure à la fois, de 7 h à 18 h, et notez la température de la marchandise à chaque fois.</p>
+<div class="formule">
+<p><strong>Ce que la livraison apporte : E = m × cp × (θ entrée − θ consigne)</strong></p>
+<ul>
+<li><strong>cp</strong><span>des fruits et légumes : 3,8 kJ/(kg·K)</span></li>
+<li>Le simulateur compte cette énergie <strong>dès l’entrée</strong> : c’est ce qu’il faudra sortir, même si cela prend des heures</li>
+</ul>
+</div>
+<section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e3" data-exo="FICHE-FROID-EN-MOUVEMENT-e3" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgaGp0bHZ4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · A2-3</p><h4>L’énergie de la livraison</h4><div class="enonce">
+
+<p>1 500 kg de fruits et légumes entrent à 15 °C dans une chambre à 2 °C. Quelle énergie faudra-t-il extraire pour les amener à la consigne ?</p>
+</div><div class="indice" hidden>Masse par chaleur massique par écart de température donne des kilojoules ; divisez par 3 600 pour les kilowattheures. Le poste « Livraison » du simulateur affiche ce nombre dès 7 h.</div></section>
+<div class="cle">
+<p>Sur les réglages par défaut, la livraison pèse <strong>41 % de tout ce qui entre dans la journée</strong>, plus que les parois et la porte réunies. Et le groupe ne la sort pas en une heure : il la sort tout l’après-midi, parce que la marchandise ne rend sa chaleur à l’air qu’à la vitesse des ventilateurs.</p>
+</div>
+<div class="piege">
+<p>Ce n’est pas le groupe qui est en cause quand l’air reste au-dessus de la consigne de 7 h à 11 h. C’est la livraison. Les deux parades sont <strong>prérefroidir</strong> la marchandise avant l’entrée, ou <strong>étaler</strong> les entrées sur la journée. Doubler le groupe marche aussi, mais il tournera à vide le reste du temps.</p>
+</div>
+<h2 id="8-h-les-gens-et-la-lumiere">8 h. Les gens et la lumière</h2>
+<p>Deux personnes entrent de 8 à 10 h, puis de 14 à 16 h. L’éclairage s’allume de 6 à 18 h. Sur le graphe, cela ne se voit presque pas.</p>
+<div class="cle">
+<p>Ces postes sont petits, deux kilowattheures chacun sur la journée. On les compte quand même, pour deux raisons : une <strong>chambre négative</strong> fait dégager 400 W par personne au lieu de 270, et une chambre de préparation où l’on travaille huit heures n’a plus rien de petit. La méthode ne change pas, ce sont les heures qui changent.</p>
+</div>
+<h2 id="12-h-le-degivrage">12 h. Le dégivrage</h2>
+<p><strong>Chargez le scénario 4, la chambre négative.</strong> À −20 °C, toute la vapeur qui entre gèle sur l’évaporateur. Toutes les six heures, le groupe s’arrête vingt minutes et une résistance fait fondre le givre. Regardez la barre du groupe et la bosse de l’air à 0 h, 6 h, 12 h et 18 h.</p>
+<div class="cle">
+<p>Un dégivrage <strong>chauffe la chambre</strong>, deux fois : par la résistance, et par le temps perdu pendant lequel rien n’est extrait. C’est la raison pour laquelle la puissance à installer se calcule sur <strong>les heures de marche</strong> et non sur 24 : le groupe doit rattraper ce que le dégivrage lui a fait perdre.</p>
+</div>
+<div class="piege">
+<p>Un dégivrage à heure fixe, comme ici, en fait souvent trop. Une régulation qui <strong>mesure le givre</strong> — par la perte de charge de l’air ou par l’écart entre la température d’évaporation et celle de l’air — dégivre à la demande, et gagne 2 à 4 points de rendement saisonnier. La simulation est donc pessimiste sur ce point, et elle le sait.</p>
+</div>
+<h2 id="l-apres-midi-deux-vitesses">L’après-midi. Deux vitesses</h2>
+<p>Revenez au scénario 3 et regardez les deux courbes après la livraison. <strong>L’air</strong> retombe en quelques minutes dès que le groupe le rattrape. <strong>La marchandise</strong> met tout l’après-midi. Ce n’est pas une lenteur du groupe : c’est une propriété de la marchandise.</p>
+<div class="formule">
+<p><strong>Constante de temps : τ = C / h</strong></p>
+<ul>
+<li><strong>C</strong><span>: capacité thermique, en kJ/K — la masse fois la chaleur massique</span></li>
+<li><strong>h</strong><span>: conductance d’échange avec l’air, en kW/K — 0,6 pour des ventilateurs d’évaporateur soufflant sur des palettes</span></li>
+<li>Au bout de τ, l’écart initial est réduit à <strong>37 %</strong> ; au bout de 3τ, à 5 %</li>
+</ul>
+</div>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Démonstration : pourquoi la marchandise descend en exponentielle</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Appelons θ la température de la marchandise et θa celle de l’air, supposée tenue à la consigne par le groupe. La marchandise perd, chaque seconde, une puissance proportionnelle à l’écart :</p>
+<p>C × dθ/dt = − h × (θ − θa)</p>
+<p><strong>C’est une équation dont la solution est une exponentielle.</strong> En posant x = θ − θa, elle s’écrit dx/dt = −(h/C) × x, et x(t) = x₀ × e^(−t/τ) avec τ = C/h. L’écart ne descend pas d’un pas fixe par heure : il descend d’une <strong>fraction fixe</strong> par heure, et donc de moins en moins vite.</p>
+<p><strong>Les nombres du scénario 3.</strong> Après la livraison, la marchandise pèse 3 500 kg à 3,8 kJ/(kg·K), soit C = 13 300 kJ/K. Avec h = 0,6 kW/K, τ vaut 22 000 secondes, un peu plus de six heures. La livraison arrive à 7 h avec un écart de 6 K environ ; à 13 h il en reste 37 %, soit 2,3 K ; à 19 h, 0,9 K. C’est exactement ce que trace la courbe verte.</p>
+<p><strong>Ce que l’air fait de différent.</strong> Sa capacité est cent fois plus petite, un millier de kJ/K, pour la même conductance vers la marchandise et une autre vers le groupe. Sa constante de temps est de l’ordre de la <strong>demi-heure</strong>. Voilà pourquoi l’air bondit à chaque porte et retombe aussitôt, pendant que la marchandise ne bouge presque pas : deux corps, deux τ, un facteur dix entre les deux.</p>
+<p><strong>Là où l’hypothèse tombe.</strong> On a supposé l’air tenu à la consigne. Quand la livraison est trop grosse pour le groupe, l’air lui-même dérive, l’écart θ − θa se réduit et la marchandise descend encore plus lentement. C’est ce que montre le scénario 5.</p></div></details>
+</div><section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e4" data-exo="FICHE-FROID-EN-MOUVEMENT-e4" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgbHRodnguNTZ4YG50anZ4L3hgeDJ4Jw=="><p class="k">Exercice · A2-3</p><h4>La constante de temps de la marchandise</h4><div class="enonce">
+
+<p>Après la livraison, la chambre contient <strong>3 500 kg</strong> de fruits et légumes, à <strong>3,8 kJ/(kg·K)</strong>. Les ventilateurs échangent avec l’air à <strong>0,6 kW/K</strong>. Quelle est la constante de temps, en heures ?</p>
+</div><div class="indice" hidden>τ = C / h, avec C en kilojoules par kelvin et h en kilowatts par kelvin : le résultat sort en secondes, à diviser par 3 600. Vérifiez sur la courbe verte : au bout de ce temps après 7 h, l’écart doit avoir perdu presque les deux tiers.</div></section>
+<h2 id="24-h-le-bilan-et-ce-qu-on-installe">24 h. Le bilan, et ce qu’on installe</h2>
+<p>Laissez la journée se finir. Le compte rendu donne ce qui est entré, poste par poste, et le taux de marche du groupe.</p>
+<div class="formule">
+<p><strong>Puissance moyenne du besoin : Φ = E jour / 24</strong></p>
+<p><strong>Puissance à installer : Φ inst = Φ × 1,10 × 24 / heures de marche</strong></p>
+<ul>
+<li>1,10 : la marge d’usage</li>
+<li>heures de marche : <strong>16 en positif, 18 en négatif</strong>, le reste étant dégivrage et arrêts</li>
+</ul>
+</div>
+<section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e5" data-exo="FICHE-FROID-EN-MOUVEMENT-e5" data-type="calcul" data-savoir="A2-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgaXRubnZ4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · A2-3</p><h4>Le groupe qu’il aurait fallu</h4><div class="enonce">
+
+<p>La journée par défaut fait entrer <strong>50 kWh</strong>. Quelle puissance faut-il installer, pour une chambre positive, avec la marge d’usage ?</p>
+</div><div class="indice" hidden>Divisez d’abord par 24 pour la puissance moyenne, majorez de 10 %, puis ramenez sur 16 heures de marche en multipliant par 24/16. Comparez au groupe de 3 kW du scénario 3 : il tournait 64 % du temps et a laissé l’air 4 h hors consigne.</div></section>
+<div class="piege">
+<p><strong>Chargez le scénario 5, le groupe trop petit.</strong> Il tourne sans arrêt et l’air ne redescend jamais : la marchandise reste tiède toute la nuit. <strong>Puis le scénario 6, le groupe généreux.</strong> Tout est rattrapé en deux heures, le groupe tourne un quart du temps : machine trois fois trop grosse, cycles courts à vie.</p>
+</div>
+<div class="cle">
+<p>Le bon groupe est celui qui tourne <strong>60 à 80 % du temps</strong> la journée la plus chargée. En dessous, on a surpayé ; au-dessus, on ne tient pas la consigne. Le taux de marche est le nombre qui juge un dimensionnement, et le simulateur le donne à la fin de chaque journée.</p>
+</div>
+<h2 id="acte-2-lire-la-machine">Acte 2. Lire la machine</h2>
+<p>Un frigoriste arrive devant une machine avec un manifold et deux sondes. Il relève <strong>quatre nombres</strong>, et avant de rien démonter il sait où chercher.</p>
+<div class="formule">
+<p><strong>Les quatre nombres, et ce que chacun raconte :</strong></p>
+<ul>
+<li><strong>Basse pression</strong><span>: la température à laquelle le fluide bout dans l’évaporateur</span></li>
+<li><strong>Haute pression</strong><span>: celle à laquelle il se condense</span></li>
+<li><strong>Surchauffe</strong><span>: ce qui se passe <strong>à l’évaporateur</strong> — trop de fluide, ou pas assez</span></li>
+<li><strong>Sous-refroidissement</strong><span>: ce qui se passe <strong>au condenseur</strong> — trop de liquide, ou pas assez</span></li>
+</ul>
+</div>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>Panne</th>
+<th style="text-align: center;">BP</th>
+<th style="text-align: center;">HP</th>
+<th style="text-align: center;">Surchauffe</th>
+<th style="text-align: center;">Sous-refr.</th>
+<th>Ce qui se passe</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manque de fluide</td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;"><strong>↑↑</strong></td>
+<td style="text-align: center;">↓</td>
+<td>l’évaporateur est affamé, le condenseur presque vide</td>
+</tr>
+<tr>
+<td>Excès de fluide</td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;">↑</td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;"><strong>↑↑</strong></td>
+<td>le liquide s’accumule au condenseur et le noie</td>
+</tr>
+<tr>
+<td>Condenseur encrassé</td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;"><strong>↑↑</strong></td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;">↓</td>
+<td>la chaleur ne part plus, la HP grimpe</td>
+</tr>
+<tr>
+<td>Évaporateur givré</td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;"><strong>↓</strong></td>
+<td style="text-align: center;">=</td>
+<td>l’air ne passe plus, peu de chaleur entre</td>
+</tr>
+<tr>
+<td>Détendeur bloqué ouvert</td>
+<td style="text-align: center;">↑</td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;"><strong>0</strong></td>
+<td style="text-align: center;">=</td>
+<td>l’évaporateur est noyé, le liquide menace le compresseur</td>
+</tr>
+<tr>
+<td>Détendeur bouché</td>
+<td style="text-align: center;"><strong>↓↓</strong></td>
+<td style="text-align: center;">↓</td>
+<td style="text-align: center;"><strong>↑↑</strong></td>
+<td style="text-align: center;">↑</td>
+<td>presque plus de fluide envoyé</td>
+</tr>
+<tr>
+<td>Incondensables</td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;">↑</td>
+<td style="text-align: center;">=</td>
+<td style="text-align: center;">↑ apparent</td>
+<td>de l’air gonfle la HP sans condenser</td>
+</tr>
+</tbody>
+</table>
+<div class="cle">
+<p>La méthode tient en deux lectures. <strong>La surchauffe d’abord</strong> : nulle, l’évaporateur est noyé ; énorme, il est affamé. <strong>Le sous-refroidissement ensuite</strong> : nul, le condenseur manque de liquide ; énorme, il en déborde. Les deux pressions confirment, elles ne décident pas.</p>
+</div>
+<div class="outil" data-outil="diagnostic-frigo">
+
+</div>
+<div class="piege">
+<p>Le jeu ne vous dira jamais la bonne réponse : il dit <em>juste</em> ou <em>faux</em>, et vous indique <strong>l’aiguille qui contredit votre choix</strong>. C’est exactement ce qu’un relevé fait sur le terrain — il ne nomme pas la panne, il élimine celles qui ne collent pas.</p>
+</div>
+<section class="exo" id="FICHE-FROID-EN-MOUVEMENT-e6" data-exo="FICHE-FROID-EN-MOUVEMENT-e6" data-type="justification" data-savoir="A5-1" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A5-1</p><h4>Un relevé, un diagnostic</h4><div class="enonce">
+
+<p>Sur une machine au R134a, vous relevez : BP 1,3 bar, HP 8,1 bar, surchauffe 22 K, sous-refroidissement 1 K. Le local est à température normale. Rédigez votre diagnostic en quatre lignes, dans l’ordre de la méthode.</p>
+</div><div class="indice" hidden>Deux organes, deux nombres. Un évaporateur affamé et un condenseur vide en même temps désignent la seule cause qui touche les deux : il n’y a pas assez de fluide dans le circuit.</div><ul class="verifier" hidden><li>J’ai commencé par la surchauffe, et dit qu’à 22 K l’évaporateur est affamé.</li><li>J’ai lu ensuite le sous-refroidissement, et dit qu’à 1 K le condenseur manque de liquide.</li><li>J’ai constaté que les deux pressions sont basses, ce qui confirme les deux lectures.</li><li>J’ai conclu sur un manque de fluide, et proposé de chercher la fuite avant de recharger.</li></ul></section>
+<h2 id="comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Deux nœuds, un thermostat, et quatre hypothèses avouées</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un simulateur est un choix d’hypothèses, et une page honnête les montre.</p>
+<p><strong>Deux nœuds.</strong> L’air de la chambre, avec ses rayonnages, pèse l’équivalent d’un millier de kilojoules par kelvin ; la marchandise, plusieurs milliers. Les deux sont couplés par les ventilateurs de l’évaporateur, à 0,6 kW par kelvin d’écart. C’est ce couplage qui fait que l’air réagit en minutes et la marchandise en heures — et c’est la seule chose qu’un modèle à un seul nœud ne peut pas montrer.</p>
+<p><strong>Un thermostat sur l’air</strong>, avec un différentiel de 1 K : le groupe démarre à consigne + 1 et s’arrête à consigne − 1. Un dégivrage de 20 minutes toutes les six heures l’arrête de force, et chauffe l’air de 2 kW si la chambre est négative.</p>
+<p><strong>Les apports</strong> sont ceux du bilan en sept postes : les parois à travers l’isolant, la porte à chaque ouverture — un tiers du volume échangé en deux minutes, ce qui redonne les 70/√V par jour des tables — le personnel de 8 à 10 h et de 14 à 16 h, l’éclairage de 6 à 18 h, les ventilateurs en permanence, la respiration des fruits et légumes.</p>
+<p><strong>Ce que le modèle ne fait pas.</strong> Il ne connaît pas l’humidité de la marchandise, qui gèle et dégèle en surface. Il ne sait pas qu’une palette au centre refroidit plus lentement qu’une palette contre l’évaporateur. Il place les dégivrages à heures fixes, là où une régulation à la demande les placerait selon le givre. Et son thermostat est parfait, sans retard de sonde.</p>
+<p><strong>Pourquoi ces limites ne gênent pas.</strong> Elles déplacent les courbes de quelques dixièmes de degré et de quelques minutes. Elles ne changent rien aux trois choses que le cours veut faire voir : la marchandise plus lente que l’air, la livraison qui pèse plus que les parois, et le groupe qu’on dimensionne sur les heures de marche.</p></div></details>
+</div><h2 id="les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</h2>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>U d’un panneau isotherme, 100 mm</td>
+<td><strong>0,22 W/(m²·K)</strong></td>
+</tr>
+<tr>
+<td>Différentiel d’un thermostat de chambre</td>
+<td>1 à 2 K</td>
+</tr>
+<tr>
+<td>Bond de l’air à une ouverture de porte</td>
+<td>0,5 à 1,5 K</td>
+</tr>
+<tr>
+<td>Énergie d’une ouverture, chambre positive de 60 m³</td>
+<td>≈ 0,3 kWh</td>
+</tr>
+<tr>
+<td>Constante de temps de l’air · de la marchandise</td>
+<td><strong>½ h · 6 h</strong></td>
+</tr>
+<tr>
+<td>Au bout d’une constante de temps, il reste</td>
+<td><strong>37 %</strong> de l’écart</td>
+</tr>
+<tr>
+<td>Chaleur massique des fruits et légumes</td>
+<td>3,8 kJ/(kg·K)</td>
+</tr>
+<tr>
+<td>Durée d’un dégivrage · fréquence</td>
+<td>20 à 30 min · 4 à 6 par jour</td>
+</tr>
+<tr>
+<td>Heures de marche, positif · négatif</td>
+<td>16 · 18 h/j</td>
+</tr>
+<tr>
+<td><strong>Taux de marche correct d’un groupe</strong></td>
+<td><strong>60 à 80 %</strong></td>
+</tr>
+<tr>
+<td>Surchauffe normale · sous-refroidissement normal</td>
+<td>5 à 8 K · 3 à 6 K</td>
+</tr>
+<tr>
+<td>Surchauffe qui signale un manque de fluide</td>
+<td>plus de 15 K</td>
+</tr>
+<tr>
+<td>Surchauffe qui signale un évaporateur noyé</td>
+<td>moins de 2 K</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le contrôle qui rejette une lecture en une seconde : <strong>une surchauffe et un sous-refroidissement tous les deux normaux, avec des pressions anormales, désignent l’environnement, pas la machine</strong> — un condenseur encrassé, un évaporateur givré, un local trop chaud.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>La scie de la courbe de l’air, la nuit, c’est : <strong>le thermostat</strong> | la porte</li>
+<li>Le groupe démarre à : <strong>consigne + 1 K</strong> | la consigne exacte</li>
+<li>Une ouverture de porte se compte en : <strong>enthalpies</strong> | températures</li>
+<li>Sur une petite chambre très ouverte, ce qui domine est : <strong>la porte</strong> | les parois</li>
+<li>L’énergie d’une livraison se compte : <strong>dès son entrée</strong> | quand elle est refroidie</li>
+<li>Après la livraison, l’air reste haut pendant des heures à cause de : <strong>la marchandise</strong> | du groupe</li>
+<li>La constante de temps vaut : <strong>C / h</strong> | h / C</li>
+<li>Au bout d’une constante de temps, l’écart a perdu : <strong>63 %</strong> | 37 %</li>
+<li>La marchandise est lente parce que : <strong>sa capacité est grande</strong> | le groupe est petit</li>
+<li>Un dégivrage : <strong>chauffe la chambre</strong> | la refroidit</li>
+<li>La puissance à installer se calcule sur : <strong>les heures de marche</strong> | 24 heures</li>
+<li>Un groupe qui tourne 100 % du temps est : <strong>trop petit</strong> | bien dimensionné</li>
+<li>Un groupe qui tourne 25 % du temps est : <strong>surdimensionné</strong> | bien dimensionné</li>
+<li>La surchauffe raconte : <strong>l’évaporateur</strong> | le condenseur</li>
+<li>Le sous-refroidissement raconte : <strong>le condenseur</strong> | le compresseur</li>
+<li>Une surchauffe de 22 K avec un sous-refroidissement de 1 K, c’est : <strong>un manque de fluide</strong> | un condenseur encrassé</li>
+<li>Les deux pressions, dans le diagnostic : <strong>confirment</strong> | décident</li>
+<li>Le jeu de diagnostic révèle la panne : <strong>jamais</strong> | après trois essais</li>
+</ul>
+</div>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="FICHE-CTA-EN-MOUVEMENT.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">La CTA en mouvement</span></a><a class="ap" href="FICHE-FROID-METIER.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Le métier du froid</span></a></div></nav>
+<p class="pied">Fiche complémentaire, hors programme de l'option C. Les calculs se font dans votre navigateur ; rien n'est enregistré, et le jeu de diagnostic ne révèle jamais la panne.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

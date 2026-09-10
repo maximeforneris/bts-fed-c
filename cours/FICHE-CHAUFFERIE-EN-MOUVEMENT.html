@@ -1,0 +1,341 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="robots" content="noindex, nofollow">
+<title>La chaufferie en mouvement</title>
+<link rel="stylesheet" href="../assets/kit.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/site.css?v=a3f11d71">
+<link rel="stylesheet" href="../assets/fluides.css?v=a3f11d71">
+
+<div class="page" data-site="bts-fed-c" data-page="cours/FICHE-CHAUFFERIE-EN-MOUVEMENT">
+<div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fleches"><a class="fleche" href="SEQ1.html" rel="prev" title="Thermique du bâtiment, séances 1 à 5" aria-label="Thermique du bâtiment, séances 1 à 5">&lsaquo;</a><a class="fleche" href="FICHE-CTA-EN-MOUVEMENT.html" rel="next" title="La CTA en mouvement" aria-label="La CTA en mouvement">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/FICHE-CHAUFFERIE-EN-MOUVEMENT">Marquer comme lu</button></div>
+<header class="tete a-img">
+  <div class="tete-img" data-schema="chaufferie-embleme"></div>
+  
+  <div class="titraille">
+    <p class="sur">BTS FED option C · 2e année</p>
+    <h1>La chaufferie en mouvement<span>le cours d'une journée</span></h1>
+  </div>
+  <p class="accroche">Une aile de collège, quatre-vingt-dix kilowatts de chaudière à condensation, un ballon d'eau chaude pour l'internat, une loi d'eau. À cinq heures la relance, à sept heures les douches, à huit heures les élèves, la nuit le réduit. Chaque heure a sa formule, son scénario, et un calcul que le simulateur confirme. Puis six cadrans en chaufferie, et à vous de trouver la panne.</p>
+  <p class="contenu">2 outils · 20 questions · 10 exercices · 1 repli</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B1-1 Production de chaleur · niveau 3</span><span class="tag n3">B1-2 Émission de chaleur · niveau 3</span><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span><span class="tag n3">B11 Régulation, loi d'eau et optimisation · niveau 3</span></div>
+</header>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J4.html">Les déperditions d'un bâtiment et son coefficient G</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">l'aile du collège perd 3 kW par kelvin d'écart avec l'extérieur ; ce seul nombre fixe la puissance de la chaudière, la pente de la loi d'eau et ce que rapporte le réduit.</span></li><li><b>Le rendement d'une chaudière, et la condition pour condenser</b><span class="ou">J11 · Les générateurs · à venir</span><span class="car">la chaudière ne récupère la chaleur des fumées que si l'eau qui lui revient est sous 57 °C ; toute la journée se joue sur cette température de retour.</span></li><li><b>La loi d'émission d'un radiateur</b><span class="ou">J12 · Les émetteurs · à venir</span><span class="car">la puissance d'un radiateur suit l'écart moyen entre l'eau et l'air à la puissance 1,3 ; c'est elle qui relie la température de départ à ce que les salles reçoivent.</span></li><li><b>L'eau chaude sanitaire se compte en pointes</b><span class="ou">J10 · L'eau chaude sanitaire · à venir</span><span class="car">les douches de l'internat vident un ballon en une demi-heure ; la puissance se dimensionne sur cette pointe et le ballon sur ce qu'elle dure.</span></li><li><b>La loi d'eau, sa pente et son parallèle</b><span class="ou">J19 · La loi d'eau · à venir</span><span class="car">le départ ne se règle pas à la main, il se déduit de l'extérieur ; deux boutons la déplacent, et chacun a son scénario ici.</span></li><li><b>Le tout ou rien et le proportionnel</b><span class="ou">J18 · Les boucles de régulation · à venir</span><span class="car">sous 20 % de sa puissance une chaudière modulante ne module plus, elle bat ; c'est le scénario de mi-saison, et ce sont les démarrages qui le disent.</span></li><li><b><a href="FICHE-SYMBOLES.html">Les quinze symboles d'un schéma hydraulique</a></b><span class="ou">Lire un circuit hydraulique</span><span class="car">la vanne trois voies, le bipasse et le circulateur du schéma de chaufferie se lisent avant de se régler.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#comment-ce-cours-est-fait">Comment ce cours est fait</a><a href="#5-h-la-relance">5 h. La relance</a><a href="#7-h-les-douches-de-l-internat">7 h. Les douches de l’internat</a><a href="#8-h-les-eleves-entrent-la-loi-d-emission">8 h. Les élèves entrent : la loi d’émission</a><a href="#10-h-le-retour-decide-de-tout">10 h. Le retour décide de tout</a><a href="#12-h-le-soleil-et-la-loi-d-eau-trop-haute">12 h. Le soleil, et la loi d’eau trop haute</a><a href="#16-h-mi-saison-la-chaudiere-court-cycle">16 h. Mi-saison : la chaudière court-cycle</a><a href="#22-h-le-reduit-de-nuit">22 h. Le réduit de nuit</a><a href="#24-h-le-rendement-du-jour">24 h. Le rendement du jour</a><a href="#acte-2-lire-la-chaufferie">Acte 2. Lire la chaufferie</a><a href="#comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</a><a href="#les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</a><a href="#vous-verifier">Vous vérifier</a></div></nav>
+<h2 id="comment-ce-cours-est-fait">Comment ce cours est fait</h2>
+<p>Vous connaissez ce bâtiment : c’est l’aile du collège du fil rouge, celle dont vous avez calculé les déperditions en séance 4. Le devoir la chauffait <strong>à un instant</strong>, par −5 °C. Ici elle vit <strong>une journée</strong>, et le cours suit l’horloge.</p>
+<div class="cle">
+<p>Le simulateur ci-dessous est <strong>le tableau du cours</strong>. Chaque heure dit quel scénario charger, donne sa formule, et pose un calcul à faire à la main dont le simulateur affiche la valeur. Il ne calcule pas à votre place : il <strong>confirme</strong> le vôtre.</p>
+</div>
+<div class="outil" data-outil="journee-chaufferie">
+
+</div>
+<p>Quatre courbes, une barre. <strong>Le bâtiment</strong> en bleu, l’extérieur en pointillé. <strong>Le départ</strong> en rouge, <strong>le retour</strong> en orange : l’écart entre les deux est ce que les radiateurs ont pris. <strong>Le ballon</strong> en violet, avec les douches en tirets. Et sous le graphe, la <strong>barre de la chaudière</strong> : verte quand elle condense, rouge quand elle brûle sans condenser, vide quand elle est arrêtée.</p>
+<h2 id="5-h-la-relance">5 h. La relance</h2>
+<p><strong>Chargez le scénario 2, la journée d’hiver avec réduit de nuit.</strong> Il fait 0 °C en moyenne, −3 °C à l’aube. Avancez d’une heure à la fois jusqu’à 8 h, et regardez la courbe rouge sauter à 5 h.</p>
+<div class="formule">
+<p><strong>Loi d’eau : θ départ = θ consigne + pente × (θ consigne − θ extérieur) + parallèle</strong></p>
+<ul>
+<li><strong>pente</strong><span>sans unité, <strong>parallèle</strong> en K</span></li>
+<li>la consigne passe de 16 à 19 °C à l’heure de relance : le départ suit</li>
+</ul>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e1" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e1" data-type="calcul" data-savoir="B11" data-a="IXgueGB4OTs2OS82eHZ4LHhgbW50anZ4LjU2eGBodGp2eC94YHgGL2pqOGoZeCc="><p class="k">Exercice · B11</p><h4>Le départ de 5 h</h4><div class="enonce">
+
+<p>Consigne 19 °C, pente 2,5, parallèle nul, −3 °C dehors. Quelle température de départ la loi d’eau demande-t-elle ?</p>
+</div><div class="indice" hidden>L’écart consigne moins extérieur vaut 22 K ; multipliez par la pente et ajoutez la consigne. Le compte rendu affiche le départ à chaque heure.</div></section>
+<div class="cle">
+<p>Le bâtiment a passé la nuit à 16 °C : <strong>17,6 °C</strong> à 8 h, 19,5 à 10 h, et les élèves ont fait le dernier degré. La chaudière n’est pas lente, elle tourne à 70 % : <strong>la loi d’eau ne sait pas relancer</strong>, elle donne le départ du régime établi. Dix kilowatts de marge pour 17 kWh par kelvin : cinq heures.</p>
+</div>
+<div class="piege">
+<p>Poussez la relance à 7 h : les élèves entrent à 8 h dans des salles à <strong>16,5 °C</strong>, et le compte rendu note 0,8 h <strong>hors confort en présence</strong>. Une relance tardive économise vingt kilowattheures et coûte des plaintes ; une relance précoce chauffe des salles vides. Un optimiseur fait mieux : il surchauffe le départ le temps de la relance.</p>
+</div>
+<h2 id="7-h-les-douches-de-l-internat">7 h. Les douches de l’internat</h2>
+<p>Restez sur le scénario 2 et regardez <strong>la courbe violette</strong> entre 7 h et 7 h 30 : le ballon plonge de huit degrés, la chaudière lui donne la priorité, et le départ du chauffage fléchit pendant la même demi-heure.</p>
+<div class="formule">
+<p><strong>Énergie d’un puisage : E = V × 4,185 × (θ chaude − θ froide) / 3 600</strong></p>
+<ul>
+<li><strong>V</strong><span>en litres, <strong>E</strong> en kWh</span></li>
+<li>la chaudière ne fournit que ce que l’échangeur passe : <strong>40 kW</strong> ici ; le ballon fournit le reste, et sa température le dit</li>
+</ul>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e2" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e2" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgaG10Y3Z4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · B3-2</p><h4>L’énergie des douches</h4><div class="enonce">
+
+<p>L’internat tire <strong>800 L</strong> à 40 °C en une demi-heure, à partir d’eau froide à 10 °C. Quelle énergie ces douches emportent-elles ?</p>
+</div><div class="indice" hidden>Le volume, fois 4,185, fois l’écart de température, en kilojoules ; divisez par 3 600. Le poste « ECS » du simulateur cumule ce que la chaudière a rendu au ballon dans la journée.</div></section>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e3" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e3" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgbnRvdnguNTZ4YG90anZ4L3hgeBF4Jw=="><p class="k">Exercice · B3-2</p><h4>Ce que le ballon perd pendant la pointe</h4><div class="enonce">
+
+<p>Pendant cette demi-heure, l’échangeur donne <strong>40 kW</strong> au ballon de <strong>1 500 L</strong>. De combien de kelvins le ballon descend-il, si les douches emportent 27,9 kWh ?</p>
+</div><div class="indice" hidden>La chaudière fournit 40 kW pendant une demi-heure, soit 20 kWh ; la différence avec les 27,9 kWh sort du ballon. Convertissez ce déficit en kilojoules et divisez par 1 500 fois 4,185. Le simulateur montre huit kelvins, de 59,7 à 51,7 °C : la chaudière n’enclenche l’ECS qu’à 55 °C, et la boucle refroidit aussi le ballon.</div></section>
+<div class="cle">
+<p><strong>La priorité ECS</strong> coupe le chauffage le temps de la pointe. À 7 h, en pleine relance, c’est le pire moment, et le seul choix possible : une douche froide se voit tout de suite, un degré de moins dans une salle non. Chargez le scénario 5, où l’internat tire deux fois plus : le ballon descend à <strong>37 °C</strong> à 7 h 30.</p>
+</div>
+<h2 id="8-h-les-eleves-entrent-la-loi-d-emission">8 h. Les élèves entrent : la loi d’émission</h2>
+<p>Cent cinquante élèves apportent <strong>dix kilowatts</strong>, autant qu’un radiateur sur sept. Regardez la courbe bleue accélérer à 8 h, puis le retour orange monter : un bâtiment plus chaud prend moins aux radiateurs.</p>
+<div class="formule">
+<p><strong>Loi d’émission : Φ = Φ nominal × (Δθ moyen / 50)^1,3</strong></p>
+<ul>
+<li><strong>Δθ moyen</strong><span>= (θ départ + θ retour) / 2 − θ ambiance, en K</span></li>
+<li><strong>Φ nominal</strong><span>est donné en 80/60 pour 20 °C, soit <strong>50 K</strong> d’écart moyen</span></li>
+</ul>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e4" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e4" data-type="calcul" data-savoir="B1-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgb2l0bnZ4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · B1-2</p><h4>Ce que les radiateurs donnent à 10 h</h4><div class="enonce">
+
+<p>Départ <strong>65 °C</strong>, retour <strong>51 °C</strong>, salles à <strong>19,5 °C</strong>, radiateurs de <strong>75 kW</strong> nominaux en 80/60. Quelle puissance émettent-ils ?</p>
+</div><div class="indice" hidden>L’écart moyen est la moyenne du départ et du retour, moins l’ambiance ; divisez par 50, élevez à la puissance 1,3 avec la calculatrice, multipliez par 75. Le poste « Chauffage » du simulateur cumule ces kilowatts.</div></section>
+<div class="piege">
+<p>L’exposant 1,3 n’est pas un détail : entre 50 K et 25 K d’écart, un radiateur ne perd pas la moitié de sa puissance mais <strong>près de 60 %</strong>. C’est pour cela qu’une chaudière à basse température exige des radiateurs plus grands, et que la loi d’eau est <strong>courbe</strong> avant qu’on ne la remplace par une droite.</p>
+</div>
+<h2 id="10-h-le-retour-decide-de-tout">10 h. Le retour décide de tout</h2>
+<p>Le compte rendu affiche deux retours : celui <strong>des radiateurs</strong> et celui <strong>qui entre dans la chaudière</strong>. Tant que le bipasse est à zéro, ce sont les mêmes. <strong>Chargez le scénario 4 :</strong> un bipasse à 50 %, et regardez la barre passer du vert au rouge.</p>
+<div class="formule">
+<p><strong>Retour = départ − Φ / (qm × 4,185)</strong>, qm en kg/s, Φ en kW</p>
+<p><strong>Condensation</strong> si la température qui entre dans la chaudière est <strong>sous 57 °C</strong> : le rendement gagne alors jusqu’à vingt points, six pour dix kelvins</p>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e5" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e5" data-type="calcul" data-savoir="B1-1" data-a="IXgueGB4OTs2OS82eHZ4LHhgb2t0anZ4LjU2eGBodGp2eC94YHgGL2pqOGoZeCc="><p class="k">Exercice · B1-1</p><h4>Le retour de 10 h</h4><div class="enonce">
+
+<p>Départ <strong>65 °C</strong>, radiateurs qui émettent <strong>53,4 kW</strong>, débit <strong>0,896 kg/s</strong>. À quelle température l’eau revient-elle ?</p>
+</div><div class="indice" hidden>La puissance divisée par le débit et par 4,185 donne la chute de température en kelvins ; retirez-la du départ. Le compte rendu affiche le couple départ-retour à chaque instant.</div></section>
+<div class="cle">
+<p>Un bipasse à 50 % mélange la moitié du départ dans le retour : 51 °C deviennent <strong>58 °C</strong> à l’entrée de la chaudière, et elle <strong>ne condense plus</strong>. Le bâtiment ne s’en aperçoit pas, les radiateurs reçoivent la même eau. Seule la facture change : c’est la panne ordinaire d’une chaudière à condensation posée sur l’hydraulique faite pour l’ancienne.</p>
+</div>
+<div class="piege">
+<p>Mettez la moyenne extérieure à <strong>−5 °C</strong> dans le scénario 2 : le départ monte à 83 °C, le retour à 61, et la barre reste rouge toute la matinée. Condenser suppose un retour bas, donc des radiateurs larges pour le régime d’eau. <strong>En 80/60, on ne condense pas par grand froid</strong> ; on condense en mi-saison, qui dure plus longtemps.</p>
+</div>
+<h2 id="12-h-le-soleil-et-la-loi-d-eau-trop-haute">12 h. Le soleil, et la loi d’eau trop haute</h2>
+<p><strong>Chargez le scénario 3, la loi d’eau relevée de 8 K en parallèle.</strong> Le bâtiment monte à 23 °C l’après-midi, les fenêtres s’ouvrent, et le gaz suit.</p>
+<div class="formule">
+<p><strong>Ce que coûte un degré de trop : ΔE = G × 1 K × 24 h</strong>, G en kW/K, ΔE en kWh par jour</p>
+<p>Sans robinets thermostatiques, <strong>la loi d’eau est le seul thermostat</strong> du bâtiment : un parallèle de trop se paie tous les jours de la saison.</p>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e6" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e6" data-type="calcul" data-savoir="A2-4" data-a="IXgueGB4OTs2OS82eHZ4LHhgbWh0anZ4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · A2-4</p><h4>Le prix d’un degré</h4><div class="enonce">
+
+<p>L’aile perd <strong>3 kW par kelvin</strong>. Combien de kilowattheures par jour coûte un bâtiment tenu <strong>1 K</strong> au-dessus de sa consigne ?</p>
+</div><div class="indice" hidden>Les déperditions en trop sont G fois l’écart, en kilowatts ; multipliez par 24 heures. Comparez ensuite le poste « Gaz » du scénario 3 à celui du scénario 2 : 250 kWh de plus pour deux degrés et demi de trop, davantage que 72 par degré, parce que le retour plus chaud condense moins.</div></section>
+<div class="cle">
+<p>Le soleil de midi apporte <strong>8 kW</strong> sur la façade sud, et la loi d’eau ne le voit pas : elle ne lit que l’extérieur. Même bien réglée, au scénario 2, elle laisse le bâtiment monter à 21 °C à 16 h. C’est <strong>la limite d’une boucle ouverte</strong> : elle anticipe, elle ne corrige pas. Un robinet thermostatique referme la boucle.</p>
+</div>
+<h2 id="16-h-mi-saison-la-chaudiere-court-cycle">16 h. Mi-saison : la chaudière court-cycle</h2>
+<p><strong>Chargez le scénario 6, la mi-saison.</strong> Douze degrés dehors, du soleil, et un bâtiment qui n’a presque besoin de rien. Regardez la barre de la chaudière se hacher, et le compteur de <strong>démarrages</strong> grimper.</p>
+<div class="formule">
+<p><strong>Plage de modulation : de 20 à 100 % de la puissance nominale</strong>, soit <strong>18 à 90 kW</strong> ici</p>
+<p>Sous 18 kW la chaudière ne module plus : elle <strong>s’arrête et repart</strong>, et chaque démarrage coûte une purge, un balayage et une chambre froide à réchauffer</p>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e7" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e7" data-type="calcul" data-savoir="B1-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2l0anZ4LjU2eGBvdGp2eC94YHgxDXgn"><p class="k">Exercice · B1-2</p><h4>Les radiateurs en mi-saison</h4><div class="enonce">
+
+<p>Départ <strong>36 °C</strong>, retour <strong>30 °C</strong>, salles à <strong>20 °C</strong>, les mêmes radiateurs de 75 kW. Quelle puissance émettent-ils, et la chaudière peut-elle descendre si bas ?</p>
+</div><div class="indice" hidden>L’écart moyen n’est plus que de 13 K ; divisez par 50, puissance 1,3, fois 75. Vous trouverez moins que le minimum de modulation de 18 kW : la chaudière ne peut pas fournir si peu en continu.</div></section>
+<div class="cle">
+<p><strong>Une chaudière se juge sur sa puissance minimale autant que sur sa puissance nominale.</strong> Les 90 kW servent trois semaines par an ; les 18 kW du bas de plage, tout l’automne et tout le printemps. Une cascade de deux chaudières de 45 kW descend à 9 kW, et c’est pour cela qu’on la préfère à une seule grosse.</p>
+</div>
+<div class="piege">
+<p>Baissez la chaudière à 60 kW au scénario 6 : seuil à 12 kW, démarrages de 63 à 33, rendement de 90 à 99 %. Puis le scénario 2 à 60 kW : à 7 h la chaudière est à 100 %, le chauffage attend derrière l’ECS, une demi-heure hors confort. <strong>Le bon choix n’existe pas à une seule puissance</strong> : d’où la cascade.</p>
+</div>
+<h2 id="22-h-le-reduit-de-nuit">22 h. Le réduit de nuit</h2>
+<p><strong>Comparez le scénario 1, sans réduit, au scénario 2.</strong> Même journée, même extérieur ; seule la consigne de nuit change, de 19 à 16 °C. Lisez le poste « Gaz » à 24 h dans les deux cas.</p>
+<div class="formule">
+<p><strong>Économie d’un réduit : ΔE ≈ G × réduit × durée</strong>, à laquelle il faut retirer le surcoût de la relance</p>
+<ul>
+<li>G en kW/K, réduit en K, durée en h ; ΔE en kWh par nuit</li>
+<li>la relance rend une partie de ce qu’on a économisé : le bâtiment qu’on a laissé refroidir doit être réchauffé</li>
+</ul>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e8" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e8" data-type="calcul" data-savoir="B11" data-a="IXgueGB4OTs2OS82eHZ4LHhgbGl0anZ4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · B11</p><h4>Ce que rapporte le réduit, avant la relance</h4><div class="enonce">
+
+<p>Le bâtiment perd <strong>3 kW/K</strong>. Un réduit de <strong>3 K</strong> pendant <strong>7 h</strong>. Quelle énergie de déperditions évite-t-on par nuit, avant de compter la relance ?</p>
+</div><div class="indice" hidden>Trois grandeurs à multiplier, et le résultat est en kilowattheures. Le simulateur trouve une centaine de kilowattheures entre les scénarios 1 et 2, davantage que ce calcul : le bâtiment reste sous sa consigne jusqu’à 10 h, et le retour plus bas de la nuit fait mieux condenser.</div></section>
+<div class="cle">
+<p>Le réduit de nuit rapporte <strong>7 % du gaz de la journée</strong>, une centaine de kilowattheures par nuit d’hiver, et il ne coûte qu’un réglage d’horloge. C’est <strong>la première mesure d’économie d’une chaufferie</strong>, avant toute chaudière neuve, et elle exige une relance calculée sur la constante de temps du bâtiment et non sur l’horaire des cours.</p>
+</div>
+<h2 id="24-h-le-rendement-du-jour">24 h. Le rendement du jour</h2>
+<p>Laissez la journée se finir. Le compte rendu rapporte <strong>le gaz brûlé</strong> à <strong>ce qui a été rendu</strong> au bâtiment et au ballon, et dit combien de temps la chaudière a condensé.</p>
+<div class="cle">
+<p>Sur la journée d’hiver à 0 °C, la chaudière condense <strong>toute la journée</strong> : rendement <strong>94 %</strong>. Avec le bipasse du scénario 4, elle ne condense plus que les deux tiers du temps : 91 %. Par −5 °C sans réduit, jamais : 90 %. <strong>Quatre points de rendement tiennent à une vanne et à un régime d’eau</strong>, pas à la chaudière.</p>
+</div>
+<div class="piege">
+<p>Les pompes n’apparaissent presque pas dans les postes : <strong>300 W</strong> en continu, 7 kWh par jour, contre plus de mille de gaz. C’est vrai en énergie, et faux en argent : le kilowattheure électrique coûte trois fois le kilowattheure de gaz, et un circulateur qui tourne l’été sans raison rattrape vite la différence.</p>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e9" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e9" data-type="justification" data-savoir="B11" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · B11</p><h4>Le bâtiment qui est à 21 °C tous les après-midi</h4><div class="enonce">
+
+<p>Dans le scénario 3, l’aile se tient à 23 °C dès midi pour une consigne de 19, et le gardien ouvre les fenêtres. Expliquez ce que la loi d’eau ne voit pas, et dites ce que vous réglez, dans quel ordre.</p>
+</div><div class="indice" hidden>Un bâtiment trop chaud par temps doux et juste par grand froid désigne le réglage qui agit partout de la même façon. Et un régulateur qui ne mesure pas ce qu’il règle ne peut pas voir ce qui le dérange.</div><ul class="verifier" hidden><li>J’ai expliqué que la loi d’eau est une boucle ouverte qui ne lit que l’extérieur, jamais l’ambiance.</li><li>J’ai nommé les apports qu’elle ignore : le soleil de midi, les cent cinquante élèves.</li><li>J’ai distingué le parallèle, qui décale tout, de la pente, qui n’agit que par grand froid, et choisi le parallèle ici.</li><li>J’ai proposé de refermer la boucle : robinets thermostatiques, ou sonde d’ambiance qui corrige le parallèle.</li></ul></section>
+<h2 id="acte-2-lire-la-chaufferie">Acte 2. Lire la chaufferie</h2>
+<p>Un technicien qui entre dans une chaufferie lit <strong>six choses</strong> avant d’ouvrir une armoire : la sonde extérieure, le départ, le retour, une ambiance, le manomètre et le ballon. Il fait 0 °C dehors ce matin-là.</p>
+<div class="formule">
+<p><strong>La chaufferie saine, par 0 °C :</strong></p>
+<p>sonde extérieure <strong>0</strong> → départ <strong>66</strong> → retour <strong>48</strong> → ambiance <strong>19,5</strong> → pression <strong>1,6 bar</strong> → ballon <strong>58</strong></p>
+<p>L’écart départ-retour est <strong>le premier nombre à lire</strong> : autour de <strong>18 K</strong> le débit est celui du calcul ; nul, rien ne circule ; énorme, le débit manque.</p>
+</div>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Panne</th>
+<th>Le cadran qui trahit</th>
+<th>Ce qu’on lit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Circulateur arrêté</td>
+<td><strong>départ = retour</strong></td>
+<td>tout est chaud en chaufferie, le bâtiment refroidit</td>
+</tr>
+<tr>
+<td>Vanne trois voies bloquée</td>
+<td>départ <strong>à peine</strong> au-dessus du retour</td>
+<td>le bâtiment refroidit, la chaudière chauffe pour rien</td>
+</tr>
+<tr>
+<td>Sonde extérieure au soleil</td>
+<td><strong>sonde</strong> à 8 °C par 0 °C</td>
+<td>départ 12 K trop bas, bâtiment 1,5 K sous la consigne</td>
+</tr>
+<tr>
+<td>Circuit emboué</td>
+<td>écart <strong>énorme</strong>, bâtiment froid</td>
+<td>l’eau traîne dans les radiateurs et revient très froide</td>
+</tr>
+<tr>
+<td>Thermostatiques fermés</td>
+<td>écart énorme, bâtiment <strong>chaud</strong></td>
+<td>ce n’est pas une panne, c’est la loi d’eau</td>
+</tr>
+<tr>
+<td>Manque d’eau</td>
+<td><strong>manomètre</strong> sous le bar</td>
+<td>brûleur en sécurité, départ et retour se refroidissent ensemble</td>
+</tr>
+<tr>
+<td>Échangeur d’ECS entartré</td>
+<td>seul <strong>le ballon</strong> décroche</td>
+<td>chauffage parfait, douches froides</td>
+</tr>
+</tbody>
+</table></div>
+<div class="outil" data-outil="diagnostic-chaufferie">
+
+</div>
+<div class="cle">
+<p>La méthode tient en trois questions : <strong>est-ce que ça circule</strong> (l’écart), <strong>est-ce que le bâtiment s’en plaint</strong> (l’ambiance), <strong>est-ce le chauffage ou autre chose</strong> (le manomètre, le ballon). Deux pannes donnent le même grand écart, et seule l’ambiance les sépare : embouage ou robinets fermés.</p>
+</div>
+<section class="exo" id="FICHE-CHAUFFERIE-EN-MOUVEMENT-e10" data-exo="FICHE-CHAUFFERIE-EN-MOUVEMENT-e10" data-type="justification" data-savoir="B1-1" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · B1-1</p><h4>Un relevé, un diagnostic</h4><div class="enonce">
+
+<p>Par 0 °C, vous relevez : sonde extérieure 0 °C, départ 66 °C, retour 30 °C, ambiance 16,5 °C, pression 1,6 bar, ballon 58 °C. Le gardien dit que les radiateurs du fond sont tièdes. Rédigez votre diagnostic.</p>
+</div><div class="indice" hidden>Un grand écart avec un départ normal dit que chaque litre d’eau a le temps de tout donner : il en passe trop peu. Reste à savoir si c’est le circuit qui bloque ou les radiateurs qui ferment, et une seule aiguille le dit.</div><ul class="verifier" hidden><li>J’ai lu l’écart départ-retour en premier et noté qu’il est le double du normal.</li><li>J’ai conclu que le débit manque, pas la chaleur : la chaudière fait sa température.</li><li>J’ai séparé embouage et robinets fermés par l’ambiance, froide ici, donc embouage.</li><li>J’ai proposé une vérification : pression différentielle du circulateur, filtre, désembouage.</li></ul></section>
+<h2 id="comment-le-simulateur-est-fait-et-ce-qu-il-ne-fait-pas">Comment le simulateur est fait, et ce qu’il ne fait pas</h2>
+<div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Un nœud, un ballon, une loi d&#39;émission implicite, et quatre hypothèses avouées</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un simulateur est un choix d’hypothèses, et une page honnête les montre.</p>
+<p><strong>Le bâtiment</strong> est un seul nœud thermique de 60 000 kJ/K, 17 kWh par kelvin, avec 3 kW/K de déperditions, air neuf compris. Sa constante de temps est de cinq à six heures : c’est pourquoi il perd trois degrés dans la nuit et pas dix, et pourquoi la relance prend cinq heures. Les élèves apportent 70 W chacun, le soleil une bosse de 7 h à 18 h.</p>
+<p><strong>Les radiateurs</strong> font 75 kW en 80/60 pour 20 °C, avec l’exposant 1,3. Le débit est constant, 0,896 kg/s. Le retour n’est pas posé, il est <strong>calculé</strong> : pour un départ donné, on cherche le retour tel que ce que les radiateurs émettent soit exactement ce que l’eau a perdu. Quatre itérations suffisent.</p>
+<p><strong>La chaudière</strong> fait 90 kW, module de 20 à 100 %, et sous 20 % elle bat au rythme d’un anti-court-cycle de trois minutes au moins. Son rendement sur PCI va de 90 % quand elle ne condense pas à 109 % pour un retour à 25 °C, en ligne droite entre les deux. L’ECS a la priorité : l’échangeur du ballon prend 40 kW, le chauffage a le reste. Le bipasse renvoie une fraction du départ dans le retour, avant la chaudière.</p>
+<p><strong>Le ballon</strong> fait 1 500 L, tenu entre 55 et 60 °C, avec une boucle de 1,4 kW. Les douches tirent la moitié du volume du jour en une demi-heure à 7 h, un sixième à midi, un tiers le soir, à 40 °C mitigés.</p>
+<p><strong>Ce que le modèle ne fait pas.</strong> Il n’a pas de robinets thermostatiques : le bâtiment n’a que la loi d’eau pour thermostat, ce qui est justement ce que le scénario 3 veut faire voir. Il n’a pas d’inertie lourde séparée, pas de vase d’expansion, pas de fumées calculées : le rendement est une droite et non une courbe de constructeur. Et sa relance ne surchauffe pas le départ, comme le ferait un optimiseur.</p>
+<p><strong>Pourquoi ces limites ne gênent pas.</strong> Elles déplacent les courbes de quelques dixièmes de degré et le gaz de quelques pour cent. Elles ne changent rien aux quatre choses que le cours veut faire voir : la relance qui dure ce que dure le bâtiment, la priorité ECS qui coupe le chauffage à la pire heure, le retour qui décide de la condensation, et le bas de plage qui compte plus que la puissance nominale.</p></div></details>
+</div><h2 id="les-nombres-qui-permettent-de-dire-c-est-faux">Les nombres qui permettent de dire « c’est faux »</h2>
+<div class="enveloppe-tbl"><table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Grandeur</th>
+<th>Valeur</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Déperditions de l’aile</td>
+<td><strong>3 kW/K</strong>, 72 kW par −5 °C</td>
+</tr>
+<tr>
+<td>Inertie du bâtiment</td>
+<td>17 kWh/K, constante de temps 5 à 6 h</td>
+</tr>
+<tr>
+<td>Régime nominal des radiateurs</td>
+<td>80/60 pour 20 °C, écart moyen <strong>50 K</strong></td>
+</tr>
+<tr>
+<td>Exposant de la loi d’émission</td>
+<td><strong>1,3</strong></td>
+</tr>
+<tr>
+<td>Débit du circuit, en 80/60</td>
+<td>0,896 kg/s pour 75 kW</td>
+</tr>
+<tr>
+<td>Pente d’une loi d’eau radiateurs</td>
+<td>1,5 à 2,5 ; plancher chauffant 0,6 à 1</td>
+</tr>
+<tr>
+<td>Retour qui fait condenser</td>
+<td><strong>sous 57 °C</strong> ; gain de six points par 10 K</td>
+</tr>
+<tr>
+<td>Rendement PCI, sans et avec condensation</td>
+<td>90 % · jusqu’à 109 %</td>
+</tr>
+<tr>
+<td>Plage de modulation</td>
+<td><strong>20 à 100 %</strong> de la puissance nominale</td>
+</tr>
+<tr>
+<td>Apport d’un élève</td>
+<td>70 W</td>
+</tr>
+<tr>
+<td>Énergie de 800 L de douches</td>
+<td>28 kWh</td>
+</tr>
+<tr>
+<td>Puissance d’un échangeur de ballon</td>
+<td>40 kW pour 1 500 L</td>
+</tr>
+<tr>
+<td>Réduit de nuit courant</td>
+<td>3 K, 7 à 8 h par nuit</td>
+</tr>
+<tr>
+<td>Pression à froid d’une chaufferie</td>
+<td>1,2 à 2,2 bar</td>
+</tr>
+</tbody>
+</table></div>
+<div class="cle">
+<p>Le contrôle qui rejette une lecture en une seconde : <strong>un retour plus chaud que le départ est impossible</strong>, et un retour plus froid que l’ambiance aussi. L’eau ne peut que perdre entre le départ et le retour, et ne peut pas descendre sous l’air qu’elle chauffe.</p>
+</div>
+<h2 id="vous-verifier">Vous vérifier</h2>
+<div class="quiz">
+<ul>
+<li>Le départ d’une loi d’eau dépend de : <strong>la température extérieure</strong> | la température des salles</li>
+<li>La relance dure trois heures parce que : <strong>le bâtiment a de l’inertie</strong> | la chaudière est lente</li>
+<li>Une relance trop tardive se voit : <strong>aux heures hors confort</strong> | au poste gaz</li>
+<li>À 7 h, la chaudière donne la priorité : <strong>au ballon</strong> | aux radiateurs</li>
+<li>Les douches font plonger : <strong>le ballon</strong> | le retour</li>
+<li>Un ballon deux fois plus tiré descend : <strong>sous 40 °C</strong> | à la même température</li>
+<li>Entre 50 et 25 K d’écart, un radiateur perd : <strong>près de 60 %</strong> | la moitié</li>
+<li>Le retour se déduit : <strong>du débit et de la puissance</strong> | de la loi d’eau</li>
+<li>La chaudière condense si le retour est : <strong>sous 57 °C</strong> | au-dessus de 57 °C</li>
+<li>Un bipasse à 50 % : <strong>réchauffe le retour chaudière</strong> | refroidit le départ</li>
+<li>Le bâtiment s’aperçoit du bipasse : <strong>jamais</strong> | tout de suite</li>
+<li>Un parallèle de +8 K se paie : <strong>tous les jours de la saison</strong> | seulement par grand froid</li>
+<li>Le soleil de midi est vu par la loi d’eau : <strong>jamais</strong> | par la sonde extérieure</li>
+<li>Sous 20 % de sa puissance, une chaudière : <strong>s’arrête et repart</strong> | module</li>
+<li>Une cascade de deux petites chaudières descend : <strong>plus bas en puissance</strong> | moins bas</li>
+<li>Le réduit de nuit rapporte environ : <strong>7 % du gaz</strong> | la moitié du gaz</li>
+<li>Un écart départ-retour nul dit que : <strong>rien ne circule</strong> | la chaudière est en panne</li>
+<li>Grand écart et bâtiment chaud désignent : <strong>la loi d’eau trop haute</strong> | l’embouage</li>
+<li>Grand écart et bâtiment froid désignent : <strong>l’embouage</strong> | les thermostatiques</li>
+<li>Seul le ballon qui décroche désigne : <strong>l’échangeur d’ECS</strong> | le circulateur</li>
+</ul>
+</div>
+<nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="SEQ1.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Thermique du bâtiment, séances 1 à 5</span></a><a class="ap" href="FICHE-CTA-EN-MOUVEMENT.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">La CTA en mouvement</span></a></div></nav>
+<p class="pied">Fiche complémentaire aux séances 10 à 12 et 19, et aux chapitres 4, 5, 6 et 13 du manuel. Les calculs se font dans votre navigateur ; rien n'est enregistré, et le jeu de diagnostic ne révèle jamais la panne.</p>
+</div>
+<script src="../assets/kit.js?v=a3f11d71"></script>
+<script src="../assets/site.js?v=a3f11d71"></script>

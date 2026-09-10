@@ -50,6 +50,21 @@ h1,h2,h3,h4,.gro{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-s
 p{margin:0 0 13px}
 a{color:var(--froid)}
 
+/* ─────────────────────────────────────────────── entete illustre
+   « image: » nomme un schema du kit, qui vient se ranger a droite du titre.
+   L'accueil a trois enfants, une page de cours en a six : plutot que de leur
+   imposer une grille dont le nombre de lignes varie — span 99 fabriquait 98
+   gouttieres vides et un en-tete d'un metre de haut — on reserve la place a
+   droite et on y pose le dessin. */
+.tete.a-img{position:relative;padding-right:calc(clamp(210px,26vw,330px) + 34px)}
+.tete.a-img>.tete-img{position:absolute;right:0;top:50%;
+  transform:translateY(-50%);width:clamp(210px,26vw,330px)}
+.tete-img svg{display:block;width:100%;height:auto}
+@media (max-width:760px){
+  .tete.a-img{padding-right:0}
+  .tete.a-img>.tete-img{position:static;transform:none;max-width:330px;margin-top:14px}
+}
+
 /* ─────────────────────────────────────────────── entete
    Le numero de seance est un reperage, pas une mention de plus dans une ligne
    grise : on le reconnait avant d'avoir lu le titre. */
@@ -84,6 +99,28 @@ h1 span{display:block;color:var(--froid)}
   border:1px solid var(--trait);border-radius:99px;color:var(--encre2)}
 .tag.n3{border-color:var(--chaud);color:var(--chaud);font-weight:600}
 .tag.n3::before{content:"● ";font-size:8px;vertical-align:middle}
+
+/* ─────────────────────────────────────────────── prerequis
+   « prerequis: » liste ce qu'il faut tenir avant d'entrer dans la page — le
+   savoir, la raison, et la page qui l'enseigne quand elle existe. Il se lit
+   entre l'en-tete et le sommaire, pas dans le corps. */
+.prerequis{margin:22px 0 8px;padding:16px 20px 14px;background:var(--carte);
+  border:1px solid var(--trait);border-radius:var(--r)}
+.chapeau-p{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--encre2);margin:0 0 10px;opacity:.85}
+.prerequis ul{list-style:none;margin:0;padding:0;display:grid;gap:11px 24px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.prerequis li{margin:0;font-size:15.5px;line-height:1.45}
+.prerequis b{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  font-weight:700;font-size:16px;color:var(--encre)}
+.prerequis a{color:var(--encre);text-decoration:none;
+  border-bottom:1.5px solid var(--teinte,var(--froid))}
+.prerequis a:hover{color:var(--teinte,var(--froid))}
+.prerequis .ou{display:inline-block;margin-left:8px;font-family:"IBM Plex Mono",monospace;
+  font-size:11px;letter-spacing:.06em;color:var(--encre2);vertical-align:1px}
+.prerequis .ou::before{content:"→ "}
+.prerequis .car{display:block;color:var(--encre2);margin-top:2px}
+@media print{.prerequis{break-inside:avoid}}
 
 /* ─────────────────────────────────────────────── navigation */
 nav.somm{position:sticky;top:0;z-index:20;background:var(--fond);
