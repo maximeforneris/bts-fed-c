@@ -3,10 +3,10 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="robots" content="noindex, nofollow">
 <title>Séance 10 — eau chaude sanitaire</title>
-<link rel="stylesheet" href="../assets/kit.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/site.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/fluides.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/vivant.css?v=d3aa8fdf">
+<link rel="stylesheet" href="../assets/kit.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/site.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/fluides.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/vivant.css?v=2a75a503">
 
 <div class="page" data-site="bts-fed-c" data-page="cours/J10" data-rang="2">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="J9.html" rel="prev" title="Séance 9 — point de fonctionnement" aria-label="Séance 9 — point de fonctionnement">&lsaquo;</a><a class="fleche" href="SEQ1.html" rel="next" title="Thermique du bâtiment, séances 1 à 5" aria-label="Thermique du bâtiment, séances 1 à 5">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J10">Marquer comme lu</button></div>
@@ -20,11 +20,14 @@
   <p class="contenu">1 outil · 8 questions · 9 replis · 2 figures</p>
   <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
 </header>
-<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J1.html">L'énergie pour chauffer une masse d'eau</a></b><span class="ou">J1 · L'énergie dans le bâtiment</span><span class="car">E = m × 4,185 × Δθ en kilojoules, puis en kilowattheures ; c'est la seule formule de la séance.</span></li><li><b><a href="J5.html">Une puissance sur une durée</a></b><span class="ou">J5 · Le besoin d'énergie</span><span class="car">le besoin journalier d'ECS est une énergie, la pointe du matin est une puissance ; les confondre est l'erreur classique.</span></li><li><b><a href="J7.html">Débit et perte de chaleur d'un circuit</a></b><span class="ou">J7 · Les réseaux hydrauliques</span><span class="car">le bouclage est un circuit d'eau comme les autres, avec un débit, une longueur et une perte en ligne.</span></li></ul></aside>
-<nav class="somm"><div class="in"><a href="#l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</a><a href="#la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</a><a href="#le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J1.html">L'énergie pour chauffer une masse d'eau</a></b><span class="ou">Séance 1 · L'énergie dans le bâtiment</span><span class="car">E = m × 4,185 × Δθ en kilojoules, puis en kilowattheures ; c'est la seule formule de la séance.</span></li><li><b><a href="J5.html">Une puissance sur une durée</a></b><span class="ou">Séance 5 · Le besoin d'énergie</span><span class="car">le besoin journalier d'ECS est une énergie, la pointe du matin est une puissance ; les confondre est l'erreur classique.</span></li><li><b><a href="J7.html">Débit et perte de chaleur d'un circuit</a></b><span class="ou">Séance 7 · Les réseaux hydrauliques</span><span class="car">le bouclage est un circuit d'eau comme les autres, avec un débit, une longueur et une perte en ligne.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#objectifs-de-la-seance">Objectifs de la séance</a><a href="#l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</a><a href="#la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</a><a href="#le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
 <div class="piege">
 <p><strong>Un savoir au niveau 3.</strong> Le référentiel classe B3-2 au niveau maîtrise d’outils pour l’option C : savoir faire, seul, sans guidage. L’ECS tombe presque à chaque session, souvent dans la même partie que la sous-station.</p>
 </div>
+<h2 id="objectifs-de-la-seance">Objectifs de la séance</h2>
+<p>L’eau du chauffage tourne en boucle fermée. L’eau chaude sanitaire, elle, se consomme et ne revient pas : on la produit pour une pointe qu’on ne choisit pas, et sous des contraintes sanitaires qui ne se négocient pas.</p>
+<p>À la fin de la séance, vous savez <strong>calculer l’énergie d’une journée</strong> et <strong>la puissance d’une pointe</strong>, choisir entre production instantanée et accumulation, et <strong>justifier le bouclage</strong>.</p>
 <h2 id="l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</h2>
 <p>Chauffer un litre d’eau de 10 à 60 °C coûte la même chose, qu’on le fasse à six heures du matin ou étalé sur la journée. L’énergie d’une journée se calcule donc à partir du seul volume total.</p>
 <div class="formule">
@@ -258,6 +261,6 @@
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J9.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 9 — point de fonctionnement</span></a><a class="ap" href="SEQ1.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Thermique du bâtiment, séances 1 à 5</span></a></div><a class="vers-recap" href="SEQ2.html">Préparation au contrôle</a></nav>
 <p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p><p class="pied-site"><a class="mentions" href="../mentions-legales.html">Mentions légales</a></p>
 </div>
-<script src="../assets/kit.js?v=d3aa8fdf"></script>
-<script src="../assets/site.js?v=d3aa8fdf"></script>
-<script src="../assets/vivant.js?v=d3aa8fdf"></script>
+<script src="../assets/kit.js?v=2a75a503"></script>
+<script src="../assets/site.js?v=2a75a503"></script>
+<script src="../assets/vivant.js?v=2a75a503"></script>

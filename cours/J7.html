@@ -3,10 +3,10 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="robots" content="noindex, nofollow">
 <title>Séance 7 — réseaux hydrauliques</title>
-<link rel="stylesheet" href="../assets/kit.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/site.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/fluides.css?v=d3aa8fdf">
-<link rel="stylesheet" href="../assets/vivant.css?v=d3aa8fdf">
+<link rel="stylesheet" href="../assets/kit.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/site.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/fluides.css?v=2a75a503">
+<link rel="stylesheet" href="../assets/vivant.css?v=2a75a503">
 
 <div class="page" data-site="bts-fed-c" data-page="cours/J7" data-rang="2">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 2 · Hydraulique et ECS</span><span class="fleches"><a class="fleche" href="J6.html" rel="prev" title="Séance 6 — la paroi mesurée" aria-label="Séance 6 — la paroi mesurée">&lsaquo;</a><a class="fleche" href="J8.html" rel="next" title="Séance 8 — pertes de charge" aria-label="Séance 8 — pertes de charge">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J7">Marquer comme lu</button></div>
@@ -20,8 +20,11 @@
   <p class="contenu">8 questions · 8 replis · 2 figures</p>
   <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">B4-1 Réseaux hydrauliques · niveau 2</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
 </header>
-<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J4.html">Les déperditions pièce par pièce</a></b><span class="ou">J4 · Les déperditions d'un bâtiment</span><span class="car">le débit de chaque radiateur se déduit de la puissance à émettre, donc des déperditions de sa pièce.</span></li><li><b><a href="J1.html">Puissance, débit et écart de température</a></b><span class="ou">J1 · L'énergie dans le bâtiment</span><span class="car">Φ = qm × 4,185 × Δθ est la formule de la séance, avec la puissance en kW et l'écart en K.</span></li><li><b><a href="FICHE-SYMBOLES.html">Les symboles d'un schéma hydraulique</a></b><span class="ou">Lire un circuit hydraulique</span><span class="car">les trois typologies se dessinent avec les mêmes quinze symboles ; on les reconnaît avant de les comparer.</span></li><li><b>Aires, volumes et conversions de débit</b><span class="car">section d'un tube en m², débit en m³/h et en L/s ; la moitié des erreurs de la séance sont des conversions.</span></li></ul></aside>
-<nav class="somm"><div class="in"><a href="#trois-typologies-trois-compromis">Trois typologies, trois compromis</a><a href="#le-debit-et-la-vitesse-qu-il-impose">Le débit, et la vitesse qu’il impose</a><a href="#retour-direct-retour-inverse">Retour direct, retour inversé</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J4.html">Les déperditions pièce par pièce</a></b><span class="ou">Séance 4 · Les déperditions d'un bâtiment</span><span class="car">le débit de chaque radiateur se déduit de la puissance à émettre, donc des déperditions de sa pièce.</span></li><li><b><a href="J1.html">Puissance, débit et écart de température</a></b><span class="ou">Séance 1 · L'énergie dans le bâtiment</span><span class="car">Φ = qm × 4,185 × Δθ est la formule de la séance, avec la puissance en kW et l'écart en K.</span></li><li><b><a href="FICHE-SYMBOLES.html">Les symboles d'un schéma hydraulique</a></b><span class="ou">Lire un circuit hydraulique</span><span class="car">les trois typologies se dessinent avec les mêmes quinze symboles ; on les reconnaît avant de les comparer.</span></li><li><b>Aires, volumes et conversions de débit</b><span class="car">section d'un tube en m², débit en m³/h et en L/s ; la moitié des erreurs de la séance sont des conversions.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#objectifs-de-la-seance">Objectifs de la séance</a><a href="#trois-typologies-trois-compromis">Trois typologies, trois compromis</a><a href="#le-debit-et-la-vitesse-qu-il-impose">Le débit, et la vitesse qu’il impose</a><a href="#retour-direct-retour-inverse">Retour direct, retour inversé</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="objectifs-de-la-seance">Objectifs de la séance</h2>
+<p>Jusqu’ici, le débit était un nombre qu’on tirait de P = Q × 1 163 × ΔT. Cette séance le fait circuler : il faut bien l’amener à chaque émetteur, et il existe plusieurs façons de tirer les tubes.</p>
+<p>À la fin de la séance, vous savez <strong>reconnaître un bitube, un monotube et une pieuvre</strong> sur un schéma, dire ce que chacun échange contre quoi, et <strong>repérer l’émetteur qui sera mal alimenté</strong>.</p>
 <h2 id="trois-typologies-trois-compromis">Trois typologies, trois compromis</h2>
 <p>Un réseau de chauffage relie un générateur à des émetteurs. Il existe trois façons de le faire, et aucune n’est meilleure dans l’absolu : chacune échange quelque chose contre autre chose.</p>
 <figure>
@@ -324,6 +327,6 @@
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J6.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 6 — la paroi mesurée</span></a><a class="ap" href="J8.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 8 — pertes de charge</span></a></div><a class="vers-recap" href="SEQ2.html">Préparation au contrôle</a></nav>
 <p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p><p class="pied-site"><a class="mentions" href="../mentions-legales.html">Mentions légales</a></p>
 </div>
-<script src="../assets/kit.js?v=d3aa8fdf"></script>
-<script src="../assets/site.js?v=d3aa8fdf"></script>
-<script src="../assets/vivant.js?v=d3aa8fdf"></script>
+<script src="../assets/kit.js?v=2a75a503"></script>
+<script src="../assets/site.js?v=2a75a503"></script>
+<script src="../assets/vivant.js?v=2a75a503"></script>
