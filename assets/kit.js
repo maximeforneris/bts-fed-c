@@ -858,7 +858,7 @@ SCHEMAS["couches-protocole"]=function(el){
      ["CSMA/CA|arbitrage bit \u00e0 bit","ma\u00eetre-esclave|1 ma\u00eetre",
       "client-serveur|sur IP","ma\u00eetre-esclave|1 contr\u00f4leur"]],
     ["PHYSIQUE","sur quoi \u00e7a circule",
-     ["paire torsad\u00e9e|29 V, 9 600 bit/s","RS-485|2 ou 3 fils",
+     ["paire torsad\u00e9e|30 V, 9 600 bit/s","RS-485|2 ou 3 fils",
       "Ethernet|UDP 47808","2 fils|\u00b116 V, sans polarit\u00e9"]]
   ];
   LIGNES.forEach(function(L,r){
@@ -981,6 +981,93 @@ SCHEMAS["situations-e5"]=function(el){
     "2e ann\u00e9e"));
   svg.appendChild(S("text",{x:W/2,y:236,"text-anchor":"middle","class":"s-nom"},
     "Chaque situation donne lieu \u00e0 un rapport argument\u00e9 et \u00e0 une proposition de note pr\u00e9sent\u00e9e au jury."));
+  el.appendChild(svg);
+};
+
+/* ─────────── la monotone de puissance et la puissance souscrite ───────────
+   Les points sont ceux de l'exercice du cours : au-dela de 36 kVA, seule la
+   duree du depassement se paie, pas son ampleur. */
+SCHEMAS["monotone-puissance"]=function(el){
+  var W=760,H=330, X0=78,X1=520,Y0=30,Y1=262, HMAX=180, PMIN=85, PMAX=125;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Monotone de puissance d'un b\u00e2timent et puissance souscrite"});
+  function x(h){return X0+(X1-X0)*h/HMAX;}
+  function y(p){return Y1-(Y1-Y0)*(p-PMIN)/(PMAX-PMIN);}
+  var PTS=[[0,120],[6,115],[15,110],[32,105],[60,100],[105,95],[170,90]];
+  /* la surface des depassements, sous la courbe et au-dessus de 110 */
+  svg.appendChild(S("path",{d:"M"+x(0)+","+y(110)+"L"+x(0)+","+y(120)+"L"+x(6)+","+y(115)+
+    "L"+x(15)+","+y(110)+"Z",fill:V("chaud"),opacity:"0.28"}));
+  /* grille */
+  [90,100,110,120].forEach(function(p){
+    svg.appendChild(S("line",{x1:X0,y1:y(p),x2:X1,y2:y(p),stroke:V("trait2"),"stroke-width":"1"}));
+    svg.appendChild(S("text",{x:X0-8,y:y(p)+4,"text-anchor":"end","class":"s-nom"},p+" kVA"));
+  });
+  [0,50,100,150].forEach(function(h){
+    svg.appendChild(S("text",{x:x(h),y:Y1+18,"text-anchor":"middle","class":"s-nom"},h+" h"));
+  });
+  svg.appendChild(S("line",{x1:X0,y1:Y1,x2:X1,y2:Y1,stroke:V("encre2"),"stroke-width":"1.5"}));
+  svg.appendChild(S("line",{x1:X0,y1:Y0,x2:X0,y2:Y1,stroke:V("encre2"),"stroke-width":"1.5"}));
+  svg.appendChild(S("text",{x:(X0+X1)/2,y:Y1+40,"text-anchor":"middle","class":"s-nom"},
+    "heures de l'hiver pendant lesquelles la puissance d\u00e9passe la valeur lue"));
+  /* la monotone */
+  var d="";
+  PTS.forEach(function(p,i){d+=(i?"L":"M")+x(p[0])+","+y(p[1]);});
+  svg.appendChild(S("path",{d:d,fill:"none",stroke:V("froid"),"stroke-width":"3"}));
+  PTS.forEach(function(p){svg.appendChild(S("circle",{cx:x(p[0]),cy:y(p[1]),r:4,fill:V("froid")}));});
+  /* la souscription */
+  svg.appendChild(S("line",{x1:X0,y1:y(110),x2:X1,y2:y(110),stroke:V("chaud"),"stroke-width":"2.5",
+    "stroke-dasharray":"8 5"}));
+  svg.appendChild(S("text",{x:X1-4,y:y(110)-8,"text-anchor":"end","class":"s-lab"},"souscrit : 110 kVA"));
+  svg.appendChild(S("text",{x:x(15)+10,y:y(113)+2,"class":"s-nom",fill:V("chaud")},"15 h de d\u00e9passement"));
+  /* ce que chaque cote coute */
+  var R=[["un kVA de plus","31,08 \u20ac par an"],["une heure de d\u00e9passement","12,79 \u20ac"],
+         ["\u00e9quilibre","2,43 h par kVA"]];
+  R.forEach(function(r,i){
+    var yy=70+i*62;
+    svg.appendChild(S("text",{x:548,y:yy,"class":"s-nom"},r[0]));
+    svg.appendChild(S("text",{x:548,y:yy+20,"class":"s-lab"},r[1]));
+  });
+  svg.appendChild(S("text",{x:548,y:268,"class":"s-nom",fill:V("chaud")},"L'ampleur du d\u00e9passement"));
+  svg.appendChild(S("text",{x:548,y:286,"class":"s-nom",fill:V("chaud")},"ne compte pas : seule"));
+  svg.appendChild(S("text",{x:548,y:304,"class":"s-nom",fill:V("chaud")},"sa dur\u00e9e se paie."));
+  el.appendChild(svg);
+};
+
+/* ─────────── trois courants, et ce qui revient par le neutre ─────────── */
+SCHEMAS["phaseurs-neutre"]=function(el){
+  var W=760,H=320, OX=210, OY=270, K=2.5;
+  var svg=S("svg",{viewBox:"0 0 "+W+" "+H,role:"img",
+    "aria-label":"Somme des trois courants de phase et courant de neutre"});
+  function fl(x1,y1,x2,y2,coul,ep){
+    var a=Math.atan2(y2-y1,x2-x1);
+    svg.appendChild(S("line",{x1:x1,y1:y1,x2:x2-9*Math.cos(a),y2:y2-9*Math.sin(a),
+      stroke:V(coul),"stroke-width":ep||"3"}));
+    svg.appendChild(S("path",{d:"M"+x2+","+y2+
+      "L"+(x2-12*Math.cos(a-0.38))+","+(y2-12*Math.sin(a-0.38))+
+      "L"+(x2-12*Math.cos(a+0.38))+","+(y2-12*Math.sin(a+0.38))+"Z",fill:V(coul)}));
+  }
+  function vec(I,deg){var r=deg*Math.PI/180;return [I*K*Math.cos(r),-I*K*Math.sin(r)];}
+  var v1=vec(60,90), v2=vec(35,-30), v3=vec(30,210);
+  var p1=[OX+v1[0],OY+v1[1]], p2=[p1[0]+v2[0],p1[1]+v2[1]], p3=[p2[0]+v3[0],p2[1]+v3[1]];
+  fl(OX,OY,p1[0],p1[1],"froid");
+  fl(p1[0],p1[1],p2[0],p2[1],"tiede");
+  fl(p2[0],p2[1],p3[0],p3[1],"vert");
+  fl(OX,OY,p3[0],p3[1],"chaud","4");
+  svg.appendChild(S("circle",{cx:OX,cy:OY,r:4,fill:V("encre")}));
+  svg.appendChild(S("text",{x:OX-12,y:(OY+p1[1])/2,"text-anchor":"end","class":"s-lab"},"I1 = 60 A"));
+  svg.appendChild(S("text",{x:(p1[0]+p2[0])/2+12,y:(p1[1]+p2[1])/2-6,"class":"s-lab"},"I2 = 35 A"));
+  svg.appendChild(S("text",{x:(p2[0]+p3[0])/2+14,y:(p2[1]+p3[1])/2+18,"class":"s-lab"},"I3 = 30 A"));
+  svg.appendChild(S("text",{x:OX+24,y:OY-20,"class":"s-lab"},"IN = 27,8 A"));
+  svg.appendChild(S("text",{x:OX-150,y:OY+34,"class":"s-nom"},
+    "Les trois courants mis bout \u00e0 bout : ce qui ne se referme pas revient par le neutre."));
+  /* le cas equilibre, a droite */
+  var cx=560, cy=175;
+  svg.appendChild(S("text",{x:cx,y:40,"text-anchor":"middle","class":"s-tit"},"PHASES \u00c9QUILIBR\u00c9ES"));
+  var q1=[cx,cy-100], q2=[q1[0]+86.6,q1[1]+50], q3=[q2[0]-86.6,q2[1]+50];
+  fl(cx,cy,q1[0],q1[1],"froid"); fl(q1[0],q1[1],q2[0],q2[1],"tiede"); fl(q2[0],q2[1],q3[0],q3[1],"vert");
+  svg.appendChild(S("circle",{cx:cx,cy:cy,r:5,fill:V("chaud")}));
+  svg.appendChild(S("text",{x:cx,y:cy+50,"text-anchor":"middle","class":"s-nom"},"le triangle se referme :"));
+  svg.appendChild(S("text",{x:cx,y:cy+68,"text-anchor":"middle","class":"s-lab"},"IN = 0"));
   el.appendChild(svg);
 };
 
@@ -8699,6 +8786,14 @@ OUTILS.dispersion={
 };
 
 /* ═══════════════════════════════════════════════════ montage */
+/* ═══════════ OUTILS DE DOMOTIQUE, 1re année (16 septembre 2026) ═══════════
+   Chaque outil ci-dessous suit le patron du kit : OUTILS["nom"]={titre, intro,
+   monte(d)}. Les deux repères qui suivent servent d'ancres d'insertion. */
+/* === OUTILS DOMOTIQUE : réseau et bus === */
+
+/* === OUTILS DOMOTIQUE : liaisons, mesures, référentiel === */
+
+/* ───────────────────────────────── montage des outils */
 [].forEach.call(document.querySelectorAll(".outil[data-outil]"),function(el){
   var o=OUTILS[el.getAttribute("data-outil")];
   if(!o){el.innerHTML="<div class='dedans'>Outil inconnu : "+
