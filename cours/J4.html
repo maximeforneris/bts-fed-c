@@ -3,11 +3,11 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="robots" content="noindex, nofollow">
 <title>Séance 4 — déperditions</title>
-<link rel="stylesheet" href="../assets/kit.css?v=ff2af6f3">
-<link rel="stylesheet" href="../assets/site.css?v=ff2af6f3">
-<link rel="stylesheet" href="../assets/fluides.css?v=ff2af6f3">
-<link rel="stylesheet" href="../assets/vivant.css?v=ff2af6f3">
-<link rel="stylesheet" href="../assets/doc.css?v=ff2af6f3">
+<link rel="stylesheet" href="../assets/kit.css?v=b2150bab">
+<link rel="stylesheet" href="../assets/site.css?v=b2150bab">
+<link rel="stylesheet" href="../assets/fluides.css?v=b2150bab">
+<link rel="stylesheet" href="../assets/vivant.css?v=b2150bab">
+<link rel="stylesheet" href="../assets/doc.css?v=b2150bab">
 
 <div class="page" data-site="bts-fed-c" data-page="cours/J4" data-rang="1">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 1 · Thermique du bâtiment</span><span class="fleches"><a class="fleche" href="J3.html" rel="prev" title="Séance 3 — conductivité et U" aria-label="Séance 3 — conductivité et U">&lsaquo;</a><a class="fleche" href="J5.html" rel="next" title="Séance 5 — besoin annuel" aria-label="Séance 5 — besoin annuel">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J4">Marquer comme lu</button></div>
@@ -57,6 +57,7 @@
 <p>Appliquer le même ΔT à toutes les lignes du tableau surestime les déperditions d’un bâtiment sur vide sanitaire ou mitoyen, parfois de 15 %. Le générateur retenu est alors trop gros, et il court-cyclera toute la mi-saison.</p>
 </div>
 <h2 id="le-bilan-d-une-maison-ligne-par-ligne">Le bilan d’une maison, ligne par ligne</h2>
+<p><strong>Ce n’est pas le bâtiment de la séance.</strong> Le polycopié traite des bureaux de plain-pied à Rouen ; cette maison-ci a des ponts thermiques deux fois plus lourds. Le classement des postes en est renversé, et c’est exactement ce qu’il faut voir.</p>
 <p>Intérieur à 20 °C, extérieur de base à −7 °C, vide sanitaire à 5 °C.</p>
 <div class="enveloppe-tbl"><table>
 <thead>
@@ -123,7 +124,7 @@
 </div>
 <figure class="schema"><div class="dessin" data-schema="batiment-ecorche"></div><figcaption>La coupe suit l’outil ci-dessus : changez un poste et le classement se refait.</figcaption></figure>
 <div class="cle">
-<p><strong>Les ponts thermiques sont le premier poste</strong>, devant les menuiseries et devant l’air neuf. Sur un bâtiment isolé par l’intérieur, ils pèsent plus que tous les murs réunis, c’est ce que la séance 3 annonçait, et que le bilan confirme.</p>
+<p><strong>Le classement des postes se calcule, il ne se devine pas.</strong> Ici les ponts thermiques arrivent en tête, devant l’air neuf. Sur les bureaux de la séance, dont les Ψ sont deux fois plus faibles, ils tombent <strong>troisièmes</strong>, derrière l’air neuf et les murs. Même méthode, même formule, conclusion inverse.</p>
 </div>
 <h2 id="la-signature-du-batiment">La signature du bâtiment</h2>
 <figure class="memo"><img src="img/J4/memo-bilan.png" alt="" /></figure>
@@ -159,7 +160,7 @@
 <li>Le coefficient 1,15 du bilan couvre : <strong>la relance après abaissement</strong> | une marge de confort</li>
 <li>Le GV s’exprime en : <strong>W/K</strong> | W</li>
 <li>Le GV dépend : <strong>du bâtiment seul</strong> | du bâtiment et du climat</li>
-<li>Sur un bâtiment isolé par l’intérieur, les ponts thermiques pèsent : <strong>plus que tous les murs</strong> | moins que les menuiseries</li>
+<li>Sur le bâtiment de la séance, les deux ponts cumulés pèsent : <strong>plus que la toiture</strong> | moins que le plancher</li>
 <li>La déperdition par l’air neuf se calcule avec le coefficient : <strong>0,34</strong> | 1 163</li>
 <li>Une paroi mitoyenne avec un local chauffé à la même température perd : <strong>rien</strong> | autant qu’un mur extérieur</li>
 </ul>
@@ -248,7 +249,7 @@
 <div class="piege">
 <p><strong>Puissance et énergie appellent des hypothèses opposées.</strong> La puissance se calcule dans le cas le plus défavorable et ignore les apports. L’énergie se calcule en moyenne sur la saison et les compte. Utiliser les hypothèses de l’une pour l’autre est l’erreur structurante de la séquence.</p>
 </div>
-<p><strong>Le contrôle final, en une division.</strong> La puissance obtenue, divisée par la surface chauffée, doit tomber dans les fourchettes de la séance 1 : 10 à 20 W/m² en passif, 30 à 50 en neuf réglementaire, 100 à 150 en ancien non isolé. Nos 4 680 W sur une maison de 90 m² font <strong>52 W/m²</strong>, cohérent avec un bâtiment isolé mais pas performant, ce que le poids des ponts thermiques confirme.</p></div></details>
+<p><strong>Le contrôle final, en une division.</strong> La puissance obtenue, divisée par la surface chauffée, doit tomber dans les fourchettes de la séance 1 : 10 à 20 W/m² en passif, 30 à 50 en neuf réglementaire, 100 à 150 en ancien non isolé. Nos 4 680 W sur une maison de 74 m² font <strong>63 W/m²</strong> : au-dessus du neuf réglementaire, loin de l’ancien non isolé. Le poids des ponts thermiques explique l’écart.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">L&#39;air neuf dans le bilan : ce qui se compte, et ce qui se subit</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La ligne « air neuf » du bilan pèse 1 010 W, soit un quart du total. Elle mélange en réalité deux phénomènes très différents, et le dossier ne le dit pas toujours.</p>
 <p><strong>Le renouvellement volontaire.</strong> C’est la ventilation : un débit choisi, imposé par la réglementation et par les occupants. Il se calcule, il se règle, et il se récupère, c’est tout l’objet de la séance 14.</p>
 <p><strong>Les infiltrations subies.</strong> L’air qui entre par les défauts d’étanchéité : pieds de cloison, boîtiers électriques, jonctions de menuiseries, trappes. Il n’est ni choisi ni réglé, et <strong>il ne passe par aucun récupérateur</strong>.</p>
@@ -387,8 +388,8 @@
 </div><nav class="suite"><p class="chapeau-s">La suite</p><div class="pas-a-pas"><a class="av" href="J3.html" rel="prev"><span class="k">&lsaquo; Précédent</span><span class="t">Séance 3 — conductivité et U</span></a><a class="ap" href="J5.html" rel="next"><span class="k">Suivant &rsaquo;</span><span class="t">Séance 5 — besoin annuel</span></a></div><a class="vers-recap" href="SEQ1.html">Préparation au contrôle</a></nav>
 <p class="pied">Cette page rappelle la séance. Elle ne remplace pas le polycopié et ne donne aucun corrigé. Tous les calculs se font dans votre navigateur ; rien n'est enregistré.</p><p class="pied-site"><a class="mentions" href="../mentions-legales.html">Mentions légales</a></p>
 </div>
-<script src="../assets/kit.js?v=ff2af6f3"></script>
-<script src="../assets/site.js?v=ff2af6f3"></script>
-<script src="../assets/vivant.js?v=ff2af6f3"></script>
-<script src="../assets/plan.js?v=ff2af6f3"></script>
-<script src="../assets/doc.js?v=ff2af6f3"></script>
+<script src="../assets/kit.js?v=b2150bab"></script>
+<script src="../assets/site.js?v=b2150bab"></script>
+<script src="../assets/vivant.js?v=b2150bab"></script>
+<script src="../assets/plan.js?v=b2150bab"></script>
+<script src="../assets/doc.js?v=b2150bab"></script>
