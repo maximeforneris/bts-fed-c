@@ -242,8 +242,10 @@ details[open]>summary .chev{transform:rotate(90deg)}
 table{border-collapse:collapse;width:100%;font-size:15px;margin:14px 0}
 th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--trait2);
   vertical-align:top}
-th{font-family:"Bricolage Grotesque",sans-serif;font-size:11.5px;font-weight:700;
-  letter-spacing:.06em;text-transform:uppercase;color:var(--encre2);
+/* Pas de capitales dans un en-tete de tableau : il porte des unites, et « mA » en capitales
+   se lit « MA », des megaamperes. Releve le 26 septembre 2026 sur « v (m/s) » → « V (M/S) ». */
+th{font-family:"Bricolage Grotesque",sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.01em;color:var(--encre2);
   border-bottom:1.5px solid var(--trait)}
 tbody tr:last-child td{border-bottom:0}
 .enveloppe-tbl{overflow-x:auto;max-width:760px;margin:14px 0}

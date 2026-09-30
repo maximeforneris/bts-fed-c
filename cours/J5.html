@@ -5,17 +5,17 @@
 <meta http-equiv="Cache-Control" content="no-cache">
 <meta name="robots" content="noindex, nofollow">
 <title>Séance 5 — besoin annuel</title>
-<link rel="stylesheet" href="../assets/kit.css?v=8e991f45">
-<link rel="stylesheet" href="../assets/site.css?v=8e991f45">
-<link rel="stylesheet" href="../assets/fluides.css?v=8e991f45">
-<link rel="stylesheet" href="../assets/vivant.css?v=8e991f45">
-<link rel="stylesheet" href="../assets/doc.css?v=8e991f45">
-<link rel="stylesheet" href="../assets/impression.css?v=8e991f45">
-<script src="../assets/kit.js?v=8e991f45-eb4ab7" defer></script>
-<script src="../assets/site.js?v=8e991f45" defer></script>
-<script src="../assets/vivant.js?v=8e991f45" defer></script>
-<script src="../assets/plan.js?v=8e991f45" defer></script>
-<script src="../assets/doc.js?v=8e991f45" defer></script>
+<link rel="stylesheet" href="../assets/kit.css?v=600fffa7">
+<link rel="stylesheet" href="../assets/site.css?v=600fffa7">
+<link rel="stylesheet" href="../assets/fluides.css?v=600fffa7">
+<link rel="stylesheet" href="../assets/vivant.css?v=600fffa7">
+<link rel="stylesheet" href="../assets/doc.css?v=600fffa7">
+<link rel="stylesheet" href="../assets/impression.css?v=600fffa7">
+<script src="../assets/kit.js?v=600fffa7-eb4ab7" defer></script>
+<script src="../assets/site.js?v=600fffa7" defer></script>
+<script src="../assets/vivant.js?v=600fffa7" defer></script>
+<script src="../assets/plan.js?v=600fffa7" defer></script>
+<script src="../assets/doc.js?v=600fffa7" defer></script>
 
 <div class="page" data-site="bts-fed-c" data-page="cours/J5" data-rang="1">
 <div class="jauge-lecture" id="jauge-lecture"><i></i></div><div class="barre-site"><a class="accueil" href="../index.html">BTS FED option C</a><span class="fil">Séquence 1 · Thermique du bâtiment</span><span class="fleches"><a class="fleche" href="J4.html" rel="prev" title="Séance 4 — déperditions" aria-label="Séance 4 — déperditions">&lsaquo;</a><a class="fleche" href="J6.html" rel="next" title="Séance 6 — la paroi mesurée" aria-label="Séance 6 — la paroi mesurée">&rsaquo;</a></span><button type="button" class="lu" data-lu="cours/J5">Marquer comme lu</button></div>
@@ -65,7 +65,7 @@
 
 <blockquote>
 
-<p>Notre maison : 151 × 2 300 × 24 / 1 000 = <strong>8 320 kWh</strong> de besoin brut.</p>
+<p>Notre maison : GV = 4 070 / 27 = 150,7 W/K, donc 150,7 × 2 300 × 24 / 1 000 = <strong>8 320 kWh</strong> de besoin brut.</p>
 
 </blockquote>
 
@@ -161,6 +161,12 @@
 
 <figure class="schema"><div class="dessin" data-schema="dpe-etiquette"></div><figcaption>La double étiquette : l’énergie d’un côté, le climat de l’autre.</figcaption></figure>
 
+<div class="piege">
+
+<p><strong>Nos 69 kWh/m² ne sont pas un classement.</strong> C’est le besoin de chauffage seul. Le vrai diagnostic additionne cinq usages, dont l’eau chaude, et compte en énergie primaire : le classement réel du bâtiment est moins bon que ce que ce ratio laisse lire sur l’échelle.</p>
+
+</div>
+
 <h2 id="les-travaux-se-rentabilisent-ils">Les travaux se rentabilisent-ils</h2>
 
 <div class="formule">
@@ -178,6 +184,8 @@
 </div>
 
 <p>Isoler une toiture qui passe de U = 0,90 à 0,16 fait gagner 54,8 W/K, soit <strong>2 270 kWh</strong> par an. Doubler un isolant déjà bon, de 0,16 à 0,12, n’en fait gagner que <strong>123</strong>.</p>
+
+<p>Chaque temps de retour est donné à l’électricité, puis au gaz.</p>
 
 <div class="enveloppe-tbl"><table>
 
@@ -231,7 +239,7 @@
 
 <td style="text-align: right;">1 500 €</td>
 
-<td style="text-align: right;"><strong>environ 50 ans</strong></td>
+<td style="text-align: right;"><strong>50 à 100 ans</strong></td>
 
 </tr>
 
@@ -253,13 +261,13 @@
 
 <li>Passer du GV de la séance 4 au besoin brut de la saison</li>
 
-<li>Comparer le même bâtiment sous huit climats, et lire l’écart</li>
+<li>Comparer le même bâtiment sous deux climats, Rouen et Nice, et lire l’écart</li>
 
 <li>Estimer les apports gratuits et en déduire le besoin net</li>
 
 <li>Convertir le besoin en facture, selon deux vecteurs d’énergie</li>
 
-<li>Calculer le temps de retour de deux travaux, et comprendre pourquoi ils diffèrent d’un facteur huit</li>
+<li>Calculer le temps de retour de trois travaux, et comprendre pourquoi ils diffèrent autant</li>
 
 </ol>
 
@@ -323,7 +331,7 @@
 
 
 
-<p>Isoler une toiture nue se rembourse en une dizaine d’années ; doubler un isolant existant en une cinquantaine. Expliquez d’où vient cet écart.</p>
+<p>Isoler une toiture nue se rembourse en une dizaine d’années ; doubler un isolant existant en cinquante ans au moins. Expliquez d’où vient cet écart.</p>
 
 </div><ul class="verifier" hidden><li>J’ai parlé de rendements décroissants de l’isolation.</li><li>J’ai dit qu’on ajoute une résistance à une résistance déjà grande.</li><li>J’ai comparé les deux gains de GV, pas les deux épaisseurs.</li><li>J’ai conclu par une règle d’ordre des travaux.</li></ul></section>
 
@@ -338,6 +346,8 @@
 <div class="piege">
 
 <p><strong>Le besoin calculé avec des DJU base 18 contient donc déjà une partie des apports.</strong> Retirer ensuite 25 % d’apports revient à les compter deux fois. Selon les usages, on retire une part plus faible, ou on part de DJU base 20. <strong>Le sujet dit toujours quelle convention il retient.</strong> Et on ne mélange pas les deux.</p>
+
+<p><strong>En séance, on a pris la convention simple</strong> : des DJU base 18, puis 25 % d’apports. Elle compte une petite part deux fois ; on l’accepte pour un ordre de grandeur.</p>
 
 </div>
 
@@ -365,7 +375,7 @@
 
 <td>Littoral méditerranéen</td>
 
-<td style="text-align: right;">1 200 à 1 600</td>
+<td style="text-align: right;">1 000 à 1 600</td>
 
 </tr>
 
@@ -373,7 +383,7 @@
 
 <td>Façade atlantique</td>
 
-<td style="text-align: right;">1 900 à 2 300</td>
+<td style="text-align: right;">1 700 à 2 300</td>
 
 </tr>
 
@@ -389,7 +399,7 @@
 
 <td>Est, Massif central, montagne</td>
 
-<td style="text-align: right;">2 800 à 4 000</td>
+<td style="text-align: right;">2 700 à 4 000</td>
 
 </tr>
 
