@@ -1465,15 +1465,29 @@ OUTILS.energie={
   titre:"Besoin annuel et temps de retour",
   intro:"Le besoin de la saison, la facture, et ce que rapporte un scénario de travaux.",
   chaine:"le GV vient du bilan de déperditions",
-  monte:function(d){
-    var P={ville:0,ap:25,prix:0.25,trav:3000,gain:15};
+  monte:function(d,el){
+    /* Sans bilan de deperditions sur la page, le GV restait a zero et tout le calcul
+       aussi : l'outil porte alors ses propres reglages de GV et de surface, ouverts
+       sur le batiment de la page (data-gv, data-surface, data-ville, data-ap). */
+    var seul=!document.querySelector('.outil[data-outil="bilan"]');
+    function att(n,def){var v=el?el.getAttribute("data-"+n):null;return v===null||v===""?def:v;}
+    var iv=VILLES.map(function(v){return v[0];}).indexOf(att("ville","Nice"));
+    var P={ville:iv<0?0:iv,ap:+att("ap",25),prix:+att("prix",0.25),trav:3000,gain:15,
+           gv:+att("gv",150.7),surface:+att("surface",90)};
     var maj=[];
     var g=E("div",{"class":"g2"}),c1=E("div"),c2=E("div");
+    if(seul){
+      ch(c1,"GV du bâtiment","gv",20,600,0.1,1," W/K");
+      ch(c1,"Surface chauffée","surface",20,400,1,0," m²");
+      var tc=el&&el.querySelector(".chaine");
+      if(tc)tc.textContent="↳ le GV et la surface se règlent ici ; sur une page qui porte le bilan de déperditions, ils en viennent";
+    }
     var cv=E("div",{"class":"champ"});
     cv.appendChild(E("label",{},"Ville"));
     var vv=E("span",{"class":"v"},"");cv.appendChild(vv);
     var sv=E("select",{},VILLES.map(function(v,i){
       return '<option value="'+i+'">'+v[0]+" — "+v[1]+" DJU</option>";}).join(""));
+    sv.value=P.ville;
     sv.addEventListener("change",function(){P.ville=+this.value;calc();});
     cv.appendChild(sv);c1.appendChild(cv);
     maj.push(function(){vv.textContent=VILLES[P.ville][1]+" DJU";});
@@ -1496,6 +1510,7 @@ OUTILS.energie={
     d.appendChild(r1);d.appendChild(r2);
     function calc(){
       maj.forEach(function(f){f();});
+      if(seul){ETAT.gv=P.gv;ETAT.surface=P.surface;}
       ETAT.ville=P.ville;
       SCHEMA_MAJ.forEach(function(f){f();});
       var dju=VILLES[P.ville][1];
