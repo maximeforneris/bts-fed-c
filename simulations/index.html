@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les simulations du BTS</title>
+<meta name="description" content="Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chaque simulation s&#x27;ouvre sans réseau.">
+<meta name="etiquette" content="Par thème">
+<meta name="porte-compte" content="5 simulations">
+<style>
+/* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
+   Palette du kit web (kit.css) : papier, graphite, un seul accent. Polices du systeme : la page
+   s'ouvre sans reseau, depuis une cle ou le poste de la salle. */
+:root{
+  --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
+  --trait:#c9c5bf; --trait2:#dedbd6; --accent:#2c6da6; --accent-doux:#dfe8f1;
+  --juste:#2f7a55; --juste-doux:#e2efe7; --faux:#ab432a; --faux-doux:#f5e3dd; --tiede:#b8801f;
+  --scene:#f6f5f2; --ombre:0 1px 2px rgba(25,26,28,.05),0 10px 26px rgba(25,26,28,.07); --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+    --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+    --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+    --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+  --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+  --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+  --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;font-size:16px;line-height:1.5}
+.page{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+.mono,.afficheur .val,.curseur .val,table.releve td{font-family:ui-monospace,"Cascadia Mono",Consolas,"Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+sub,sup{font-size:.72em;line-height:0}
+
+/* En-tete */
+.tete{padding:6px 0 16px;border-bottom:1px solid var(--trait);margin-bottom:16px}
+.surtitre{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre2);font-weight:600}
+.tete h1{font-size:clamp(1.45rem,4vw,2rem);margin:4px 0 6px;font-weight:750}
+.chapeau{margin:0;color:var(--encre2);max-width:70ch}
+
+/* Onglets : un par protocole ou par ecran */
+.onglets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.onglets button{font:inherit;font-weight:650;font-size:.95rem;padding:9px 14px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre2);cursor:pointer}
+.onglets button[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.onglets button:not([aria-selected="true"]):hover{border-color:var(--encre2);color:var(--encre)}
+.vue[hidden]{display:none}
+
+/* Mise en page : la scene a gauche, les commandes a droite ; une colonne sous 820 px */
+.plan{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.plan{grid-template-columns:1fr}}
+.carte{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);box-shadow:var(--ombre);padding:16px;margin-bottom:16px}
+.carte > h2{font-size:1.08rem;margin-bottom:10px;font-weight:700}
+.carte > h2 .num{color:var(--accent);margin-right:.35em}
+.consigne{color:var(--encre2);margin:0 0 12px;font-size:.95rem}
+.scene{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r);overflow:hidden;position:relative}
+.scene svg,.scene canvas{display:block;width:100%;height:auto}
+.legende{font-size:.82rem;color:var(--encre2);margin-top:6px}
+
+/* Commandes */
+.commandes{display:flex;flex-direction:column;gap:14px}
+.curseur label{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-weight:600;margin-bottom:2px}
+.curseur .val{font-weight:600;color:var(--encre)}
+.curseur input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.curseur .bornes{display:flex;justify-content:space-between;font-size:.75rem;color:var(--encre2)}
+.choix .titre{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.choix .boutons{display:flex;flex-wrap:wrap;gap:6px}
+.choix button,.bouton{font:inherit;font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;min-height:40px}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bouton:hover,.choix button:hover{border-color:var(--encre2)}
+.bouton.principal{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.bouton:disabled{opacity:.45;cursor:not-allowed}
+.rangee{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Afficheurs : ce que lit un instrument */
+.afficheurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.afficheur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:8px 10px}
+.afficheur .nom{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);font-weight:650}
+.afficheur .val{font-size:1.45rem;font-weight:650;white-space:nowrap}
+.afficheur .unite{font-size:.95rem;color:var(--encre2);margin-left:.25em}
+.afficheur .note{font-size:.75rem;color:var(--encre2)}
+
+/* Releve de mesures et graphe */
+.releve-zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:820px){.releve-zone{grid-template-columns:1fr}}
+table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
+table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
+table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
+table.releve tr.vide td{color:var(--encre2);font-style:italic}
+.graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.graphe canvas{display:block;width:100%;height:auto}
+
+/* Enregistreur : une mesure toute seule, a intervalle regulier du temps simule */
+.enregistreur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.enr-lampe{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--trait)}
+.enr-lampe.actif{background:var(--faux)}
+.enr-lampe.eclair{animation:eclair .6s ease-out}
+@keyframes eclair{from{box-shadow:0 0 0 0 var(--faux)}to{box-shadow:0 0 0 10px transparent}}
+.enr-info{font-size:.88rem;color:var(--encre2)}
+
+/* Defi : l'eleve propose une valeur, la page dit juste ou pas encore, jamais la reponse */
+.defi{border:1px dashed var(--trait);border-radius:var(--r);padding:12px 14px;background:var(--carte2)}
+.defi p{margin:0 0 8px}
+.defi .saisie{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.defi input{font:inherit;width:9em;padding:7px 9px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.defi .retour{margin-top:8px;font-weight:600;min-height:1.4em}
+.defi .retour.juste{color:var(--juste)}
+.defi .retour.faux{color:var(--faux)}
+.defi .methode{font-weight:400;color:var(--encre2)}
+
+/* Encadres */
+.note-modele{margin-top:6px}
+details.modele{border-top:1px solid var(--trait);padding-top:10px;margin-top:8px}
+details.modele summary{cursor:pointer;font-weight:650}
+details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-size:.92rem}
+.alerte{border-left:4px solid var(--tiede);background:var(--carte2);padding:8px 12px;border-radius:0 var(--r) var(--r) 0;font-size:.92rem}
+.pied{margin-top:24px;padding-top:10px;border-top:1px solid var(--trait);font-size:.8rem;color:var(--encre2)}
+
+@media print{
+  body{background:#fff}
+  .onglets,.commandes .bouton,.defi{display:none}
+  .carte{box-shadow:none;break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Centrale d'acquisition : periode, duree, deux courbes en direct, tableau defilant, export */
+.centrale{display:flex;flex-direction:column;gap:12px}
+.centrale-reglages{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.centrale-traces{display:flex;flex-wrap:wrap;gap:8px 18px}
+.centrale-traces label{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.centrale-traces select{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);min-height:40px;max-width:100%}
+.centrale-pastille{display:inline-block;width:14px;height:4px;border-radius:2px}
+.centrale-table{max-height:300px;overflow:auto;border:1px solid var(--trait2);border-radius:var(--r)}
+.centrale-table table.releve th{position:sticky;top:0;z-index:1}
+.centrale-table table.releve{border-collapse:separate;border-spacing:0}
+
+/* Molette posee sur la scene : on la tourne au doigt */
+.molette{cursor:grab;touch-action:none;outline:none}
+.molette.tourne{cursor:grabbing}
+.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
+.molette.tourne .molette-corps{fill:var(--accent-doux)}
+.molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
+.molette-graduation{stroke:var(--encre2);stroke-width:1.2}
+.molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
+.molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
+
+.grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:10px 0 22px}
+section h2{font-size:1.1rem;margin-top:8px}
+.carte-sim{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid var(--trait2);border-radius:var(--r);
+  background:var(--carte);box-shadow:var(--ombre);color:var(--encre);text-decoration:none}
+.carte-sim:hover{border-color:var(--encre2)}
+.carte-sim .code{font-size:.75rem;letter-spacing:.1em;color:var(--encre2);font-weight:650}
+.carte-sim .nom{font-weight:700}
+.carte-sim .quoi{font-size:.9rem;color:var(--encre2)}
+.carte-sim .origine{font-size:.75rem;color:var(--accent);font-weight:650;margin-top:2px}
+
+</style>
+<script>
+
+</script>
+</head>
+<body>
+<div class="page">
+<header class="tete">
+<div class="surtitre">BTS FED option C · génie climatique</div>
+<h1>Les simulations du BTS</h1>
+<p class="chapeau">Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chaque simulation s'ouvre sans réseau.</p>
+</header>
+<section><h2>Production de chaleur</h2><div class="grille"><a class="carte-sim" href="chaudiere-condensation.html"><span class="code">Séance 11</span><span class="nom">La chaudière à condensation</span><span class="quoi">PCI et PCS, analyse des fumées, condensation selon le retour, rendement d'une journée</span><span class="origine">hors ligne</span></a><a class="carte-sim" href="pac-cop.html"><span class="code">Séance 13</span><span class="nom">La pompe à chaleur air-eau</span><span class="quoi">manomètres HP et BP du R32, COP mesuré et limite de Carnot, givre et dégivrage, journée de grand froid avec appoint</span><span class="origine">hors ligne</span></a></div></section>
+<section><h2>Froid et pompe à chaleur</h2><div class="grille"><a class="carte-sim" href="banc-froid.html"><span class="code">Séance 13 · habilitation fluides</span><span class="nom">Le banc de froid</span><span class="quoi">circuit complet, manomètres et sondes, diagramme enthalpique détaillé de cinq fluides, tracé du cycle point par point, sept pannes à diagnostiquer</span><span class="origine">hors ligne</span></a></div></section>
+<section><h2>Traitement de l'air</h2><div class="grille"><a class="carte-sim" href="cta-air-humide.html"><span class="code">Séances 14 à 17</span><span class="nom">La CTA et l'air humide</span><span class="quoi">banc double flux, débit à l'anémomètre, efficacité, diagramme de l'air humide, réglage d'une CTA en hiver et en été</span><span class="origine">hors ligne</span></a></div></section>
+<section><h2>Régulation</h2><div class="grille"><a class="carte-sim" href="regulation-loi-d-eau.html"><span class="code">Séances 18 et 19</span><span class="nom">La régulation et la loi d'eau</span><span class="quoi">tout ou rien et différentiel, bande proportionnelle et erreur statique, action intégrale, courbe de chauffe, sonde au soleil, réduit de nuit</span><span class="origine">hors ligne</span></a></div></section>
+<footer class="pied">Simulations hors ligne, sans compte et sans enregistrement. Chaque page dit sous la simulation ce que son modèle simplifie.</footer>
+</div>
+</body>
+</html>

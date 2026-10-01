@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La chaudière à condensation</title>
+<meta name="description" content="Une chaudière gaz sur son banc d&#x27;essai, puis une journée d&#x27;hiver au service d&#x27;un bâtiment. On tourne la modulation, la vis d&#x27;air et le banc de charge au doigt, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d&#x27;acquisition enregistre tout dans le temps.">
+<meta name="etiquette" content="Simulation · J11">
+<style>
+/* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
+   Palette du kit web (kit.css) : papier, graphite, un seul accent. Polices du systeme : la page
+   s'ouvre sans reseau, depuis une cle ou le poste de la salle. */
+:root{
+  --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
+  --trait:#c9c5bf; --trait2:#dedbd6; --accent:#2c6da6; --accent-doux:#dfe8f1;
+  --juste:#2f7a55; --juste-doux:#e2efe7; --faux:#ab432a; --faux-doux:#f5e3dd; --tiede:#b8801f;
+  --scene:#f6f5f2; --ombre:0 1px 2px rgba(25,26,28,.05),0 10px 26px rgba(25,26,28,.07); --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+    --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+    --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+    --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+  --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+  --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+  --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;font-size:16px;line-height:1.5}
+.page{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+.mono,.afficheur .val,.curseur .val,table.releve td{font-family:ui-monospace,"Cascadia Mono",Consolas,"Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+sub,sup{font-size:.72em;line-height:0}
+
+/* En-tete */
+.tete{padding:6px 0 16px;border-bottom:1px solid var(--trait);margin-bottom:16px}
+.surtitre{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre2);font-weight:600}
+.tete h1{font-size:clamp(1.45rem,4vw,2rem);margin:4px 0 6px;font-weight:750}
+.chapeau{margin:0;color:var(--encre2);max-width:70ch}
+
+/* Onglets : un par protocole ou par ecran */
+.onglets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.onglets button{font:inherit;font-weight:650;font-size:.95rem;padding:9px 14px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre2);cursor:pointer}
+.onglets button[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.onglets button:not([aria-selected="true"]):hover{border-color:var(--encre2);color:var(--encre)}
+.vue[hidden]{display:none}
+
+/* Mise en page : la scene a gauche, les commandes a droite ; une colonne sous 820 px */
+.plan{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.plan{grid-template-columns:1fr}}
+.carte{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);box-shadow:var(--ombre);padding:16px;margin-bottom:16px}
+.carte > h2{font-size:1.08rem;margin-bottom:10px;font-weight:700}
+.carte > h2 .num{color:var(--accent);margin-right:.35em}
+.consigne{color:var(--encre2);margin:0 0 12px;font-size:.95rem}
+.scene{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r);overflow:hidden;position:relative}
+.scene svg,.scene canvas{display:block;width:100%;height:auto}
+.legende{font-size:.82rem;color:var(--encre2);margin-top:6px}
+
+/* Commandes */
+.commandes{display:flex;flex-direction:column;gap:14px}
+.curseur label{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-weight:600;margin-bottom:2px}
+.curseur .val{font-weight:600;color:var(--encre)}
+.curseur input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.curseur .bornes{display:flex;justify-content:space-between;font-size:.75rem;color:var(--encre2)}
+.choix .titre{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.choix .boutons{display:flex;flex-wrap:wrap;gap:6px}
+.choix button,.bouton{font:inherit;font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;min-height:40px}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bouton:hover,.choix button:hover{border-color:var(--encre2)}
+.bouton.principal{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.bouton:disabled{opacity:.45;cursor:not-allowed}
+.rangee{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Afficheurs : ce que lit un instrument */
+.afficheurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.afficheur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:8px 10px}
+.afficheur .nom{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);font-weight:650}
+.afficheur .val{font-size:1.45rem;font-weight:650;white-space:nowrap}
+.afficheur .unite{font-size:.95rem;color:var(--encre2);margin-left:.25em}
+.afficheur .note{font-size:.75rem;color:var(--encre2)}
+
+/* Releve de mesures et graphe */
+.releve-zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:820px){.releve-zone{grid-template-columns:1fr}}
+table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
+table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
+table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
+table.releve tr.vide td{color:var(--encre2);font-style:italic}
+.graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.graphe canvas{display:block;width:100%;height:auto}
+
+/* Enregistreur : une mesure toute seule, a intervalle regulier du temps simule */
+.enregistreur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.enr-lampe{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--trait)}
+.enr-lampe.actif{background:var(--faux)}
+.enr-lampe.eclair{animation:eclair .6s ease-out}
+@keyframes eclair{from{box-shadow:0 0 0 0 var(--faux)}to{box-shadow:0 0 0 10px transparent}}
+.enr-info{font-size:.88rem;color:var(--encre2)}
+
+/* Defi : l'eleve propose une valeur, la page dit juste ou pas encore, jamais la reponse */
+.defi{border:1px dashed var(--trait);border-radius:var(--r);padding:12px 14px;background:var(--carte2)}
+.defi p{margin:0 0 8px}
+.defi .saisie{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.defi input{font:inherit;width:9em;padding:7px 9px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.defi .retour{margin-top:8px;font-weight:600;min-height:1.4em}
+.defi .retour.juste{color:var(--juste)}
+.defi .retour.faux{color:var(--faux)}
+.defi .methode{font-weight:400;color:var(--encre2)}
+
+/* Encadres */
+.note-modele{margin-top:6px}
+details.modele{border-top:1px solid var(--trait);padding-top:10px;margin-top:8px}
+details.modele summary{cursor:pointer;font-weight:650}
+details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-size:.92rem}
+.alerte{border-left:4px solid var(--tiede);background:var(--carte2);padding:8px 12px;border-radius:0 var(--r) var(--r) 0;font-size:.92rem}
+.pied{margin-top:24px;padding-top:10px;border-top:1px solid var(--trait);font-size:.8rem;color:var(--encre2)}
+
+@media print{
+  body{background:#fff}
+  .onglets,.commandes .bouton,.defi{display:none}
+  .carte{box-shadow:none;break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Centrale d'acquisition : periode, duree, deux courbes en direct, tableau defilant, export */
+.centrale{display:flex;flex-direction:column;gap:12px}
+.centrale-reglages{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.centrale-traces{display:flex;flex-wrap:wrap;gap:8px 18px}
+.centrale-traces label{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.centrale-traces select{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);min-height:40px;max-width:100%}
+.centrale-pastille{display:inline-block;width:14px;height:4px;border-radius:2px}
+.centrale-table{max-height:300px;overflow:auto;border:1px solid var(--trait2);border-radius:var(--r)}
+.centrale-table table.releve th{position:sticky;top:0;z-index:1}
+.centrale-table table.releve{border-collapse:separate;border-spacing:0}
+
+/* Molette posee sur la scene : on la tourne au doigt */
+.molette{cursor:grab;touch-action:none;outline:none}
+.molette.tourne{cursor:grabbing}
+.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
+.molette.tourne .molette-corps{fill:var(--accent-doux)}
+.molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
+.molette-graduation{stroke:var(--encre2);stroke-width:1.2}
+.molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
+.molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
+
+</style>
+<script>
+/* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
+   Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
+   Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
+"use strict";
+var Sim = (function () {
+
+  /* Nombres a la francaise : virgule, espace fine insecable entre les milliers. */
+  function fr(x, dec) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (dec === undefined) dec = 2;
+    var s = Math.abs(x).toFixed(dec).split(".");
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return (x < 0 && Number(x.toFixed(dec)) !== 0 ? "−" : "") + s.join(",");
+  }
+  /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
+  function lire(txt) {
+    if (txt === null || txt === undefined) return NaN;
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
+    return t === "" ? NaN : Number(t);
+  }
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "texte") n.textContent = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k === "classe") n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function $(sel) { return typeof sel === "string" ? document.querySelector(sel) : sel; }
+  function borne(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  /* Un instrument ne donne jamais la valeur exacte : bruit gaussien relatif, puis resolution. */
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function mesure(vraie, opts) {
+    opts = opts || {};
+    var x = vraie * (1 + (opts.relatif || 0) * gauss()) + (opts.absolu || 0) * gauss();
+    if (opts.resolution) x = Math.round(x / opts.resolution) * opts.resolution;
+    return x;
+  }
+
+  /* Onglets : boutons [data-vue="id"] qui montrent la section #id. */
+  function onglets(nav, surChange) {
+    nav = $(nav);
+    var boutons = Array.prototype.slice.call(nav.querySelectorAll("button[data-vue]"));
+    nav.setAttribute("role", "tablist");
+    function montrer(id) {
+      boutons.forEach(function (b) {
+        var actif = b.getAttribute("data-vue") === id;
+        b.setAttribute("aria-selected", actif ? "true" : "false");
+        b.setAttribute("role", "tab");
+        var v = document.getElementById(b.getAttribute("data-vue"));
+        if (v) v.hidden = !actif;
+      });
+      if (surChange) surChange(id);
+    }
+    boutons.forEach(function (b) { b.addEventListener("click", function () { montrer(b.getAttribute("data-vue")); }); });
+    montrer(boutons[0].getAttribute("data-vue"));
+    return { montrer: montrer };
+  }
+
+  /* Curseur avec son etiquette, sa valeur affichee et ses bornes. */
+  function curseur(parent, o) {
+    var dec = o.dec === undefined ? 0 : o.dec;
+    var id = o.id || ("c" + Math.random().toString(36).slice(2, 8));
+    var val = el("span", { classe: "val" });
+    var inp = el("input", { type: "range", id: id, min: o.min, max: o.max, step: o.pas || 1, value: o.valeur });
+    var bloc = el("div", { classe: "curseur" }, [
+      el("label", { "for": id }, [el("span", { texte: o.label }), val]), inp,
+      el("div", { classe: "bornes" }, [el("span", { texte: fr(o.min, dec) + " " + (o.unite || "") }), el("span", { texte: fr(o.max, dec) + " " + (o.unite || "") })])
+    ]);
+    function maj() { val.textContent = fr(Number(inp.value), dec) + (o.unite ? " " + o.unite : ""); }
+    inp.addEventListener("input", function () { maj(); if (o.surChange) o.surChange(Number(inp.value)); });
+    maj();
+    $(parent).appendChild(bloc);
+    return {
+      get: function () { return Number(inp.value); },
+      set: function (v, silencieux) { inp.value = v; maj(); if (!silencieux && o.surChange) o.surChange(Number(inp.value)); },
+      activer: function (oui) { inp.disabled = !oui; },
+      noeud: bloc
+    };
+  }
+
+  /* Groupe de boutons dont un seul est enfonce. options : [{val, texte}] */
+  function choix(parent, o) {
+    var courant = o.valeur;
+    var zone = el("div", { classe: "boutons", role: "group", "aria-label": o.label || "" });
+    var boutons = o.options.map(function (op) {
+      var b = el("button", { type: "button", texte: op.texte });
+      b.addEventListener("click", function () { poser(op.val); });
+      zone.appendChild(b);
+      return { b: b, val: op.val };
+    });
+    function poser(v, silencieux) {
+      courant = v;
+      boutons.forEach(function (x) { x.b.setAttribute("aria-pressed", x.val === v ? "true" : "false"); });
+      if (!silencieux && o.surChange) o.surChange(v);
+    }
+    var bloc = el("div", { classe: "choix" }, [o.label ? el("div", { classe: "titre", texte: o.label }) : null, zone]);
+    $(parent).appendChild(bloc);
+    poser(courant, true);
+    return { get: function () { return courant; }, set: poser, noeud: bloc };
+  }
+
+  /* Afficheur d'instrument : nom, valeur, unite, et une note facultative. */
+  function afficheur(parent, o) {
+    var v = el("span", { classe: "val", texte: "—" });
+    var n = el("div", { classe: "note", texte: o.note || "" });
+    var bloc = el("div", { classe: "afficheur" }, [el("div", { classe: "nom", texte: o.nom }), el("div", null, [v, el("span", { classe: "unite", texte: o.unite || "" })]), o.note !== undefined ? n : null]);
+    $(parent).appendChild(bloc);
+    return {
+      set: function (x, dec) { v.textContent = typeof x === "string" ? x : fr(x, dec === undefined ? (o.dec === undefined ? 2 : o.dec) : dec); },
+      note: function (t) { n.textContent = t; },
+      noeud: bloc
+    };
+  }
+
+  /* Graphe sur canvas, net sur les ecrans haute densite. Axes, grille, courbes, points. */
+  function graphe(parent, o) {
+    var larg = o.largeur || 640, haut = o.hauteur || 380;
+    var cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": o.titre || "graphe" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    $(parent).appendChild(cadre);
+    var ctx = cv.getContext("2d");
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = larg * dpr; cv.height = haut * dpr; ctx.scale(dpr, dpr);
+    var m = { g: 62, d: 16, h: 16, b: 48 };
+    var ax = { xmin: o.xmin, xmax: o.xmax, ymin: o.ymin, ymax: o.ymax };
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+    function X(x) { return m.g + (x - ax.xmin) / (ax.xmax - ax.xmin) * (larg - m.g - m.d); }
+    function Y(y) { return haut - m.b - (y - ax.ymin) / (ax.ymax - ax.ymin) * (haut - m.h - m.b); }
+    function pasJoli(etendue, n) {
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function fond() {
+      ctx.clearRect(0, 0, larg, haut);
+      ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var px = o.pasX || pasJoli(ax.xmax - ax.xmin, 8), py = o.pasY || pasJoli(ax.ymax - ax.ymin, 6);
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2");
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = Math.ceil(ax.xmin / px) * px; x <= ax.xmax + 1e-9; x += px) {
+        ctx.beginPath(); ctx.moveTo(X(x), Y(ax.ymin)); ctx.lineTo(X(x), Y(ax.ymax)); ctx.stroke();
+        ctx.fillText(fr(x, o.decX !== undefined ? o.decX : decimales(px)), X(x), Y(ax.ymin) + 5);
+      }
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (var y = Math.ceil(ax.ymin / py) * py; y <= ax.ymax + 1e-9; y += py) {
+        ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y)); ctx.lineTo(X(ax.xmax), Y(y)); ctx.stroke();
+        ctx.fillText(fr(y, o.decY !== undefined ? o.decY : decimales(py)), X(ax.xmin) - 6, Y(y));
+      }
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.4;
+      var y0 = borne(0, ax.ymin, ax.ymax), x0 = borne(0, ax.xmin, ax.xmax);
+      ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y0)); ctx.lineTo(X(ax.xmax), Y(y0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(x0), Y(ax.ymin)); ctx.lineTo(X(x0), Y(ax.ymax)); ctx.stroke();
+      ctx.fillStyle = css("--encre"); ctx.font = "600 13px system-ui, Segoe UI, Arial, sans-serif";
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(o.titreX || "", larg - m.d, haut - 4);
+      ctx.save(); ctx.translate(14, m.h); ctx.rotate(-Math.PI / 2); ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText(o.titreY || "", 0, 0); ctx.restore();
+    }
+    function couleur(c) { return c && c.indexOf("--") === 0 ? css(c) : (c || css("--accent")); }
+    var api = {
+      axes: function (n) { for (var k in n) ax[k] = n[k]; return api; },
+      effacer: function () { fond(); return api; },
+      /* f : fonction x -> y, ou tableau de [x, y] */
+      courbe: function (f, opts) {
+        opts = opts || {};
+        ctx.save(); ctx.beginPath();
+        ctx.rect(m.g, m.h, larg - m.g - m.d, haut - m.h - m.b); ctx.clip();
+        ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = opts.epaisseur || 2.2;
+        if (opts.pointille) ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        if (typeof f === "function") {
+          var n = opts.pas || 400, prem = true;
+          for (var i = 0; i <= n; i++) {
+            var x = ax.xmin + (ax.xmax - ax.xmin) * i / n, y = f(x);
+            if (!isFinite(y)) { prem = true; continue; }
+            if (prem) { ctx.moveTo(X(x), Y(y)); prem = false; } else ctx.lineTo(X(x), Y(y));
+          }
+        } else {
+          f.forEach(function (p, i) { if (i === 0) ctx.moveTo(X(p[0]), Y(p[1])); else ctx.lineTo(X(p[0]), Y(p[1])); });
+        }
+        ctx.stroke(); ctx.restore();
+        return api;
+      },
+      points: function (pts, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.strokeStyle = css("--carte");
+        pts.forEach(function (p) {
+          var r = opts.rayon || 4.5;
+          ctx.beginPath();
+          if (opts.forme === "croix") {
+            ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = 2;
+            ctx.moveTo(X(p[0]) - r, Y(p[1]) - r); ctx.lineTo(X(p[0]) + r, Y(p[1]) + r);
+            ctx.moveTo(X(p[0]) + r, Y(p[1]) - r); ctx.lineTo(X(p[0]) - r, Y(p[1]) + r); ctx.stroke();
+          } else { ctx.arc(X(p[0]), Y(p[1]), r, 0, 2 * Math.PI); ctx.fill(); ctx.lineWidth = 1; ctx.stroke(); }
+        });
+        return api;
+      },
+      texte: function (x, y, t, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.font = (opts.gras ? "600 " : "") + "13px system-ui, Segoe UI, Arial, sans-serif";
+        ctx.textAlign = opts.align || "left"; ctx.textBaseline = "middle";
+        ctx.fillText(t, X(x) + (opts.dx || 0), Y(y) + (opts.dy || 0));
+        return api;
+      },
+      X: X, Y: Y, ctx: ctx, canvas: cv
+    };
+    fond();
+    return api;
+  }
+
+  /* Releve : l'eleve garde une mesure dans un tableau, qui peut alimenter un graphe.
+     colonnes : [{cle, titre, unite, dec}] ; graphe : {x, y, ...options de Sim.graphe} */
+  function releve(parent, o) {
+    var lignes = [];
+    var zone = el("div", { classe: "releve-zone" });
+    var gauche = el("div");
+    var table = el("table", { classe: "releve" });
+    var tete = el("tr"); o.colonnes.forEach(function (c) { tete.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+    table.appendChild(el("thead", null, [tete]));
+    var corps = el("tbody"); table.appendChild(corps);
+    var boutons = el("div", { classe: "rangee", style: "margin-top:8px" });
+    var bAnnuler = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    boutons.appendChild(bAnnuler); boutons.appendChild(bVider);
+    gauche.appendChild(table); gauche.appendChild(boutons);
+    zone.appendChild(gauche);
+    var gr = null;
+    if (o.graphe) { var droite = el("div"); zone.appendChild(droite); gr = graphe(droite, o.graphe); }
+    $(parent).appendChild(zone);
+    function dessiner() {
+      corps.innerHTML = "";
+      if (!lignes.length) {
+        var tr = el("tr", { classe: "vide" }); tr.appendChild(el("td", { colspan: o.colonnes.length, texte: o.vide || "Aucune mesure gardée pour l'instant." })); corps.appendChild(tr);
+      }
+      lignes.forEach(function (l) {
+        var tr = el("tr");
+        o.colonnes.forEach(function (c) { tr.appendChild(el("td", { texte: typeof l[c.cle] === "number" ? fr(l[c.cle], c.dec === undefined ? 2 : c.dec) : (l[c.cle] || "") })); });
+        corps.appendChild(tr);
+      });
+      if (gr) {
+        gr.effacer();
+        if (o.avantPoints) o.avantPoints(gr, lignes);
+        gr.points(lignes.map(function (l) { return [l[o.graphe.x], l[o.graphe.y]]; }), { couleur: o.graphe.couleur });
+      }
+      if (o.surChange) o.surChange(lignes);
+    }
+    bAnnuler.addEventListener("click", function () { lignes.pop(); dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; dessiner(); });
+    dessiner();
+    return {
+      ajouter: function (l) { if (o.max && lignes.length >= o.max) lignes.shift(); lignes.push(l); dessiner(); },
+      lignes: function () { return lignes.slice(); },
+      vider: function () { lignes = []; dessiner(); },
+      redessiner: dessiner,
+      graphe: gr
+    };
+  }
+
+  /* Enregistreur : garde une ligne du releve tout seul, a intervalle regulier du temps SIMULE,
+     comme une centrale d'acquisition. La simulation appelle tic(t) a chaque pas de calcul.
+     o : { periodes: [{val, texte}], valeur, lire: function (tPlanifie, tLancement) -> ligne ou null, label } */
+  function enregistreur(parent, rel, o) {
+    var periode = o.valeur, actif = false, prochain = null, dernier = 0, debut = 0;
+    var zone = el("div", { classe: "enregistreur" });
+    choix(zone, { label: o.label || "Enregistrement automatique : une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; } });
+    var b = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'enregistrement" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [b, lampe, info]));
+    $(parent).appendChild(zone);
+    function majInfo() {
+      var n = rel.lignes().length;
+      info.textContent = (actif ? "enregistre" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") + " dans le tableau" : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      b.textContent = oui ? "Arrêter l'enregistrement" : "Lancer l'enregistrement";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo();
+      if (o.surEtat) o.surEtat(oui);
+    }
+    b.addEventListener("click", function () { poser(!actif); });
+    majInfo();
+    return {
+      tic: function (t) {
+        if (!actif) return;
+        if (prochain === null) { prochain = t; debut = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;      // un pas trop long : pas de rattrapage en rafale
+        if (l) {
+          rel.ajouter(l); majInfo();
+          lampe.classList.remove("eclair"); void lampe.offsetWidth; lampe.classList.add("eclair");
+        }
+      },
+      actif: function () { return actif; },
+      lancer: function () { if (!actif) poser(true); },
+      arreter: function () { if (actif) poser(false); },
+      majInfo: majInfo,
+      noeud: zone
+    };
+  }
+
+  /* Centrale d'acquisition : l'enregistreur, le tableau et la courbe reunis, comme sur un vrai
+     enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
+     tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
+     Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+           lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
+           nomFichier, surChange } */
+  var COULEURS_VOIES = ["--accent", "--faux"];
+  function centrale(parent, o) {
+    var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
+    var periode = o.valeur, duree = o.duree || 0, TP = o.temps, voies = o.voies;
+    var montree = {}; voies.forEach(function (v) { montree[v.cle] = !v.cache; });
+    var trace = (o.trace || [voies[0].cle]).concat([null]).slice(0, 2);
+    var zone = el("div", { classe: "centrale" });
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+
+    /* Les reglages de l'acquisition */
+    var reg = el("div", { classe: "centrale-reglages" });
+    choix(reg, { label: "Une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; majInfo(); } });
+    if (o.durees) choix(reg, { label: "Arrêt automatique au bout de", valeur: duree, options: o.durees, surChange: function (v) { duree = v; majInfo(); } });
+    zone.appendChild(reg);
+    var bLancer = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'acquisition" });
+    var bMain = el("button", { type: "button", classe: "bouton", texte: "Une mesure maintenant" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    lampe.addEventListener("animationend", function () { lampe.classList.remove("eclair"); });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bLancer, bMain, lampe, info]));
+
+    /* La courbe en direct : deux voies au choix, chacune sur son axe */
+    var selects = [0, 1].map(function (i) {
+      var s = el("select", { "aria-label": i ? "Courbe 2, axe de droite" : "Courbe 1, axe de gauche" });
+      if (i) s.appendChild(el("option", { value: "", texte: "aucune" }));
+      voies.forEach(function (v) { s.appendChild(el("option", { value: v.cle, texte: v.titre + (v.unite ? " (" + v.unite + ")" : "") })); });
+      s.value = trace[i] || "";
+      s.addEventListener("change", function () { trace[i] = s.value || null; dessinerCourbe(); });
+      return s;
+    });
+    var pastille = function (i) { return el("span", { classe: "centrale-pastille", style: "background:" + css(COULEURS_VOIES[i]) }); };
+    var pastilles = [pastille(0), pastille(1)];
+    zone.appendChild(el("div", { classe: "centrale-traces" }, [
+      el("label", null, [pastilles[0], el("span", { texte: "Courbe 1, à gauche" }), selects[0]]),
+      el("label", null, [pastilles[1], el("span", { texte: "Courbe 2, à droite" }), selects[1]])
+    ]));
+    /* Le canevas se dessine a la largeur reelle de son cadre : sur un telephone, les graduations
+       restent lisibles au lieu d'etre reduites de moitie. */
+    var larg = 640, haut = 300, cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": "courbe de l'acquisition" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    zone.appendChild(cadre);
+    var ctx = cv.getContext("2d"), dpr = 1;
+    function dimensionner() {
+      var w = cadre.clientWidth ? Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) : 640, h = Math.round(w < 480 ? w * 0.72 : Math.min(320, w * 0.47)), d = Math.max(1, window.devicePixelRatio || 1);
+      if (w === larg && h === haut && d === dpr && cv.width === Math.round(w * d)) return;
+      larg = w; haut = h; dpr = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    /* redessiner quand le cadre change de taille, y compris quand son onglet devient visible */
+    if (window.ResizeObserver) new ResizeObserver(function () { if (cadre.clientWidth && Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) !== larg) dessinerCourbe(); }).observe(cadre);
+    else window.addEventListener("resize", function () { dessinerCourbe(); });
+
+    /* Les voies du tableau */
+    var puces = el("div", { classe: "boutons" });
+    voies.forEach(function (v) {
+      var b = el("button", { type: "button", texte: v.titre, "aria-pressed": montree[v.cle] ? "true" : "false" });
+      b.addEventListener("click", function () { montree[v.cle] = !montree[v.cle]; b.setAttribute("aria-pressed", montree[v.cle] ? "true" : "false"); dessinerTable(); });
+      puces.appendChild(b);
+    });
+    zone.appendChild(el("div", { classe: "choix" }, [el("div", { classe: "titre", texte: "Colonnes du tableau (tout est enregistré)" }), puces]));
+    var table = el("table", { classe: "releve" }), boite = el("div", { classe: "centrale-table" }, [table]);
+    zone.appendChild(boite);
+    var bCopier = el("button", { type: "button", classe: "bouton", texte: "Copier pour un tableur" });
+    var bCsv = el("button", { type: "button", classe: "bouton", texte: "Enregistrer en CSV" });
+    var bRetirer = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    var retour = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bCopier, bCsv, bRetirer, bVider, retour]));
+    $(parent).appendChild(zone);
+
+    function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
+    var corps = null;
+    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
+    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function dessinerTable() {
+      var cs = colonnes(); table.innerHTML = "";
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      table.appendChild(el("thead", null, [tr]));
+      corps = el("tbody");
+      if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
+      lignes.forEach(function (l) { corps.appendChild(ligneTable(l, cs)); });
+      table.appendChild(corps);
+      boite.scrollTop = boite.scrollHeight;
+    }
+    function pasJoli(etendue, n) {
+      if (!(etendue > 0)) return 1;
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function bornes(cle) {
+      var a = Infinity, b = -Infinity;
+      lignes.forEach(function (l) { var y = l[cle]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } });
+      if (!isFinite(a)) return null;
+      if (b - a < 1e-9) { var d = Math.max(Math.abs(a) * 0.05, 0.5); a -= d; b += d; }
+      var marge = (b - a) * 0.04; a -= marge; b += marge;
+      var pas = pasJoli(b - a, 5); return { min: Math.floor(a / pas) * pas, max: Math.ceil(b / pas) * pas, pas: pas };
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function dessinerCourbe() {
+      dimensionner();
+      var mg = 52, md = trace[1] ? 52 : 14, mh = 26, mb = 38, w = larg - mg - md, h = haut - mh - mb;
+      ctx.clearRect(0, 0, larg, haut); ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
+      var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
+      if (x1 - x0 < 1e-9) x1 = x0 + 1;
+      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      trace.forEach(function (cle, i) {
+        if (!cle) return;
+        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
+        ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.fillStyle = coul; ctx.textBaseline = "top";
+        ctx.textAlign = i ? "right" : "left"; ctx.fillText(v.titre + (v.unite ? " (" + v.unite + ")" : ""), i ? larg - 6 : 6, 5);
+        if (!b) return;
+        var Y = function (y) { return mh + h - (y - b.min) / (b.max - b.min) * h; };
+        ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = i ? "left" : "right";
+        for (var y = b.min; y <= b.max + 1e-9; y += b.pas) {
+          if (!i) { ctx.strokeStyle = css("--trait2"); ctx.beginPath(); ctx.moveTo(mg, Y(y)); ctx.lineTo(mg + w, Y(y)); ctx.stroke(); }
+          ctx.fillText(fr(y, decimales(b.pas)), i ? mg + w + 6 : mg - 6, Y(y));
+        }
+        ctx.strokeStyle = coul; ctx.lineWidth = 2; ctx.beginPath();
+        var prem = true;
+        lignes.forEach(function (l) { var yy = l[cle], xx = l[TP.cle]; if (typeof yy !== "number" || !isFinite(yy)) { prem = true; return; }
+          if (prem) { ctx.moveTo(X(xx), Y(yy)); prem = false; } else ctx.lineTo(X(xx), Y(yy)); });
+        ctx.stroke();
+        ctx.fillStyle = coul;
+        if (lignes.length <= 80) lignes.forEach(function (l) { var yy = l[cle]; if (typeof yy === "number" && isFinite(yy)) { ctx.beginPath(); ctx.arc(X(l[TP.cle]), Y(yy), 3, 0, 2 * Math.PI); ctx.fill(); } });
+      });
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.2; ctx.strokeRect(mg, mh, w, h);
+      pastilles[1].style.visibility = trace[1] ? "visible" : "hidden";
+    }
+    function dessiner() { dessinerTable(); dessinerCourbe(); majInfo(); if (o.surChange) o.surChange(lignes); }
+    /* A chaque mesure, une ligne de plus au tableau et une courbe redessinee au plus quatre fois par seconde :
+       a grande vitesse, refaire tout le tableau a chaque point finit par figer la page. */
+    var dernierTrace = 0, traceEnAttente = null;
+    var suivre = true;      // le tableau defile avec les mesures, sauf si on est remonte le lire
+    boite.addEventListener("scroll", function () { suivre = boite.scrollTop + boite.clientHeight >= boite.scrollHeight - 8; });
+    function tracer() { dernierTrace = Date.now(); dessinerCourbe(); if (suivre) boite.scrollTop = boite.scrollHeight; }
+    function courbePlusTard() {
+      if (Date.now() - dernierTrace > 250) { tracer(); return; }
+      if (!traceEnAttente) traceEnAttente = setTimeout(function () { traceEnAttente = null; tracer(); }, 260);
+    }
+    function ecoule() { return Math.max(0, dernier - depart); }
+    function texteDuree(s) { return s >= 3600 ? fr(s / 3600, s % 3600 ? 1 : 0) + " h" : s >= 60 ? fr(s / 60, s % 60 ? 1 : 0) + " min" : fr(s, 0) + " s"; }
+    function majInfo() {
+      var n = lignes.length;
+      info.textContent = (actif ? "acquisition en cours" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") : "") +
+        (actif && duree ? " · " + texteDuree(ecoule()) + " sur " + texteDuree(duree) : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      bLancer.textContent = oui ? "Arrêter l'acquisition" : "Lancer l'acquisition";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo(); if (o.surEtat) o.surEtat(oui);
+    }
+    function ajouter(l) {
+      if (!l) return;
+      if (l[TP.cle] === undefined) l[TP.cle] = (tCourant - (debut === null ? 0 : debut)) / (TP.echelle || 1);
+      lignes.push(l);
+      if (o.max && lignes.length > o.max) { lignes.shift(); dessinerTable(); }
+      else if (corps) {
+        if (lignes.length === 1) dessinerTable();
+        else corps.appendChild(ligneTable(l, colonnes()));
+      }
+      courbePlusTard(); majInfo(); if (o.surChange) o.surChange(lignes);
+      lampe.classList.remove("eclair"); lampe.classList.add("eclair");
+    }
+    function versTexte(sep, decimale) {
+      var cs = colonnes(), lignesTxt = [cs.map(function (c) { return c.titre + (c.unite ? " (" + c.unite + ")" : ""); }).join(sep)];
+      lignes.forEach(function (l) { lignesTxt.push(cs.map(function (c) { var x = l[c.cle]; return typeof x === "number" ? (isFinite(x) ? x.toFixed(c.dec === undefined ? 2 : c.dec).replace(".", decimale) : "") : (x || ""); }).join(sep)); });
+      return lignesTxt.join("\r\n");
+    }
+    function dire(t) { retour.textContent = t; setTimeout(function () { if (retour.textContent === t) retour.textContent = ""; }, 4000); }
+    /* Relancer apres un arret continue la meme serie, sur le meme temps ; tout effacer la remet a zero. */
+    function lancer() { if (!lignes.length) debut = null; poser(true); }
+    bLancer.addEventListener("click", function () { if (actif) poser(false); else lancer(); });
+    bMain.addEventListener("click", function () { if (debut === null) debut = tCourant; ajouter(o.lire(tCourant, debut)); });
+    bRetirer.addEventListener("click", function () { lignes.pop(); if (!lignes.length && !actif) debut = null; dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; if (!actif) debut = null; dessiner(); });
+    bCopier.addEventListener("click", function () {
+      var t = versTexte("\t", ",");
+      function secours() {
+        var ta = el("textarea", { style: "position:fixed;left:-9999px;top:0" }); ta.value = t; document.body.appendChild(ta); ta.select();
+        var ok = false; try { ok = document.execCommand("copy"); } catch (x) { ok = false; }
+        document.body.removeChild(ta); dire(ok ? "Copié : colle-le dans le tableur." : "La copie est refusée par ce navigateur : enregistre en CSV.");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { dire("Copié : colle-le dans le tableur."); }, secours);
+      else secours();
+    });
+    bCsv.addEventListener("click", function () {
+      var blob = new Blob(["﻿" + versTexte(";", ",")], { type: "text/csv;charset=utf-8" });
+      var a = el("a", { href: URL.createObjectURL(blob), download: o.nomFichier || "acquisition.csv" });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      dire("Fichier CSV enregistré, séparateur point-virgule.");
+    });
+    dessiner();
+    return {
+      tic: function (t) {
+        tCourant = t;
+        if (!actif) return;
+        if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;
+        if (l) { if (l[TP.cle] === undefined) l[TP.cle] = (dernier - debut) / (TP.echelle || 1); ajouter(l); }
+        if (duree && dernier - depart >= duree - 1e-9) poser(false);
+        else majInfo();
+      },
+      ajouter: ajouter, lignes: function () { return lignes.slice(); }, vider: function () { lignes = []; if (!actif) debut = null; dessiner(); },
+      lancer: function () { if (!actif) lancer(); }, arreter: function () { if (actif) poser(false); },
+      actif: function () { return actif; }, majInfo: majInfo, redessiner: dessiner,
+      tracer: function (c1, c2) { trace = [c1 || trace[0], c2 === undefined ? trace[1] : c2]; selects[0].value = trace[0]; selects[1].value = trace[1] || ""; dessinerCourbe(); },
+      periode: function () { return periode; }, noeud: zone
+    };
+  }
+
+  /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
+     pour monter), a la molette de la souris ou aux fleches du clavier.
+     o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
+  function molette(parent, o) {
+    var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
+    var g = svg("g", { "class": "molette", transform: "translate(" + o.x + " " + o.y + ")", tabindex: "0", role: "slider",
+      "aria-label": o.label || "", "aria-valuemin": o.min, "aria-valuemax": o.max }, parent);
+    svg("circle", { r: o.zone || 46, fill: "transparent" }, g);
+    for (var k = 0; k <= 10; k++) {
+      var a = (-135 + 27 * k) * Math.PI / 180;
+      svg("line", { x1: Math.sin(a) * (r + 3), y1: -Math.cos(a) * (r + 3), x2: Math.sin(a) * (r + (k % 5 ? 6 : 8)), y2: -Math.cos(a) * (r + (k % 5 ? 6 : 8)), "class": "molette-graduation" }, g);
+    }
+    svg("circle", { r: r, "class": "molette-corps" }, g);
+    var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
+    var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
+    var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    function maj() {
+      var f = (v - o.min) / (o.max - o.min);
+      index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
+      val.textContent = o.format ? o.format(v) : fr(v, dec) + (o.unite ? " " + o.unite : "");
+      g.setAttribute("aria-valuenow", v); g.setAttribute("aria-valuetext", val.textContent);
+    }
+    function poser(x, silencieux) {
+      var p = o.pas || 1; x = borne(Math.round(x / p) * p, o.min, o.max); x = Number(x.toFixed(6));
+      var change = x !== v; v = x; maj();
+      if (change && !silencieux && o.surChange) o.surChange(v);
+    }
+    g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
+    g.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
+      g.classList.add("tourne");
+      function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
+      function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
+      g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
+    });
+    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("keydown", function (e) {
+      var p = o.pas || 1;
+      if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
+      if (e.key === "ArrowDown" || e.key === "ArrowLeft") { poser(v - p); e.preventDefault(); }
+    });
+    maj();
+    return { get: function () { return v; }, set: poser, noeud: g, montrer: function (oui) { g.style.display = oui ? "" : "none"; } };
+  }
+
+  /* Defi : une valeur a trouver. La page dit juste ou pas encore, et rappelle la methode,
+     jamais la valeur attendue. attendu : nombre ou fonction qui le calcule au moment du clic. */
+  function defi(parent, o) {
+    var inp = el("input", { type: "text", inputmode: "decimal", "aria-label": o.question });
+    var b = el("button", { type: "button", classe: "bouton", texte: "Vérifier" });
+    var retour = el("div", { classe: "retour", "aria-live": "polite" });
+    var bloc = el("div", { classe: "defi" }, [el("p", { html: o.question }), el("div", { classe: "saisie" }, [inp, o.unite ? el("span", { texte: o.unite }) : null, b]), retour]);
+    function verifier() {
+      var v = lire(inp.value), a = typeof o.attendu === "function" ? o.attendu() : o.attendu;
+      retour.className = "retour";
+      if (!isFinite(v)) { retour.textContent = "Écris un nombre."; return; }
+      var tol = o.tolerance === undefined ? 0.05 : o.tolerance;
+      var ok = Math.abs(v - a) <= Math.abs(a) * tol + (o.toleranceAbsolue || 0);
+      retour.className = "retour " + (ok ? "juste" : "faux");
+      retour.innerHTML = ok ? "Juste." : "Pas encore. <span class=\"methode\">" + (o.methode || "") + "</span>";
+      if (o.surReponse) o.surReponse(ok, v);
+    }
+    b.addEventListener("click", verifier);
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+    $(parent).appendChild(bloc);
+    return { noeud: bloc, effacer: function () { inp.value = ""; retour.textContent = ""; retour.className = "retour"; } };
+  }
+
+  /* Boucle d'animation : f(dt en secondes). S'arrete seule quand l'onglet est cache.
+     Sim.avancer(s) fait tourner les boucles a la main : c'est la porte des essais, dans un
+     navigateur qui ne dessine pas (onglet cache, capture sans affichage). */
+  var boucles = [];
+  function avancer(secondes, pasDt) {
+    pasDt = pasDt || 0.05;
+    for (var t = 0; t < secondes - 1e-9; t += pasDt) boucles.forEach(function (f) { f(pasDt); });
+  }
+  function animer(f) {
+    boucles.push(f);
+    var avant = null, actif = true, id = null;
+    function pas(t) {
+      if (avant === null) avant = t;
+      var dt = Math.min(0.1, (t - avant) / 1000); avant = t;
+      if (actif) f(dt);
+      id = requestAnimationFrame(pas);
+    }
+    id = requestAnimationFrame(pas);
+    return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
+  }
+
+  /* Petit utilitaire SVG. */
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) { if (k === "texte") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
+    afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
+    defi: defi, animer: animer, avancer: avancer, svg: svg };
+})();
+
+</script>
+</head>
+<body>
+<div class="page">
+<header class="tete">
+<div class="surtitre">BTS FED · séance 11, les générateurs</div>
+<h1>La chaudière à condensation</h1>
+<p class="chapeau">Une chaudière gaz sur son banc d'essai, puis une journée d'hiver au service d'un bâtiment. On tourne la modulation, la vis d'air et le banc de charge au doigt, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d'acquisition enregistre tout dans le temps.</p>
+</header>
+<style>
+:root{--gaz:#d9b54a;--chaud:#c0392b;--froid:#2c6da6}
+.objet{fill:var(--carte);stroke:var(--encre);stroke-width:2;stroke-linejoin:round}
+.trait{fill:none;stroke:var(--encre);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.etiq{font-size:11px;fill:var(--encre2)}
+.etiq-titre{font-size:12px;font-weight:700;fill:var(--encre)}
+.lcd{fill:#cfd8cf;stroke:var(--encre2);stroke-width:1}
+.lcd-txt{font-family:ui-monospace,Consolas,monospace;font-size:12px;font-weight:600;fill:#1d2a1d}
+.lcd-petit{font-family:ui-monospace,Consolas,monospace;font-size:8px;fill:#1d2a1d}
+.prise{cursor:grab;touch-action:none;outline:none}
+.prise:active{cursor:grabbing}
+.clic{cursor:pointer}
+.prise-zone{fill:var(--accent);fill-opacity:.08;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.indice{font-size:12px;font-weight:650;fill:var(--accent)}
+.carte [hidden]{display:none!important}
+.case{display:flex;gap:8px;align-items:center;font-size:.92rem;font-weight:600}
+.case input{width:20px;height:20px;accent-color:var(--accent)}
+.fiche{font-size:.9rem;color:var(--encre2);margin:0}
+.fiche b{color:var(--encre)}
+#fluxBloc{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r)}
+#fluxBloc svg{display:block;width:100%;height:auto}
+</style>
+
+<nav class="onglets" id="experiences" aria-label="Expériences">
+  <button type="button" data-vue="vueBanc">Le banc d'essai</button>
+  <button type="button" data-vue="vueJour">Une journée d'hiver</button>
+</nav>
+
+<div class="carte">
+  <h2><span class="num">1</span>La chaudière et son installation</h2>
+  <p class="consigne">Gaz naturel : PCI = 10 kWh/m³, PCS = 11,1 kWh/m³. Changer un réglage de cette carte remet l'expérience au départ.</p>
+  <div class="commandes" id="reglages"></div>
+  <p class="fiche" id="fiche"></p>
+</div>
+
+<div class="plan">
+  <div class="carte">
+    <h2><span class="num">2</span><span id="titreScene">Sur le banc d'essai</span></h2>
+    <div class="scene">
+      <svg id="scene" viewBox="0 0 640 440" role="img" aria-label="La chaudière, son compteur de gaz, son analyseur de fumées et son circuit d'eau"></svg>
+    </div>
+    <p class="legende" id="legende"></p>
+  </div>
+  <div class="carte">
+    <h2><span class="num">3</span>Règle et mesure</h2>
+    <div class="commandes">
+      <div id="cmd" class="commandes"></div>
+      <div class="rangee">
+        <button type="button" class="bouton principal" id="bMarche">Allumer le brûleur</button>
+      </div>
+      <div class="afficheurs" id="instruments"></div>
+      <div id="vitesse"></div>
+      <label class="case"><input type="checkbox" id="voirFlux"> Montrer où va l'énergie</label>
+      <div id="fluxBloc" hidden><svg id="flux" viewBox="0 0 320 178" role="img" aria-label="Où va la puissance, en ce moment"></svg></div>
+      <p class="alerte" id="etat"></p>
+    </div>
+  </div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">4</span>La centrale d'acquisition</h2>
+  <p class="consigne" id="consigneReleve"></p>
+  <div id="vueBanc" class="vue"></div>
+  <div id="vueJour" class="vue"></div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">5</span>Le résultat</h2>
+  <p class="consigne" id="consigneResultat"></p>
+  <div class="commandes" id="defis"></div>
+  <details class="modele">
+    <summary>Ce que la simulation simplifie</summary>
+    <ul>
+      <li>Le gaz est du méthane pur : PCI 10 kWh/m³, PCS 11,1 kWh/m³, compté aux conditions du compteur. Un vrai gaz naturel contient un peu d'azote et d'éthane, et le fournisseur corrige le volume de la température et de la pression.</li>
+      <li>Les fumées sortent de l'échangeur quelques degrés au-dessus de l'eau de retour : 2 à 8 °C pour la condensation, 80 à 140 °C pour la chaudière classique. Elles condensent jusqu'à saturation, sans gouttelettes entraînées.</li>
+      <li>L'échangeur a la même température d'eau partout ; les pertes par l'enveloppe sont fixes. À très faible charge, la chaudière fait des cycles marche-arrêt, comptés comme une petite perte en plus.</li>
+      <li>Le bâtiment de la journée a un GV de 600 W/K, 3 kW d'apports gratuits de 8 h à 18 h, et une loi d'eau parfaitement réglée sur ses émetteurs. La température extérieure suit une courbe régulière, sans vent ni soleil.</li>
+      <li>L'analyseur lit juste et tout de suite. Un vrai analyseur se calibre à l'air libre, demande une à deux minutes de stabilisation, et sa sonde doit être au cœur du conduit.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function () {
+  /* ---------- La combustion : methane, PCI 802,3 kJ/mol, vapeur 2 mol par mol ---------- */
+  var PCI_M3 = 10, PCS_M3 = 11.1, PCI_MOL = 802.3e3, LAT = 43.9e3, MOL_M3 = PCI_M3 * 3.6e6 / PCI_MOL, T_AIR = 20;
+  var PNOM = 24, PMIN = 4.8;
+  function psat(t) { return 0.61094 * Math.exp(17.625 * t / (t + 243.04)); }
+  function rosee(lam) { var p = 2 / (9.52 * lam + 1) * 101.3, g = Math.log(p / 0.61094); return 243.04 * g / (17.625 - g); }
+  /* Rendement sur PCI, temperature des fumees, eau condensee (mol par mol de CH4). */
+  function combustion(Tr, charge, lam, cond) {
+    var sec = 9.52 * lam - 1, Tf = cond ? Tr + 2 + 6 * charge : Tr + 80 + 60 * charge, x = 2 / (sec + 2), pv = psat(Tf), vap, c;
+    if (pv >= x * 101.3) { vap = 2; c = 0; } else { vap = sec * pv / (101.3 - pv); c = 2 - vap; }
+    var sens = (sec * 30 + vap * 34) * (Tf - T_AIR) / PCI_MOL, gain = c * LAT / PCI_MOL, parois = (cond ? 0.004 : 0.015) / Math.max(charge, 0.2);
+    return { eta: 1 - sens + gain - parois, Tf: Tf, cond: c, vap: vap, sens: sens, gain: gain, parois: parois,
+      co2: 100 / sec, o2: 200 * (lam - 1) / sec, co: 8 + 2500 * Math.max(0, 1.15 - lam) + 300 * Math.max(0, lam - 1.65) };
+  }
+
+  /* ---------- Les reglages ---------- */
+  var reg = { type: "condensation", regime: "55/45", tmoy: 2, vitesse: 10 };
+  var REGIMES = { "70/50": { d: 70, r: 50, n: 1.3, nom: "radiateurs anciens 70/50" }, "55/45": { d: 55, r: 45, n: 1.3, nom: "radiateurs récents 55/45" }, "45/35": { d: 45, r: 35, n: 1.1, nom: "plancher chauffant 45/35" } };
+  var GV = 600, TI = 19, TBASE = -7, PNOM_BAT = GV * (TI - TBASE) / 1000;
+  function tExt(h) { return reg.tmoy + 4 * Math.sin(2 * Math.PI * (h - 9) / 24); }
+  function apports(h) { return h >= 8 && h < 18 ? 3 : 0; }
+
+  /* ---------- L'etat : un par experience ---------- */
+  var exp = "banc", etats = {};
+  function E() { return etats[exp]; }
+  function etatNeuf(x) {
+    return { exp: x, t: 0, marche: false, mod: 60, lam: 1.3, trCons: 40, Q: 1.2, sonde: false,
+      Tr: 20, Td: 20, Pg: 0, Pu: 0, c: combustion(40, 0.6, 1.3, true), index: 1234.567, becher: 0, gouttes: [],
+      chrono: 0, chronoMarche: false, flamme: 0,
+      // la journee
+      h: 0, jour: false, fini: false, z: { Eu: 0, gaz: 0, cond: 0 }, Text: tExt(0), hist: [] };
+  }
+
+  /* ---------- Le banc ---------- */
+  function pasBanc(e, dt) {
+    var allume = e.marche;
+    e.flamme += ((allume ? 1 : 0) - e.flamme) * Math.min(1, dt / 2);
+    var Pg = allume ? PNOM * e.mod / 100 : 0;
+    // le banc de charge impose le retour ; l'eau suit avec l'inertie de l'echangeur
+    e.Tr += (e.trCons - e.Tr) * (1 - Math.exp(-dt / 40));
+    var c = combustion(e.Tr, Math.max(0.2, e.mod / 100), e.lam, reg.type === "condensation");
+    var Pu = Pg * c.eta, Td = e.Tr + Pu / (1.163 * e.Q);
+    e.Td += (Td - e.Td) * (1 - Math.exp(-dt / 25));
+    e.Pg = Pg; e.Pu = Pu; e.c = c;
+    var molCH4 = Pg * 1000 / PCI_MOL * dt;                       // mol de methane brules pendant dt
+    e.index += Pg / PCI_M3 * dt / 3600;
+    e.becher = Math.min(2000, e.becher + molCH4 * c.cond * 18);  // 1 g d'eau = 1 mL
+    if (allume && c.cond > 0.02 && Math.random() < Math.min(0.9, c.cond * e.mod / 200)) e.gouttes.push({ y: 0 });
+    e.t += dt; if (e.chronoMarche) e.chrono += dt;
+  }
+
+  /* ---------- La journee ---------- */
+  function pasJour(e, dt) {
+    if (!e.jour || e.fini) { e.Pg = 0; e.Pu = 0; e.flamme += (0 - e.flamme) * Math.min(1, dt / 2); return; }
+    var h = e.h, R = REGIMES[reg.regime];
+    e.Text = tExt(h);
+    var P = Math.max(0, GV * (TI - e.Text) / 1000 - apports(h)), x = P / PNOM_BAT;
+    var dTmNom = (R.d + R.r) / 2 - TI, Tm = TI + dTmNom * Math.pow(Math.max(x, 0.001), 1 / R.n), dT = (R.d - R.r) * x;
+    e.Td = Tm + dT / 2; e.Tr = Tm - dT / 2;
+    var charge = Math.max(P, PMIN) / PNOM, c = combustion(e.Tr, charge, 1.3, reg.type === "condensation");
+    var eta = c.eta * (P < PMIN ? 1 - 0.02 * (1 - P / PMIN) : 1);    // cycles marche-arret a faible charge
+    var Pg = P > 0 ? P / eta : 0;
+    e.Pg = Pg; e.Pu = P; e.c = c; e.mod = Math.round(100 * charge);
+    e.flamme += ((P > 0 ? 1 : 0) - e.flamme) * Math.min(1, dt / 60);
+    var molCH4 = Pg * 1000 / PCI_MOL * dt;
+    e.index += Pg / PCI_M3 * dt / 3600; e.z.gaz += Pg / PCI_M3 * dt / 3600;
+    e.z.Eu += P * dt / 3600; e.z.cond += molCH4 * c.cond * 18 / 1000;
+    e.becher = Math.min(2000, e.becher + molCH4 * c.cond * 18);
+    e.h += dt / 3600; e.t += dt;
+    if (e.hist.length === 0 || e.h - e.hist[e.hist.length - 1].h >= 0.1) e.hist.push({ h: e.h, Td: e.Td, Tr: e.Tr, Te: e.Text });
+    if (e.h >= 24) { e.h = 24; e.fini = true; e.jour = false; message("Fin de la journée : relève le calorimètre, le compteur de gaz et le bécher."); }
+  }
+
+  /* ---------- Les lectures ---------- */
+  function lec(e) {
+    var l = { Td: Sim.mesure(e.Td, { absolu: 0.05, resolution: 0.1 }), Tr: Sim.mesure(e.Tr, { absolu: 0.05, resolution: 0.1 }),
+      Q: Sim.mesure(e.exp === "banc" ? e.Q : 1.2, { relatif: 0.003, resolution: 0.01 }), index: Math.floor(e.index * 1000) / 1000, becher: Math.floor(e.becher) };
+    var dans = e.sonde && e.flamme > 0.5;
+    l.Tf = dans ? Sim.mesure(e.c.Tf, { absolu: 0.2, resolution: 0.1 }) : Sim.mesure(T_AIR, { absolu: 0.1, resolution: 0.1 });
+    l.o2 = dans ? Sim.mesure(e.c.o2, { absolu: 0.03, resolution: 0.1 }) : 20.9;
+    l.co2 = dans ? Sim.mesure(e.c.co2, { absolu: 0.03, resolution: 0.1 }) : 0;
+    l.co = dans ? Math.max(0, Math.round(Sim.mesure(e.c.co, { relatif: 0.05 }))) : 0;
+    if (e.exp === "jour") { l.Te = Sim.mesure(e.Text, { absolu: 0.05, resolution: 0.1 }); l.Eu = Math.floor(e.z.Eu * 10) / 10; l.P = Sim.mesure(e.Pu, { relatif: 0.01, resolution: 0.1 }); }
+    return l;
+  }
+  function heure(h) { var m = Math.floor(h * 60); return Math.floor(m / 60) + " h " + (m % 60 < 10 ? "0" : "") + (m % 60); }
+  function chronoTexte(t) { var s = Math.floor(t); return Math.floor(s / 60) + " min " + (s % 60 < 10 ? "0" : "") + (s % 60) + " s"; }
+
+  /* ---------- Les reglages de la carte 1 ---------- */
+  function message(t) { if (t) document.getElementById("etat").textContent = t; }
+  function poserReglages() {
+    var R = document.getElementById("reglages"); R.innerHTML = "";
+    Sim.choix(R, { label: "La chaudière", valeur: reg.type, options: [{ val: "condensation", texte: "Gaz à condensation · 24 kW" }, { val: "classique", texte: "Gaz classique, basse température · 24 kW" }],
+      surChange: function (v) { reg.type = v; etats[exp] = etatNeuf(exp); poserCommandes(); poserDefis(); message(v === "condensation" ? "Chaudière à condensation : un échangeur assez grand pour refroidir les fumées jusqu'à l'eau de retour." : "Chaudière classique : ses fumées sortent chaudes, elle ne condense jamais."); } });
+    if (exp === "jour") {
+      Sim.choix(R, { label: "Les émetteurs du bâtiment", valeur: reg.regime, options: Object.keys(REGIMES).map(function (k) { return { val: k, texte: REGIMES[k].nom }; }),
+        surChange: function (v) { reg.regime = v; etats.jour = etatNeuf("jour"); poserCommandes(); message("Émetteurs : " + REGIMES[v].nom + ". La loi d'eau est réglée sur eux."); } });
+      Sim.curseur(R, { label: "Température extérieure moyenne du jour", min: -8, max: 12, pas: 1, valeur: reg.tmoy, unite: "°C", dec: 0,
+        surChange: function (v) { reg.tmoy = v; etats.jour = etatNeuf("jour"); poserCommandes(); } });
+    }
+    document.getElementById("fiche").innerHTML = exp === "banc"
+      ? "Le <b>banc de charge</b> impose la température de retour, comme le ferait un réseau. Le <b>débitmètre</b> et les deux sondes donnent la puissance utile, <b>P = 1,163 × Q × Δθ</b>, Q en m³/h. Le <b>compteur de gaz</b> avance au millième de m³."
+      : "Un bâtiment de bureaux de <b>GV 600 W/K</b>, à 19 °C, dimensionné pour −7 °C : <b>" + Sim.fr(PNOM_BAT, 1) + " kW</b>. Un <b>calorimètre</b> compte l'énergie livrée au réseau de chauffage.";
+  }
+
+  /* ---------- Les commandes et les instruments de la carte 3 ---------- */
+  var C = {};
+  function poserCommandes() {
+    var Z = document.getElementById("cmd"), e = E();
+    Z.innerHTML = ""; C = {};
+    if (exp === "banc") Z.appendChild(Sim.el("p", { classe: "fiche", html: "Tout se règle <b>sur la scène</b>, au doigt : les deux molettes du brûleur, celle du banc de charge, le circulateur. On touche la sonde, le bécher, le chronomètre, et le tableau de la chaudière pour l'allumer." }));
+    else Z.appendChild(Sim.el("p", { classe: "fiche", html: "Touche le tableau de la chaudière, ou le bouton, pour lancer la journée." }));
+    majMolettes(); poserInstruments(); afficher();
+  }
+  var I = document.getElementById("instruments"), A = {};
+  function poserInstruments() {
+    I.innerHTML = ""; A = {};
+    if (exp === "jour") { A.h = Sim.afficheur(I, { nom: "Heure", unite: "", dec: 0 }); A.Te = Sim.afficheur(I, { nom: "Température extérieure", unite: "°C", dec: 1 }); }
+    A.index = Sim.afficheur(I, { nom: "Compteur de gaz", unite: "m³", dec: 3 });
+    A.Td = Sim.afficheur(I, { nom: "Départ", unite: "°C", dec: 1 });
+    A.Tr = Sim.afficheur(I, { nom: "Retour", unite: "°C", dec: 1 });
+    if (exp === "banc") A.Q = Sim.afficheur(I, { nom: "Débitmètre", unite: "m³/h", dec: 2 });
+    else { A.P = Sim.afficheur(I, { nom: "Calorimètre · puissance", unite: "kW", dec: 1 }); A.Eu = Sim.afficheur(I, { nom: "Calorimètre · énergie", unite: "kWh", dec: 1 }); }
+    if (exp === "banc") {
+      A.Tf = Sim.afficheur(I, { nom: "Analyseur · fumées", unite: "°C", dec: 1 });
+      A.o2 = Sim.afficheur(I, { nom: "Analyseur · O₂", unite: "%", dec: 1 });
+      A.co2 = Sim.afficheur(I, { nom: "Analyseur · CO₂", unite: "%", dec: 1 });
+      A.co = Sim.afficheur(I, { nom: "Analyseur · CO", unite: "ppm", dec: 0 });
+    }
+    A.becher = Sim.afficheur(I, { nom: "Condensats au bécher", unite: "mL", dec: 0 });
+    if (exp === "banc") A.chrono = Sim.afficheur(I, { nom: "Chronomètre", unite: "", dec: 0 });
+  }
+  function afficher() {
+    var e = E(), l = lec(e);
+    if (A.h) A.h.set(heure(e.h)); if (A.Te) A.Te.set(l.Te, 1);
+    A.index.set(l.index, 3); A.Td.set(l.Td, 1); A.Tr.set(l.Tr, 1);
+    if (A.Q) A.Q.set(l.Q, 2); if (A.P) A.P.set(l.P, 1); if (A.Eu) A.Eu.set(l.Eu, 1);
+    if (A.Tf) { A.Tf.set(l.Tf, 1); A.o2.set(l.o2, 1); A.co2.set(l.co2, 1); A.co.set(l.co, 0); }
+    A.becher.set(l.becher, 0);
+    if (A.chrono) A.chrono.set(chronoTexte(e.chrono));
+    var b = document.getElementById("bMarche");
+    b.textContent = exp === "banc" ? (e.marche ? "Éteindre le brûleur" : "Allumer le brûleur") : (e.fini ? "Journée terminée" : e.jour ? "Pause" : e.h > 0 ? "Reprendre la journée" : "Lancer la journée");
+    b.disabled = exp === "jour" && e.fini;
+  }
+
+  /* ---------- Les releves et leurs enregistreurs ---------- */
+  /* ---------- La centrale d'acquisition, une par experience ---------- */
+  var CEN = {};
+  CEN.banc = Sim.centrale("#vueBanc", {
+    temps: { cle: "t", titre: "t", unite: "min", dec: 2, echelle: 60 },
+    voies: [{ cle: "index", titre: "Gaz", unite: "m³", dec: 3 }, { cle: "Td", titre: "Départ", unite: "°C", dec: 1 }, { cle: "Tr", titre: "Retour", unite: "°C", dec: 1 },
+      { cle: "Q", titre: "Débit", unite: "m³/h", dec: 2 }, { cle: "Tf", titre: "Fumées", unite: "°C", dec: 1 }, { cle: "o2", titre: "O₂", unite: "%", dec: 1 },
+      { cle: "co2", titre: "CO₂", unite: "%", dec: 1, cache: true }, { cle: "co", titre: "CO", unite: "ppm", dec: 0, cache: true }, { cle: "becher", titre: "Condensats", unite: "mL", dec: 0 }],
+    periodes: [{ val: 10, texte: "10 s" }, { val: 30, texte: "30 s" }, { val: 60, texte: "1 min" }, { val: 120, texte: "2 min" }], valeur: 30,
+    durees: [{ val: 0, texte: "jamais" }, { val: 300, texte: "5 min" }, { val: 600, texte: "10 min" }, { val: 1800, texte: "30 min" }], duree: 0,
+    trace: ["Tr", "Tf"], nomFichier: "chaudiere-banc.csv",
+    lire: function () { var l = lec(etats.banc); return { index: l.index, Td: l.Td, Tr: l.Tr, Q: l.Q, Tf: l.Tf, o2: l.o2, co2: l.co2, co: l.co, becher: l.becher }; }
+  });
+  CEN.jour = Sim.centrale("#vueJour", {
+    temps: { cle: "h", titre: "Heure", unite: "h", dec: 2, echelle: 3600 },
+    voies: [{ cle: "Te", titre: "Extérieur", unite: "°C", dec: 1 }, { cle: "Td", titre: "Départ", unite: "°C", dec: 1 }, { cle: "Tr", titre: "Retour", unite: "°C", dec: 1 },
+      { cle: "P", titre: "Puissance", unite: "kW", dec: 1, cache: true }, { cle: "index", titre: "Gaz", unite: "m³", dec: 3 }, { cle: "Eu", titre: "Calorimètre", unite: "kWh", dec: 1 },
+      { cle: "becher", titre: "Condensats", unite: "mL", dec: 0 }],
+    periodes: [{ val: 900, texte: "15 min" }, { val: 1800, texte: "30 min" }, { val: 3600, texte: "1 h" }], valeur: 1800,
+    durees: [{ val: 0, texte: "jamais" }, { val: 21600, texte: "6 h" }, { val: 43200, texte: "12 h" }, { val: 86400, texte: "24 h" }], duree: 0,
+    trace: ["Tr", "Te"], nomFichier: "chaudiere-journee.csv",
+    lire: function () { var e = etats.jour, l = lec(e); return { h: e.h, Te: l.Te, Td: l.Td, Tr: l.Tr, P: l.P, index: l.index, Eu: l.Eu, becher: l.becher }; }
+  });
+
+  /* ---------- Les verifications : juste ou pas encore, jamais la valeur ---------- */
+  function stable(e) { return e.marche && Math.abs(e.Tr - e.trCons) < 0.5 && e.t > 120; }
+  function poserDefis() {
+    var D = document.getElementById("defis"); D.innerHTML = "";
+    if (exp === "banc") {
+      Sim.defi(D, { question: "Puissance du gaz brûlé, sur PCI, à partir du compteur et du chronomètre :", unite: "kW",
+        attendu: function () { return stable(E()) ? E().Pg : NaN; }, tolerance: 0.03,
+        methode: "Volume de gaz relevé pendant une durée chronométrée, ramené à l'heure, × 10 kWh/m³. Attends que les températures soient stables." });
+      Sim.defi(D, { question: "Puissance utile reçue par l'eau, P = 1,163 × Q × (θ<sub>départ</sub> − θ<sub>retour</sub>) :", unite: "kW",
+        attendu: function () { return stable(E()) ? E().Pu : NaN; }, tolerance: 0.03, methode: "Q en m³/h, l'écart en kelvins : le résultat sort en kW." });
+      Sim.defi(D, { question: "Rendement de la chaudière sur PCI :", unite: "%",
+        attendu: function () { return stable(E()) ? 100 * E().c.eta : NaN; }, tolerance: 0, toleranceAbsolue: 2, methode: "Puissance utile ÷ puissance du gaz sur PCI, × 100. Il peut dépasser 100 %." });
+      Sim.defi(D, { question: "Le même rendement compté sur PCS :", unite: "%",
+        attendu: function () { return stable(E()) ? 100 * E().c.eta / 1.11 : NaN; }, tolerance: 0, toleranceAbsolue: 2, methode: "PCS = 1,11 × PCI : divise le rendement sur PCI par 1,11." });
+      Sim.defi(D, { question: "Eau récupérée par mètre cube de gaz brûlé, d'après le bécher et le compteur :", unite: "mL/m³",
+        attendu: function () { return stable(E()) ? E().c.cond * 18 * MOL_M3 : NaN; }, tolerance: 0.08, methode: "Vide le bécher, relève le compteur, laisse brûler un moment, puis divise les millilitres par les m³." });
+      document.getElementById("consigneResultat").innerHTML = "Allume, attends que <b>le retour soit stable</b>, puis mesure. Gaz : PCI = 10 kWh/m³, PCS = 11,1 kWh/m³.";
+    } else {
+      Sim.defi(D, { question: "Énergie utile livrée au chauffage pendant la journée, lue au calorimètre :", unite: "kWh",
+        attendu: function () { var e = E(); return e.fini ? e.z.Eu : NaN; }, tolerance: 0.02, methode: "La lecture du calorimètre à la fin de la journée." });
+      Sim.defi(D, { question: "Énergie du gaz consommé pendant la journée, sur PCI :", unite: "kWh",
+        attendu: function () { var e = E(); return e.fini ? e.z.gaz * PCI_M3 : NaN; }, tolerance: 0.02, methode: "Index du soir − index du matin, en m³, × 10 kWh/m³." });
+      Sim.defi(D, { question: "Rendement de la chaudière sur la journée, sur PCI :", unite: "%",
+        attendu: function () { var e = E(); return e.fini ? 100 * e.z.Eu / (e.z.gaz * PCI_M3) : NaN; }, tolerance: 0, toleranceAbsolue: 1.5, methode: "Énergie utile ÷ énergie du gaz, × 100." });
+      document.getElementById("consigneResultat").innerHTML = "Lance la journée, relève l'index du gaz au départ, et laisse aller jusqu'à minuit. Puis change les émetteurs, et recommence.";
+    }
+  }
+
+  /* ---------- La scene ---------- */
+  var S = document.getElementById("scene"), svg = Sim.svg;
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function texte(p, x, y, t, o) { o = o || {}; return svg("text", { x: x, y: y, "class": o.classe || "etiq", "text-anchor": o.ancre || "start", texte: t }, p); }
+  function couleurEau(t) { var k = Sim.borne((t - 20) / 60, 0, 1); return "rgb(" + Math.round(44 + 148 * k) + "," + Math.round(109 - 52 * k) + "," + Math.round(166 - 123 * k) + ")"; }
+  function lcd(G, x, y, w, val, unite, uw) {
+    uw = uw || 24;                                          // la place laissee a l'unite, a droite
+    svg("rect", { x: x, y: y, width: w, height: 18, rx: 2, "class": "lcd" }, G);
+    svg("text", { x: x + w - uw, y: y + 13, "text-anchor": "end", "class": "lcd-txt", texte: val }, G);
+    svg("text", { x: x + w - 3, y: y + 12.5, "text-anchor": "end", "class": "lcd-petit", texte: unite }, G);
+  }
+  var Lc = {};
+  ["fond", "dyn"].forEach(function (k) { Lc[k] = svg("g", {}, S); });
+  Lc.molettes = svg("g", {}, S);
+  ["sonde", "panneau", "becher", "chrono"].forEach(function (k) { Lc[k] = svg("g", { "class": "clic" }, S); });
+  var DYN = ["fond", "dyn", "sonde", "panneau", "becher", "chrono"];
+
+  /* Les molettes du banc : posees une fois, elles ne se redessinent pas a chaque image. */
+  var M = {};
+  M.mod = Sim.molette(Lc.molettes, { x: 52, y: 100, min: 20, max: 100, pas: 5, valeur: 60, unite: "%", label: "Modulation du brûleur", titreCourt: "modulation",
+    surChange: function (v) { etats.banc.mod = v; } });
+  M.lam = Sim.molette(Lc.molettes, { x: 138, y: 100, min: 1.1, max: 1.8, pas: 0.05, valeur: 1.3, dec: 2, label: "Vis d'air du brûleur, excès d'air λ", titreCourt: "vis d'air",
+    format: function (v) { return "λ " + Sim.fr(v, 2); }, surChange: function (v) { etats.banc.lam = v; } });
+  M.tr = Sim.molette(Lc.molettes, { x: 588, y: 352, r: 15, min: 25, max: 75, pas: 1, valeur: 40, unite: "°C", label: "Retour imposé par le banc de charge", titreCourt: "retour",
+    surChange: function (v) { etats.banc.trCons = v; } });
+  M.q = Sim.molette(Lc.molettes, { x: 450, y: 372, r: 13, min: 0.6, max: 2.4, pas: 0.1, valeur: 1.2, dec: 1, label: "Vitesse du circulateur", titreCourt: "circulateur",
+    format: function (v) { return Sim.fr(v, 1) + " m³/h"; }, surChange: function (v) { etats.banc.Q = v; } });
+  function majMolettes() {
+    var e = etats.banc; Lc.molettes.style.display = exp === "banc" ? "" : "none"; if (!e) return;
+    M.mod.set(e.mod, true); M.lam.set(e.lam, true); M.tr.set(e.trCons, true); M.q.set(e.Q, true);
+  }
+  /* La chaudiere en coupe : x0, y0 le coin haut gauche du carter. */
+  function chaudiere(G, x0, y0, e, k) {
+    k = k || 1;
+    var X = function (x) { return x0 + x * k; }, Y = function (y) { return y0 + y * k; };
+    svg("rect", { x: X(0), y: Y(0), width: 140 * k, height: 250 * k, rx: 8, "class": "objet" }, G);
+    svg("rect", { x: X(12), y: Y(18), width: 116 * k, height: 196 * k, rx: 4, fill: css("--scene"), stroke: css("--encre2"), "stroke-width": 1 }, G);
+    // le brule ur et sa flamme
+    svg("rect", { x: X(30), y: Y(28), width: 80 * k, height: 12 * k, rx: 3, fill: "#8d949c", stroke: css("--encre"), "stroke-width": 1.2 }, G);
+    if (e.flamme > 0.05) {
+      var hF = (10 + 18 * (e.mod / 100)) * k * e.flamme, jaune = Sim.borne((1.2 - e.lam) / 0.1, 0, 1);
+      for (var i = 0; i < 6; i++) svg("ellipse", { cx: X(38 + i * 13), cy: Y(40) + hF / 2, rx: 5 * k, ry: hF / 2, fill: jaune > 0 ? "rgb(" + Math.round(80 + 170 * jaune) + "," + Math.round(140 + 60 * jaune) + ",230)" : "#5aa0e6", opacity: 0.85 }, G);
+    }
+    // l'echangeur : les tubes, a la couleur de l'eau
+    for (var r = 0; r < 5; r++) {
+      var yt = Y(90 + r * 22), tEau = e.Tr + (e.Td - e.Tr) * (1 - r / 4);
+      svg("rect", { x: X(20), y: yt, width: 100 * k, height: 10 * k, rx: 5 * k, fill: couleurEau(tEau), stroke: css("--encre"), "stroke-width": 1 }, G);
+    }
+    // les fumees qui descendent, puis remontent par le conduit
+    if (e.flamme > 0.05) for (var j = 0; j < 3; j++) svg("path", { d: "M" + X(40 + j * 30) + " " + Y(60) + " l0 " + 140 * k, stroke: css("--encre2"), "stroke-width": 1.2, "stroke-dasharray": "3 4", fill: "none", opacity: 0.6 }, G);
+    // les condensats : gouttes sous l'echangeur, siphon
+    e.gouttes.forEach(function (g) { svg("ellipse", { cx: X(70), cy: Y(205) + g.y * k, rx: 2.4 * k, ry: 3.2 * k, fill: "#8fbde3", stroke: css("--encre2"), "stroke-width": 0.8 }, G); });
+    svg("path", { d: "M" + X(70) + " " + Y(214) + " L" + X(70) + " " + Y(262) + " Q" + X(70) + " " + Y(274) + " " + X(60) + " " + Y(274) + " Q" + X(50) + " " + Y(274) + " " + X(50) + " " + Y(262), fill: "none", stroke: css("--encre2"), "stroke-width": 3 * k }, G);
+    // le tableau de commande : on le touche pour allumer ou eteindre
+    var T = Lc.panneau, allume = e.exp === "banc" ? e.marche : e.jour;
+    svg("rect", { x: X(14), y: Y(212), width: 112 * k, height: 34 * k, fill: "transparent" }, T);
+    svg("rect", { x: X(30), y: Y(222), width: 80 * k, height: 20 * k, rx: 3, fill: allume ? css("--accent-doux") : css("--carte2"), stroke: allume ? css("--accent") : css("--encre"), "stroke-width": allume ? 2 : 1 }, T);
+    svg("circle", { cx: X(38), cy: Y(232), r: 3.5 * k, fill: allume ? "#4cc35e" : "#8a8f96" }, T);
+    texte(T, X(74), Y(236), e.flamme > 0.5 ? "brûleur " + e.mod + " %" : allume ? "allumage" : "veille · touche", { ancre: "middle" });
+    svg("text", { x: X(70), y: Y(13), "text-anchor": "middle", "font-size": 9.5 * k, "font-weight": 700, fill: css("--encre"), texte: reg.type === "condensation" ? "à condensation · 24 kW" : "classique · 24 kW" }, G);
+  }
+  function dessiner() {
+    var e = E();
+    DYN.forEach(function (k) { Lc[k].innerHTML = ""; });
+    if (exp === "banc") dessinerBanc(e); else dessinerJour(e);
+    if (document.getElementById("voirFlux").checked) dessinerFlux(e);
+  }
+  function dessinerBanc(e) {
+    var D = Lc.dyn, l = lec(e), x0 = 180, y0 = 70;
+    svg("rect", { x: 0, y: 400, width: 640, height: 40, fill: css("--carte2") }, Lc.fond);
+    svg("line", { x1: 0, y1: 400, x2: 640, y2: 400, stroke: css("--trait"), "stroke-width": 2 }, Lc.fond);
+    // le conduit de fumees et son orifice de mesure
+    svg("rect", { x: x0 + 100, y: 0, width: 26, height: y0, fill: css("--carte2"), stroke: css("--encre"), "stroke-width": 2 }, Lc.fond);
+    svg("circle", { cx: x0 + 113, cy: 30, r: 4, fill: css("--encre") }, Lc.fond);
+    chaudiere(D, x0, y0, e);
+    // le compteur de gaz et sa conduite jaune
+    svg("path", { d: "M70 300 L70 350 L" + (x0 + 30) + " 350 L" + (x0 + 30) + " " + (y0 + 250), fill: "none", stroke: css("--gaz"), "stroke-width": 6 }, Lc.fond);
+    svg("rect", { x: 20, y: 240, width: 100, height: 64, rx: 6, "class": "objet" }, D);
+    texte(D, 70, 232, "compteur de gaz", { ancre: "middle" });
+    var idx = l.index.toFixed(3).split("."), ent = ("00000" + idx[0]).slice(-5);
+    svg("rect", { x: 28, y: 254, width: 84, height: 20, rx: 2, fill: "#1d1d1f" }, D);
+    svg("text", { x: 30, y: 269, "font-family": "ui-monospace,Consolas,monospace", "font-size": 13, fill: "#f2f2f2", texte: ent }, D);
+    svg("text", { x: 80, y: 269, "font-family": "ui-monospace,Consolas,monospace", "font-size": 13, fill: "#ff6b5a", texte: "," + idx[1] }, D);
+    texte(D, 70, 292, "m³", { ancre: "middle" });
+    // le circuit d'eau vers le banc de charge
+    var yd = y0 + 250, xd = x0 + 120, xr = x0 + 95;
+    svg("path", { d: "M" + xd + " " + yd + " L" + xd + " 330 L470 330", fill: "none", stroke: couleurEau(e.Td), "stroke-width": 7 }, Lc.fond);
+    svg("path", { d: "M470 372 L" + xr + " 372 L" + xr + " " + yd, fill: "none", stroke: couleurEau(e.Tr), "stroke-width": 7 }, Lc.fond);
+    lcd(D, 330, 300, 86, Sim.fr(l.Td, 1), "°C"); texte(D, 330, 296, "départ", {});
+    lcd(D, 268, 378, 74, Sim.fr(l.Tr, 1), "°C"); texte(D, 268, 410, "retour", {});
+    lcd(D, 346, 378, 74, Sim.fr(l.Q, 2), "m³/h", 30); texte(D, 346, 410, "débitmètre", {});
+    svg("rect", { x: 470, y: 290, width: 154, height: 104, rx: 8, "class": "objet" }, Lc.fond);
+    texte(D, 476, 306, "banc de charge", { classe: "etiq-titre" });
+    for (var p = 0; p < 4; p++) svg("line", { x1: 486 + p * 16, y1: 326, x2: 486 + p * 16, y2: 384, stroke: couleurEau((e.Td + e.Tr) / 2), "stroke-width": 6 }, D);
+    // le becher de condensats : on le touche pour le vider
+    var vb = Math.min(1, e.becher / 2000), Bk = Lc.becher;
+    svg("path", { d: "M" + (x0 + 50) + " " + (y0 + 274) + " C " + (x0 + 50) + " 330, 170 330, 162 360", fill: "none", stroke: css("--encre2"), "stroke-width": 2 }, Lc.fond);
+    svg("rect", { x: 118, y: 336, width: 84, height: 70, fill: "transparent" }, Bk);
+    svg("rect", { x: 141, y: 398 - 34 * vb, width: 38, height: 34 * vb, fill: "#8fbde3" }, Bk);
+    svg("path", { d: "M138 362 L140 400 L180 400 L182 362", fill: "none", stroke: css("--encre"), "stroke-width": 2 }, Bk);
+    texte(Bk, 132, 380, "bécher", { ancre: "end" }); if (e.becher > 0) texte(Bk, 132, 394, "touche : vider", { ancre: "end" });
+    // le chronometre : touche pour partir, arreter, remettre a zero
+    var Ch = Lc.chrono;
+    svg("rect", { x: 14, y: 150, width: 120, height: 66, fill: "transparent" }, Ch);
+    svg("rect", { x: 20, y: 160, width: 100, height: 40, rx: 8, "class": "objet" }, Ch);
+    svg("rect", { x: 63, y: 152, width: 14, height: 8, rx: 2, fill: css("--encre") }, Ch);
+    svg("text", { x: 70, y: 186, "text-anchor": "middle", "class": "lcd-txt", texte: chronoTexte(e.chrono).replace(" min ", ":").replace(" s", "") }, Ch);
+    texte(Ch, 70, 212, e.chronoMarche ? "touche : arrêt" : e.chrono > 0 ? "touche : zéro" : "touche : départ", { ancre: "middle" });
+    // l'analyseur de fumees
+    svg("rect", { x: 380, y: 20, width: 170, height: 132, rx: 8, "class": "objet" }, D);
+    texte(D, 465, 14, "analyseur de fumées", { ancre: "middle" });
+    lcd(D, 390, 30, 150, Sim.fr(l.Tf, 1), "°C fumées", 48);
+    lcd(D, 390, 54, 150, Sim.fr(l.o2, 1), "% O₂", 48);
+    lcd(D, 390, 78, 150, Sim.fr(l.co2, 1), "% CO₂", 48);
+    lcd(D, 390, 102, 150, String(l.co), "ppm CO", 48);
+    texte(D, 465, 140, e.sonde ? "sonde dans le conduit" : "sonde à l'air libre", { ancre: "middle" });
+    // la sonde : un clic la met dans le conduit ou la retire
+    var G = Lc.sonde, xs = e.sonde ? x0 + 113 : 330, ys = e.sonde ? 30 : 160;
+    svg("path", { d: "M380 120 C 350 120, " + (xs + 40) + " " + ys + ", " + xs + " " + ys, fill: "none", stroke: css("--encre2"), "stroke-width": 2 }, G);
+    svg("line", { x1: xs, y1: ys, x2: xs + (e.sonde ? 0 : -24), y2: ys + (e.sonde ? 0 : 6), stroke: css("--encre"), "stroke-width": 3 }, G);
+    svg("circle", { cx: xs, cy: ys, r: 38, fill: "transparent" }, G);
+    svg("circle", { cx: xs, cy: ys, r: 12, "class": "prise-zone" }, G);
+  }
+  function dessinerJour(e) {
+    var D = Lc.dyn, l = lec(e), R = REGIMES[reg.regime];
+    svg("rect", { x: 0, y: 400, width: 640, height: 40, fill: css("--carte2") }, Lc.fond);
+    // le batiment : nuit ou jour, et ses emetteurs
+    var jour = e.h >= 7 && e.h < 19;
+    svg("rect", { x: 10, y: 10, width: 250, height: 110, fill: jour ? "#e7f0f8" : "#2a3242" }, Lc.fond);
+    if (jour) svg("circle", { cx: 40 + 180 * (e.h - 7) / 12, cy: 60 - 30 * Math.sin(Math.PI * (e.h - 7) / 12), r: 12, fill: "#f2c94c" }, Lc.fond);
+    else svg("circle", { cx: 220, cy: 40, r: 9, fill: "#dfe6ec" }, Lc.fond);
+    svg("path", { d: "M20 400 L20 150 L140 100 L260 150 L260 400 Z", "class": "objet" }, D);
+    for (var f = 0; f < 3; f++) svg("rect", { x: 40 + f * 72, y: 180, width: 40, height: 50, fill: jour ? css("--scene") : "#f7e7a8", stroke: css("--encre"), "stroke-width": 1.5 }, D);
+    var Tm = (e.Td + e.Tr) / 2;
+    if (R.n > 1.2) for (var r = 0; r < 3; r++) { var xr0 = 36 + r * 72; for (var k = 0; k < 6; k++) svg("rect", { x: xr0 + k * 8, y: 300, width: 6, height: 50, rx: 2, fill: couleurEau(Tm), stroke: css("--encre"), "stroke-width": 0.8 }, D); }
+    else for (var s = 0; s < 6; s++) svg("path", { d: "M30 " + (380 + (s % 2) * 6) + " Q 140 " + (372 + s * 2) + " 250 " + (380 + (s % 2) * 6), fill: "none", stroke: couleurEau(Tm), "stroke-width": 3 }, D);
+    texte(D, 140, 270, R.nom, { ancre: "middle" });
+    lcd(D, 160, 126, 90, Sim.fr(l.Te, 1), "°C"); texte(D, 160, 158, "dehors", {});
+    texte(D, 20, 26, heure(e.h), { classe: "etiq-titre" });
+    // la chaudiere et ses tuyaux
+    chaudiere(D, 290, 150, e, 0.85);
+    svg("path", { d: "M392 362 L392 380 L250 380", fill: "none", stroke: couleurEau(e.Td), "stroke-width": 6 }, Lc.fond);
+    svg("path", { d: "M250 392 L372 392 L372 362", fill: "none", stroke: couleurEau(e.Tr), "stroke-width": 6 }, Lc.fond);
+    // les temperatures de la journee, et la rosee des fumees
+    var gx = 430, gy = 30, gw = 200, gh = 220, ty = function (t) { return gy + gh - t / 80 * gh; }, tx = function (h) { return gx + h / 24 * gw; };
+    svg("rect", { x: gx, y: gy, width: gw, height: gh, fill: css("--carte"), stroke: css("--trait"), "stroke-width": 1 }, D);
+    var yr = ty(rosee(1.3));
+    if (reg.type === "condensation") svg("rect", { x: gx, y: yr, width: gw, height: gy + gh - yr, fill: "#8fbde3", opacity: 0.18 }, D);
+    svg("line", { x1: gx, y1: yr, x2: gx + gw, y2: yr, stroke: css("--encre2"), "stroke-width": 1.2, "stroke-dasharray": "5 4" }, D);
+    texte(D, gx + gw - 4, yr - 4, "rosée des fumées", { ancre: "end" });
+    [0, 20, 40, 60, 80].forEach(function (t) { texte(D, gx - 4, ty(t) + 4, String(t), { ancre: "end" }); });
+    [0, 6, 12, 18, 24].forEach(function (h) { texte(D, tx(h), gy + gh + 14, h + " h", { ancre: "middle" }); });
+    if (e.hist.length > 1) {
+      ["Td", "Tr"].forEach(function (c) {
+        svg("path", { d: "M" + e.hist.map(function (p) { return tx(p.h) + " " + ty(p[c]); }).join(" L"), fill: "none", stroke: c === "Td" ? css("--chaud") : css("--froid"), "stroke-width": 2 }, D);
+      });
+    }
+    texte(D, gx, gy - 8, "départ et retour de la journée", {});
+    texte(D, gx, gy + gh + 32, "zone bleue : le retour fait condenser", {});
+  }
+  /* Ou va la puissance en ce moment : une barre par poste, sans valeur. */
+  function dessinerFlux(e) {
+    var Z = document.getElementById("flux"), c = e.c, k = 160 / 26, Pg = e.Pg;
+    Z.innerHTML = "";
+    var lignes = [["gaz brûlé, sur PCI", Pg, "#d9b54a"], ["condensation récupérée", Pg * c.gain, "#5c9bd1"], ["eau de chauffage", e.Pu, "#2f7a55"],
+      ["chaleur des fumées", Pg * c.sens, "#c0392b"], ["vapeur non condensée", Pg * (c.vap * LAT / PCI_MOL), "#9fb7c9"], ["pertes du carter", Pg * c.parois, "#8a8f96"]];
+    lignes.forEach(function (l, i) {
+      var y = 6 + i * 25;
+      svg("text", { x: 4, y: y + 12, "font-size": 10, fill: css("--encre"), texte: l[0] }, Z);
+      svg("rect", { x: 150, y: y + 2, width: Math.max(0, Math.min(166, l[1] * k)), height: 14, rx: 3, fill: l[2] }, Z);
+    });
+    svg("text", { x: 4, y: 172, "font-size": 9.5, fill: css("--encre2"), texte: "La vapeur non condensée est la part du PCS que le PCI ne compte pas." }, Z);
+  }
+
+  /* ---------- Les boutons ---------- */
+  document.getElementById("bMarche").addEventListener("click", function () {
+    var e = E();
+    if (exp === "banc") { e.marche = !e.marche; message(e.marche ? "Brûleur allumé. Attends que le retour se stabilise avant de mesurer." : "Brûleur éteint."); }
+    else { if (e.fini) return; e.jour = !e.jour; message(e.jour ? "La journée tourne : la loi d'eau suit la température extérieure." : "Journée en pause."); }
+    afficher();
+  });
+  function basculerSonde() { var e = E(); e.sonde = !e.sonde; message(e.sonde ? "Sonde au cœur du conduit : l'analyseur lit les fumées." : "Sonde retirée : l'analyseur lit l'air de la pièce."); afficher(); }
+  Lc.sonde.addEventListener("click", basculerSonde);
+  Lc.panneau.addEventListener("click", function () { document.getElementById("bMarche").click(); });
+  Lc.becher.addEventListener("click", function () { if (exp !== "banc") return; E().becher = 0; message("Bécher vidé : il recueille les condensats à partir de maintenant."); afficher(); });
+  Lc.chrono.addEventListener("click", function () {
+    var e = E(); if (exp !== "banc") return;
+    if (e.chronoMarche) { e.chronoMarche = false; message("Chronomètre arrêté : " + chronoTexte(e.chrono) + "."); }
+    else if (e.chrono > 0) { e.chrono = 0; message("Chronomètre remis à zéro."); }
+    else { e.chronoMarche = true; message("Chronomètre parti : relève l'index du gaz en même temps."); }
+    afficher();
+  });
+  var cVit = Sim.choix("#vitesse", { label: "Vitesse du temps", valeur: reg.vitesse, options: [{ val: 0, texte: "pause" }, { val: 1, texte: "× 1" }, { val: 10, texte: "× 10" }, { val: 600, texte: "× 600" }],
+    surChange: function (v) { reg.vitesse = v; } });
+  document.getElementById("voirFlux").addEventListener("change", function (ev) { document.getElementById("fluxBloc").hidden = !ev.target.checked; });
+
+  /* ---------- La boucle ---------- */
+  var cumul = 0, dernierDessin = 0;
+  function pas(dt) {
+    var e = E(), dts = dt * reg.vitesse, n = Math.max(1, Math.ceil(dts / (exp === "jour" ? 30 : 0.5)));
+    if (dts > 0) for (var i = 0; i < n; i++) { if (exp === "banc") pasBanc(e, dts / n); else pasJour(e, dts / n); CEN[exp].tic(e.t); }
+    e.gouttes.forEach(function (g) { g.y += 3; }); e.gouttes = e.gouttes.filter(function (g) { return g.y < 50; }).slice(-12);
+    cumul += dt;
+    if (cumul >= 0.25) { cumul = 0; afficher(); }
+    var t = performance.now();
+    if (t - dernierDessin > 30) { dernierDessin = t; dessiner(); }
+  }
+
+  /* ---------- Changer d'experience ---------- */
+  var TEXTES = {
+    banc: { titre: "Sur le banc d'essai", legende: "Tourne les molettes au doigt : modulation et vis d'air du brûleur, retour du banc de charge, circulateur. Touche la sonde de l'analyseur pour la mettre dans le conduit, le bécher pour le vider, le chronomètre pour le lancer.",
+      releve: "Lance l'acquisition une fois le retour stable : elle garde l'index du gaz, les températures, l'analyse et le bécher à chaque intervalle. Trace le gaz en fonction du temps : sa pente est le débit de gaz.",
+      accueil: "Touche le tableau de la chaudière pour l'allumer, place la sonde dans le conduit, et attends que le retour se stabilise." },
+    jour: { titre: "Une journée d'hiver", legende: "La loi d'eau règle le départ sur la température extérieure ; les émetteurs fixent le retour. Sous la ligne de rosée, le retour fait condenser les fumées.",
+      releve: "Une mesure par demi-heure suffit pour une journée, avec l'arrêt automatique au bout de 24 h. Trace le retour et l'extérieur, et compare le retour à la rosée des fumées.",
+      accueil: "Choisis les émetteurs et la météo, relève l'index du gaz, puis lance la journée. Le temps « × 600 » fait passer dix minutes par seconde." }
+  };
+  function changerExp(x) {
+    exp = x;
+    if (!etats[x]) etats[x] = etatNeuf(x);
+    if (x === "jour" && reg.vitesse < 600) { reg.vitesse = 600; cVit.set(600, true); }
+    if (x === "banc" && reg.vitesse > 10) { reg.vitesse = 10; cVit.set(10, true); }
+    document.getElementById("titreScene").textContent = TEXTES[x].titre;
+    document.getElementById("legende").textContent = TEXTES[x].legende;
+    document.getElementById("consigneReleve").textContent = TEXTES[x].releve;
+    poserReglages(); poserCommandes(); poserDefis(); majMolettes(); dessiner();
+    message(TEXTES[x].accueil);
+  }
+  var og = Sim.onglets("#experiences", function (id) { changerExp(id === "vueBanc" ? "banc" : "jour"); });
+  if (location.hash === "#journee") og.montrer("vueJour");
+  Sim.animer(pas);
+
+  /* Porte des essais. */
+  window.chaudiere = { etat: E, reglage: reg, combustion: combustion, rosee: rosee, lectures: function () { return lec(E()); }, enr: function () { return CEN[exp]; },
+    releve: function () { return CEN[exp]; }, centrale: function () { return CEN[exp]; }, molettes: M, dessiner: function () { dessiner(); afficher(); } };
+})();
+</script>
+<footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
+</div>
+</body>
+</html>

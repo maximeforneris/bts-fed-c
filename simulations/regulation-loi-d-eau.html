@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La régulation du chauffage</title>
+<meta name="description" content="Une salle et son ventilo-convecteur : on tourne les molettes du régulateur, tout ou rien, P, PI ou manuel, on fait glisser la consigne sur la courbe, on ouvre la fenêtre. Puis un immeuble et sa loi d&#x27;eau : on tire la courbe de chauffe au doigt, on peint la programmation horaire, on déplace la sonde au soleil. La centrale d&#x27;acquisition enregistre tout dans le temps.">
+<meta name="etiquette" content="Simulation · J18-J19">
+<style>
+/* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
+   Palette du kit web (kit.css) : papier, graphite, un seul accent. Polices du systeme : la page
+   s'ouvre sans reseau, depuis une cle ou le poste de la salle. */
+:root{
+  --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
+  --trait:#c9c5bf; --trait2:#dedbd6; --accent:#2c6da6; --accent-doux:#dfe8f1;
+  --juste:#2f7a55; --juste-doux:#e2efe7; --faux:#ab432a; --faux-doux:#f5e3dd; --tiede:#b8801f;
+  --scene:#f6f5f2; --ombre:0 1px 2px rgba(25,26,28,.05),0 10px 26px rgba(25,26,28,.07); --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+    --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+    --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+    --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+  --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+  --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+  --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;font-size:16px;line-height:1.5}
+.page{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+.mono,.afficheur .val,.curseur .val,table.releve td{font-family:ui-monospace,"Cascadia Mono",Consolas,"Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+sub,sup{font-size:.72em;line-height:0}
+
+/* En-tete */
+.tete{padding:6px 0 16px;border-bottom:1px solid var(--trait);margin-bottom:16px}
+.surtitre{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre2);font-weight:600}
+.tete h1{font-size:clamp(1.45rem,4vw,2rem);margin:4px 0 6px;font-weight:750}
+.chapeau{margin:0;color:var(--encre2);max-width:70ch}
+
+/* Onglets : un par protocole ou par ecran */
+.onglets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.onglets button{font:inherit;font-weight:650;font-size:.95rem;padding:9px 14px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre2);cursor:pointer}
+.onglets button[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.onglets button:not([aria-selected="true"]):hover{border-color:var(--encre2);color:var(--encre)}
+.vue[hidden]{display:none}
+
+/* Mise en page : la scene a gauche, les commandes a droite ; une colonne sous 820 px */
+.plan{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.plan{grid-template-columns:1fr}}
+.carte{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);box-shadow:var(--ombre);padding:16px;margin-bottom:16px}
+.carte > h2{font-size:1.08rem;margin-bottom:10px;font-weight:700}
+.carte > h2 .num{color:var(--accent);margin-right:.35em}
+.consigne{color:var(--encre2);margin:0 0 12px;font-size:.95rem}
+.scene{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r);overflow:hidden;position:relative}
+.scene svg,.scene canvas{display:block;width:100%;height:auto}
+.legende{font-size:.82rem;color:var(--encre2);margin-top:6px}
+
+/* Commandes */
+.commandes{display:flex;flex-direction:column;gap:14px}
+.curseur label{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-weight:600;margin-bottom:2px}
+.curseur .val{font-weight:600;color:var(--encre)}
+.curseur input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.curseur .bornes{display:flex;justify-content:space-between;font-size:.75rem;color:var(--encre2)}
+.choix .titre{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.choix .boutons{display:flex;flex-wrap:wrap;gap:6px}
+.choix button,.bouton{font:inherit;font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;min-height:40px}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bouton:hover,.choix button:hover{border-color:var(--encre2)}
+.bouton.principal{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.bouton:disabled{opacity:.45;cursor:not-allowed}
+.rangee{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Afficheurs : ce que lit un instrument */
+.afficheurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.afficheur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:8px 10px}
+.afficheur .nom{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);font-weight:650}
+.afficheur .val{font-size:1.45rem;font-weight:650;white-space:nowrap}
+.afficheur .unite{font-size:.95rem;color:var(--encre2);margin-left:.25em}
+.afficheur .note{font-size:.75rem;color:var(--encre2)}
+
+/* Releve de mesures et graphe */
+.releve-zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:820px){.releve-zone{grid-template-columns:1fr}}
+table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
+table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
+table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
+table.releve tr.vide td{color:var(--encre2);font-style:italic}
+.graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.graphe canvas{display:block;width:100%;height:auto}
+
+/* Enregistreur : une mesure toute seule, a intervalle regulier du temps simule */
+.enregistreur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.enr-lampe{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--trait)}
+.enr-lampe.actif{background:var(--faux)}
+.enr-lampe.eclair{animation:eclair .6s ease-out}
+@keyframes eclair{from{box-shadow:0 0 0 0 var(--faux)}to{box-shadow:0 0 0 10px transparent}}
+.enr-info{font-size:.88rem;color:var(--encre2)}
+
+/* Defi : l'eleve propose une valeur, la page dit juste ou pas encore, jamais la reponse */
+.defi{border:1px dashed var(--trait);border-radius:var(--r);padding:12px 14px;background:var(--carte2)}
+.defi p{margin:0 0 8px}
+.defi .saisie{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.defi input{font:inherit;width:9em;padding:7px 9px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.defi .retour{margin-top:8px;font-weight:600;min-height:1.4em}
+.defi .retour.juste{color:var(--juste)}
+.defi .retour.faux{color:var(--faux)}
+.defi .methode{font-weight:400;color:var(--encre2)}
+
+/* Encadres */
+.note-modele{margin-top:6px}
+details.modele{border-top:1px solid var(--trait);padding-top:10px;margin-top:8px}
+details.modele summary{cursor:pointer;font-weight:650}
+details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-size:.92rem}
+.alerte{border-left:4px solid var(--tiede);background:var(--carte2);padding:8px 12px;border-radius:0 var(--r) var(--r) 0;font-size:.92rem}
+.pied{margin-top:24px;padding-top:10px;border-top:1px solid var(--trait);font-size:.8rem;color:var(--encre2)}
+
+@media print{
+  body{background:#fff}
+  .onglets,.commandes .bouton,.defi{display:none}
+  .carte{box-shadow:none;break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Centrale d'acquisition : periode, duree, deux courbes en direct, tableau defilant, export */
+.centrale{display:flex;flex-direction:column;gap:12px}
+.centrale-reglages{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.centrale-traces{display:flex;flex-wrap:wrap;gap:8px 18px}
+.centrale-traces label{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.centrale-traces select{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);min-height:40px;max-width:100%}
+.centrale-pastille{display:inline-block;width:14px;height:4px;border-radius:2px}
+.centrale-table{max-height:300px;overflow:auto;border:1px solid var(--trait2);border-radius:var(--r)}
+.centrale-table table.releve th{position:sticky;top:0;z-index:1}
+.centrale-table table.releve{border-collapse:separate;border-spacing:0}
+
+/* Molette posee sur la scene : on la tourne au doigt */
+.molette{cursor:grab;touch-action:none;outline:none}
+.molette.tourne{cursor:grabbing}
+.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
+.molette.tourne .molette-corps{fill:var(--accent-doux)}
+.molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
+.molette-graduation{stroke:var(--encre2);stroke-width:1.2}
+.molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
+.molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
+
+</style>
+<script>
+/* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
+   Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
+   Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
+"use strict";
+var Sim = (function () {
+
+  /* Nombres a la francaise : virgule, espace fine insecable entre les milliers. */
+  function fr(x, dec) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (dec === undefined) dec = 2;
+    var s = Math.abs(x).toFixed(dec).split(".");
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return (x < 0 && Number(x.toFixed(dec)) !== 0 ? "−" : "") + s.join(",");
+  }
+  /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
+  function lire(txt) {
+    if (txt === null || txt === undefined) return NaN;
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
+    return t === "" ? NaN : Number(t);
+  }
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "texte") n.textContent = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k === "classe") n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function $(sel) { return typeof sel === "string" ? document.querySelector(sel) : sel; }
+  function borne(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  /* Un instrument ne donne jamais la valeur exacte : bruit gaussien relatif, puis resolution. */
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function mesure(vraie, opts) {
+    opts = opts || {};
+    var x = vraie * (1 + (opts.relatif || 0) * gauss()) + (opts.absolu || 0) * gauss();
+    if (opts.resolution) x = Math.round(x / opts.resolution) * opts.resolution;
+    return x;
+  }
+
+  /* Onglets : boutons [data-vue="id"] qui montrent la section #id. */
+  function onglets(nav, surChange) {
+    nav = $(nav);
+    var boutons = Array.prototype.slice.call(nav.querySelectorAll("button[data-vue]"));
+    nav.setAttribute("role", "tablist");
+    function montrer(id) {
+      boutons.forEach(function (b) {
+        var actif = b.getAttribute("data-vue") === id;
+        b.setAttribute("aria-selected", actif ? "true" : "false");
+        b.setAttribute("role", "tab");
+        var v = document.getElementById(b.getAttribute("data-vue"));
+        if (v) v.hidden = !actif;
+      });
+      if (surChange) surChange(id);
+    }
+    boutons.forEach(function (b) { b.addEventListener("click", function () { montrer(b.getAttribute("data-vue")); }); });
+    montrer(boutons[0].getAttribute("data-vue"));
+    return { montrer: montrer };
+  }
+
+  /* Curseur avec son etiquette, sa valeur affichee et ses bornes. */
+  function curseur(parent, o) {
+    var dec = o.dec === undefined ? 0 : o.dec;
+    var id = o.id || ("c" + Math.random().toString(36).slice(2, 8));
+    var val = el("span", { classe: "val" });
+    var inp = el("input", { type: "range", id: id, min: o.min, max: o.max, step: o.pas || 1, value: o.valeur });
+    var bloc = el("div", { classe: "curseur" }, [
+      el("label", { "for": id }, [el("span", { texte: o.label }), val]), inp,
+      el("div", { classe: "bornes" }, [el("span", { texte: fr(o.min, dec) + " " + (o.unite || "") }), el("span", { texte: fr(o.max, dec) + " " + (o.unite || "") })])
+    ]);
+    function maj() { val.textContent = fr(Number(inp.value), dec) + (o.unite ? " " + o.unite : ""); }
+    inp.addEventListener("input", function () { maj(); if (o.surChange) o.surChange(Number(inp.value)); });
+    maj();
+    $(parent).appendChild(bloc);
+    return {
+      get: function () { return Number(inp.value); },
+      set: function (v, silencieux) { inp.value = v; maj(); if (!silencieux && o.surChange) o.surChange(Number(inp.value)); },
+      activer: function (oui) { inp.disabled = !oui; },
+      noeud: bloc
+    };
+  }
+
+  /* Groupe de boutons dont un seul est enfonce. options : [{val, texte}] */
+  function choix(parent, o) {
+    var courant = o.valeur;
+    var zone = el("div", { classe: "boutons", role: "group", "aria-label": o.label || "" });
+    var boutons = o.options.map(function (op) {
+      var b = el("button", { type: "button", texte: op.texte });
+      b.addEventListener("click", function () { poser(op.val); });
+      zone.appendChild(b);
+      return { b: b, val: op.val };
+    });
+    function poser(v, silencieux) {
+      courant = v;
+      boutons.forEach(function (x) { x.b.setAttribute("aria-pressed", x.val === v ? "true" : "false"); });
+      if (!silencieux && o.surChange) o.surChange(v);
+    }
+    var bloc = el("div", { classe: "choix" }, [o.label ? el("div", { classe: "titre", texte: o.label }) : null, zone]);
+    $(parent).appendChild(bloc);
+    poser(courant, true);
+    return { get: function () { return courant; }, set: poser, noeud: bloc };
+  }
+
+  /* Afficheur d'instrument : nom, valeur, unite, et une note facultative. */
+  function afficheur(parent, o) {
+    var v = el("span", { classe: "val", texte: "—" });
+    var n = el("div", { classe: "note", texte: o.note || "" });
+    var bloc = el("div", { classe: "afficheur" }, [el("div", { classe: "nom", texte: o.nom }), el("div", null, [v, el("span", { classe: "unite", texte: o.unite || "" })]), o.note !== undefined ? n : null]);
+    $(parent).appendChild(bloc);
+    return {
+      set: function (x, dec) { v.textContent = typeof x === "string" ? x : fr(x, dec === undefined ? (o.dec === undefined ? 2 : o.dec) : dec); },
+      note: function (t) { n.textContent = t; },
+      noeud: bloc
+    };
+  }
+
+  /* Graphe sur canvas, net sur les ecrans haute densite. Axes, grille, courbes, points. */
+  function graphe(parent, o) {
+    var larg = o.largeur || 640, haut = o.hauteur || 380;
+    var cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": o.titre || "graphe" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    $(parent).appendChild(cadre);
+    var ctx = cv.getContext("2d");
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = larg * dpr; cv.height = haut * dpr; ctx.scale(dpr, dpr);
+    var m = { g: 62, d: 16, h: 16, b: 48 };
+    var ax = { xmin: o.xmin, xmax: o.xmax, ymin: o.ymin, ymax: o.ymax };
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+    function X(x) { return m.g + (x - ax.xmin) / (ax.xmax - ax.xmin) * (larg - m.g - m.d); }
+    function Y(y) { return haut - m.b - (y - ax.ymin) / (ax.ymax - ax.ymin) * (haut - m.h - m.b); }
+    function pasJoli(etendue, n) {
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function fond() {
+      ctx.clearRect(0, 0, larg, haut);
+      ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var px = o.pasX || pasJoli(ax.xmax - ax.xmin, 8), py = o.pasY || pasJoli(ax.ymax - ax.ymin, 6);
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2");
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = Math.ceil(ax.xmin / px) * px; x <= ax.xmax + 1e-9; x += px) {
+        ctx.beginPath(); ctx.moveTo(X(x), Y(ax.ymin)); ctx.lineTo(X(x), Y(ax.ymax)); ctx.stroke();
+        ctx.fillText(fr(x, o.decX !== undefined ? o.decX : decimales(px)), X(x), Y(ax.ymin) + 5);
+      }
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (var y = Math.ceil(ax.ymin / py) * py; y <= ax.ymax + 1e-9; y += py) {
+        ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y)); ctx.lineTo(X(ax.xmax), Y(y)); ctx.stroke();
+        ctx.fillText(fr(y, o.decY !== undefined ? o.decY : decimales(py)), X(ax.xmin) - 6, Y(y));
+      }
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.4;
+      var y0 = borne(0, ax.ymin, ax.ymax), x0 = borne(0, ax.xmin, ax.xmax);
+      ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y0)); ctx.lineTo(X(ax.xmax), Y(y0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(x0), Y(ax.ymin)); ctx.lineTo(X(x0), Y(ax.ymax)); ctx.stroke();
+      ctx.fillStyle = css("--encre"); ctx.font = "600 13px system-ui, Segoe UI, Arial, sans-serif";
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(o.titreX || "", larg - m.d, haut - 4);
+      ctx.save(); ctx.translate(14, m.h); ctx.rotate(-Math.PI / 2); ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText(o.titreY || "", 0, 0); ctx.restore();
+    }
+    function couleur(c) { return c && c.indexOf("--") === 0 ? css(c) : (c || css("--accent")); }
+    var api = {
+      axes: function (n) { for (var k in n) ax[k] = n[k]; return api; },
+      effacer: function () { fond(); return api; },
+      /* f : fonction x -> y, ou tableau de [x, y] */
+      courbe: function (f, opts) {
+        opts = opts || {};
+        ctx.save(); ctx.beginPath();
+        ctx.rect(m.g, m.h, larg - m.g - m.d, haut - m.h - m.b); ctx.clip();
+        ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = opts.epaisseur || 2.2;
+        if (opts.pointille) ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        if (typeof f === "function") {
+          var n = opts.pas || 400, prem = true;
+          for (var i = 0; i <= n; i++) {
+            var x = ax.xmin + (ax.xmax - ax.xmin) * i / n, y = f(x);
+            if (!isFinite(y)) { prem = true; continue; }
+            if (prem) { ctx.moveTo(X(x), Y(y)); prem = false; } else ctx.lineTo(X(x), Y(y));
+          }
+        } else {
+          f.forEach(function (p, i) { if (i === 0) ctx.moveTo(X(p[0]), Y(p[1])); else ctx.lineTo(X(p[0]), Y(p[1])); });
+        }
+        ctx.stroke(); ctx.restore();
+        return api;
+      },
+      points: function (pts, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.strokeStyle = css("--carte");
+        pts.forEach(function (p) {
+          var r = opts.rayon || 4.5;
+          ctx.beginPath();
+          if (opts.forme === "croix") {
+            ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = 2;
+            ctx.moveTo(X(p[0]) - r, Y(p[1]) - r); ctx.lineTo(X(p[0]) + r, Y(p[1]) + r);
+            ctx.moveTo(X(p[0]) + r, Y(p[1]) - r); ctx.lineTo(X(p[0]) - r, Y(p[1]) + r); ctx.stroke();
+          } else { ctx.arc(X(p[0]), Y(p[1]), r, 0, 2 * Math.PI); ctx.fill(); ctx.lineWidth = 1; ctx.stroke(); }
+        });
+        return api;
+      },
+      texte: function (x, y, t, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.font = (opts.gras ? "600 " : "") + "13px system-ui, Segoe UI, Arial, sans-serif";
+        ctx.textAlign = opts.align || "left"; ctx.textBaseline = "middle";
+        ctx.fillText(t, X(x) + (opts.dx || 0), Y(y) + (opts.dy || 0));
+        return api;
+      },
+      X: X, Y: Y, ctx: ctx, canvas: cv
+    };
+    fond();
+    return api;
+  }
+
+  /* Releve : l'eleve garde une mesure dans un tableau, qui peut alimenter un graphe.
+     colonnes : [{cle, titre, unite, dec}] ; graphe : {x, y, ...options de Sim.graphe} */
+  function releve(parent, o) {
+    var lignes = [];
+    var zone = el("div", { classe: "releve-zone" });
+    var gauche = el("div");
+    var table = el("table", { classe: "releve" });
+    var tete = el("tr"); o.colonnes.forEach(function (c) { tete.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+    table.appendChild(el("thead", null, [tete]));
+    var corps = el("tbody"); table.appendChild(corps);
+    var boutons = el("div", { classe: "rangee", style: "margin-top:8px" });
+    var bAnnuler = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    boutons.appendChild(bAnnuler); boutons.appendChild(bVider);
+    gauche.appendChild(table); gauche.appendChild(boutons);
+    zone.appendChild(gauche);
+    var gr = null;
+    if (o.graphe) { var droite = el("div"); zone.appendChild(droite); gr = graphe(droite, o.graphe); }
+    $(parent).appendChild(zone);
+    function dessiner() {
+      corps.innerHTML = "";
+      if (!lignes.length) {
+        var tr = el("tr", { classe: "vide" }); tr.appendChild(el("td", { colspan: o.colonnes.length, texte: o.vide || "Aucune mesure gardée pour l'instant." })); corps.appendChild(tr);
+      }
+      lignes.forEach(function (l) {
+        var tr = el("tr");
+        o.colonnes.forEach(function (c) { tr.appendChild(el("td", { texte: typeof l[c.cle] === "number" ? fr(l[c.cle], c.dec === undefined ? 2 : c.dec) : (l[c.cle] || "") })); });
+        corps.appendChild(tr);
+      });
+      if (gr) {
+        gr.effacer();
+        if (o.avantPoints) o.avantPoints(gr, lignes);
+        gr.points(lignes.map(function (l) { return [l[o.graphe.x], l[o.graphe.y]]; }), { couleur: o.graphe.couleur });
+      }
+      if (o.surChange) o.surChange(lignes);
+    }
+    bAnnuler.addEventListener("click", function () { lignes.pop(); dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; dessiner(); });
+    dessiner();
+    return {
+      ajouter: function (l) { if (o.max && lignes.length >= o.max) lignes.shift(); lignes.push(l); dessiner(); },
+      lignes: function () { return lignes.slice(); },
+      vider: function () { lignes = []; dessiner(); },
+      redessiner: dessiner,
+      graphe: gr
+    };
+  }
+
+  /* Enregistreur : garde une ligne du releve tout seul, a intervalle regulier du temps SIMULE,
+     comme une centrale d'acquisition. La simulation appelle tic(t) a chaque pas de calcul.
+     o : { periodes: [{val, texte}], valeur, lire: function (tPlanifie, tLancement) -> ligne ou null, label } */
+  function enregistreur(parent, rel, o) {
+    var periode = o.valeur, actif = false, prochain = null, dernier = 0, debut = 0;
+    var zone = el("div", { classe: "enregistreur" });
+    choix(zone, { label: o.label || "Enregistrement automatique : une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; } });
+    var b = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'enregistrement" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [b, lampe, info]));
+    $(parent).appendChild(zone);
+    function majInfo() {
+      var n = rel.lignes().length;
+      info.textContent = (actif ? "enregistre" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") + " dans le tableau" : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      b.textContent = oui ? "Arrêter l'enregistrement" : "Lancer l'enregistrement";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo();
+      if (o.surEtat) o.surEtat(oui);
+    }
+    b.addEventListener("click", function () { poser(!actif); });
+    majInfo();
+    return {
+      tic: function (t) {
+        if (!actif) return;
+        if (prochain === null) { prochain = t; debut = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;      // un pas trop long : pas de rattrapage en rafale
+        if (l) {
+          rel.ajouter(l); majInfo();
+          lampe.classList.remove("eclair"); void lampe.offsetWidth; lampe.classList.add("eclair");
+        }
+      },
+      actif: function () { return actif; },
+      lancer: function () { if (!actif) poser(true); },
+      arreter: function () { if (actif) poser(false); },
+      majInfo: majInfo,
+      noeud: zone
+    };
+  }
+
+  /* Centrale d'acquisition : l'enregistreur, le tableau et la courbe reunis, comme sur un vrai
+     enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
+     tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
+     Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+           lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
+           nomFichier, surChange } */
+  var COULEURS_VOIES = ["--accent", "--faux"];
+  function centrale(parent, o) {
+    var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
+    var periode = o.valeur, duree = o.duree || 0, TP = o.temps, voies = o.voies;
+    var montree = {}; voies.forEach(function (v) { montree[v.cle] = !v.cache; });
+    var trace = (o.trace || [voies[0].cle]).concat([null]).slice(0, 2);
+    var zone = el("div", { classe: "centrale" });
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+
+    /* Les reglages de l'acquisition */
+    var reg = el("div", { classe: "centrale-reglages" });
+    choix(reg, { label: "Une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; majInfo(); } });
+    if (o.durees) choix(reg, { label: "Arrêt automatique au bout de", valeur: duree, options: o.durees, surChange: function (v) { duree = v; majInfo(); } });
+    zone.appendChild(reg);
+    var bLancer = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'acquisition" });
+    var bMain = el("button", { type: "button", classe: "bouton", texte: "Une mesure maintenant" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    lampe.addEventListener("animationend", function () { lampe.classList.remove("eclair"); });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bLancer, bMain, lampe, info]));
+
+    /* La courbe en direct : deux voies au choix, chacune sur son axe */
+    var selects = [0, 1].map(function (i) {
+      var s = el("select", { "aria-label": i ? "Courbe 2, axe de droite" : "Courbe 1, axe de gauche" });
+      if (i) s.appendChild(el("option", { value: "", texte: "aucune" }));
+      voies.forEach(function (v) { s.appendChild(el("option", { value: v.cle, texte: v.titre + (v.unite ? " (" + v.unite + ")" : "") })); });
+      s.value = trace[i] || "";
+      s.addEventListener("change", function () { trace[i] = s.value || null; dessinerCourbe(); });
+      return s;
+    });
+    var pastille = function (i) { return el("span", { classe: "centrale-pastille", style: "background:" + css(COULEURS_VOIES[i]) }); };
+    var pastilles = [pastille(0), pastille(1)];
+    zone.appendChild(el("div", { classe: "centrale-traces" }, [
+      el("label", null, [pastilles[0], el("span", { texte: "Courbe 1, à gauche" }), selects[0]]),
+      el("label", null, [pastilles[1], el("span", { texte: "Courbe 2, à droite" }), selects[1]])
+    ]));
+    /* Le canevas se dessine a la largeur reelle de son cadre : sur un telephone, les graduations
+       restent lisibles au lieu d'etre reduites de moitie. */
+    var larg = 640, haut = 300, cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": "courbe de l'acquisition" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    zone.appendChild(cadre);
+    var ctx = cv.getContext("2d"), dpr = 1;
+    function dimensionner() {
+      var w = cadre.clientWidth ? Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) : 640, h = Math.round(w < 480 ? w * 0.72 : Math.min(320, w * 0.47)), d = Math.max(1, window.devicePixelRatio || 1);
+      if (w === larg && h === haut && d === dpr && cv.width === Math.round(w * d)) return;
+      larg = w; haut = h; dpr = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    /* redessiner quand le cadre change de taille, y compris quand son onglet devient visible */
+    if (window.ResizeObserver) new ResizeObserver(function () { if (cadre.clientWidth && Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) !== larg) dessinerCourbe(); }).observe(cadre);
+    else window.addEventListener("resize", function () { dessinerCourbe(); });
+
+    /* Les voies du tableau */
+    var puces = el("div", { classe: "boutons" });
+    voies.forEach(function (v) {
+      var b = el("button", { type: "button", texte: v.titre, "aria-pressed": montree[v.cle] ? "true" : "false" });
+      b.addEventListener("click", function () { montree[v.cle] = !montree[v.cle]; b.setAttribute("aria-pressed", montree[v.cle] ? "true" : "false"); dessinerTable(); });
+      puces.appendChild(b);
+    });
+    zone.appendChild(el("div", { classe: "choix" }, [el("div", { classe: "titre", texte: "Colonnes du tableau (tout est enregistré)" }), puces]));
+    var table = el("table", { classe: "releve" }), boite = el("div", { classe: "centrale-table" }, [table]);
+    zone.appendChild(boite);
+    var bCopier = el("button", { type: "button", classe: "bouton", texte: "Copier pour un tableur" });
+    var bCsv = el("button", { type: "button", classe: "bouton", texte: "Enregistrer en CSV" });
+    var bRetirer = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    var retour = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bCopier, bCsv, bRetirer, bVider, retour]));
+    $(parent).appendChild(zone);
+
+    function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
+    var corps = null;
+    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
+    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function dessinerTable() {
+      var cs = colonnes(); table.innerHTML = "";
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      table.appendChild(el("thead", null, [tr]));
+      corps = el("tbody");
+      if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
+      lignes.forEach(function (l) { corps.appendChild(ligneTable(l, cs)); });
+      table.appendChild(corps);
+      boite.scrollTop = boite.scrollHeight;
+    }
+    function pasJoli(etendue, n) {
+      if (!(etendue > 0)) return 1;
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function bornes(cle) {
+      var a = Infinity, b = -Infinity;
+      lignes.forEach(function (l) { var y = l[cle]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } });
+      if (!isFinite(a)) return null;
+      if (b - a < 1e-9) { var d = Math.max(Math.abs(a) * 0.05, 0.5); a -= d; b += d; }
+      var marge = (b - a) * 0.04; a -= marge; b += marge;
+      var pas = pasJoli(b - a, 5); return { min: Math.floor(a / pas) * pas, max: Math.ceil(b / pas) * pas, pas: pas };
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function dessinerCourbe() {
+      dimensionner();
+      var mg = 52, md = trace[1] ? 52 : 14, mh = 26, mb = 38, w = larg - mg - md, h = haut - mh - mb;
+      ctx.clearRect(0, 0, larg, haut); ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
+      var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
+      if (x1 - x0 < 1e-9) x1 = x0 + 1;
+      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      trace.forEach(function (cle, i) {
+        if (!cle) return;
+        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
+        ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.fillStyle = coul; ctx.textBaseline = "top";
+        ctx.textAlign = i ? "right" : "left"; ctx.fillText(v.titre + (v.unite ? " (" + v.unite + ")" : ""), i ? larg - 6 : 6, 5);
+        if (!b) return;
+        var Y = function (y) { return mh + h - (y - b.min) / (b.max - b.min) * h; };
+        ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = i ? "left" : "right";
+        for (var y = b.min; y <= b.max + 1e-9; y += b.pas) {
+          if (!i) { ctx.strokeStyle = css("--trait2"); ctx.beginPath(); ctx.moveTo(mg, Y(y)); ctx.lineTo(mg + w, Y(y)); ctx.stroke(); }
+          ctx.fillText(fr(y, decimales(b.pas)), i ? mg + w + 6 : mg - 6, Y(y));
+        }
+        ctx.strokeStyle = coul; ctx.lineWidth = 2; ctx.beginPath();
+        var prem = true;
+        lignes.forEach(function (l) { var yy = l[cle], xx = l[TP.cle]; if (typeof yy !== "number" || !isFinite(yy)) { prem = true; return; }
+          if (prem) { ctx.moveTo(X(xx), Y(yy)); prem = false; } else ctx.lineTo(X(xx), Y(yy)); });
+        ctx.stroke();
+        ctx.fillStyle = coul;
+        if (lignes.length <= 80) lignes.forEach(function (l) { var yy = l[cle]; if (typeof yy === "number" && isFinite(yy)) { ctx.beginPath(); ctx.arc(X(l[TP.cle]), Y(yy), 3, 0, 2 * Math.PI); ctx.fill(); } });
+      });
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.2; ctx.strokeRect(mg, mh, w, h);
+      pastilles[1].style.visibility = trace[1] ? "visible" : "hidden";
+    }
+    function dessiner() { dessinerTable(); dessinerCourbe(); majInfo(); if (o.surChange) o.surChange(lignes); }
+    /* A chaque mesure, une ligne de plus au tableau et une courbe redessinee au plus quatre fois par seconde :
+       a grande vitesse, refaire tout le tableau a chaque point finit par figer la page. */
+    var dernierTrace = 0, traceEnAttente = null;
+    var suivre = true;      // le tableau defile avec les mesures, sauf si on est remonte le lire
+    boite.addEventListener("scroll", function () { suivre = boite.scrollTop + boite.clientHeight >= boite.scrollHeight - 8; });
+    function tracer() { dernierTrace = Date.now(); dessinerCourbe(); if (suivre) boite.scrollTop = boite.scrollHeight; }
+    function courbePlusTard() {
+      if (Date.now() - dernierTrace > 250) { tracer(); return; }
+      if (!traceEnAttente) traceEnAttente = setTimeout(function () { traceEnAttente = null; tracer(); }, 260);
+    }
+    function ecoule() { return Math.max(0, dernier - depart); }
+    function texteDuree(s) { return s >= 3600 ? fr(s / 3600, s % 3600 ? 1 : 0) + " h" : s >= 60 ? fr(s / 60, s % 60 ? 1 : 0) + " min" : fr(s, 0) + " s"; }
+    function majInfo() {
+      var n = lignes.length;
+      info.textContent = (actif ? "acquisition en cours" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") : "") +
+        (actif && duree ? " · " + texteDuree(ecoule()) + " sur " + texteDuree(duree) : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      bLancer.textContent = oui ? "Arrêter l'acquisition" : "Lancer l'acquisition";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo(); if (o.surEtat) o.surEtat(oui);
+    }
+    function ajouter(l) {
+      if (!l) return;
+      if (l[TP.cle] === undefined) l[TP.cle] = (tCourant - (debut === null ? 0 : debut)) / (TP.echelle || 1);
+      lignes.push(l);
+      if (o.max && lignes.length > o.max) { lignes.shift(); dessinerTable(); }
+      else if (corps) {
+        if (lignes.length === 1) dessinerTable();
+        else corps.appendChild(ligneTable(l, colonnes()));
+      }
+      courbePlusTard(); majInfo(); if (o.surChange) o.surChange(lignes);
+      lampe.classList.remove("eclair"); lampe.classList.add("eclair");
+    }
+    function versTexte(sep, decimale) {
+      var cs = colonnes(), lignesTxt = [cs.map(function (c) { return c.titre + (c.unite ? " (" + c.unite + ")" : ""); }).join(sep)];
+      lignes.forEach(function (l) { lignesTxt.push(cs.map(function (c) { var x = l[c.cle]; return typeof x === "number" ? (isFinite(x) ? x.toFixed(c.dec === undefined ? 2 : c.dec).replace(".", decimale) : "") : (x || ""); }).join(sep)); });
+      return lignesTxt.join("\r\n");
+    }
+    function dire(t) { retour.textContent = t; setTimeout(function () { if (retour.textContent === t) retour.textContent = ""; }, 4000); }
+    /* Relancer apres un arret continue la meme serie, sur le meme temps ; tout effacer la remet a zero. */
+    function lancer() { if (!lignes.length) debut = null; poser(true); }
+    bLancer.addEventListener("click", function () { if (actif) poser(false); else lancer(); });
+    bMain.addEventListener("click", function () { if (debut === null) debut = tCourant; ajouter(o.lire(tCourant, debut)); });
+    bRetirer.addEventListener("click", function () { lignes.pop(); if (!lignes.length && !actif) debut = null; dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; if (!actif) debut = null; dessiner(); });
+    bCopier.addEventListener("click", function () {
+      var t = versTexte("\t", ",");
+      function secours() {
+        var ta = el("textarea", { style: "position:fixed;left:-9999px;top:0" }); ta.value = t; document.body.appendChild(ta); ta.select();
+        var ok = false; try { ok = document.execCommand("copy"); } catch (x) { ok = false; }
+        document.body.removeChild(ta); dire(ok ? "Copié : colle-le dans le tableur." : "La copie est refusée par ce navigateur : enregistre en CSV.");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { dire("Copié : colle-le dans le tableur."); }, secours);
+      else secours();
+    });
+    bCsv.addEventListener("click", function () {
+      var blob = new Blob(["﻿" + versTexte(";", ",")], { type: "text/csv;charset=utf-8" });
+      var a = el("a", { href: URL.createObjectURL(blob), download: o.nomFichier || "acquisition.csv" });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      dire("Fichier CSV enregistré, séparateur point-virgule.");
+    });
+    dessiner();
+    return {
+      tic: function (t) {
+        tCourant = t;
+        if (!actif) return;
+        if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;
+        if (l) { if (l[TP.cle] === undefined) l[TP.cle] = (dernier - debut) / (TP.echelle || 1); ajouter(l); }
+        if (duree && dernier - depart >= duree - 1e-9) poser(false);
+        else majInfo();
+      },
+      ajouter: ajouter, lignes: function () { return lignes.slice(); }, vider: function () { lignes = []; if (!actif) debut = null; dessiner(); },
+      lancer: function () { if (!actif) lancer(); }, arreter: function () { if (actif) poser(false); },
+      actif: function () { return actif; }, majInfo: majInfo, redessiner: dessiner,
+      tracer: function (c1, c2) { trace = [c1 || trace[0], c2 === undefined ? trace[1] : c2]; selects[0].value = trace[0]; selects[1].value = trace[1] || ""; dessinerCourbe(); },
+      periode: function () { return periode; }, noeud: zone
+    };
+  }
+
+  /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
+     pour monter), a la molette de la souris ou aux fleches du clavier.
+     o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
+  function molette(parent, o) {
+    var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
+    var g = svg("g", { "class": "molette", transform: "translate(" + o.x + " " + o.y + ")", tabindex: "0", role: "slider",
+      "aria-label": o.label || "", "aria-valuemin": o.min, "aria-valuemax": o.max }, parent);
+    svg("circle", { r: o.zone || 46, fill: "transparent" }, g);
+    for (var k = 0; k <= 10; k++) {
+      var a = (-135 + 27 * k) * Math.PI / 180;
+      svg("line", { x1: Math.sin(a) * (r + 3), y1: -Math.cos(a) * (r + 3), x2: Math.sin(a) * (r + (k % 5 ? 6 : 8)), y2: -Math.cos(a) * (r + (k % 5 ? 6 : 8)), "class": "molette-graduation" }, g);
+    }
+    svg("circle", { r: r, "class": "molette-corps" }, g);
+    var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
+    var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
+    var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    function maj() {
+      var f = (v - o.min) / (o.max - o.min);
+      index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
+      val.textContent = o.format ? o.format(v) : fr(v, dec) + (o.unite ? " " + o.unite : "");
+      g.setAttribute("aria-valuenow", v); g.setAttribute("aria-valuetext", val.textContent);
+    }
+    function poser(x, silencieux) {
+      var p = o.pas || 1; x = borne(Math.round(x / p) * p, o.min, o.max); x = Number(x.toFixed(6));
+      var change = x !== v; v = x; maj();
+      if (change && !silencieux && o.surChange) o.surChange(v);
+    }
+    g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
+    g.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
+      g.classList.add("tourne");
+      function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
+      function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
+      g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
+    });
+    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("keydown", function (e) {
+      var p = o.pas || 1;
+      if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
+      if (e.key === "ArrowDown" || e.key === "ArrowLeft") { poser(v - p); e.preventDefault(); }
+    });
+    maj();
+    return { get: function () { return v; }, set: poser, noeud: g, montrer: function (oui) { g.style.display = oui ? "" : "none"; } };
+  }
+
+  /* Defi : une valeur a trouver. La page dit juste ou pas encore, et rappelle la methode,
+     jamais la valeur attendue. attendu : nombre ou fonction qui le calcule au moment du clic. */
+  function defi(parent, o) {
+    var inp = el("input", { type: "text", inputmode: "decimal", "aria-label": o.question });
+    var b = el("button", { type: "button", classe: "bouton", texte: "Vérifier" });
+    var retour = el("div", { classe: "retour", "aria-live": "polite" });
+    var bloc = el("div", { classe: "defi" }, [el("p", { html: o.question }), el("div", { classe: "saisie" }, [inp, o.unite ? el("span", { texte: o.unite }) : null, b]), retour]);
+    function verifier() {
+      var v = lire(inp.value), a = typeof o.attendu === "function" ? o.attendu() : o.attendu;
+      retour.className = "retour";
+      if (!isFinite(v)) { retour.textContent = "Écris un nombre."; return; }
+      var tol = o.tolerance === undefined ? 0.05 : o.tolerance;
+      var ok = Math.abs(v - a) <= Math.abs(a) * tol + (o.toleranceAbsolue || 0);
+      retour.className = "retour " + (ok ? "juste" : "faux");
+      retour.innerHTML = ok ? "Juste." : "Pas encore. <span class=\"methode\">" + (o.methode || "") + "</span>";
+      if (o.surReponse) o.surReponse(ok, v);
+    }
+    b.addEventListener("click", verifier);
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+    $(parent).appendChild(bloc);
+    return { noeud: bloc, effacer: function () { inp.value = ""; retour.textContent = ""; retour.className = "retour"; } };
+  }
+
+  /* Boucle d'animation : f(dt en secondes). S'arrete seule quand l'onglet est cache.
+     Sim.avancer(s) fait tourner les boucles a la main : c'est la porte des essais, dans un
+     navigateur qui ne dessine pas (onglet cache, capture sans affichage). */
+  var boucles = [];
+  function avancer(secondes, pasDt) {
+    pasDt = pasDt || 0.05;
+    for (var t = 0; t < secondes - 1e-9; t += pasDt) boucles.forEach(function (f) { f(pasDt); });
+  }
+  function animer(f) {
+    boucles.push(f);
+    var avant = null, actif = true, id = null;
+    function pas(t) {
+      if (avant === null) avant = t;
+      var dt = Math.min(0.1, (t - avant) / 1000); avant = t;
+      if (actif) f(dt);
+      id = requestAnimationFrame(pas);
+    }
+    id = requestAnimationFrame(pas);
+    return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
+  }
+
+  /* Petit utilitaire SVG. */
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) { if (k === "texte") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
+    afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
+    defi: defi, animer: animer, avancer: avancer, svg: svg };
+})();
+
+</script>
+</head>
+<body>
+<div class="page">
+<header class="tete">
+<div class="surtitre">BTS FED · séances 18 et 19, réguler</div>
+<h1>La régulation du chauffage</h1>
+<p class="chapeau">Une salle et son ventilo-convecteur : on tourne les molettes du régulateur, tout ou rien, P, PI ou manuel, on fait glisser la consigne sur la courbe, on ouvre la fenêtre. Puis un immeuble et sa loi d'eau : on tire la courbe de chauffe au doigt, on peint la programmation horaire, on déplace la sonde au soleil. La centrale d'acquisition enregistre tout dans le temps.</p>
+</header>
+<style>
+:root{--chaud:#c0392b;--froid:#2c6da6}
+.objet{fill:var(--carte);stroke:var(--encre);stroke-width:2;stroke-linejoin:round}
+.etiq{font-size:11px;fill:var(--encre2)}
+.etiq-titre{font-size:12px;font-weight:700;fill:var(--encre)}
+.lcd{fill:#cfd8cf;stroke:var(--encre2);stroke-width:1}
+.lcd-txt{font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:600;fill:#1d2a1d}
+.grille{stroke:var(--trait2);stroke-width:1}
+.prise{cursor:grab;touch-action:none;outline:none}
+.prise:active{cursor:grabbing}
+.clic{cursor:pointer}
+.prise-zone{fill:var(--accent);fill-opacity:.08;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.indice{font-size:12px;font-weight:650;fill:var(--accent)}
+.carte [hidden]{display:none!important}
+.fiche{font-size:.9rem;color:var(--encre2);margin:0}
+.fiche b{color:var(--encre)}
+</style>
+
+<nav class="onglets" id="experiences" aria-label="Expériences">
+  <button type="button" data-vue="vueBoucle">La boucle de régulation</button>
+  <button type="button" data-vue="vueLoi">La loi d'eau</button>
+</nav>
+
+<div class="carte">
+  <h2><span class="num">1</span><span id="titreReglages">La salle</span></h2>
+  <p class="consigne" id="consigneReglages"></p>
+  <div class="commandes" id="reglages"></div>
+  <p class="fiche" id="fiche"></p>
+</div>
+
+<div class="plan">
+  <div class="carte">
+    <h2><span class="num">2</span><span id="titreScene">La salle et sa boucle</span></h2>
+    <div class="scene">
+      <svg id="scene" viewBox="0 0 640 512" role="img" aria-label="La salle, son émetteur, son régulateur et la courbe de la boucle"></svg>
+    </div>
+    <p class="legende" id="legende"></p>
+  </div>
+  <div class="carte">
+    <h2><span class="num">3</span>Règle et observe</h2>
+    <div class="commandes">
+      <div id="cmd" class="commandes"></div>
+      <div class="rangee" id="rgBoutons">
+        <button type="button" class="bouton principal" id="bMarche">Mettre en route</button>
+      </div>
+      <div class="afficheurs" id="instruments"></div>
+      <div id="vitesse"></div>
+      <p class="alerte" id="etat"></p>
+    </div>
+  </div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">4</span>La centrale d'acquisition</h2>
+  <p class="consigne" id="consigneReleve"></p>
+  <div id="vueBoucle" class="vue"></div>
+  <div id="vueLoi" class="vue"></div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">5</span>Le résultat</h2>
+  <p class="consigne" id="consigneResultat"></p>
+  <div class="commandes" id="defis"></div>
+  <details class="modele">
+    <summary>Ce que la simulation simplifie</summary>
+    <ul>
+      <li>La salle est un seul volume à une seule température, de constante de temps vingt-deux minutes ; le ventilo-convecteur répond en une minute, et la sonde a vingt secondes de retard. Une vraie salle a des murs qui stockent et rendent la chaleur sur des heures.</li>
+      <li>Le régulateur PI calcule u = 100 ÷ Xp × (écart + somme de l'écart ÷ Ti), borné entre 0 et 100 %, sans emballement de l'intégrale quand la vanne est en butée. En manuel, la vanne suit la molette et le régulateur ne fait plus rien.</li>
+      <li>L'immeuble a un GV de 600 W/K, une inertie de 14 heures, des radiateurs 70/50 à −5 °C. Par temps clair, le soleil donne jusqu'à 2 kW par les fenêtres entre 9 h et 17 h, et chauffe la façade sud.</li>
+      <li>Aux heures de réduit, l'automate baisse le départ de (1 + pente) × abaissement. Il n'y a pas d'optimiseur : la relance démarre à l'heure programmée.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function () {
+  var reg = { vitesse: 10 };
+  /* ---------- La salle : un volume, un ventilo-convecteur de 4 kW, une sonde en retard ---------- */
+  var C_SALLE = 200000, GV_SALLE = 150, PMAX = 4000, TAU_EM = 60, RETARD = 20;
+  var MODES = ["TOR", "P", "PI", "MANU"];
+  var exp = "boucle", etats = {};
+  function E() { return etats[exp]; }
+  function progDefaut() { var p = []; for (var i = 0; i < 24; i++) p.push(i >= 22 || i < 6); return p; }
+  function etatNeuf(x) {
+    if (x === "boucle") return { exp: x, t: 0, marche: false, mode: "P", Xs: 19, diff: 1, Xp: 1, Ti: 300, manu: 40, te: 5, fenetre: false, soleil: false,
+      T: 15, Pem: 0, u: 0, integ: 0, tor: false, file: [], mes: 15, hist: [], E: 0, vu: {} };
+    return { exp: x, t: 0, h: 0, marche: false, pente: 1.5, para: 0, sonde: "nord", reduit: 0, prog: progDefaut(), k: 0, meteo: "froid", Ta: 19, Td: 40, Pem: 0,
+      E: 0, Ejour: 0, jours: [], hist: [], vu: {} };
+  }
+
+  /* ---------- La boucle ---------- */
+  function pasBoucle(e, dt) {
+    // la sonde lit la temperature d'il y a RETARD secondes
+    e.file.push({ t: e.t, T: e.T }); while (e.file.length > 2 && e.file[1].t <= e.t - RETARD) e.file.shift();
+    e.mes = e.file[0].T;
+    var u = 0;
+    if (e.marche) {
+      var ecart = e.Xs - e.mes;
+      if (e.mode === "MANU") u = e.manu;
+      else if (e.mode === "TOR") { if (e.mes <= e.Xs - e.diff / 2) e.tor = true; else if (e.mes >= e.Xs + e.diff / 2) e.tor = false; u = e.tor ? 100 : 0; }
+      else if (e.mode === "P") u = Sim.borne(ecart / e.Xp * 100, 0, 100);
+      else {
+        var brut = 100 / e.Xp * (ecart + e.integ / e.Ti);
+        if (brut > 0 && brut < 100 || (brut >= 100 && ecart < 0) || (brut <= 0 && ecart > 0)) e.integ += ecart * dt;    // pas d'emballement en butee
+        u = Sim.borne(100 / e.Xp * (ecart + e.integ / e.Ti), 0, 100);
+      }
+    }
+    e.u = u;
+    e.Pem += (PMAX * u / 100 - e.Pem) * (1 - Math.exp(-dt / TAU_EM));
+    var gv = GV_SALLE + (e.fenetre ? 120 : 0), apports = (e.soleil ? 1200 : 0) + 300;
+    e.T += (e.Pem + apports - gv * (e.T - e.te)) / C_SALLE * dt;
+    e.E += e.Pem * dt / 3.6e6;
+    e.t += dt;
+    if (e.hist.length === 0 || e.t - e.hist[e.hist.length - 1].t >= 5) { e.hist.push({ t: e.t, T: e.mes, u: u, Xs: e.Xs }); if (e.hist.length > 400) e.hist.shift(); }
+  }
+
+  /* ---------- La loi d'eau : un immeuble de GV 600 W/K, des radiateurs 70/50 a -5 degres ---------- */
+  var GV_BAT = 600, C_BAT = 30e6, PNOM = GV_BAT * 24, DTM_NOM = 41;
+  var METEOS = { froid: { texte: "Froid sec et ensoleillé · −5 °C", tm: -5, amp: 4, soleil: 1 }, couvert: { texte: "Froid couvert · −2 °C", tm: -2, amp: 2, soleil: 0 },
+    doux: { texte: "Doux et couvert · 8 °C", tm: 8, amp: 3, soleil: 0 } };
+  function soleil(h, m) { return m.soleil && h > 9 && h < 17 ? Math.sin(Math.PI * (h - 9) / 8) : 0; }
+  function tExt(h, m) { return m.tm + m.amp * Math.sin(2 * Math.PI * (h - 9) / 24); }
+  /* Les radiateurs, a debit constant : l'eau perd 20 K a pleine charge, f x 20 K a charge f. */
+  function emission(td, ta) {
+    var f = 0.5;
+    for (var i = 0; i < 30; i++) { var x = td - 10 * f - ta; f = 0.5 * f + 0.5 * (x > 0 ? Math.pow(x / DTM_NOM, 1.3) : 0); }
+    return f * PNOM;
+  }
+  function enReduit(e, h) { return e.prog[Math.floor(h % 24)]; }
+  function departLoi(e, te, ta, h) {
+    var reduit = enReduit(e, h) ? e.reduit : 0, cons = 19 - reduit;
+    var td = 19 + e.pente * (19 - te) + e.para - e.pente * reduit - reduit + e.k * (cons - ta);
+    return Sim.borne(td, 20, 80);
+  }
+  function aUnReduit(e) { return e.reduit > 0 && e.prog.indexOf(true) >= 0; }
+  function signature(e) { return [e.meteo, e.pente, e.para, e.sonde, e.k, aUnReduit(e) ? e.reduit + ":" + e.prog.map(Number).join("") : "0"].join("|"); }
+  function pasLoi(e, dt) {
+    if (!e.marche) return;
+    if (e.reglageJour === undefined) e.reglageJour = e.h % 24 < 0.02 ? signature(e) : "début en cours de journée";
+    if (e.reglageJour !== signature(e)) e.reglageJour = "changé en cours de journée";
+    var m = METEOS[e.meteo], h = e.h, te = tExt(h, m), sol = soleil(h % 24, m);
+    var teSonde = te + (e.sonde === "sud" ? 12 * sol : 0);
+    e.te = te; e.teSonde = teSonde;
+    e.Td = departLoi(e, teSonde, e.Ta, h);
+    var P = emission(e.Td, e.Ta);
+    var gains = (h % 24 >= 8 && h % 24 < 18 ? 2000 : 600) + 2000 * sol;
+    e.Pem = P;
+    e.Ta += (P + gains - GV_BAT * (e.Ta - te)) / C_BAT * dt;
+    e.E += P * dt / 3.6e6; e.Ejour += P * dt / 3.6e6;
+    var hAvant = e.h; e.h += dt / 3600; e.t += dt;
+    if (Math.floor(e.h / 24) > Math.floor(hAvant / 24)) {     // fin d'une journee : on la range
+      var stable = e.reglageJour === signature(e);
+      e.jours.push({ E: e.Ejour, reduit: aUnReduit(e) ? e.reduit : 0, reglage: e.reglageJour, stable: stable, tmin: e.tminJour, tmax: e.tmaxJour });
+      e.reglageJour = signature(e);
+      message("Journée " + e.jours.length + " finie : de 8 h à 18 h, l'ambiance est restée entre " + Sim.fr(e.tminJour, 1) + " et " + Sim.fr(e.tmaxJour, 1) + " °C" +
+        (stable ? "." : ". Un réglage a changé en cours de journée : elle ne compte pas pour une comparaison."));
+      e.Ejour = 0; e.tminJour = 99; e.tmaxJour = -99;
+    }
+    var hh = e.h % 24; if (hh >= 8 && hh < 18) { e.tminJour = Math.min(e.tminJour === undefined ? 99 : e.tminJour, e.Ta); e.tmaxJour = Math.max(e.tmaxJour === undefined ? -99 : e.tmaxJour, e.Ta); }
+    if (e.hist.length === 0 || e.h - e.hist[e.hist.length - 1].h >= 0.2) { e.hist.push({ h: e.h, Ta: e.Ta, te: te }); if (e.hist.length > 400) e.hist.shift(); }
+  }
+
+  /* ---------- Les lectures ---------- */
+  function lec(e) {
+    if (e.exp === "boucle") return { mes: Sim.mesure(e.mes, { absolu: 0.03, resolution: 0.1 }), u: Math.round(e.u), P: Sim.mesure(e.Pem, { relatif: 0.01, resolution: 10 }), E: Math.floor(e.E * 100) / 100 };
+    return { Ta: Sim.mesure(e.Ta, { absolu: 0.03, resolution: 0.1 }), te: Sim.mesure(e.te === undefined ? 0 : e.te, { absolu: 0.05, resolution: 0.1 }), teS: Sim.mesure(e.teSonde === undefined ? 0 : e.teSonde, { absolu: 0.05, resolution: 0.1 }),
+      Td: Sim.mesure(e.Td, { absolu: 0.05, resolution: 0.1 }), P: Sim.mesure(e.Pem / 1000, { relatif: 0.01, resolution: 0.1 }), E: Math.floor(e.E * 10) / 10 };
+  }
+  function heure(h) { var m = Math.floor((h % 24) * 60); return "J" + (Math.floor(h / 24) + 1) + " · " + Math.floor(m / 60) + " h " + (m % 60 < 10 ? "0" : "") + (m % 60); }
+  function duree(t) { var s = Math.floor(t); return Math.floor(s / 60) + " min " + (s % 60 < 10 ? "0" : "") + (s % 60) + " s"; }
+
+  /* ---------- Reglages et commandes ---------- */
+  function message(t) { if (t) document.getElementById("etat").textContent = t; }
+  function poserReglages() {
+    var R = document.getElementById("reglages"), e = E(); R.innerHTML = "";
+    if (exp === "boucle") {
+      Sim.curseur(R, { label: "Température extérieure", min: -10, max: 15, pas: 1, valeur: e.te, unite: "°C", dec: 0, surChange: function (v) { E().te = v; } });
+      document.getElementById("fiche").innerHTML = "Une salle de <b>GV 150 W/K</b>, un ventilo-convecteur de <b>4 kW</b> commandé par une vanne. Le régulateur se règle <b>sur sa façade</b> : tourne ses molettes au doigt. La consigne se fait aussi glisser sur la courbe. Un clic ouvre la fenêtre ou fait entrer le soleil.";
+    } else {
+      Sim.choix(R, { label: "La météo, répétée chaque jour", valeur: e.meteo, options: Object.keys(METEOS).map(function (k) { return { val: k, texte: METEOS[k].texte }; }),
+        surChange: function (v) { E().meteo = v; message("Nouvelle météo à partir de maintenant."); } });
+      Sim.choix(R, { label: "La sonde extérieure est posée", valeur: e.sonde, options: [{ val: "nord", texte: "au nord, à l'ombre" }, { val: "sud", texte: "au sud, au soleil" }],
+        surChange: function (v) { poserSonde(v); } });
+      Sim.curseur(R, { label: "Abaissement aux heures de réduit", min: 0, max: 5, pas: 1, valeur: e.reduit, unite: "K", dec: 0, surChange: function (v) { E().reduit = v; } });
+      Sim.curseur(R, { label: "Correction d'ambiance k", min: 0, max: 4, pas: 0.5, valeur: e.k, dec: 1, surChange: function (v) { E().k = v; } });
+      document.getElementById("fiche").innerHTML = "Un immeuble de <b>GV 600 W/K</b>, radiateurs <b>70/50 à −5 °C</b>. La loi d'eau : <b>départ = 19 + pente × (19 − Te) + parallèle</b>. Tire les poignées de la courbe, <b>peins les heures</b> de la programmation au doigt, touche la façade où poser la sonde.";
+    }
+  }
+  function poserSonde(v) {
+    var e = E(); if (e.sonde === v) return; e.sonde = v; poserReglages();
+    message(v === "sud" ? "Sonde au soleil : à midi, elle croira qu'il fait bien plus doux." : "Sonde au nord, à l'ombre : là où elle doit être.");
+  }
+  var CURS = {};
+  function poserCommandes() {
+    var Z = document.getElementById("cmd"), e = E(); Z.innerHTML = ""; CURS = {};
+    if (exp === "loi") {
+      CURS.pente = Sim.curseur(Z, { label: "Pente de la loi d'eau", min: 0.5, max: 3, pas: 0.05, valeur: e.pente, dec: 2, surChange: function (v) { E().pente = v; } });
+      CURS.para = Sim.curseur(Z, { label: "Parallèle", min: -10, max: 10, pas: 0.5, valeur: e.para, unite: "K", dec: 1, surChange: function (v) { E().para = v; } });
+    }
+    poserInstruments(); afficher();
+  }
+  var I = document.getElementById("instruments"), A = {};
+  function poserInstruments() {
+    I.innerHTML = ""; A = {};
+    if (exp === "boucle") {
+      A.mes = Sim.afficheur(I, { nom: "Sonde d'ambiance", unite: "°C", dec: 1 });
+      A.u = Sim.afficheur(I, { nom: "Commande de la vanne", unite: "%", dec: 0 });
+      A.P = Sim.afficheur(I, { nom: "Puissance émise", unite: "W", dec: 0 });
+      A.t = Sim.afficheur(I, { nom: "Temps", unite: "", dec: 0 });
+    } else {
+      A.h = Sim.afficheur(I, { nom: "Heure", unite: "", dec: 0 });
+      A.te = Sim.afficheur(I, { nom: "Dehors, à l'ombre", unite: "°C", dec: 1 });
+      A.teS = Sim.afficheur(I, { nom: "Ce que lit la sonde extérieure", unite: "°C", dec: 1 });
+      A.Td = Sim.afficheur(I, { nom: "Départ", unite: "°C", dec: 1 });
+      A.Ta = Sim.afficheur(I, { nom: "Ambiance", unite: "°C", dec: 1 });
+      A.E = Sim.afficheur(I, { nom: "Compteur de chaleur", unite: "kWh", dec: 1 });
+    }
+  }
+  function afficher() {
+    var e = E(), l = lec(e);
+    if (exp === "boucle") { A.mes.set(l.mes, 1); A.u.set(l.u, 0); A.P.set(l.P, 0); A.t.set(duree(e.t)); }
+    else { A.h.set(heure(e.h)); A.te.set(l.te, 1); A.teS.set(l.teS, 1); A.Td.set(l.Td, 1); A.Ta.set(l.Ta, 1); A.E.set(l.E, 1); }
+    document.getElementById("bMarche").textContent = e.marche ? (exp === "boucle" ? "Arrêter la régulation" : "Pause") : (exp === "boucle" ? "Mettre en route" : e.h > 0 ? "Reprendre" : "Lancer les journées");
+  }
+
+  /* ---------- La centrale d'acquisition, une par experience ---------- */
+  var CEN = {};
+  CEN.boucle = Sim.centrale("#vueBoucle", {
+    temps: { cle: "t", titre: "t", unite: "min", dec: 2, echelle: 60 },
+    voies: [{ cle: "mes", titre: "Ambiance", unite: "°C", dec: 1 }, { cle: "u", titre: "Vanne", unite: "%", dec: 0 }, { cle: "P", titre: "Puissance", unite: "W", dec: 0 },
+      { cle: "Xs", titre: "Consigne", unite: "°C", dec: 1 }, { cle: "te", titre: "Dehors", unite: "°C", dec: 0, cache: true }, { cle: "mode", titre: "Mode", cache: true }],
+    periodes: [{ val: 5, texte: "5 s" }, { val: 10, texte: "10 s" }, { val: 30, texte: "30 s" }, { val: 60, texte: "1 min" }], valeur: 10,
+    durees: [{ val: 0, texte: "jamais" }, { val: 600, texte: "10 min" }, { val: 1800, texte: "30 min" }, { val: 3600, texte: "1 h" }, { val: 7200, texte: "2 h" }], duree: 0,
+    trace: ["mes", "u"], nomFichier: "regulation-boucle.csv",
+    lire: function () { var e = etats.boucle, l = lec(e); return { mes: l.mes, u: l.u, P: l.P, Xs: e.Xs, te: e.te, mode: e.mode }; }
+  });
+  CEN.loi = Sim.centrale("#vueLoi", {
+    temps: { cle: "h", titre: "Heure", unite: "h", dec: 2, echelle: 3600 },
+    voies: [{ cle: "Ta", titre: "Ambiance", unite: "°C", dec: 1 }, { cle: "te", titre: "Dehors", unite: "°C", dec: 1 }, { cle: "teS", titre: "Sonde ext.", unite: "°C", dec: 1 },
+      { cle: "Td", titre: "Départ", unite: "°C", dec: 1 }, { cle: "P", titre: "Puissance", unite: "kW", dec: 1, cache: true }, { cle: "E", titre: "Compteur", unite: "kWh", dec: 1 }],
+    periodes: [{ val: 900, texte: "15 min" }, { val: 1800, texte: "30 min" }, { val: 3600, texte: "1 h" }, { val: 7200, texte: "2 h" }], valeur: 3600,
+    durees: [{ val: 0, texte: "jamais" }, { val: 86400, texte: "1 jour" }, { val: 172800, texte: "2 jours" }, { val: 604800, texte: "1 semaine" }], duree: 0,
+    trace: ["Ta", "te"], nomFichier: "regulation-loi-d-eau.csv",
+    lire: function () { var e = etats.loi, l = lec(e); return { h: e.h, Ta: l.Ta, te: l.te, teS: l.teS, Td: l.Td, P: l.P, E: l.E }; }
+  });
+
+  /* ---------- Verifications ---------- */
+  function regimeP(e) {            // la boucle P au repos : la commande et l'ecart d'equilibre
+    if (!e.marche || e.mode === "TOR" || e.mode === "MANU" || e.t < 2400) return null;
+    var h = e.hist.slice(-60); if (h.length < 40) return null;
+    var tmin = Math.min.apply(null, h.map(function (p) { return p.T; })), tmax = Math.max.apply(null, h.map(function (p) { return p.T; }));
+    return tmax - tmin < 0.15 ? { ecart: e.Xs - e.mes, u: e.u } : null;
+  }
+  function poserDefis() {
+    var D = document.getElementById("defis"), e = E(); D.innerHTML = "";
+    if (exp === "boucle") {
+      if (e.mode === "TOR") {
+        Sim.defi(D, { question: "Température d'enclenchement de la vanne, en tout ou rien :", unite: "°C", attendu: function () { return E().Xs - E().diff / 2; }, tolerance: 0, toleranceAbsolue: 0.05,
+          methode: "Enclenchement = Xs − diff ÷ 2." });
+        Sim.defi(D, { question: "Température de coupure :", unite: "°C", attendu: function () { return E().Xs + E().diff / 2; }, tolerance: 0, toleranceAbsolue: 0.05, methode: "Coupure = Xs + diff ÷ 2." });
+        Sim.defi(D, { question: "Amplitude réelle des oscillations de l'ambiance, lue sur la courbe, du creux à la bosse :", unite: "K",
+          attendu: function () { var x = E(); if (!x.marche || x.t < 2400) return NaN; var h = x.hist.slice(-240); return Math.max.apply(null, h.map(function (p) { return p.T; })) - Math.min.apply(null, h.map(function (p) { return p.T; })); },
+          tolerance: 0.15, toleranceAbsolue: 0.1, methode: "Elle dépasse le différentiel : la sonde est en retard et le ventilo-convecteur aussi. Lis-la sur la courbe de la centrale, après quelques cycles." });
+        document.getElementById("consigneResultat").innerHTML = "Mets en route, laisse la boucle osciller quelques cycles, puis lis les seuils et l'amplitude sur la courbe.";
+      } else if (e.mode === "MANU") {
+        Sim.defi(D, { question: "Gain statique de la salle : variation de l'ambiance stabilisée ÷ variation de la commande de la vanne :", unite: "K/%",
+          attendu: function () { return PMAX / 100 / (GV_SALLE + (E().fenetre ? 120 : 0)); }, tolerance: 0.1,
+          methode: "En manuel, laisse l'ambiance se stabiliser, change la vanne d'un coup (de 40 à 60 % par exemple), attends la nouvelle stabilisation : ΔT ÷ Δu." });
+        Sim.defi(D, { question: "Constante de temps de la salle, lue sur la réponse à ce changement :", unite: "min",
+          attendu: function () { return C_SALLE / (GV_SALLE + (E().fenetre ? 120 : 0)) / 60; }, tolerance: 0.15,
+          methode: "Le temps pour faire 63 % de la variation totale, compté depuis le changement de la vanne. Lis-le sur la courbe de la centrale." });
+        document.getElementById("consigneResultat").innerHTML = "<b>L'essai en boucle ouverte</b> : en manuel, le régulateur ne fait plus rien. Change la vanne d'un coup et enregistre la réponse de la salle.";
+      } else {
+        Sim.defi(D, { question: "Commande de la vanne en régime établi, lue sur l'afficheur :", unite: "%", attendu: function () { var r = regimeP(E()); return r ? r.u : NaN; }, tolerance: 0, toleranceAbsolue: 2,
+          methode: "Attends que la courbe soit plate, trois quarts d'heure au moins, sans toucher à rien." });
+        Sim.defi(D, { question: "Erreur statique, consigne − ambiance en régime établi :", unite: "K", attendu: function () { var r = regimeP(E()); return r ? r.ecart : NaN; }, tolerance: 0, toleranceAbsolue: 0.15,
+          methode: e.mode === "P" ? "En P, elle vaut commande × Xp ÷ 100 : la vanne a besoin d'un écart pour rester ouverte." : "En PI, l'intégrale la ramène à zéro : attends assez longtemps." });
+        document.getElementById("consigneResultat").innerHTML = "Mets en route, laisse la boucle se stabiliser, puis fais glisser la consigne, ouvre la fenêtre ou fais entrer le soleil, et regarde la courbe rattraper.";
+      }
+    } else {
+      Sim.defi(D, { question: "Pente d'une loi d'eau qui donne 70 °C de départ par −5 °C dehors, sans parallèle :", unite: "", attendu: (70 - 19) / 24, tolerance: 0, toleranceAbsolue: 0.03,
+        methode: "départ = 19 + pente × (19 − Te) : 70 = 19 + pente × 24." });
+      Sim.defi(D, { question: "Départ demandé par ta loi d'eau actuelle quand la sonde lit 5 °C :", unite: "°C", attendu: function () { var x = E(); return Sim.borne(19 + x.pente * 14 + x.para, 20, 80); }, tolerance: 0, toleranceAbsolue: 0.3,
+        methode: "19 + pente × (19 − 5) + parallèle." });
+      Sim.defi(D, { question: "Économie mesurée par le réduit : compare une journée sans réduit et une avec, même météo, même loi d'eau :", unite: "%",
+        attendu: function () {
+          var j = E().jours.filter(function (x) { return x.stable; }), sans = null, avec = null;
+          for (var i = j.length - 1; i >= 0; i--) { if (j[i].reduit === 0 && !sans) sans = j[i]; if (j[i].reduit > 0 && !avec) avec = j[i]; }
+          if (!sans || !avec || sans.reglage.split("|").slice(0, 5).join("|") !== avec.reglage.split("|").slice(0, 5).join("|")) return NaN;
+          return 100 * (sans.E - avec.E) / sans.E;
+        }, tolerance: 0, toleranceAbsolue: 1, methode: "Deux journées entières, de minuit à minuit, sans toucher à rien d'autre que le réduit : (chaleur sans − chaleur avec) ÷ chaleur sans × 100, compteur relevé à minuit." });
+      document.getElementById("consigneResultat").innerHTML = "Règle la courbe pour tenir <b>19 à 21 °C</b> de 8 h à 18 h, dans les trois météos. Puis mets la sonde au soleil, et regarde ce qui se passe à midi.";
+    }
+  }
+
+  /* ---------- La scene ---------- */
+  var S = document.getElementById("scene"), svg = Sim.svg;
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function texte(p, x, y, t, o) { o = o || {}; return svg("text", { x: x, y: y, "class": o.classe || "etiq", "text-anchor": o.ancre || "start", texte: t }, p); }
+  function lcd(G, x, y, w, val) { svg("rect", { x: x, y: y, width: w, height: 17, rx: 2, "class": "lcd" }, G); svg("text", { x: x + w / 2, y: y + 12.5, "text-anchor": "middle", "class": "lcd-txt", texte: val }, G); }
+  var Lc = {}; ["fond", "dyn"].forEach(function (k) { Lc[k] = svg("g", {}, S); });
+  Lc.molettes = svg("g", {}, S);
+  ["fenetre", "soleil", "sondeN", "sondeS"].forEach(function (k) { Lc[k] = svg("g", { "class": "clic" }, S); });
+  ["courbe", "base", "para", "prog"].forEach(function (k) { Lc[k] = svg("g", { "class": "prise" }, S); });
+  var DYN = ["fond", "dyn", "fenetre", "soleil", "sondeN", "sondeS", "courbe", "base", "para", "prog"];
+  function dessiner() { DYN.forEach(function (k) { Lc[k].innerHTML = ""; }); if (exp === "boucle") dessinerBoucle(E()); else dessinerLoi(E()); }
+  function sombre() { var t = document.documentElement.getAttribute("data-theme"); return t === "dark" || (t !== "light" && matchMedia("(prefers-color-scheme: dark)").matches); }
+  function tc(clair, fonce) { return sombre() ? fonce : clair; }
+  function melange(a, b, f) {      // deux couleurs #rrggbb, f entre 0 et 1
+    var x = parseInt(a.slice(1), 16), y = parseInt(b.slice(1), 16), r = [16, 8, 0].map(function (s) { return Math.round(((x >> s) & 255) * (1 - f) + ((y >> s) & 255) * f); });
+    return "rgb(" + r.join(",") + ")";
+  }
+  function fleche(G, x1, y1, x2, y2, coul, ep, op) {
+    var a = Math.atan2(y2 - y1, x2 - x1), l = 7 + ep;
+    svg("line", { x1: x1, y1: y1, x2: x2 - Math.cos(a) * l * 0.6, y2: y2 - Math.sin(a) * l * 0.6, stroke: coul, "stroke-width": ep, opacity: op }, G);
+    svg("path", { d: "M" + x2 + " " + y2 + " L" + (x2 - l * Math.cos(a - 0.45)) + " " + (y2 - l * Math.sin(a - 0.45)) + " L" + (x2 - l * Math.cos(a + 0.45)) + " " + (y2 - l * Math.sin(a + 0.45)) + " Z", fill: coul, opacity: op }, G);
+  }
+
+  /* La facade du regulateur : quatre molettes, posees une fois, montrees selon le mode. */
+  var RG = { x: 350, y: 60, w: 278, h: 232 };
+  var M = {};
+  function majMolettes() {
+    var e = etats.boucle; if (!e) return;
+    M.mode.set(MODES.indexOf(e.mode), true); M.Xs.set(e.Xs, true); M.diff.set(e.diff, true); M.Xp.set(e.Xp, true); M.manu.set(e.manu, true); M.Ti.set(e.Ti, true);
+    M.diff.montrer(e.mode === "TOR"); M.Xp.montrer(e.mode === "P" || e.mode === "PI"); M.manu.montrer(e.mode === "MANU"); M.Ti.montrer(e.mode === "PI");
+  }
+  M.mode = Sim.molette(Lc.molettes, { x: 396, y: 140, min: 0, max: 3, pas: 1, valeur: 1, label: "Mode du régulateur", titreCourt: "mode", course: 120,
+    format: function (v) { return ["TOR", "P", "PI", "MANU"][v]; },
+    surChange: function (v) {
+      var e = etats.boucle, m = MODES[v]; if (e.mode === m) return;
+      if (m === "MANU") e.manu = Math.round(e.u / 5) * 5;
+      e.mode = m; e.integ = 0; majMolettes(); poserDefis();
+      message(m === "TOR" ? "Tout ou rien : la vanne est ouverte ou fermée, avec un différentiel." : m === "P" ? "Proportionnel : la vanne s'ouvre en proportion de l'écart." :
+        m === "PI" ? "PI : l'intégrale ajoute l'écart accumulé, et rattrape l'erreur statique." : "Manuel : la vanne suit la molette, le régulateur ne fait plus rien. C'est l'essai en boucle ouverte.");
+    } });
+  M.Xs = Sim.molette(Lc.molettes, { x: 489, y: 140, min: 16, max: 23, pas: 0.5, valeur: 19, dec: 1, unite: "°C", label: "Consigne", titreCourt: "consigne",
+    surChange: function (v) { etats.boucle.Xs = v; } });
+  M.diff = Sim.molette(Lc.molettes, { x: 582, y: 140, min: 0.2, max: 3, pas: 0.1, valeur: 1, dec: 1, unite: "K", label: "Différentiel", titreCourt: "différentiel",
+    surChange: function (v) { etats.boucle.diff = v; } });
+  M.Xp = Sim.molette(Lc.molettes, { x: 582, y: 140, min: 0.3, max: 5, pas: 0.1, valeur: 1, dec: 1, unite: "K", label: "Bande proportionnelle Xp", titreCourt: "Xp",
+    surChange: function (v) { etats.boucle.Xp = v; } });
+  M.manu = Sim.molette(Lc.molettes, { x: 582, y: 140, min: 0, max: 100, pas: 5, valeur: 40, dec: 0, unite: "%", label: "Ouverture de la vanne en manuel", titreCourt: "vanne",
+    surChange: function (v) { etats.boucle.manu = v; } });
+  M.Ti = Sim.molette(Lc.molettes, { x: 582, y: 232, min: 60, max: 1800, pas: 30, valeur: 300, dec: 0, unite: "s", label: "Temps d'intégrale Ti", titreCourt: "Ti",
+    surChange: function (v) { etats.boucle.Ti = v; } });
+
+  var GR = null;      // l'echelle de la courbe de la boucle, pour y faire glisser la consigne
+  function dessinerBoucle(e) {
+    var G = Lc.dyn, F = Lc.fond, l = lec(e);
+    // la salle : sa couleur suit sa temperature, de 15 a 22 degres
+    svg("rect", { x: 16, y: 16, width: 284, height: 190, fill: melange(tc("#dbe7f3", "#1d2a37"), tc("#f6d9c9", "#3d2a22"), Sim.borne((e.T - 15) / 7, 0, 1)), stroke: css("--encre"), "stroke-width": 3 }, F);
+    texte(F, 26, 34, "la salle", { classe: "etiq-titre" });
+    var Fw = Lc.fenetre;
+    svg("rect", { x: 196, y: 36, width: 90, height: 64, fill: e.fenetre ? tc("#eef4fa", "#3a4a5a") : tc("#c9dced", "#2a3d50"), stroke: css("--encre"), "stroke-width": 2 }, Fw);
+    if (e.fenetre) {
+      svg("path", { d: "M196 36 L168 50 L168 114 L196 100 Z", fill: tc("#c9dced", "#2a3d50"), stroke: css("--encre"), "stroke-width": 2 }, Fw);
+      fleche(Fw, 241, 74, 241, 128, css("--froid"), 3, 0.8);
+    } else svg("line", { x1: 241, y1: 36, x2: 241, y2: 100, stroke: css("--encre"), "stroke-width": 2 }, Fw);
+    svg("rect", { x: 164, y: 24, width: 130, height: 104, fill: "transparent" }, Fw);
+    texte(Fw, 241, 31, e.fenetre ? "fenêtre ouverte" : "fenêtre : clic", { ancre: "middle" });
+    var Sw = Lc.soleil;
+    svg("circle", { cx: 326, cy: 26, r: 13, fill: e.soleil ? "#f2c94c" : "none", stroke: "#d9b54a", "stroke-width": 2 }, Sw);
+    if (e.soleil) fleche(Sw, 314, 36, 284, 60, "#d9b54a", 3, 0.9);
+    svg("circle", { cx: 326, cy: 22, r: 34, fill: "transparent" }, Sw);
+    texte(Sw, 344, 30, e.soleil ? "soleil" : "soleil : clic", {});
+    // l'eau chaude, la vanne et son moteur, le ventilo-convecteur
+    var ouvert = Sim.borne(e.Pem / PMAX, 0, 1);
+    svg("path", { d: "M16 160 L130 160", stroke: css("--chaud"), "stroke-width": 5 }, G);
+    texte(G, 24, 152, "eau chaude", {});
+    svg("path", { d: "M88 150 L112 170 L112 150 L88 170 Z", fill: css("--carte"), stroke: css("--encre"), "stroke-width": 2 }, G);
+    svg("line", { x1: 100, y1: 160, x2: 100, y2: 174, stroke: css("--encre"), "stroke-width": 2 }, G);
+    svg("rect", { x: 90, y: 174, width: 20, height: 12, rx: 2, fill: css("--encre") }, G);
+    texte(G, 84, 184, "vanne " + Math.round(e.u) + " %", { ancre: "end" });
+    svg("rect", { x: 130, y: 136, width: 120, height: 42, rx: 4, fill: melange(tc("#eeeae4", "#2b2c30"), tc("#e0866e", "#9a4330"), ouvert), stroke: css("--encre"), "stroke-width": 2 }, G);
+    texte(G, 190, 161, "ventilo-convecteur", { ancre: "middle" });
+    [154, 190, 226].forEach(function (x) { if (ouvert > 0.03) fleche(G, x, 132, x, 106, css("--chaud"), 1.5 + 3 * ouvert, 0.35 + 0.6 * ouvert); });
+    // la sonde, le regulateur, et la boucle qui les relie
+    svg("rect", { x: 276, y: 122, width: 12, height: 18, rx: 3, fill: css("--encre") }, G);
+    texte(G, 282, 154, "sonde", { ancre: "middle" });
+    svg("path", { d: "M288 131 L" + RG.x + " 131", stroke: css("--accent"), "stroke-width": 1.8, "stroke-dasharray": "5 3" }, G);
+    texte(G, 325, 124, "mesure", { ancre: "middle", classe: "indice" });
+    svg("rect", { x: RG.x, y: RG.y, width: RG.w, height: RG.h, rx: 8, "class": "objet" }, F);
+    texte(G, RG.x + 10, RG.y + 21, "régulateur", { classe: "etiq-titre" });
+    lcd(G, RG.x + 128, RG.y + 8, 140, "mesure " + Sim.fr(l.mes, 1) + " °C");
+    // la sortie du regulateur, en barre : ce qu'il envoie a la vanne
+    var bx = RG.x + 26, by = RG.y + 150, bh = 66;
+    svg("rect", { x: bx, y: by, width: 18, height: bh, fill: css("--carte2"), stroke: css("--encre2"), "stroke-width": 1 }, G);
+    svg("rect", { x: bx, y: by + bh * (1 - e.u / 100), width: 18, height: bh * e.u / 100, fill: css("--accent") }, G);
+    texte(G, bx + 26, by + 10, "sortie", {}); texte(G, bx + 26, by + 26, Math.round(e.u) + " %", { classe: "indice" });
+    texte(G, bx + 26, by + 62, "dehors " + Sim.fr(e.te, 0) + " °C", {});
+    svg("path", { d: "M" + RG.x + " 252 L124 252 L124 180 L110 180", fill: "none", stroke: css("--accent"), "stroke-width": 1.8, "stroke-dasharray": "5 3" }, G);
+    texte(G, 236, 246, "commande", { ancre: "middle", classe: "indice" });
+    // la reponse de la boucle : les 30 dernieres minutes ; on y fait glisser la consigne
+    var gx = 50, gy = 318, gw = 560, gh = 168, t1 = e.t, t0 = Math.max(0, t1 - 1800);
+    var Ts = e.hist.map(function (p) { return p.T; });
+    var tmin = GR && GR.fige ? GR.tmin : Math.floor(Math.min.apply(null, Ts.concat([e.Xs - 3]))), tmax = GR && GR.fige ? GR.tmax : Math.ceil(Math.max.apply(null, Ts.concat([e.Xs + 3])));
+    GR = { gx: gx, gy: gy, gw: gw, gh: gh, tmin: tmin, tmax: tmax, fige: GR && GR.fige };
+    var X = function (t) { return gx + (t - t0) / 1800 * gw; }, Y = function (T) { return gy + gh - (T - tmin) / (tmax - tmin) * gh; }, Yu = function (u) { return gy + gh - u / 100 * gh; };
+    svg("rect", { x: gx, y: gy, width: gw, height: gh, fill: css("--carte"), stroke: css("--trait"), "stroke-width": 1 }, G);
+    for (var T = tmin; T <= tmax; T++) { svg("line", { x1: gx, y1: Y(T), x2: gx + gw, y2: Y(T), "class": "grille" }, G); texte(G, gx - 4, Y(T) + 4, String(T), { ancre: "end" }); }
+    texte(G, gx, gy - 7, "ambiance lue par la sonde (°C) ; en gris, la commande de la vanne", {});
+    texte(G, gx + gw + 3, gy + 9, "100 %", {}); texte(G, gx + gw + 3, gy + gh, "0 %", {});
+    texte(G, gx, gy + gh + 15, t1 > 1800 ? "il y a 30 min" : "mise en route", {}); texte(G, gx + gw, gy + gh + 15, "maintenant", { ancre: "end" });
+    if (e.mode === "TOR") svg("rect", { x: gx, y: Y(e.Xs + e.diff / 2), width: gw, height: Y(e.Xs - e.diff / 2) - Y(e.Xs + e.diff / 2), fill: css("--accent"), opacity: 0.12 }, G);
+    var pts = e.hist.filter(function (p) { return p.t >= t0; });
+    if (pts.length > 1) {
+      svg("path", { d: "M" + pts.map(function (p) { return X(p.t) + " " + Yu(p.u); }).join(" L"), fill: "none", stroke: css("--encre2"), "stroke-width": 1.2, opacity: 0.55 }, G);
+      svg("path", { d: "M" + pts.map(function (p) { return X(p.t) + " " + Y(p.Xs); }).join(" L"), fill: "none", stroke: css("--juste"), "stroke-width": 1.5, "stroke-dasharray": "6 4" }, G);
+      svg("path", { d: "M" + pts.map(function (p) { return X(p.t) + " " + Y(p.T); }).join(" L"), fill: "none", stroke: css("--chaud"), "stroke-width": 2.2 }, G);
+    }
+    // la consigne du moment, avec sa poignee : on la fait glisser au doigt
+    var C = Lc.courbe, yc = Y(e.Xs);
+    svg("rect", { x: gx, y: gy, width: gw, height: gh, fill: "transparent" }, C);
+    svg("line", { x1: gx + gw - 70, y1: yc, x2: gx + gw, y2: yc, stroke: css("--juste"), "stroke-width": 2 }, C);
+    svg("circle", { cx: gx + gw - 26, cy: yc, r: 10, "class": "prise-zone" }, C); svg("circle", { cx: gx + gw - 26, cy: yc, r: 4.5, fill: css("--juste") }, C);
+    texte(C, gx + gw - 42, yc - 8, "consigne " + Sim.fr(e.Xs, 1) + " °C : glisse-la", { ancre: "end", classe: "indice" });
+  }
+
+  /* La courbe de chauffe, avec ses deux poignees : la base (pente), l'arret (parallele). */
+  var CC = { x: 350, y: 40, w: 260, h: 180 };
+  function ccX(te) { return CC.x + (te + 15) / 35 * CC.w; }
+  function ccY(td) { return CC.y + CC.h - (td - 20) / 60 * CC.h; }
+  var PG = { x: 40, y: 270, w: 570, h: 22 };      // la programmation horaire, une case par heure
+  function dessinerLoi(e) {
+    var G = Lc.dyn, F = Lc.fond, l = lec(e), m = METEOS[e.meteo], hh = e.h % 24, sol = soleil(hh, m), nuit = hh < 7 || hh >= 19;
+    // le ciel, le sol, l'immeuble
+    svg("rect", { x: 10, y: 10, width: 316, height: 216, fill: nuit ? "#2a3242" : m.soleil ? tc("#dcebf8", "#24384b") : tc("#dfe3e8", "#2c3036") }, F);
+    svg("rect", { x: 10, y: 214, width: 316, height: 12, fill: tc("#b9c4a8", "#3b4433") }, F);
+    var xSol = 40 + 256 * (hh - 9) / 8, ySol = 74 - 46 * sol;
+    if (sol > 0) svg("circle", { cx: xSol, cy: ySol, r: 13, fill: "#f2c94c" }, G);
+    lcd(G, 18, 18, 118, heure(e.h)); lcd(G, 200, 18, 118, "dehors " + Sim.fr(l.te, 1) + " °C");
+    svg("rect", { x: 86, y: 66, width: 164, height: 148, "class": "objet" }, G);
+    var chaud = Sim.borne((e.Ta - 15) / 7, 0, 1);
+    for (var r = 0; r < 3; r++) for (var c = 0; c < 3; c++)
+      svg("rect", { x: 102 + c * 50, y: 78 + r * 38, width: 32, height: 24, fill: nuit ? "#f7e7a8" : melange(tc("#c9dced", "#2a3d50"), tc("#f1c7b2", "#6a3a2a"), chaud), stroke: css("--encre"), "stroke-width": 1.2 }, G);
+    lcd(G, 106, 192, 124, "ambiance " + Sim.fr(l.Ta, 1) + " °C");
+    // la sonde exterieure : on touche la facade ou la poser ; au sud, le soleil la frappe
+    [["nord", 74, Lc.sondeN], ["sud", 256, Lc.sondeS]].forEach(function (s) {
+      var ici = e.sonde === s[0], xs = s[1], Z = s[2];
+      svg("circle", { cx: xs, cy: 125, r: 46, fill: "transparent" }, Z);
+      if (ici) {
+        if (s[0] === "sud" && sol > 0) svg("line", { x1: xSol, y1: ySol, x2: xs, y2: 124, stroke: "#e2b93b", "stroke-width": 1 + 3 * sol, "stroke-dasharray": "4 3" }, Z);
+        svg("rect", { x: xs - 6, y: 116, width: 12, height: 18, rx: 2, fill: css("--encre") }, Z);
+        texte(Z, s[0] === "sud" ? xs + 8 : xs - 8, 152, "sonde", { ancre: s[0] === "sud" ? "start" : "end" });
+      } else {
+        svg("rect", { x: xs - 6, y: 116, width: 12, height: 18, rx: 2, fill: "none", stroke: css("--encre2"), "stroke-width": 1.2, "stroke-dasharray": "3 2" }, Z);
+        texte(Z, s[0] === "sud" ? xs + 8 : xs - 8, 152, "la poser ici", { ancre: s[0] === "sud" ? "start" : "end" });
+      }
+    });
+    // la courbe de chauffe
+    svg("rect", { x: CC.x, y: CC.y, width: CC.w, height: CC.h, fill: css("--carte"), stroke: css("--trait"), "stroke-width": 1 }, F);
+    for (var te = -15; te <= 20; te += 5) { svg("line", { x1: ccX(te), y1: CC.y, x2: ccX(te), y2: CC.y + CC.h, "class": "grille" }, F); if (te > -15) texte(F, ccX(te), CC.y + CC.h + 13, String(te), { ancre: "middle" }); }
+    for (var td = 20; td <= 80; td += 10) { svg("line", { x1: CC.x, y1: ccY(td), x2: CC.x + CC.w, y2: ccY(td), "class": "grille" }, F); texte(F, CC.x - 4, ccY(td) + 4, String(td), { ancre: "end" }); }
+    texte(F, CC.x + CC.w, CC.y + CC.h + 27, "ce que lit la sonde (°C)", { ancre: "end" }); texte(F, CC.x - 22, CC.y - 10, "départ (°C) : la courbe de chauffe", {});
+    var loi = function (t) { return Sim.borne(19 + e.pente * (19 - t) + e.para, 20, 80); };
+    var pts = []; for (var t = -15; t <= 20; t += 1) pts.push(ccX(t) + " " + ccY(loi(t)));
+    svg("path", { d: "M" + pts.join(" L"), fill: "none", stroke: css("--chaud"), "stroke-width": 2.5 }, G);
+    if (e.teSonde !== undefined && e.marche) svg("circle", { cx: ccX(Sim.borne(e.teSonde, -15, 20)), cy: ccY(e.Td), r: 5.5, fill: css("--accent"), stroke: css("--carte"), "stroke-width": 1.5 }, G);
+    // les poignees : la base a -5 degres regle la pente, le point a 15 degres le parallele
+    var B = Lc.base, Pp = Lc.para, xb = ccX(-5), yb = ccY(loi(-5)), xa = ccX(15), ya = ccY(loi(15));
+    svg("circle", { cx: xb, cy: yb, r: 46, fill: "transparent" }, B); svg("circle", { cx: xb, cy: yb, r: 10, "class": "prise-zone" }, B); svg("circle", { cx: xb, cy: yb, r: 4.5, fill: css("--chaud") }, B);
+    texte(B, xb - 14, yb + 4, "pente", { classe: "indice", ancre: "end" });
+    svg("circle", { cx: xa, cy: ya, r: 46, fill: "transparent" }, Pp); svg("circle", { cx: xa, cy: ya, r: 10, "class": "prise-zone" }, Pp); svg("circle", { cx: xa, cy: ya, r: 4.5, fill: css("--chaud") }, Pp);
+    texte(Pp, xa, ya - 16, "parallèle", { classe: "indice", ancre: "middle" });
+    // la programmation horaire : on peint les heures au doigt
+    var Pg = Lc.prog, cw = PG.w / 24;
+    texte(F, PG.x, PG.y - 7, "programmation horaire : touche ou glisse sur les heures", { classe: "etiq-titre" });
+    texte(F, PG.x + PG.w, PG.y - 7, "abaissement " + e.reduit + " K", { ancre: "end", classe: "indice" });
+    svg("rect", { x: PG.x, y: PG.y - 12, width: PG.w, height: PG.h + 24, fill: "transparent" }, Pg);
+    for (var i = 0; i < 24; i++) {
+      var red = e.prog[i];
+      svg("rect", { x: PG.x + i * cw + 0.5, y: PG.y, width: cw - 1, height: PG.h, fill: red ? tc("#9fb8d6", "#2f4a68") : tc("#f0c987", "#7a5a22"), stroke: css("--carte"), "stroke-width": 1 }, Pg);
+    }
+    if (e.marche || e.h > 0) svg("rect", { x: PG.x + Math.floor(hh) * cw, y: PG.y - 2, width: cw, height: PG.h + 4, fill: "none", stroke: css("--encre"), "stroke-width": 2.2 }, Pg);
+    [0, 6, 12, 18, 24].forEach(function (k) { texte(F, PG.x + k * cw, PG.y + PG.h + 13, k + " h", { ancre: k === 0 ? "start" : k === 24 ? "end" : "middle" }); });
+    texte(F, PG.x + 3 * cw, PG.y + PG.h + 13, "orange : confort", { ancre: "middle" }); texte(F, PG.x + 21 * cw, PG.y + PG.h + 13, "bleu : réduit", { ancre: "middle" });
+    // l'ambiance des 48 dernieres heures, contre la plage de confort
+    var gx = 40, gy = 328, gw = 570, gh = 112, h1 = e.h, h0 = Math.max(0, h1 - 48), X = function (h) { return gx + (h - h0) / 48 * gw; }, Y = function (T) { return gy + gh - (T - 14) / 10 * gh; };
+    svg("rect", { x: gx, y: gy, width: gw, height: gh, fill: css("--carte"), stroke: css("--trait"), "stroke-width": 1 }, G);
+    svg("rect", { x: gx, y: Y(21), width: gw, height: Y(19) - Y(21), fill: css("--juste"), opacity: 0.15 }, G);
+    [14, 16, 18, 20, 22, 24].forEach(function (T) { svg("line", { x1: gx, y1: Y(T), x2: gx + gw, y2: Y(T), "class": "grille" }, G); texte(G, gx - 4, Y(T) + 4, String(T), { ancre: "end" }); });
+    for (var hj = Math.ceil(h0 / 24) * 24; hj <= h1; hj += 24) { svg("line", { x1: X(hj), y1: gy, x2: X(hj), y2: gy + gh, stroke: css("--encre2"), "stroke-width": 1, "stroke-dasharray": "3 3" }, G); texte(G, X(hj) + 3, gy + 12, "minuit", {}); }
+    texte(G, gx, gy - 7, "ambiance (°C) ; en vert, 19 à 21 °C", {});
+    texte(G, gx, gy + gh + 15, h1 > 48 ? "il y a 48 h" : "lancement", {}); texte(G, gx + gw, gy + gh + 15, "maintenant", { ancre: "end" });
+    var hp = e.hist.filter(function (p) { return p.h >= h0; });
+    if (hp.length > 1) svg("path", { d: "M" + hp.map(function (p) { return X(p.h) + " " + Y(Sim.borne(p.Ta, 14, 24)); }).join(" L"), fill: "none", stroke: css("--chaud"), "stroke-width": 2 }, G);
+  }
+
+  /* ---------- Gestes : fenetre, soleil, sonde, consigne, courbe de chauffe, programmation ---------- */
+  Lc.fenetre.addEventListener("click", function () { var e = E(); if (exp !== "boucle") return; e.fenetre = !e.fenetre; message(e.fenetre ? "Fenêtre ouverte : la salle perd d'un coup ; regarde la vanne réagir." : "Fenêtre fermée."); });
+  Lc.soleil.addEventListener("click", function () { var e = E(); if (exp !== "boucle") return; e.soleil = !e.soleil; message(e.soleil ? "Le soleil entre : 1,2 kW gratuits ; la vanne doit se fermer." : "Le soleil est passé."); });
+  Lc.sondeN.addEventListener("click", function () { if (exp === "loi") poserSonde("nord"); });
+  Lc.sondeS.addEventListener("click", function () { if (exp === "loi") poserSonde("sud"); });
+  function point(ev) { var p = S.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; return p.matrixTransform(S.getScreenCTM().inverse()); }
+  function glisser(el, quand, debut, bouge, fin) {
+    el.addEventListener("touchstart", function (ev) { ev.preventDefault(); }, { passive: false });
+    el.addEventListener("pointerdown", function (ev) {
+      if (exp !== quand) return;
+      ev.preventDefault(); try { el.setPointerCapture(ev.pointerId); } catch (x) { /* synthese */ }
+      if (debut) debut(point(ev));
+      function mv(e2) { bouge(point(e2)); }
+      function arret() { el.removeEventListener("pointermove", mv); el.removeEventListener("pointerup", arret); el.removeEventListener("pointercancel", arret); if (fin) fin(); }
+      el.addEventListener("pointermove", mv); el.addEventListener("pointerup", arret); el.addEventListener("pointercancel", arret);
+    });
+  }
+  function ccTd(y) { return 20 + (CC.y + CC.h - y) / CC.h * 60; }
+  function synchroLoi() { var e = E(); if (CURS.pente) CURS.pente.set(e.pente, true); if (CURS.para) CURS.para.set(e.para, true); }
+  glisser(Lc.base, "loi", null, function (p) { var e = E(); e.pente = Sim.borne(Math.round((ccTd(p.y) - 19 - e.para) / 24 * 20) / 20, 0.5, 3); synchroLoi(); });
+  glisser(Lc.para, "loi", null, function (p) { var e = E(); e.para = Sim.borne(Math.round((ccTd(p.y) - 19 - e.pente * 4) * 2) / 2, -10, 10); synchroLoi(); });
+  function consigneSous(p) { return Sim.borne(Math.round((GR.tmin + (GR.gy + GR.gh - p.y) / GR.gh * (GR.tmax - GR.tmin)) * 2) / 2, 16, 23); }
+  glisser(Lc.courbe, "boucle", function (p) { GR.fige = true; var e = E(); e.Xs = consigneSous(p); M.Xs.set(e.Xs, true); },
+    function (p) { var e = E(); e.Xs = consigneSous(p); M.Xs.set(e.Xs, true); }, function () { GR.fige = false; message("Consigne à " + Sim.fr(E().Xs, 1) + " °C : regarde la boucle rattraper."); });
+  var peinture = null;
+  function heureSous(p) { return Math.floor((p.x - PG.x) / (PG.w / 24)); }
+  glisser(Lc.prog, "loi", function (p) { var e = E(), i = heureSous(p); if (i < 0 || i > 23) { peinture = null; return; } peinture = !e.prog[i]; e.prog[i] = peinture; },
+    function (p) { var e = E(), i = heureSous(p); if (peinture === null || i < 0 || i > 23) return; e.prog[i] = peinture; },
+    function () { var e = E(), n = e.prog.filter(Boolean).length; peinture = null;
+      message(n ? n + " heure" + (n > 1 ? "s" : "") + " de réduit programmée" + (n > 1 ? "s" : "") + (e.reduit ? ", abaissement " + e.reduit + " K." : ". Règle l'abaissement pour qu'il serve.") : "Aucune heure de réduit : confort toute la journée."); });
+
+  /* ---------- Boutons, temps, boucle ---------- */
+  document.getElementById("bMarche").addEventListener("click", function () {
+    var e = E(); e.marche = !e.marche;
+    if (exp === "loi" && e.marche && e.tminJour === undefined) { e.tminJour = 99; e.tmaxJour = -99; }
+    message(e.marche ? (exp === "boucle" ? "Régulation en route : la vanne obéit au régulateur." : "Les journées défilent : la loi d'eau suit la sonde extérieure.") : "En pause.");
+    afficher();
+  });
+  var VITESSES = { boucle: [0, 1, 10, 60], loi: [0, 600, 3600] };
+  function poserVitesse() {
+    var Z = document.getElementById("vitesse"); Z.innerHTML = "";
+    if (VITESSES[exp].indexOf(reg.vitesse) < 0) reg.vitesse = exp === "boucle" ? 10 : 3600;
+    Sim.choix(Z, { label: "Vitesse du temps", valeur: reg.vitesse, options: VITESSES[exp].map(function (v) { return { val: v, texte: v ? "× " + Sim.fr(v, 0) : "pause" }; }),
+      surChange: function (v) { reg.vitesse = v; } });
+  }
+  var cumul = 0, dernierDessin = 0;
+  function pas(dt) {
+    var e = E(), dts = dt * reg.vitesse, n = Math.max(1, Math.ceil(dts / (exp === "loi" ? 60 : 1)));
+    if (dts > 0) for (var i = 0; i < n; i++) { if (exp === "boucle") pasBoucle(e, dts / n); else pasLoi(e, dts / n); CEN[exp].tic(e.t); }
+    cumul += dt;
+    if (cumul >= 0.25) { cumul = 0; afficher(); }
+    var t = performance.now();
+    if (t - dernierDessin > 40) { dernierDessin = t; dessiner(); }
+  }
+
+  /* ---------- Changer d'experience ---------- */
+  var TEXTES = {
+    boucle: { titre: "La salle et sa boucle", reglages: "La salle", consigne: "Une boucle fermée : la sonde mesure, le régulateur compare à la consigne, la vanne agit. En manuel, la boucle est ouverte.",
+      legende: "Tourne les molettes du régulateur au doigt. Sur la courbe, la consigne se fait glisser ; en tout ou rien, la bande bleue est le différentiel. Clique sur la fenêtre ou le soleil pour perturber la salle.",
+      releve: "Une mesure toutes les 10 secondes suit la boucle de près. Coche les colonnes utiles, choisis les deux courbes, et copie le tableau vers un tableur pour exploiter la réponse.",
+      accueil: "Mets en route en proportionnel, Xp = 1 K, lance l'acquisition et attends la courbe plate : où se stabilise l'ambiance ?" },
+    loi: { titre: "L'immeuble et sa loi d'eau", reglages: "L'immeuble et sa sonde", consigne: "Une boucle ouverte : la loi d'eau règle le départ sur la température extérieure, sans regarder l'ambiance, sauf si on ajoute la correction d'ambiance.",
+      legende: "Tire la poignée de gauche pour la pente, celle de droite pour le parallèle. Peins la programmation horaire au doigt. Le point bleu est le départ du moment ; en bas, l'ambiance des deux derniers jours.",
+      releve: "Une mesure par heure suffit, et l'arrêt automatique au bout d'un jour ou deux te laisse comparer des journées entières. Le compteur relevé à minuit donne la chaleur de la journée.",
+      accueil: "Lance les journées en froid sec, regarde l'ambiance, puis ajuste la courbe. À « × 3 600 », une heure passe par seconde." }
+  };
+  function changerExp(x) {
+    exp = x;
+    if (!etats[x]) etats[x] = etatNeuf(x);
+    S.setAttribute("viewBox", x === "boucle" ? "0 0 640 512" : "0 0 640 466");
+    Lc.molettes.style.display = x === "boucle" ? "" : "none";
+    if (x === "boucle") majMolettes();
+    poserVitesse();
+    document.getElementById("titreScene").textContent = TEXTES[x].titre;
+    document.getElementById("titreReglages").textContent = TEXTES[x].reglages;
+    document.getElementById("consigneReglages").textContent = TEXTES[x].consigne;
+    document.getElementById("legende").textContent = TEXTES[x].legende;
+    document.getElementById("consigneReleve").textContent = TEXTES[x].releve;
+    poserReglages(); poserCommandes(); poserDefis(); dessiner();
+    message(TEXTES[x].accueil);
+  }
+  var og = Sim.onglets("#experiences", function (id) { changerExp(id === "vueBoucle" ? "boucle" : "loi"); });
+  if (location.hash === "#loi") og.montrer("vueLoi");
+  Sim.animer(pas);
+
+  window.regulation = { etat: E, reglage: reg, lectures: function () { return lec(E()); }, enr: function () { return CEN[exp]; }, releve: function () { return CEN[exp]; },
+    centrale: function () { return CEN[exp]; }, molettes: M, dessiner: function () { dessiner(); afficher(); }, defis: poserDefis };
+})();
+</script>
+<footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
+</div>
+</body>
+</html>

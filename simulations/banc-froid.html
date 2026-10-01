@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le banc de froid</title>
+<meta name="description" content="Un circuit frigorifique complet, avec ses manomètres, ses sondes, son débitmètre et son diagramme enthalpique détaillé. On met en marche, on attend le régime établi, on relève, puis on trace le cycle point par point. Cinq fluides, trois usages, sept pannes à diagnostiquer.">
+<meta name="etiquette" content="Simulation · J13">
+<style>
+/* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
+   Palette du kit web (kit.css) : papier, graphite, un seul accent. Polices du systeme : la page
+   s'ouvre sans reseau, depuis une cle ou le poste de la salle. */
+:root{
+  --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
+  --trait:#c9c5bf; --trait2:#dedbd6; --accent:#2c6da6; --accent-doux:#dfe8f1;
+  --juste:#2f7a55; --juste-doux:#e2efe7; --faux:#ab432a; --faux-doux:#f5e3dd; --tiede:#b8801f;
+  --scene:#f6f5f2; --ombre:0 1px 2px rgba(25,26,28,.05),0 10px 26px rgba(25,26,28,.07); --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+    --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+    --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+    --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+  --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+  --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+  --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;font-size:16px;line-height:1.5}
+.page{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+.mono,.afficheur .val,.curseur .val,table.releve td{font-family:ui-monospace,"Cascadia Mono",Consolas,"Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+sub,sup{font-size:.72em;line-height:0}
+
+/* En-tete */
+.tete{padding:6px 0 16px;border-bottom:1px solid var(--trait);margin-bottom:16px}
+.surtitre{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre2);font-weight:600}
+.tete h1{font-size:clamp(1.45rem,4vw,2rem);margin:4px 0 6px;font-weight:750}
+.chapeau{margin:0;color:var(--encre2);max-width:70ch}
+
+/* Onglets : un par protocole ou par ecran */
+.onglets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.onglets button{font:inherit;font-weight:650;font-size:.95rem;padding:9px 14px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre2);cursor:pointer}
+.onglets button[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.onglets button:not([aria-selected="true"]):hover{border-color:var(--encre2);color:var(--encre)}
+.vue[hidden]{display:none}
+
+/* Mise en page : la scene a gauche, les commandes a droite ; une colonne sous 820 px */
+.plan{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.plan{grid-template-columns:1fr}}
+.carte{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);box-shadow:var(--ombre);padding:16px;margin-bottom:16px}
+.carte > h2{font-size:1.08rem;margin-bottom:10px;font-weight:700}
+.carte > h2 .num{color:var(--accent);margin-right:.35em}
+.consigne{color:var(--encre2);margin:0 0 12px;font-size:.95rem}
+.scene{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r);overflow:hidden;position:relative}
+.scene svg,.scene canvas{display:block;width:100%;height:auto}
+.legende{font-size:.82rem;color:var(--encre2);margin-top:6px}
+
+/* Commandes */
+.commandes{display:flex;flex-direction:column;gap:14px}
+.curseur label{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-weight:600;margin-bottom:2px}
+.curseur .val{font-weight:600;color:var(--encre)}
+.curseur input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.curseur .bornes{display:flex;justify-content:space-between;font-size:.75rem;color:var(--encre2)}
+.choix .titre{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.choix .boutons{display:flex;flex-wrap:wrap;gap:6px}
+.choix button,.bouton{font:inherit;font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;min-height:40px}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bouton:hover,.choix button:hover{border-color:var(--encre2)}
+.bouton.principal{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.bouton:disabled{opacity:.45;cursor:not-allowed}
+.rangee{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Afficheurs : ce que lit un instrument */
+.afficheurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.afficheur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:8px 10px}
+.afficheur .nom{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);font-weight:650}
+.afficheur .val{font-size:1.45rem;font-weight:650;white-space:nowrap}
+.afficheur .unite{font-size:.95rem;color:var(--encre2);margin-left:.25em}
+.afficheur .note{font-size:.75rem;color:var(--encre2)}
+
+/* Releve de mesures et graphe */
+.releve-zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:820px){.releve-zone{grid-template-columns:1fr}}
+table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
+table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
+table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
+table.releve tr.vide td{color:var(--encre2);font-style:italic}
+.graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.graphe canvas{display:block;width:100%;height:auto}
+
+/* Enregistreur : une mesure toute seule, a intervalle regulier du temps simule */
+.enregistreur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.enr-lampe{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--trait)}
+.enr-lampe.actif{background:var(--faux)}
+.enr-lampe.eclair{animation:eclair .6s ease-out}
+@keyframes eclair{from{box-shadow:0 0 0 0 var(--faux)}to{box-shadow:0 0 0 10px transparent}}
+.enr-info{font-size:.88rem;color:var(--encre2)}
+
+/* Defi : l'eleve propose une valeur, la page dit juste ou pas encore, jamais la reponse */
+.defi{border:1px dashed var(--trait);border-radius:var(--r);padding:12px 14px;background:var(--carte2)}
+.defi p{margin:0 0 8px}
+.defi .saisie{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.defi input{font:inherit;width:9em;padding:7px 9px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.defi .retour{margin-top:8px;font-weight:600;min-height:1.4em}
+.defi .retour.juste{color:var(--juste)}
+.defi .retour.faux{color:var(--faux)}
+.defi .methode{font-weight:400;color:var(--encre2)}
+
+/* Encadres */
+.note-modele{margin-top:6px}
+details.modele{border-top:1px solid var(--trait);padding-top:10px;margin-top:8px}
+details.modele summary{cursor:pointer;font-weight:650}
+details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-size:.92rem}
+.alerte{border-left:4px solid var(--tiede);background:var(--carte2);padding:8px 12px;border-radius:0 var(--r) var(--r) 0;font-size:.92rem}
+.pied{margin-top:24px;padding-top:10px;border-top:1px solid var(--trait);font-size:.8rem;color:var(--encre2)}
+
+@media print{
+  body{background:#fff}
+  .onglets,.commandes .bouton,.defi{display:none}
+  .carte{box-shadow:none;break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Centrale d'acquisition : periode, duree, deux courbes en direct, tableau defilant, export */
+.centrale{display:flex;flex-direction:column;gap:12px}
+.centrale-reglages{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.centrale-traces{display:flex;flex-wrap:wrap;gap:8px 18px}
+.centrale-traces label{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.centrale-traces select{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);min-height:40px;max-width:100%}
+.centrale-pastille{display:inline-block;width:14px;height:4px;border-radius:2px}
+.centrale-table{max-height:300px;overflow:auto;border:1px solid var(--trait2);border-radius:var(--r)}
+.centrale-table table.releve th{position:sticky;top:0;z-index:1}
+.centrale-table table.releve{border-collapse:separate;border-spacing:0}
+
+/* Molette posee sur la scene : on la tourne au doigt */
+.molette{cursor:grab;touch-action:none;outline:none}
+.molette.tourne{cursor:grabbing}
+.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
+.molette.tourne .molette-corps{fill:var(--accent-doux)}
+.molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
+.molette-graduation{stroke:var(--encre2);stroke-width:1.2}
+.molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
+.molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
+
+</style>
+<script>
+/* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
+   Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
+   Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
+"use strict";
+var Sim = (function () {
+
+  /* Nombres a la francaise : virgule, espace fine insecable entre les milliers. */
+  function fr(x, dec) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (dec === undefined) dec = 2;
+    var s = Math.abs(x).toFixed(dec).split(".");
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return (x < 0 && Number(x.toFixed(dec)) !== 0 ? "−" : "") + s.join(",");
+  }
+  /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
+  function lire(txt) {
+    if (txt === null || txt === undefined) return NaN;
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
+    return t === "" ? NaN : Number(t);
+  }
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "texte") n.textContent = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k === "classe") n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function $(sel) { return typeof sel === "string" ? document.querySelector(sel) : sel; }
+  function borne(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  /* Un instrument ne donne jamais la valeur exacte : bruit gaussien relatif, puis resolution. */
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function mesure(vraie, opts) {
+    opts = opts || {};
+    var x = vraie * (1 + (opts.relatif || 0) * gauss()) + (opts.absolu || 0) * gauss();
+    if (opts.resolution) x = Math.round(x / opts.resolution) * opts.resolution;
+    return x;
+  }
+
+  /* Onglets : boutons [data-vue="id"] qui montrent la section #id. */
+  function onglets(nav, surChange) {
+    nav = $(nav);
+    var boutons = Array.prototype.slice.call(nav.querySelectorAll("button[data-vue]"));
+    nav.setAttribute("role", "tablist");
+    function montrer(id) {
+      boutons.forEach(function (b) {
+        var actif = b.getAttribute("data-vue") === id;
+        b.setAttribute("aria-selected", actif ? "true" : "false");
+        b.setAttribute("role", "tab");
+        var v = document.getElementById(b.getAttribute("data-vue"));
+        if (v) v.hidden = !actif;
+      });
+      if (surChange) surChange(id);
+    }
+    boutons.forEach(function (b) { b.addEventListener("click", function () { montrer(b.getAttribute("data-vue")); }); });
+    montrer(boutons[0].getAttribute("data-vue"));
+    return { montrer: montrer };
+  }
+
+  /* Curseur avec son etiquette, sa valeur affichee et ses bornes. */
+  function curseur(parent, o) {
+    var dec = o.dec === undefined ? 0 : o.dec;
+    var id = o.id || ("c" + Math.random().toString(36).slice(2, 8));
+    var val = el("span", { classe: "val" });
+    var inp = el("input", { type: "range", id: id, min: o.min, max: o.max, step: o.pas || 1, value: o.valeur });
+    var bloc = el("div", { classe: "curseur" }, [
+      el("label", { "for": id }, [el("span", { texte: o.label }), val]), inp,
+      el("div", { classe: "bornes" }, [el("span", { texte: fr(o.min, dec) + " " + (o.unite || "") }), el("span", { texte: fr(o.max, dec) + " " + (o.unite || "") })])
+    ]);
+    function maj() { val.textContent = fr(Number(inp.value), dec) + (o.unite ? " " + o.unite : ""); }
+    inp.addEventListener("input", function () { maj(); if (o.surChange) o.surChange(Number(inp.value)); });
+    maj();
+    $(parent).appendChild(bloc);
+    return {
+      get: function () { return Number(inp.value); },
+      set: function (v, silencieux) { inp.value = v; maj(); if (!silencieux && o.surChange) o.surChange(Number(inp.value)); },
+      activer: function (oui) { inp.disabled = !oui; },
+      noeud: bloc
+    };
+  }
+
+  /* Groupe de boutons dont un seul est enfonce. options : [{val, texte}] */
+  function choix(parent, o) {
+    var courant = o.valeur;
+    var zone = el("div", { classe: "boutons", role: "group", "aria-label": o.label || "" });
+    var boutons = o.options.map(function (op) {
+      var b = el("button", { type: "button", texte: op.texte });
+      b.addEventListener("click", function () { poser(op.val); });
+      zone.appendChild(b);
+      return { b: b, val: op.val };
+    });
+    function poser(v, silencieux) {
+      courant = v;
+      boutons.forEach(function (x) { x.b.setAttribute("aria-pressed", x.val === v ? "true" : "false"); });
+      if (!silencieux && o.surChange) o.surChange(v);
+    }
+    var bloc = el("div", { classe: "choix" }, [o.label ? el("div", { classe: "titre", texte: o.label }) : null, zone]);
+    $(parent).appendChild(bloc);
+    poser(courant, true);
+    return { get: function () { return courant; }, set: poser, noeud: bloc };
+  }
+
+  /* Afficheur d'instrument : nom, valeur, unite, et une note facultative. */
+  function afficheur(parent, o) {
+    var v = el("span", { classe: "val", texte: "—" });
+    var n = el("div", { classe: "note", texte: o.note || "" });
+    var bloc = el("div", { classe: "afficheur" }, [el("div", { classe: "nom", texte: o.nom }), el("div", null, [v, el("span", { classe: "unite", texte: o.unite || "" })]), o.note !== undefined ? n : null]);
+    $(parent).appendChild(bloc);
+    return {
+      set: function (x, dec) { v.textContent = typeof x === "string" ? x : fr(x, dec === undefined ? (o.dec === undefined ? 2 : o.dec) : dec); },
+      note: function (t) { n.textContent = t; },
+      noeud: bloc
+    };
+  }
+
+  /* Graphe sur canvas, net sur les ecrans haute densite. Axes, grille, courbes, points. */
+  function graphe(parent, o) {
+    var larg = o.largeur || 640, haut = o.hauteur || 380;
+    var cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": o.titre || "graphe" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    $(parent).appendChild(cadre);
+    var ctx = cv.getContext("2d");
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = larg * dpr; cv.height = haut * dpr; ctx.scale(dpr, dpr);
+    var m = { g: 62, d: 16, h: 16, b: 48 };
+    var ax = { xmin: o.xmin, xmax: o.xmax, ymin: o.ymin, ymax: o.ymax };
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+    function X(x) { return m.g + (x - ax.xmin) / (ax.xmax - ax.xmin) * (larg - m.g - m.d); }
+    function Y(y) { return haut - m.b - (y - ax.ymin) / (ax.ymax - ax.ymin) * (haut - m.h - m.b); }
+    function pasJoli(etendue, n) {
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function fond() {
+      ctx.clearRect(0, 0, larg, haut);
+      ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var px = o.pasX || pasJoli(ax.xmax - ax.xmin, 8), py = o.pasY || pasJoli(ax.ymax - ax.ymin, 6);
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2");
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = Math.ceil(ax.xmin / px) * px; x <= ax.xmax + 1e-9; x += px) {
+        ctx.beginPath(); ctx.moveTo(X(x), Y(ax.ymin)); ctx.lineTo(X(x), Y(ax.ymax)); ctx.stroke();
+        ctx.fillText(fr(x, o.decX !== undefined ? o.decX : decimales(px)), X(x), Y(ax.ymin) + 5);
+      }
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (var y = Math.ceil(ax.ymin / py) * py; y <= ax.ymax + 1e-9; y += py) {
+        ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y)); ctx.lineTo(X(ax.xmax), Y(y)); ctx.stroke();
+        ctx.fillText(fr(y, o.decY !== undefined ? o.decY : decimales(py)), X(ax.xmin) - 6, Y(y));
+      }
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.4;
+      var y0 = borne(0, ax.ymin, ax.ymax), x0 = borne(0, ax.xmin, ax.xmax);
+      ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y0)); ctx.lineTo(X(ax.xmax), Y(y0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(x0), Y(ax.ymin)); ctx.lineTo(X(x0), Y(ax.ymax)); ctx.stroke();
+      ctx.fillStyle = css("--encre"); ctx.font = "600 13px system-ui, Segoe UI, Arial, sans-serif";
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(o.titreX || "", larg - m.d, haut - 4);
+      ctx.save(); ctx.translate(14, m.h); ctx.rotate(-Math.PI / 2); ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText(o.titreY || "", 0, 0); ctx.restore();
+    }
+    function couleur(c) { return c && c.indexOf("--") === 0 ? css(c) : (c || css("--accent")); }
+    var api = {
+      axes: function (n) { for (var k in n) ax[k] = n[k]; return api; },
+      effacer: function () { fond(); return api; },
+      /* f : fonction x -> y, ou tableau de [x, y] */
+      courbe: function (f, opts) {
+        opts = opts || {};
+        ctx.save(); ctx.beginPath();
+        ctx.rect(m.g, m.h, larg - m.g - m.d, haut - m.h - m.b); ctx.clip();
+        ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = opts.epaisseur || 2.2;
+        if (opts.pointille) ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        if (typeof f === "function") {
+          var n = opts.pas || 400, prem = true;
+          for (var i = 0; i <= n; i++) {
+            var x = ax.xmin + (ax.xmax - ax.xmin) * i / n, y = f(x);
+            if (!isFinite(y)) { prem = true; continue; }
+            if (prem) { ctx.moveTo(X(x), Y(y)); prem = false; } else ctx.lineTo(X(x), Y(y));
+          }
+        } else {
+          f.forEach(function (p, i) { if (i === 0) ctx.moveTo(X(p[0]), Y(p[1])); else ctx.lineTo(X(p[0]), Y(p[1])); });
+        }
+        ctx.stroke(); ctx.restore();
+        return api;
+      },
+      points: function (pts, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.strokeStyle = css("--carte");
+        pts.forEach(function (p) {
+          var r = opts.rayon || 4.5;
+          ctx.beginPath();
+          if (opts.forme === "croix") {
+            ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = 2;
+            ctx.moveTo(X(p[0]) - r, Y(p[1]) - r); ctx.lineTo(X(p[0]) + r, Y(p[1]) + r);
+            ctx.moveTo(X(p[0]) + r, Y(p[1]) - r); ctx.lineTo(X(p[0]) - r, Y(p[1]) + r); ctx.stroke();
+          } else { ctx.arc(X(p[0]), Y(p[1]), r, 0, 2 * Math.PI); ctx.fill(); ctx.lineWidth = 1; ctx.stroke(); }
+        });
+        return api;
+      },
+      texte: function (x, y, t, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.font = (opts.gras ? "600 " : "") + "13px system-ui, Segoe UI, Arial, sans-serif";
+        ctx.textAlign = opts.align || "left"; ctx.textBaseline = "middle";
+        ctx.fillText(t, X(x) + (opts.dx || 0), Y(y) + (opts.dy || 0));
+        return api;
+      },
+      X: X, Y: Y, ctx: ctx, canvas: cv
+    };
+    fond();
+    return api;
+  }
+
+  /* Releve : l'eleve garde une mesure dans un tableau, qui peut alimenter un graphe.
+     colonnes : [{cle, titre, unite, dec}] ; graphe : {x, y, ...options de Sim.graphe} */
+  function releve(parent, o) {
+    var lignes = [];
+    var zone = el("div", { classe: "releve-zone" });
+    var gauche = el("div");
+    var table = el("table", { classe: "releve" });
+    var tete = el("tr"); o.colonnes.forEach(function (c) { tete.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+    table.appendChild(el("thead", null, [tete]));
+    var corps = el("tbody"); table.appendChild(corps);
+    var boutons = el("div", { classe: "rangee", style: "margin-top:8px" });
+    var bAnnuler = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    boutons.appendChild(bAnnuler); boutons.appendChild(bVider);
+    gauche.appendChild(table); gauche.appendChild(boutons);
+    zone.appendChild(gauche);
+    var gr = null;
+    if (o.graphe) { var droite = el("div"); zone.appendChild(droite); gr = graphe(droite, o.graphe); }
+    $(parent).appendChild(zone);
+    function dessiner() {
+      corps.innerHTML = "";
+      if (!lignes.length) {
+        var tr = el("tr", { classe: "vide" }); tr.appendChild(el("td", { colspan: o.colonnes.length, texte: o.vide || "Aucune mesure gardée pour l'instant." })); corps.appendChild(tr);
+      }
+      lignes.forEach(function (l) {
+        var tr = el("tr");
+        o.colonnes.forEach(function (c) { tr.appendChild(el("td", { texte: typeof l[c.cle] === "number" ? fr(l[c.cle], c.dec === undefined ? 2 : c.dec) : (l[c.cle] || "") })); });
+        corps.appendChild(tr);
+      });
+      if (gr) {
+        gr.effacer();
+        if (o.avantPoints) o.avantPoints(gr, lignes);
+        gr.points(lignes.map(function (l) { return [l[o.graphe.x], l[o.graphe.y]]; }), { couleur: o.graphe.couleur });
+      }
+      if (o.surChange) o.surChange(lignes);
+    }
+    bAnnuler.addEventListener("click", function () { lignes.pop(); dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; dessiner(); });
+    dessiner();
+    return {
+      ajouter: function (l) { if (o.max && lignes.length >= o.max) lignes.shift(); lignes.push(l); dessiner(); },
+      lignes: function () { return lignes.slice(); },
+      vider: function () { lignes = []; dessiner(); },
+      redessiner: dessiner,
+      graphe: gr
+    };
+  }
+
+  /* Enregistreur : garde une ligne du releve tout seul, a intervalle regulier du temps SIMULE,
+     comme une centrale d'acquisition. La simulation appelle tic(t) a chaque pas de calcul.
+     o : { periodes: [{val, texte}], valeur, lire: function (tPlanifie, tLancement) -> ligne ou null, label } */
+  function enregistreur(parent, rel, o) {
+    var periode = o.valeur, actif = false, prochain = null, dernier = 0, debut = 0;
+    var zone = el("div", { classe: "enregistreur" });
+    choix(zone, { label: o.label || "Enregistrement automatique : une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; } });
+    var b = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'enregistrement" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [b, lampe, info]));
+    $(parent).appendChild(zone);
+    function majInfo() {
+      var n = rel.lignes().length;
+      info.textContent = (actif ? "enregistre" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") + " dans le tableau" : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      b.textContent = oui ? "Arrêter l'enregistrement" : "Lancer l'enregistrement";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo();
+      if (o.surEtat) o.surEtat(oui);
+    }
+    b.addEventListener("click", function () { poser(!actif); });
+    majInfo();
+    return {
+      tic: function (t) {
+        if (!actif) return;
+        if (prochain === null) { prochain = t; debut = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;      // un pas trop long : pas de rattrapage en rafale
+        if (l) {
+          rel.ajouter(l); majInfo();
+          lampe.classList.remove("eclair"); void lampe.offsetWidth; lampe.classList.add("eclair");
+        }
+      },
+      actif: function () { return actif; },
+      lancer: function () { if (!actif) poser(true); },
+      arreter: function () { if (actif) poser(false); },
+      majInfo: majInfo,
+      noeud: zone
+    };
+  }
+
+  /* Centrale d'acquisition : l'enregistreur, le tableau et la courbe reunis, comme sur un vrai
+     enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
+     tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
+     Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+           lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
+           nomFichier, surChange } */
+  var COULEURS_VOIES = ["--accent", "--faux"];
+  function centrale(parent, o) {
+    var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
+    var periode = o.valeur, duree = o.duree || 0, TP = o.temps, voies = o.voies;
+    var montree = {}; voies.forEach(function (v) { montree[v.cle] = !v.cache; });
+    var trace = (o.trace || [voies[0].cle]).concat([null]).slice(0, 2);
+    var zone = el("div", { classe: "centrale" });
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+
+    /* Les reglages de l'acquisition */
+    var reg = el("div", { classe: "centrale-reglages" });
+    choix(reg, { label: "Une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; majInfo(); } });
+    if (o.durees) choix(reg, { label: "Arrêt automatique au bout de", valeur: duree, options: o.durees, surChange: function (v) { duree = v; majInfo(); } });
+    zone.appendChild(reg);
+    var bLancer = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'acquisition" });
+    var bMain = el("button", { type: "button", classe: "bouton", texte: "Une mesure maintenant" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    lampe.addEventListener("animationend", function () { lampe.classList.remove("eclair"); });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bLancer, bMain, lampe, info]));
+
+    /* La courbe en direct : deux voies au choix, chacune sur son axe */
+    var selects = [0, 1].map(function (i) {
+      var s = el("select", { "aria-label": i ? "Courbe 2, axe de droite" : "Courbe 1, axe de gauche" });
+      if (i) s.appendChild(el("option", { value: "", texte: "aucune" }));
+      voies.forEach(function (v) { s.appendChild(el("option", { value: v.cle, texte: v.titre + (v.unite ? " (" + v.unite + ")" : "") })); });
+      s.value = trace[i] || "";
+      s.addEventListener("change", function () { trace[i] = s.value || null; dessinerCourbe(); });
+      return s;
+    });
+    var pastille = function (i) { return el("span", { classe: "centrale-pastille", style: "background:" + css(COULEURS_VOIES[i]) }); };
+    var pastilles = [pastille(0), pastille(1)];
+    zone.appendChild(el("div", { classe: "centrale-traces" }, [
+      el("label", null, [pastilles[0], el("span", { texte: "Courbe 1, à gauche" }), selects[0]]),
+      el("label", null, [pastilles[1], el("span", { texte: "Courbe 2, à droite" }), selects[1]])
+    ]));
+    /* Le canevas se dessine a la largeur reelle de son cadre : sur un telephone, les graduations
+       restent lisibles au lieu d'etre reduites de moitie. */
+    var larg = 640, haut = 300, cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": "courbe de l'acquisition" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    zone.appendChild(cadre);
+    var ctx = cv.getContext("2d"), dpr = 1;
+    function dimensionner() {
+      var w = cadre.clientWidth ? Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) : 640, h = Math.round(w < 480 ? w * 0.72 : Math.min(320, w * 0.47)), d = Math.max(1, window.devicePixelRatio || 1);
+      if (w === larg && h === haut && d === dpr && cv.width === Math.round(w * d)) return;
+      larg = w; haut = h; dpr = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    /* redessiner quand le cadre change de taille, y compris quand son onglet devient visible */
+    if (window.ResizeObserver) new ResizeObserver(function () { if (cadre.clientWidth && Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) !== larg) dessinerCourbe(); }).observe(cadre);
+    else window.addEventListener("resize", function () { dessinerCourbe(); });
+
+    /* Les voies du tableau */
+    var puces = el("div", { classe: "boutons" });
+    voies.forEach(function (v) {
+      var b = el("button", { type: "button", texte: v.titre, "aria-pressed": montree[v.cle] ? "true" : "false" });
+      b.addEventListener("click", function () { montree[v.cle] = !montree[v.cle]; b.setAttribute("aria-pressed", montree[v.cle] ? "true" : "false"); dessinerTable(); });
+      puces.appendChild(b);
+    });
+    zone.appendChild(el("div", { classe: "choix" }, [el("div", { classe: "titre", texte: "Colonnes du tableau (tout est enregistré)" }), puces]));
+    var table = el("table", { classe: "releve" }), boite = el("div", { classe: "centrale-table" }, [table]);
+    zone.appendChild(boite);
+    var bCopier = el("button", { type: "button", classe: "bouton", texte: "Copier pour un tableur" });
+    var bCsv = el("button", { type: "button", classe: "bouton", texte: "Enregistrer en CSV" });
+    var bRetirer = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    var retour = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bCopier, bCsv, bRetirer, bVider, retour]));
+    $(parent).appendChild(zone);
+
+    function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
+    var corps = null;
+    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
+    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function dessinerTable() {
+      var cs = colonnes(); table.innerHTML = "";
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      table.appendChild(el("thead", null, [tr]));
+      corps = el("tbody");
+      if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
+      lignes.forEach(function (l) { corps.appendChild(ligneTable(l, cs)); });
+      table.appendChild(corps);
+      boite.scrollTop = boite.scrollHeight;
+    }
+    function pasJoli(etendue, n) {
+      if (!(etendue > 0)) return 1;
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function bornes(cle) {
+      var a = Infinity, b = -Infinity;
+      lignes.forEach(function (l) { var y = l[cle]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } });
+      if (!isFinite(a)) return null;
+      if (b - a < 1e-9) { var d = Math.max(Math.abs(a) * 0.05, 0.5); a -= d; b += d; }
+      var marge = (b - a) * 0.04; a -= marge; b += marge;
+      var pas = pasJoli(b - a, 5); return { min: Math.floor(a / pas) * pas, max: Math.ceil(b / pas) * pas, pas: pas };
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function dessinerCourbe() {
+      dimensionner();
+      var mg = 52, md = trace[1] ? 52 : 14, mh = 26, mb = 38, w = larg - mg - md, h = haut - mh - mb;
+      ctx.clearRect(0, 0, larg, haut); ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
+      var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
+      if (x1 - x0 < 1e-9) x1 = x0 + 1;
+      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      trace.forEach(function (cle, i) {
+        if (!cle) return;
+        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
+        ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.fillStyle = coul; ctx.textBaseline = "top";
+        ctx.textAlign = i ? "right" : "left"; ctx.fillText(v.titre + (v.unite ? " (" + v.unite + ")" : ""), i ? larg - 6 : 6, 5);
+        if (!b) return;
+        var Y = function (y) { return mh + h - (y - b.min) / (b.max - b.min) * h; };
+        ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = i ? "left" : "right";
+        for (var y = b.min; y <= b.max + 1e-9; y += b.pas) {
+          if (!i) { ctx.strokeStyle = css("--trait2"); ctx.beginPath(); ctx.moveTo(mg, Y(y)); ctx.lineTo(mg + w, Y(y)); ctx.stroke(); }
+          ctx.fillText(fr(y, decimales(b.pas)), i ? mg + w + 6 : mg - 6, Y(y));
+        }
+        ctx.strokeStyle = coul; ctx.lineWidth = 2; ctx.beginPath();
+        var prem = true;
+        lignes.forEach(function (l) { var yy = l[cle], xx = l[TP.cle]; if (typeof yy !== "number" || !isFinite(yy)) { prem = true; return; }
+          if (prem) { ctx.moveTo(X(xx), Y(yy)); prem = false; } else ctx.lineTo(X(xx), Y(yy)); });
+        ctx.stroke();
+        ctx.fillStyle = coul;
+        if (lignes.length <= 80) lignes.forEach(function (l) { var yy = l[cle]; if (typeof yy === "number" && isFinite(yy)) { ctx.beginPath(); ctx.arc(X(l[TP.cle]), Y(yy), 3, 0, 2 * Math.PI); ctx.fill(); } });
+      });
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.2; ctx.strokeRect(mg, mh, w, h);
+      pastilles[1].style.visibility = trace[1] ? "visible" : "hidden";
+    }
+    function dessiner() { dessinerTable(); dessinerCourbe(); majInfo(); if (o.surChange) o.surChange(lignes); }
+    /* A chaque mesure, une ligne de plus au tableau et une courbe redessinee au plus quatre fois par seconde :
+       a grande vitesse, refaire tout le tableau a chaque point finit par figer la page. */
+    var dernierTrace = 0, traceEnAttente = null;
+    var suivre = true;      // le tableau defile avec les mesures, sauf si on est remonte le lire
+    boite.addEventListener("scroll", function () { suivre = boite.scrollTop + boite.clientHeight >= boite.scrollHeight - 8; });
+    function tracer() { dernierTrace = Date.now(); dessinerCourbe(); if (suivre) boite.scrollTop = boite.scrollHeight; }
+    function courbePlusTard() {
+      if (Date.now() - dernierTrace > 250) { tracer(); return; }
+      if (!traceEnAttente) traceEnAttente = setTimeout(function () { traceEnAttente = null; tracer(); }, 260);
+    }
+    function ecoule() { return Math.max(0, dernier - depart); }
+    function texteDuree(s) { return s >= 3600 ? fr(s / 3600, s % 3600 ? 1 : 0) + " h" : s >= 60 ? fr(s / 60, s % 60 ? 1 : 0) + " min" : fr(s, 0) + " s"; }
+    function majInfo() {
+      var n = lignes.length;
+      info.textContent = (actif ? "acquisition en cours" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") : "") +
+        (actif && duree ? " · " + texteDuree(ecoule()) + " sur " + texteDuree(duree) : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      bLancer.textContent = oui ? "Arrêter l'acquisition" : "Lancer l'acquisition";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo(); if (o.surEtat) o.surEtat(oui);
+    }
+    function ajouter(l) {
+      if (!l) return;
+      if (l[TP.cle] === undefined) l[TP.cle] = (tCourant - (debut === null ? 0 : debut)) / (TP.echelle || 1);
+      lignes.push(l);
+      if (o.max && lignes.length > o.max) { lignes.shift(); dessinerTable(); }
+      else if (corps) {
+        if (lignes.length === 1) dessinerTable();
+        else corps.appendChild(ligneTable(l, colonnes()));
+      }
+      courbePlusTard(); majInfo(); if (o.surChange) o.surChange(lignes);
+      lampe.classList.remove("eclair"); lampe.classList.add("eclair");
+    }
+    function versTexte(sep, decimale) {
+      var cs = colonnes(), lignesTxt = [cs.map(function (c) { return c.titre + (c.unite ? " (" + c.unite + ")" : ""); }).join(sep)];
+      lignes.forEach(function (l) { lignesTxt.push(cs.map(function (c) { var x = l[c.cle]; return typeof x === "number" ? (isFinite(x) ? x.toFixed(c.dec === undefined ? 2 : c.dec).replace(".", decimale) : "") : (x || ""); }).join(sep)); });
+      return lignesTxt.join("\r\n");
+    }
+    function dire(t) { retour.textContent = t; setTimeout(function () { if (retour.textContent === t) retour.textContent = ""; }, 4000); }
+    /* Relancer apres un arret continue la meme serie, sur le meme temps ; tout effacer la remet a zero. */
+    function lancer() { if (!lignes.length) debut = null; poser(true); }
+    bLancer.addEventListener("click", function () { if (actif) poser(false); else lancer(); });
+    bMain.addEventListener("click", function () { if (debut === null) debut = tCourant; ajouter(o.lire(tCourant, debut)); });
+    bRetirer.addEventListener("click", function () { lignes.pop(); if (!lignes.length && !actif) debut = null; dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; if (!actif) debut = null; dessiner(); });
+    bCopier.addEventListener("click", function () {
+      var t = versTexte("\t", ",");
+      function secours() {
+        var ta = el("textarea", { style: "position:fixed;left:-9999px;top:0" }); ta.value = t; document.body.appendChild(ta); ta.select();
+        var ok = false; try { ok = document.execCommand("copy"); } catch (x) { ok = false; }
+        document.body.removeChild(ta); dire(ok ? "Copié : colle-le dans le tableur." : "La copie est refusée par ce navigateur : enregistre en CSV.");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { dire("Copié : colle-le dans le tableur."); }, secours);
+      else secours();
+    });
+    bCsv.addEventListener("click", function () {
+      var blob = new Blob(["﻿" + versTexte(";", ",")], { type: "text/csv;charset=utf-8" });
+      var a = el("a", { href: URL.createObjectURL(blob), download: o.nomFichier || "acquisition.csv" });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      dire("Fichier CSV enregistré, séparateur point-virgule.");
+    });
+    dessiner();
+    return {
+      tic: function (t) {
+        tCourant = t;
+        if (!actif) return;
+        if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;
+        if (l) { if (l[TP.cle] === undefined) l[TP.cle] = (dernier - debut) / (TP.echelle || 1); ajouter(l); }
+        if (duree && dernier - depart >= duree - 1e-9) poser(false);
+        else majInfo();
+      },
+      ajouter: ajouter, lignes: function () { return lignes.slice(); }, vider: function () { lignes = []; if (!actif) debut = null; dessiner(); },
+      lancer: function () { if (!actif) lancer(); }, arreter: function () { if (actif) poser(false); },
+      actif: function () { return actif; }, majInfo: majInfo, redessiner: dessiner,
+      tracer: function (c1, c2) { trace = [c1 || trace[0], c2 === undefined ? trace[1] : c2]; selects[0].value = trace[0]; selects[1].value = trace[1] || ""; dessinerCourbe(); },
+      periode: function () { return periode; }, noeud: zone
+    };
+  }
+
+  /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
+     pour monter), a la molette de la souris ou aux fleches du clavier.
+     o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
+  function molette(parent, o) {
+    var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
+    var g = svg("g", { "class": "molette", transform: "translate(" + o.x + " " + o.y + ")", tabindex: "0", role: "slider",
+      "aria-label": o.label || "", "aria-valuemin": o.min, "aria-valuemax": o.max }, parent);
+    svg("circle", { r: o.zone || 46, fill: "transparent" }, g);
+    for (var k = 0; k <= 10; k++) {
+      var a = (-135 + 27 * k) * Math.PI / 180;
+      svg("line", { x1: Math.sin(a) * (r + 3), y1: -Math.cos(a) * (r + 3), x2: Math.sin(a) * (r + (k % 5 ? 6 : 8)), y2: -Math.cos(a) * (r + (k % 5 ? 6 : 8)), "class": "molette-graduation" }, g);
+    }
+    svg("circle", { r: r, "class": "molette-corps" }, g);
+    var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
+    var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
+    var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    function maj() {
+      var f = (v - o.min) / (o.max - o.min);
+      index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
+      val.textContent = o.format ? o.format(v) : fr(v, dec) + (o.unite ? " " + o.unite : "");
+      g.setAttribute("aria-valuenow", v); g.setAttribute("aria-valuetext", val.textContent);
+    }
+    function poser(x, silencieux) {
+      var p = o.pas || 1; x = borne(Math.round(x / p) * p, o.min, o.max); x = Number(x.toFixed(6));
+      var change = x !== v; v = x; maj();
+      if (change && !silencieux && o.surChange) o.surChange(v);
+    }
+    g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
+    g.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
+      g.classList.add("tourne");
+      function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
+      function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
+      g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
+    });
+    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("keydown", function (e) {
+      var p = o.pas || 1;
+      if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
+      if (e.key === "ArrowDown" || e.key === "ArrowLeft") { poser(v - p); e.preventDefault(); }
+    });
+    maj();
+    return { get: function () { return v; }, set: poser, noeud: g, montrer: function (oui) { g.style.display = oui ? "" : "none"; } };
+  }
+
+  /* Defi : une valeur a trouver. La page dit juste ou pas encore, et rappelle la methode,
+     jamais la valeur attendue. attendu : nombre ou fonction qui le calcule au moment du clic. */
+  function defi(parent, o) {
+    var inp = el("input", { type: "text", inputmode: "decimal", "aria-label": o.question });
+    var b = el("button", { type: "button", classe: "bouton", texte: "Vérifier" });
+    var retour = el("div", { classe: "retour", "aria-live": "polite" });
+    var bloc = el("div", { classe: "defi" }, [el("p", { html: o.question }), el("div", { classe: "saisie" }, [inp, o.unite ? el("span", { texte: o.unite }) : null, b]), retour]);
+    function verifier() {
+      var v = lire(inp.value), a = typeof o.attendu === "function" ? o.attendu() : o.attendu;
+      retour.className = "retour";
+      if (!isFinite(v)) { retour.textContent = "Écris un nombre."; return; }
+      var tol = o.tolerance === undefined ? 0.05 : o.tolerance;
+      var ok = Math.abs(v - a) <= Math.abs(a) * tol + (o.toleranceAbsolue || 0);
+      retour.className = "retour " + (ok ? "juste" : "faux");
+      retour.innerHTML = ok ? "Juste." : "Pas encore. <span class=\"methode\">" + (o.methode || "") + "</span>";
+      if (o.surReponse) o.surReponse(ok, v);
+    }
+    b.addEventListener("click", verifier);
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+    $(parent).appendChild(bloc);
+    return { noeud: bloc, effacer: function () { inp.value = ""; retour.textContent = ""; retour.className = "retour"; } };
+  }
+
+  /* Boucle d'animation : f(dt en secondes). S'arrete seule quand l'onglet est cache.
+     Sim.avancer(s) fait tourner les boucles a la main : c'est la porte des essais, dans un
+     navigateur qui ne dessine pas (onglet cache, capture sans affichage). */
+  var boucles = [];
+  function avancer(secondes, pasDt) {
+    pasDt = pasDt || 0.05;
+    for (var t = 0; t < secondes - 1e-9; t += pasDt) boucles.forEach(function (f) { f(pasDt); });
+  }
+  function animer(f) {
+    boucles.push(f);
+    var avant = null, actif = true, id = null;
+    function pas(t) {
+      if (avant === null) avant = t;
+      var dt = Math.min(0.1, (t - avant) / 1000); avant = t;
+      if (actif) f(dt);
+      id = requestAnimationFrame(pas);
+    }
+    id = requestAnimationFrame(pas);
+    return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
+  }
+
+  /* Petit utilitaire SVG. */
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) { if (k === "texte") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
+    afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
+    defi: defi, animer: animer, avancer: avancer, svg: svg };
+})();
+
+</script>
+</head>
+<body>
+<div class="page">
+<header class="tete">
+<div class="surtitre">BTS FED · séance 13 et habilitation fluides, le cycle</div>
+<h1>Le banc de froid</h1>
+<p class="chapeau">Un circuit frigorifique complet, avec ses manomètres, ses sondes, son débitmètre et son diagramme enthalpique détaillé. On met en marche, on attend le régime établi, on relève, puis on trace le cycle point par point. Cinq fluides, trois usages, sept pannes à diagnostiquer.</p>
+</header>
+<style>
+:root{--hpv:#c0392b;--hpl:#e08a2e;--bpm:#2f7fc4;--bpv:#86b8dd}
+.trait{fill:none;stroke:var(--encre);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.objet{fill:var(--carte);stroke:var(--encre);stroke-width:2;stroke-linejoin:round}
+.etiq{font-size:11px;fill:var(--encre2)}
+.etiq-titre{font-size:11.5px;font-weight:700;fill:var(--encre);letter-spacing:.04em}
+.tuyau{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+.flux{fill:none;stroke:#fff;stroke-opacity:.7;stroke-width:2.2;stroke-dasharray:3 13;stroke-linecap:round}
+.lcd{fill:#cfd8cf;stroke:var(--encre2);stroke-width:1}
+.lcd-txt{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;font-weight:600;fill:#1d2a1d}
+.pastille{fill:var(--carte);stroke:var(--encre);stroke-width:1.6}
+.pastille-txt{font-size:10.5px;font-weight:700;fill:var(--encre)}
+.cadran{fill:var(--carte);stroke:var(--encre);stroke-width:2}
+.aiguille{stroke:var(--faux);stroke-width:2.2;stroke-linecap:round}
+.grad{stroke:var(--encre2);stroke-width:1}
+.chambre{fill:var(--accent-doux);fill-opacity:.55;stroke:var(--accent);stroke-width:1.4;stroke-dasharray:6 4}
+.plaque{font-size:.88rem;color:var(--encre2);margin:0}
+.plaque b{color:var(--encre)}
+.case{display:flex;gap:8px;align-items:center;font-size:.9rem;font-weight:600}
+.case input{width:19px;height:19px;accent-color:var(--accent)}
+.etat-banc{font-weight:650;font-size:.92rem}
+.etat-banc.ok{color:var(--juste)}
+.etat-banc.attente{color:var(--tiede)}
+.etat-banc.defaut{color:var(--faux)}
+.bouton[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.plan > .carte{min-width:0}
+.clic{cursor:pointer}
+.indice{font-size:12px;font-weight:650;fill:var(--accent)}
+.energie{fill:none;stroke-linecap:butt}
+.energie-txt{font-size:10.5px;font-weight:650}
+/* le diagramme */
+.mollier{overflow-x:auto;background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.mollier svg{display:block;width:100%;min-width:760px;height:auto;touch-action:pan-x pan-y;cursor:crosshair}
+.d-axe{font-size:11px;fill:var(--encre2)}
+.d-titre{font-size:12px;font-weight:650;fill:var(--encre)}
+.d-grille{stroke:var(--trait2);stroke-width:.7}
+.d-grille.fort{stroke:var(--trait);stroke-width:1}
+.d-cloche{fill:none;stroke:var(--encre);stroke-width:2.3;stroke-linejoin:round}
+.d-isot{fill:none;stroke:var(--faux);stroke-width:1;stroke-opacity:.8}
+.d-isot-txt{font-size:9.5px;fill:var(--faux);font-weight:600}
+.d-isos{fill:none;stroke:var(--accent);stroke-width:1;stroke-opacity:.75}
+.d-isos-txt{font-size:9px;fill:var(--accent);font-weight:600}
+.d-titrex{fill:none;stroke:var(--encre2);stroke-width:.9;stroke-dasharray:5 4;stroke-opacity:.8}
+.d-titrex-txt{font-size:9px;fill:var(--encre2)}
+.d-isov{fill:none;stroke:var(--juste);stroke-width:.9;stroke-dasharray:2 4}
+.d-isov-txt{font-size:9px;fill:var(--juste);font-weight:600}
+.d-eleve{fill:none;stroke:var(--tiede);stroke-width:2.2;stroke-linejoin:round}
+.d-eleve-pt{fill:var(--carte);stroke:var(--tiede);stroke-width:2.2}
+.d-eleve-txt{font-size:11px;font-weight:700;fill:var(--tiede)}
+.d-vrai{fill:var(--juste);fill-opacity:.1;stroke:var(--juste);stroke-width:2.2;stroke-linejoin:round}
+.d-vrai-pt{fill:var(--juste)}
+.d-curseur{stroke:var(--encre2);stroke-width:.8;stroke-dasharray:3 3}
+#lecture{min-height:1.5em;font-size:.9rem;margin:8px 0 0}
+.couches{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0}
+table.points{border-collapse:collapse;font-size:.9rem;margin-top:8px}
+table.points th,table.points td{border:1px solid var(--trait);padding:4px 10px;text-align:center}
+table.points th{background:var(--carte2);font-size:.82rem}
+.verdict{margin:8px 0 0;padding:0;list-style:none;font-size:.92rem}
+.verdict li{margin:3px 0}
+.verdict .juste{color:var(--juste);font-weight:650}
+.verdict .faux{color:var(--faux);font-weight:650}
+.verdict .methode{color:var(--encre2);font-weight:400}
+select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);max-width:100%}
+</style>
+
+<nav class="onglets" id="temps" aria-label="Deux temps">
+  <button type="button" data-vue="vueTracer">Relever et tracer le cycle</button>
+  <button type="button" data-vue="vueDiag">Diagnostiquer une panne</button>
+</nav>
+
+<div class="carte">
+  <h2><span class="num">1</span>Le banc et ses conditions</h2>
+  <p class="consigne">Changer de fluide arrête le banc et le remet au repos. Les autres réglages sont sur le circuit : quatre molettes, qui se tournent au doigt.</p>
+  <div class="commandes" id="reglages"></div>
+  <p class="plaque" id="plaque"></p>
+</div>
+
+<div class="plan">
+  <div class="carte">
+    <h2><span class="num">2</span>Le circuit</h2>
+    <div class="scene">
+      <svg id="scene" viewBox="0 0 680 440" role="img" aria-label="Le circuit frigorifique : compresseur, condenseur, détendeur, évaporateur, quatre sondes de température, deux manomètres, un débitmètre et un wattmètre"></svg>
+    </div>
+    <p class="legende">Touche le compresseur pour le mettre en marche. Tourne les molettes du doigt : l'air qui entre dans chaque échangeur, la vis du détendeur, le variateur. Rouge : vapeur à haute pression ; orange : liquide à haute pression ; bleu : mélange puis vapeur à basse pression. Les pastilles 1 à 4 sont les sondes de température. Les trois flèches montrent ce qu'aucun instrument ne lit : la chaleur prise, la chaleur cédée et le travail, d'autant plus larges qu'ils sont grands.</p>
+  </div>
+  <div class="carte">
+    <h2><span class="num">3</span>Mettre en marche et mesurer</h2>
+    <div class="commandes">
+      <div class="rangee">
+        <button type="button" class="bouton principal" id="bMarche">Mettre en marche</button>
+        <button type="button" class="bouton" id="bRearmer" hidden>Réarmer le pressostat</button>
+      </div>
+      <div id="vitesse"></div>
+      <div id="manos"></div>
+      <p class="etat-banc" id="etatBanc" aria-live="polite"></p>
+      <div class="afficheurs" id="instruments"></div>
+      <p class="alerte" id="message"></p>
+    </div>
+  </div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">4</span>Le diagramme enthalpique</h2>
+  <p class="consigne" id="consigneDiag">Pression absolue en ordonnée, sur une échelle logarithmique ; enthalpie massique en abscisse. Promène le pointeur pour lire un point. Pour tracer : choisis un point du cycle, puis touche le diagramme à l'endroit où tu le places.</p>
+  <div class="couches" id="couches"></div>
+  <div class="mollier"><svg id="diagramme" viewBox="0 0 920 600" role="img" aria-label="Diagramme pression-enthalpie du fluide"></svg></div>
+  <p class="mono" id="lecture" aria-live="off"></p>
+  <div id="placer"></div>
+  <div class="rangee" style="margin-top:8px">
+    <button type="button" class="bouton" id="bVerifTrace">Vérifier mon tracé</button>
+    <button type="button" class="bouton" id="bEffacer">Effacer mes points</button>
+    <label class="case"><input type="checkbox" id="voirCycle"> Montrer le cycle du banc (découverte : le tracé n'est plus vérifié)</label>
+  </div>
+  <table class="points" id="tablePoints" aria-label="Mes points"></table>
+  <ul class="verdict" id="verdict" aria-live="polite"></ul>
+</div>
+
+<div class="carte">
+  <h2><span class="num">5</span>Le relevé et le résultat</h2>
+  <p class="consigne">La centrale d'acquisition relève tous les instruments à intervalle régulier : lance-la avant de démarrer pour voir le régime s'établir. « Une mesure maintenant » ajoute une ligne à la main. Les pressions du tableau sont celles des manomètres, dans l'unité choisie.</p>
+  <div id="releve"></div>
+  <div id="vueTracer" class="vue">
+    <p class="consigne" id="consigneDefis"></p>
+    <div class="commandes" id="defis"></div>
+  </div>
+  <div id="vueDiag" class="vue">
+    <p class="consigne">Relève d'abord le banc sain, dans les mêmes conditions : c'est ta référence. Tire ensuite une panne, laisse la centrale enregistrer le nouveau régime, et compare. Calcule la surchauffe et le sous-refroidissement ; au besoin, arrête le compresseur et lis la pression d'équilibre.</p>
+    <div class="commandes">
+      <div class="rangee">
+        <button type="button" class="bouton principal" id="bPanne">Tirer une panne au hasard</button>
+        <button type="button" class="bouton" id="bSain">Remettre le banc sain</button>
+      </div>
+      <div class="defi">
+        <p>Quelle est la panne du banc ?</p>
+        <div class="saisie"><select class="panne" id="choixPanne" aria-label="Diagnostic"></select><button type="button" class="bouton" id="bDiag">Vérifier</button></div>
+        <div class="retour" id="retourDiag" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+  <details class="modele">
+    <summary>Ce que la simulation simplifie</summary>
+    <ul>
+      <li>Les propriétés des fluides sont exactes : elles viennent des équations d'état de référence, calculées avec CoolProp 6.4.1, dans la convention des diagrammes du commerce, la référence IIR (h = 200 kJ/kg et s = 1 kJ/(kg·K) pour le liquide à 0 °C). Le R410A, mélange quasi azéotrope, est traité comme un corps pur.</li>
+      <li>Aucune perte de charge : toute la haute pression est à la même pression, toute la basse aussi. Sur un vrai banc, l'évaporateur et les tuyauteries perdent quelques dixièmes de bar, et les paliers du cycle penchent.</li>
+      <li>Les tuyauteries sont parfaitement isolées : la sonde d'aspiration lit la sortie de l'évaporateur, sans le réchauffement de la ligne.</li>
+      <li>Chaque échangeur est décrit par un seul coefficient : la puissance échangée est proportionnelle à l'écart entre l'air entrant et le fluide qui change d'état. Ni givre qui s'installe, ni air humide qui condense.</li>
+      <li>Le compresseur est un volumétrique à cylindrée fixe : son rendement volumétrique et son rendement isentropique baissent quand le taux de compression monte, selon deux lois simples. La chaleur du moteur part dans le local, pas dans le fluide.</li>
+      <li>Le détendeur tient la surchauffe réglée. Le sous-refroidissement est celui d'une charge correcte ; seules les pannes le déplacent.</li>
+      <li>Le régime s'établit en une à deux minutes, bien plus vite que sur un vrai banc, et les pressions s'égalisent à l'arrêt en une minute.</li>
+      <li>Une seule sécurité : le pressostat haute pression, à réarmement manuel.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function () {
+  /* FLUIDES:DEBUT */
+/* Tables CoolProp 6.4.1, reference IIR (h = 200 kJ/kg, s = 1 kJ/(kg.K), liquide a 0 °C).
+   Generees par fluides-coolprop.py : ne pas retoucher a la main. */
+var FL = {"R134a":{"Tc":101.06,"Pc":40.593,"M":102.03,"sat":[[-60.0,0.15906,123.36,361.31,0.6846,1.801,0.0006783,1.079],[-58.0,0.18091,125.81,362.58,0.6961,1.7965,0.0006808,0.9565],[-56.0,0.20518,128.27,363.84,0.7074,1.7922,0.0006834,0.8502],[-54.0,0.23206,130.73,365.11,0.7187,1.7882,0.0006861,0.7577],[-52.0,0.26176,133.2,366.38,0.7299,1.7843,0.0006887,0.6769],[-50.0,0.29451,135.67,367.65,0.741,1.7806,0.0006914,0.6062],[-48.0,0.33051,138.15,368.92,0.7521,1.777,0.0006941,0.5441],[-46.0,0.37003,140.64,370.19,0.7631,1.7736,0.0006969,0.4896],[-44.0,0.41329,143.14,371.46,0.774,1.7704,0.0006997,0.4414],[-42.0,0.46055,145.64,372.73,0.7848,1.7673,0.0007025,0.3988],[-40.0,0.51209,148.14,374.0,0.7956,1.7643,0.0007054,0.3611],[-38.0,0.56817,150.66,375.27,0.8063,1.7615,0.0007083,0.3276],[-36.0,0.62908,153.18,376.54,0.817,1.7588,0.0007112,0.2977],[-34.0,0.69512,155.71,377.8,0.8276,1.7563,0.0007142,0.2711],[-32.0,0.76658,158.25,379.06,0.8381,1.7538,0.0007172,0.2473],[-30.0,0.84378,160.79,380.32,0.8486,1.7515,0.0007203,0.2259],[-28.0,0.92703,163.34,381.57,0.8591,1.7492,0.0007234,0.2068],[-26.0,1.0167,165.9,382.82,0.8694,1.7471,0.0007265,0.1896],[-24.0,1.113,168.47,384.07,0.8798,1.7451,0.0007297,0.1741],[-22.0,1.2165,171.05,385.32,0.89,1.7432,0.0007329,0.1601],[-20.0,1.3273,173.64,386.55,0.9002,1.7413,0.0007362,0.1474],[-18.0,1.446,176.23,387.79,0.9104,1.7396,0.0007396,0.1359],[-16.0,1.5728,178.83,389.02,0.9205,1.7379,0.000743,0.1255],[-14.0,1.7082,181.44,390.24,0.9306,1.7363,0.0007464,0.1161],[-12.0,1.8524,184.07,391.45,0.9407,1.7348,0.0007499,0.1074],[-10.0,2.006,186.7,392.66,0.9506,1.7334,0.0007535,0.09959],[-8.0,2.1693,189.34,393.87,0.9606,1.732,0.0007571,0.09242],[-6.0,2.3428,191.99,395.06,0.9705,1.7307,0.0007608,0.08587],[-4.0,2.5268,194.65,396.25,0.9804,1.7294,0.0007646,0.07987],[-2.0,2.7217,197.32,397.43,0.9902,1.7282,0.0007684,0.07436],[0.0,2.928,200.0,398.6,1.0,1.7271,0.0007723,0.06931],[2.0,3.1462,202.69,399.77,1.0098,1.726,0.0007763,0.06466],[4.0,3.3766,205.4,400.92,1.0195,1.725,0.0007804,0.06039],[6.0,3.6198,208.11,402.06,1.0292,1.724,0.0007845,0.05644],[8.0,3.8761,210.84,403.2,1.0388,1.723,0.0007887,0.0528],[10.0,4.1461,213.58,404.32,1.0485,1.7221,0.000793,0.04944],[12.0,4.4301,216.33,405.43,1.0581,1.7212,0.0007975,0.04633],[14.0,4.7288,219.09,406.53,1.0677,1.7204,0.000802,0.04345],[16.0,5.0425,221.87,407.61,1.0772,1.7196,0.0008066,0.04078],[18.0,5.3718,224.66,408.69,1.0867,1.7188,0.0008113,0.0383],[20.0,5.7171,227.47,409.75,1.0962,1.718,0.0008161,0.036],[22.0,6.0789,230.29,410.79,1.1057,1.7173,0.000821,0.03385],[24.0,6.4578,233.12,411.82,1.1152,1.7166,0.0008261,0.03186],[26.0,6.8543,235.97,412.84,1.1246,1.7159,0.0008313,0.03],[28.0,7.2688,238.84,413.84,1.1341,1.7152,0.0008367,0.02826],[30.0,7.702,241.72,414.82,1.1435,1.7145,0.0008421,0.02664],[32.0,8.1543,244.62,415.78,1.1529,1.7138,0.0008478,0.02513],[34.0,8.6263,247.54,416.72,1.1623,1.7131,0.0008536,0.02371],[36.0,9.1185,250.48,417.65,1.1717,1.7124,0.0008595,0.02238],[38.0,9.6315,253.43,418.55,1.1811,1.7118,0.0008657,0.02113],[40.0,10.166,256.41,419.43,1.1905,1.7111,0.000872,0.01997],[42.0,10.722,259.41,420.28,1.1999,1.7103,0.0008786,0.01887],[44.0,11.301,262.43,421.11,1.2092,1.7096,0.0008854,0.01784],[46.0,11.903,265.47,421.92,1.2186,1.7089,0.0008924,0.01687],[48.0,12.529,268.53,422.69,1.228,1.7081,0.0008997,0.01595],[50.0,13.179,271.62,423.44,1.2375,1.7072,0.0009072,0.01509],[52.0,13.854,274.74,424.15,1.2469,1.7064,0.000915,0.01428],[54.0,14.555,277.89,424.83,1.2563,1.7055,0.0009232,0.01351],[56.0,15.282,281.06,425.47,1.2658,1.7045,0.0009317,0.01278],[58.0,16.036,284.27,426.07,1.2753,1.7035,0.0009405,0.01209],[60.0,16.818,287.5,426.63,1.2848,1.7024,0.0009498,0.01144],[62.0,17.628,290.78,427.14,1.2944,1.7013,0.0009595,0.01083],[64.0,18.467,294.09,427.61,1.304,1.7,0.0009697,0.01024],[66.0,19.337,297.44,428.02,1.3137,1.6987,0.0009804,0.009686],[68.0,20.237,300.84,428.36,1.3234,1.6972,0.0009918,0.009157],[70.0,21.168,304.28,428.65,1.3332,1.6956,0.001004,0.008653],[72.0,22.132,307.78,428.86,1.343,1.6939,0.001017,0.008172],[74.0,23.13,311.33,429.0,1.353,1.692,0.00103,0.007713],[76.0,24.161,314.94,429.04,1.3631,1.6899,0.001045,0.007274],[78.0,25.228,318.63,428.98,1.3733,1.6876,0.00106,0.006853],[80.0,26.332,322.39,428.81,1.3836,1.685,0.001077,0.006448],[82.0,27.473,326.24,428.51,1.3942,1.6821,0.001096,0.006059],[84.0,28.653,330.2,428.05,1.4049,1.6789,0.001116,0.005683],[86.0,29.874,334.28,427.42,1.4159,1.6752,0.001139,0.005318],[88.0,31.136,338.51,426.55,1.4273,1.671,0.001164,0.004962],[90.0,32.442,342.93,425.42,1.439,1.6662,0.001194,0.004613],[92.0,33.793,347.59,423.92,1.4514,1.6604,0.001228,0.004268],[94.0,35.193,352.58,421.92,1.4645,1.6534,0.001269,0.00392],[96.0,36.645,358.07,419.18,1.4789,1.6445,0.001323,0.003562],[98.0,38.152,364.47,415.14,1.4957,1.6322,0.001398,0.003173]],"P":[0.15906,0.19222,0.23228,0.2807,0.33921,0.40992,0.49537,0.59863,0.72341,0.8742,1.0564,1.2766,1.5428,1.8643,2.253,2.7226,3.2901,3.9759,4.8047,5.8062,7.0165,8.4791,10.247,12.382,14.963,18.083,21.852,26.407,31.911,38.563],"dT":[0,2,5,10,15,20,30,40,50,60,70,80,90,100,120,140],"h":[[361.31,362.7,364.79,368.3,371.85,375.44,382.75,390.23,397.88,405.72,413.73,421.91,430.27,438.81,456.39,474.65],[363.18,364.59,366.7,370.25,373.83,377.46,384.84,392.38,400.1,407.99,416.06,424.31,432.73,441.32,459.01,477.37],[365.12,366.54,368.68,372.27,375.89,379.55,387.0,394.61,402.4,410.36,418.49,426.79,435.27,443.92,461.72,480.19],[367.13,368.57,370.73,374.36,378.03,381.73,389.25,396.93,404.79,412.81,421.01,429.37,437.91,446.62,464.54,483.12],[369.21,370.67,372.86,376.53,380.24,383.98,391.58,399.34,407.26,415.36,423.62,432.05,440.66,449.43,467.47,486.17],[371.37,372.84,375.06,378.78,382.53,386.32,394.0,401.84,409.84,418.0,426.34,434.84,443.51,452.35,470.51,489.34],[373.6,375.1,377.35,381.12,384.91,388.74,396.51,404.43,412.51,420.76,429.16,437.74,446.48,455.38,473.68,492.63],[375.92,377.43,379.72,383.54,387.38,391.26,399.12,407.13,415.29,423.62,432.1,440.75,449.56,458.54,476.98,496.06],[378.31,379.85,382.17,386.04,389.94,393.87,401.83,409.93,418.18,426.59,435.16,443.89,452.78,461.83,480.41,499.63],[380.79,382.36,384.71,388.64,392.6,396.58,404.64,412.84,421.19,429.68,438.34,447.15,456.12,465.25,483.99,503.35],[383.35,384.95,387.34,391.34,395.35,399.39,407.56,415.87,424.31,432.9,441.65,450.55,459.61,468.82,487.71,507.23],[386.0,387.62,390.06,394.13,398.21,402.31,410.6,419.01,427.56,436.26,445.1,454.09,463.24,472.54,491.6,511.28],[388.73,390.39,392.87,397.01,401.17,405.34,413.75,422.28,430.94,439.74,448.69,457.78,467.02,476.41,495.65,515.5],[391.55,393.24,395.78,400.0,404.23,408.47,417.02,425.68,434.46,443.37,452.43,461.62,470.97,480.46,499.88,519.91],[394.45,396.19,398.78,403.08,407.39,411.71,420.41,429.21,438.12,447.15,456.32,465.63,475.08,484.67,504.3,524.51],[397.44,399.21,401.86,406.27,410.67,415.07,423.93,432.87,441.92,451.08,460.38,469.8,479.37,489.07,508.91,529.32],[400.49,402.32,405.03,409.54,414.04,418.54,427.57,436.67,445.87,455.17,464.6,474.15,483.84,493.66,513.72,534.35],[403.62,405.49,408.29,412.91,417.52,422.12,431.34,440.61,449.97,459.43,469.0,478.69,488.51,498.45,518.75,539.6],[406.8,408.73,411.61,416.36,421.09,425.8,435.23,444.69,454.23,463.85,473.57,483.41,493.37,503.45,524.01,545.1],[410.01,412.01,414.98,419.89,424.75,429.59,439.24,448.91,458.64,468.44,478.33,488.33,498.44,508.66,529.49,550.84],[413.24,415.31,418.4,423.47,428.48,433.46,443.37,453.27,463.2,473.2,483.28,493.44,503.72,514.1,535.22,556.84],[416.44,418.6,421.81,427.08,432.27,437.41,447.6,457.76,467.92,478.13,488.41,498.76,509.21,519.77,541.21,563.12],[419.56,421.83,425.19,430.69,436.08,441.4,451.92,462.36,472.79,483.23,493.72,504.29,514.93,525.66,547.45,569.68],[422.52,424.93,428.48,434.24,439.87,445.41,456.31,467.07,477.78,488.49,499.22,510.01,520.86,531.8,553.95,576.53],[425.2,427.79,431.57,437.68,443.6,449.39,460.72,471.86,482.9,493.89,504.9,515.93,527.02,538.17,560.73,583.67],[427.4,430.24,434.35,440.89,447.17,453.27,465.13,476.69,488.1,499.43,510.73,522.03,533.38,544.77,567.77,591.12],[428.81,432.02,436.59,443.73,450.48,456.97,469.45,481.52,493.35,505.06,516.69,528.3,539.93,551.58,575.07,598.85],[428.8,432.66,437.96,445.98,453.36,460.36,473.61,486.28,498.61,510.74,522.75,534.7,546.64,558.59,582.6,606.86],[425.91,431.25,437.92,447.31,455.59,463.25,477.48,490.87,503.78,516.4,528.84,541.17,553.46,565.73,590.32,615.1],[413.67,425.68,435.5,447.25,456.84,465.4,480.86,495.11,508.7,521.88,534.81,547.57,560.24,572.87,598.1,623.44]],"s":[[1.801,1.8074,1.8171,1.833,1.8487,1.8643,1.895,1.9251,1.9548,1.984,2.0128,2.0412,2.0693,2.097,2.1514,2.2046],[1.7944,1.8009,1.8105,1.8264,1.8421,1.8576,1.8882,1.9183,1.9478,1.9769,2.0056,2.034,2.0619,2.0895,2.1438,2.1968],[1.7881,1.7946,1.8042,1.82,1.8357,1.8511,1.8816,1.9116,1.9411,1.9701,1.9987,2.027,2.0548,2.0823,2.1364,2.1893],[1.7821,1.7885,1.7981,1.8139,1.8295,1.8449,1.8753,1.9052,1.9346,1.9635,1.992,2.0202,2.048,2.0754,2.1293,2.1821],[1.7762,1.7827,1.7922,1.808,1.8235,1.8389,1.8693,1.899,1.9283,1.9572,1.9856,2.0137,2.0414,2.0687,2.1225,2.1751],[1.7706,1.777,1.7866,1.8023,1.8178,1.8332,1.8634,1.8931,1.9223,1.9511,1.9794,2.0074,2.035,2.0623,2.1159,2.1683],[1.7653,1.7717,1.7812,1.7969,1.8124,1.8277,1.8579,1.8875,1.9166,1.9453,1.9735,2.0014,2.0289,2.0561,2.1096,2.1618],[1.7601,1.7665,1.776,1.7917,1.8072,1.8225,1.8526,1.8821,1.9111,1.9397,1.9679,1.9957,2.0232,2.0503,2.1035,2.1556],[1.7552,1.7616,1.7712,1.7868,1.8023,1.8175,1.8476,1.877,1.906,1.9345,1.9626,1.9903,2.0177,2.0447,2.0978,2.1498],[1.7506,1.757,1.7665,1.7822,1.7976,1.8129,1.8428,1.8722,1.9011,1.9295,1.9576,1.9852,2.0125,2.0394,2.0924,2.1442],[1.7463,1.7527,1.7622,1.7778,1.7932,1.8085,1.8384,1.8677,1.8966,1.9249,1.9529,1.9804,2.0076,2.0345,2.0873,2.1389],[1.7421,1.7486,1.7581,1.7737,1.7892,1.8044,1.8343,1.8635,1.8923,1.9206,1.9485,1.976,2.0031,2.0299,2.0825,2.134],[1.7383,1.7447,1.7543,1.7699,1.7854,1.8006,1.8304,1.8597,1.8884,1.9166,1.9444,1.9718,1.9989,2.0256,2.0781,2.1294],[1.7347,1.7411,1.7507,1.7664,1.7818,1.7971,1.8269,1.8561,1.8848,1.913,1.9407,1.9681,1.9951,2.0217,2.074,2.1252],[1.7313,1.7378,1.7474,1.7632,1.7786,1.7939,1.8237,1.8529,1.8816,1.9097,1.9374,1.9647,1.9916,2.0182,2.0704,2.1214],[1.7282,1.7347,1.7444,1.7602,1.7757,1.791,1.8209,1.8501,1.8787,1.9068,1.9345,1.9617,1.9885,2.015,2.0671,2.118],[1.7253,1.7319,1.7416,1.7575,1.7731,1.7884,1.8183,1.8476,1.8762,1.9043,1.9319,1.9591,1.9859,2.0123,2.0642,2.115],[1.7227,1.7293,1.7391,1.7551,1.7707,1.7861,1.8161,1.8454,1.874,1.9021,1.9297,1.9568,1.9836,2.01,2.0618,2.1124],[1.7202,1.7269,1.7368,1.7529,1.7686,1.7841,1.8142,1.8436,1.8722,1.9003,1.9279,1.955,1.9817,2.0081,2.0598,2.1103],[1.7179,1.7246,1.7346,1.7509,1.7668,1.7824,1.8127,1.8421,1.8708,1.8989,1.9265,1.9536,1.9803,2.0066,2.0582,2.1086],[1.7156,1.7225,1.7327,1.7491,1.7652,1.7809,1.8114,1.8409,1.8697,1.8979,1.9255,1.9526,1.9793,2.0056,2.0571,2.1074],[1.7133,1.7204,1.7307,1.7475,1.7638,1.7796,1.8104,1.8401,1.869,1.8973,1.9249,1.9521,1.9788,2.0051,2.0565,2.1067],[1.711,1.7182,1.7288,1.7459,1.7624,1.7785,1.8096,1.8396,1.8687,1.897,1.9248,1.9519,1.9787,2.0049,2.0564,2.1065],[1.7083,1.7158,1.7267,1.7443,1.7612,1.7775,1.8091,1.8393,1.8686,1.8971,1.925,1.9522,1.979,2.0053,2.0567,2.1068],[1.7049,1.7128,1.7242,1.7424,1.7598,1.7765,1.8086,1.8393,1.8688,1.8975,1.9255,1.9529,1.9797,2.0061,2.0575,2.1076],[1.7006,1.709,1.7211,1.7401,1.7581,1.7754,1.8082,1.8394,1.8693,1.8982,1.9264,1.9539,1.9808,2.0073,2.0588,2.1089],[1.6944,1.7037,1.7168,1.7371,1.756,1.7739,1.8077,1.8395,1.8699,1.8992,1.9276,1.9552,1.9823,2.0088,2.0605,2.1106],[1.6848,1.6957,1.7106,1.7328,1.753,1.7719,1.8069,1.8395,1.8705,1.9002,1.9289,1.9568,1.9841,2.0107,2.0626,2.1128],[1.6682,1.6829,1.7011,1.7265,1.7487,1.7688,1.8056,1.8393,1.871,1.9012,1.9303,1.9585,1.986,2.0128,2.0649,2.1152],[1.6279,1.6601,1.6863,1.7173,1.7423,1.7643,1.8033,1.8383,1.8709,1.9018,1.9314,1.96,1.9878,2.0148,2.0672,2.1177]],"v":[[1.079,1.09,1.106,1.132,1.158,1.185,1.237,1.289,1.341,1.393,1.445,1.497,1.548,1.6,1.703,1.806],[0.9038,0.9126,0.9259,0.9479,0.9698,0.9916,1.035,1.078,1.122,1.165,1.208,1.25,1.293,1.336,1.421,1.507],[0.757,0.7644,0.7754,0.7937,0.8119,0.83,0.8661,0.9021,0.9379,0.9736,1.009,1.045,1.08,1.116,1.186,1.257],[0.6341,0.6402,0.6494,0.6646,0.6797,0.6948,0.7248,0.7547,0.7844,0.814,0.8435,0.873,0.9024,0.9318,0.9904,1.049],[0.5311,0.5362,0.5438,0.5565,0.5691,0.5817,0.6066,0.6314,0.6561,0.6806,0.7052,0.7296,0.754,0.7784,0.827,0.8755],[0.4448,0.4491,0.4554,0.466,0.4765,0.4869,0.5077,0.5283,0.5488,0.5692,0.5896,0.6098,0.6301,0.6503,0.6906,0.7308],[0.3725,0.3761,0.3814,0.3902,0.3989,0.4076,0.4249,0.4421,0.4591,0.4761,0.493,0.5098,0.5266,0.5434,0.5768,0.6101],[0.3119,0.3149,0.3193,0.3267,0.334,0.3412,0.3556,0.3699,0.3841,0.3982,0.4122,0.4262,0.4402,0.4541,0.4818,0.5094],[0.2611,0.2636,0.2673,0.2735,0.2796,0.2856,0.2977,0.3095,0.3213,0.3331,0.3447,0.3564,0.368,0.3795,0.4025,0.4254],[0.2185,0.2206,0.2238,0.2289,0.234,0.2391,0.2491,0.259,0.2689,0.2786,0.2883,0.298,0.3076,0.3172,0.3363,0.3554],[0.1828,0.1846,0.1872,0.1916,0.1958,0.2001,0.2084,0.2167,0.2249,0.2331,0.2412,0.2492,0.2572,0.2652,0.2811,0.2969],[0.1529,0.1544,0.1566,0.1602,0.1638,0.1674,0.1744,0.1813,0.1882,0.195,0.2017,0.2084,0.2151,0.2217,0.2349,0.248],[0.1278,0.1291,0.1309,0.134,0.137,0.14,0.1459,0.1517,0.1574,0.1631,0.1687,0.1743,0.1798,0.1854,0.1963,0.2072],[0.1068,0.1078,0.1094,0.112,0.1145,0.1171,0.122,0.1268,0.1316,0.1364,0.1411,0.1457,0.1504,0.155,0.1641,0.1732],[0.08914,0.09004,0.09137,0.09355,0.0957,0.09782,0.102,0.1061,0.1101,0.114,0.118,0.1219,0.1257,0.1296,0.1372,0.1447],[0.07434,0.0751,0.07624,0.07809,0.07991,0.0817,0.0852,0.08864,0.09202,0.09534,0.09863,0.1019,0.1051,0.1083,0.1147,0.121],[0.06192,0.06258,0.06354,0.06512,0.06667,0.06818,0.07115,0.07405,0.07689,0.07969,0.08245,0.08518,0.08788,0.09056,0.09587,0.1011],[0.05151,0.05207,0.0529,0.05425,0.05556,0.05685,0.05937,0.06182,0.06422,0.06658,0.0689,0.07119,0.07345,0.0757,0.08014,0.08452],[0.04277,0.04326,0.04397,0.04513,0.04626,0.04736,0.0495,0.05158,0.05361,0.0556,0.05755,0.05948,0.06138,0.06327,0.06698,0.07065],[0.03544,0.03587,0.03648,0.03748,0.03845,0.0394,0.04123,0.043,0.04472,0.0464,0.04805,0.04968,0.05128,0.05286,0.05598,0.05905],[0.0293,0.02966,0.0302,0.03107,0.03191,0.03272,0.03429,0.0358,0.03727,0.0387,0.0401,0.04147,0.04282,0.04415,0.04678,0.04935],[0.02413,0.02446,0.02493,0.02569,0.02642,0.02713,0.02848,0.02978,0.03103,0.03225,0.03344,0.0346,0.03574,0.03687,0.03908,0.04124],[0.0198,0.02009,0.02051,0.02118,0.02182,0.02243,0.02361,0.02473,0.02581,0.02685,0.02786,0.02885,0.02982,0.03077,0.03263,0.03446],[0.01616,0.01642,0.0168,0.01739,0.01796,0.0185,0.01953,0.0205,0.02143,0.02232,0.02319,0.02403,0.02486,0.02567,0.02725,0.02878],[0.01309,0.01333,0.01368,0.01422,0.01473,0.01521,0.01611,0.01696,0.01776,0.01854,0.01928,0.02,0.02071,0.0214,0.02274,0.02404],[0.0105,0.01073,0.01105,0.01155,0.01201,0.01245,0.01325,0.014,0.0147,0.01537,0.01601,0.01663,0.01724,0.01782,0.01897,0.02007],[0.008308,0.008533,0.008844,0.009314,0.00974,0.01013,0.01086,0.01152,0.01213,0.01272,0.01328,0.01381,0.01433,0.01484,0.01581,0.01675],[0.006422,0.00666,0.006976,0.007433,0.007835,0.008201,0.008858,0.009448,0.009993,0.01051,0.01099,0.01146,0.01191,0.01234,0.01318,0.01398],[0.004753,0.005041,0.005388,0.005853,0.006243,0.006587,0.007191,0.007723,0.008208,0.008659,0.009085,0.009491,0.00988,0.01026,0.01098,0.01166],[0.003059,0.0036,0.004034,0.004531,0.004917,0.005246,0.005806,0.006288,0.006722,0.007121,0.007496,0.00785,0.008189,0.008516,0.009137,0.009726]],"axes":{"pmin":0.391,"pmax":36.5,"hmin":113.0,"hmax":518.0},"nom":"R134a","classe":"A1","gwp":1430,"coul":"froid"},"R1234yf":{"Tc":94.7,"Pc":33.822,"M":114.04,"sat":[[-52.0,0.33572,137.38,328.51,0.7472,1.6115,0.0007555,0.47],[-50.0,0.37423,139.63,329.85,0.7573,1.6098,0.0007585,0.4247],[-48.0,0.41622,141.9,331.19,0.7674,1.6082,0.0007615,0.3846],[-46.0,0.46192,144.17,332.54,0.7775,1.6067,0.0007646,0.3489],[-44.0,0.51157,146.46,333.88,0.7875,1.6054,0.0007677,0.3172],[-42.0,0.5654,148.76,335.23,0.7975,1.6042,0.0007709,0.2889],[-40.0,0.62367,151.07,336.58,0.8074,1.6031,0.0007741,0.2635],[-38.0,0.68661,153.39,337.93,0.8173,1.602,0.0007773,0.2409],[-36.0,0.7545,155.73,339.28,0.8272,1.6011,0.0007806,0.2205],[-34.0,0.82761,158.08,340.62,0.837,1.6003,0.000784,0.2022],[-32.0,0.9062,160.44,341.97,0.8468,1.5996,0.0007874,0.1857],[-30.0,0.99056,162.81,343.32,0.8566,1.599,0.0007908,0.1708],[-28.0,1.081,165.2,344.67,0.8663,1.5984,0.0007943,0.1573],[-26.0,1.1778,167.6,346.02,0.876,1.598,0.0007979,0.1451],[-24.0,1.2812,170.01,347.36,0.8857,1.5976,0.0008015,0.134],[-22.0,1.3916,172.43,348.71,0.8954,1.5973,0.0008051,0.124],[-20.0,1.5092,174.87,350.05,0.905,1.597,0.0008089,0.1148],[-18.0,1.6344,177.32,351.39,0.9146,1.5968,0.0008127,0.1065],[-16.0,1.7676,179.79,352.73,0.9242,1.5967,0.0008165,0.09884],[-14.0,1.909,182.27,354.06,0.9338,1.5967,0.0008205,0.09187],[-12.0,2.059,184.76,355.39,0.9433,1.5967,0.0008245,0.08548],[-10.0,2.2178,187.26,356.72,0.9528,1.5968,0.0008285,0.07962],[-8.0,2.386,189.78,358.04,0.9623,1.5969,0.0008327,0.07424],[-6.0,2.5637,192.31,359.36,0.9717,1.597,0.0008369,0.0693],[-4.0,2.7514,194.86,360.68,0.9812,1.5973,0.0008412,0.06474],[-2.0,2.9495,197.42,361.99,0.9906,1.5975,0.0008456,0.06054],[0.0,3.1582,200.0,363.29,1.0,1.5978,0.0008501,0.05667],[2.0,3.378,202.59,364.59,1.0094,1.5981,0.0008547,0.05309],[4.0,3.6092,205.2,365.88,1.0187,1.5985,0.0008594,0.04977],[6.0,3.8523,207.82,367.16,1.0281,1.5989,0.0008642,0.0467],[8.0,4.1075,210.45,368.44,1.0374,1.5993,0.0008691,0.04385],[10.0,4.3753,213.1,369.7,1.0467,1.5998,0.0008741,0.04121],[12.0,4.6561,215.77,370.96,1.056,1.6003,0.0008792,0.03875],[14.0,4.9503,218.45,372.21,1.0653,1.6008,0.0008845,0.03646],[16.0,5.2583,221.15,373.45,1.0746,1.6013,0.0008898,0.03433],[18.0,5.5804,223.87,374.67,1.0838,1.6018,0.0008954,0.03235],[20.0,5.9172,226.6,375.89,1.0931,1.6024,0.000901,0.03049],[22.0,6.269,229.34,377.09,1.1023,1.6029,0.0009068,0.02876],[24.0,6.6363,232.11,378.28,1.1115,1.6034,0.0009128,0.02714],[26.0,7.0194,234.89,379.45,1.1208,1.604,0.0009189,0.02562],[28.0,7.4189,237.69,380.61,1.13,1.6045,0.0009252,0.0242],[30.0,7.8351,240.51,381.75,1.1392,1.6051,0.0009317,0.02287],[32.0,8.2686,243.35,382.87,1.1484,1.6056,0.0009384,0.02162],[34.0,8.7197,246.21,383.98,1.1576,1.6061,0.0009453,0.02044],[36.0,9.189,249.09,385.06,1.1668,1.6066,0.0009524,0.01934],[38.0,9.6769,251.98,386.13,1.1759,1.6071,0.0009597,0.0183],[40.0,10.184,254.9,387.17,1.1851,1.6075,0.0009673,0.01732],[42.0,10.711,257.84,388.19,1.1943,1.6079,0.0009752,0.01639],[44.0,11.257,260.81,389.18,1.2035,1.6083,0.0009833,0.01552],[46.0,11.825,263.8,390.14,1.2128,1.6087,0.0009918,0.01469],[48.0,12.413,266.81,391.08,1.222,1.6089,0.001001,0.01392],[50.0,13.023,269.85,391.98,1.2312,1.6092,0.00101,0.01318],[52.0,13.656,272.92,392.85,1.2405,1.6094,0.001019,0.01248],[54.0,14.311,276.02,393.68,1.2498,1.6095,0.001029,0.01182],[56.0,14.989,279.15,394.48,1.2592,1.6095,0.00104,0.01119],[58.0,15.692,282.32,395.23,1.2685,1.6095,0.001051,0.01059],[60.0,16.419,285.53,395.93,1.2779,1.6093,0.001062,0.01002],[62.0,17.171,288.77,396.58,1.2874,1.6091,0.001075,0.009484],[64.0,17.949,292.06,397.18,1.2969,1.6087,0.001088,0.008969],[66.0,18.754,295.39,397.71,1.3065,1.6082,0.001101,0.008477],[68.0,19.586,298.78,398.18,1.3162,1.6076,0.001116,0.008007],[70.0,20.445,302.22,398.57,1.326,1.6068,0.001132,0.007557],[72.0,21.334,305.72,398.87,1.3359,1.6058,0.001149,0.007125],[74.0,22.252,309.3,399.07,1.3459,1.6045,0.001168,0.006709],[76.0,23.201,312.95,399.16,1.3561,1.603,0.001189,0.006309],[78.0,24.181,316.69,399.11,1.3664,1.6011,0.001211,0.005922],[80.0,25.194,320.54,398.9,1.377,1.5989,0.001236,0.005545],[82.0,26.241,324.52,398.5,1.3879,1.5962,0.001264,0.005178],[84.0,27.324,328.67,397.85,1.3991,1.5928,0.001297,0.004816],[86.0,28.444,333.02,396.87,1.4109,1.5886,0.001335,0.004457],[88.0,29.602,337.68,395.44,1.4234,1.5833,0.001381,0.004094],[90.0,30.803,342.79,393.32,1.437,1.5762,0.001441,0.003716],[92.0,32.05,348.76,389.94,1.4529,1.5657,0.001527,0.0033]],"P":[0.33572,0.3929,0.45983,0.53815,0.62981,0.73709,0.86264,1.0096,1.1815,1.3828,1.6183,1.894,2.2166,2.5941,3.036,3.5531,4.1583,4.8666,5.6955,6.6656,7.8009,9.1297,10.685,12.505,14.635,17.127,20.045,23.459,27.455,32.131],"dT":[0,2,5,10,15,20,30,40,50,60,70,80,90,100,120,140],"h":[[328.51,329.99,332.24,336.02,339.85,343.73,351.66,359.78,368.11,376.63,385.35,394.26,403.35,412.64,431.74,451.54],[330.46,331.96,334.23,338.06,341.93,345.85,353.85,362.05,370.45,379.04,387.83,396.8,405.96,415.3,434.52,454.42],[332.48,334.0,336.29,340.16,344.08,348.04,356.13,364.4,372.87,381.54,390.39,399.43,408.65,418.05,437.39,457.4],[334.56,336.1,338.43,342.34,346.3,350.31,358.48,366.83,375.38,384.12,393.04,402.15,411.43,420.9,440.35,460.48],[336.71,338.27,340.63,344.59,348.6,352.66,360.91,369.35,377.98,386.79,395.79,404.96,414.32,423.85,443.43,463.67],[338.94,340.52,342.91,346.92,350.98,355.08,363.43,371.96,380.67,389.56,398.63,407.88,417.3,426.9,446.61,466.98],[341.24,342.84,345.26,349.33,353.44,357.59,366.04,374.65,383.45,392.42,401.57,410.9,420.4,430.07,449.91,470.4],[343.61,345.24,347.7,351.82,355.99,360.19,368.74,377.45,386.33,395.39,404.63,414.03,423.6,433.35,453.32,473.94],[346.07,347.72,350.21,354.4,358.62,362.88,371.53,380.34,389.32,398.47,407.79,417.27,426.93,436.74,456.87,477.62],[348.6,350.28,352.82,357.06,361.35,365.67,374.42,383.34,392.42,401.66,411.07,420.64,430.37,440.27,460.54,481.43],[351.22,352.93,355.5,359.82,364.16,368.55,377.42,386.45,395.63,404.97,414.47,424.13,433.94,443.92,464.35,485.38],[353.92,355.66,358.28,362.66,367.08,371.53,380.53,389.67,398.95,408.4,417.99,427.74,437.65,447.71,468.3,489.48],[356.71,358.48,361.15,365.61,370.09,374.61,383.74,393.0,402.4,411.95,421.65,431.5,441.5,451.65,472.4,493.74],[359.58,361.39,364.1,368.64,373.21,377.8,387.06,396.45,405.97,415.63,425.44,435.39,445.49,455.73,476.66,498.16],[362.54,364.38,367.15,371.78,376.42,381.09,390.5,400.03,409.67,419.45,429.37,439.43,449.63,459.97,481.07,502.74],[365.57,367.46,370.28,375.0,379.74,384.49,394.06,403.73,413.51,423.41,433.45,443.62,453.92,464.36,485.66,507.51],[368.68,370.61,373.5,378.32,383.15,388.0,397.73,407.55,417.48,427.51,437.67,447.96,458.38,468.93,490.43,512.45],[371.86,373.84,376.8,381.73,386.67,391.61,401.52,411.51,421.58,431.76,442.05,452.47,463.0,473.66,495.37,517.59],[375.1,377.13,380.17,385.22,390.27,395.32,405.43,415.59,425.83,436.16,446.59,457.13,467.8,478.58,500.51,522.93],[378.37,380.46,383.59,388.79,393.96,399.13,409.45,419.81,430.22,440.71,451.29,461.97,472.77,483.67,505.84,528.47],[381.66,383.83,387.06,392.41,397.73,403.02,413.58,424.14,434.74,445.41,456.15,466.98,477.92,488.96,511.37,534.23],[384.93,387.18,390.54,396.07,401.55,406.99,417.81,428.6,439.41,450.25,461.17,472.16,483.25,494.43,517.1,540.2],[388.14,390.5,394.0,399.74,405.41,411.02,422.13,433.17,444.2,455.25,466.35,477.52,488.76,500.1,523.05,546.4],[391.22,393.71,397.39,403.39,409.28,415.08,426.52,437.84,449.12,460.39,471.69,483.04,494.46,505.95,529.2,552.82],[394.07,396.74,400.65,406.97,413.12,419.14,430.96,442.6,454.14,465.66,477.18,488.73,500.34,512.0,535.57,559.47],[396.55,399.46,403.68,410.4,416.87,423.16,435.42,447.41,459.26,471.05,482.81,494.58,506.39,518.24,542.15,566.35],[398.4,401.68,406.33,413.59,420.46,427.08,439.86,452.27,464.46,476.54,488.56,500.57,512.6,524.66,548.93,573.45],[399.16,403.08,408.39,416.4,423.8,430.83,444.23,457.11,469.69,482.11,494.42,506.69,518.96,531.23,555.89,580.77],[397.75,403.04,409.51,418.64,426.75,434.3,448.46,461.9,474.92,487.7,500.34,512.9,525.42,537.94,563.02,588.26],[389.65,400.29,409.15,420.02,429.11,437.33,452.42,466.5,480.03,493.23,506.22,519.1,531.9,544.67,570.2,595.84]],"s":[[1.6115,1.6182,1.6281,1.6447,1.6611,1.6774,1.7095,1.7413,1.7725,1.8034,1.8339,1.864,1.8937,1.923,1.9807,2.0371],[1.609,1.6157,1.6257,1.6422,1.6586,1.6748,1.7069,1.7386,1.7698,1.8006,1.831,1.861,1.8906,1.9199,1.9774,2.0336],[1.6068,1.6135,1.6234,1.6399,1.6563,1.6725,1.7045,1.7361,1.7673,1.798,1.8283,1.8582,1.8878,1.917,1.9743,2.0304],[1.6048,1.6114,1.6214,1.6378,1.6542,1.6704,1.7024,1.7339,1.765,1.7956,1.8258,1.8557,1.8851,1.9142,1.9714,2.0273],[1.6029,1.6096,1.6195,1.636,1.6523,1.6685,1.7004,1.7319,1.7629,1.7934,1.8236,1.8533,1.8827,1.9118,1.9688,2.0245],[1.6013,1.608,1.6179,1.6344,1.6507,1.6668,1.6987,1.7301,1.761,1.7915,1.8216,1.8513,1.8806,1.9095,1.9664,2.0219],[1.6,1.6066,1.6166,1.633,1.6493,1.6654,1.6973,1.7286,1.7594,1.7899,1.8199,1.8495,1.8787,1.9075,1.9642,2.0196],[1.5988,1.6055,1.6154,1.6319,1.6481,1.6642,1.696,1.7273,1.7581,1.7885,1.8184,1.8479,1.877,1.9058,1.9623,2.0175],[1.5979,1.6046,1.6145,1.631,1.6472,1.6633,1.6951,1.7263,1.757,1.7873,1.8172,1.8466,1.8757,1.9043,1.9607,2.0157],[1.5973,1.6039,1.6139,1.6303,1.6466,1.6627,1.6944,1.7256,1.7563,1.7865,1.8162,1.8456,1.8746,1.9032,1.9593,2.0141],[1.5969,1.6035,1.6135,1.6299,1.6462,1.6623,1.694,1.7251,1.7557,1.7859,1.8156,1.8448,1.8737,1.9023,1.9582,2.0129],[1.5967,1.6034,1.6133,1.6298,1.6461,1.6622,1.6938,1.7249,1.7555,1.7856,1.8152,1.8444,1.8732,1.9016,1.9574,2.0119],[1.5968,1.6035,1.6134,1.6299,1.6462,1.6623,1.694,1.725,1.7556,1.7856,1.8151,1.8443,1.873,1.9013,1.957,2.0112],[1.5971,1.6038,1.6138,1.6303,1.6466,1.6627,1.6944,1.7255,1.7559,1.7859,1.8154,1.8444,1.8731,1.9013,1.9568,2.0109],[1.5976,1.6044,1.6144,1.631,1.6473,1.6634,1.6951,1.7262,1.7566,1.7865,1.8159,1.8449,1.8735,1.9017,1.9569,2.0108],[1.5984,1.6052,1.6153,1.6319,1.6483,1.6644,1.6962,1.7272,1.7576,1.7874,1.8168,1.8457,1.8742,1.9023,1.9574,2.0111],[1.5994,1.6063,1.6164,1.6331,1.6495,1.6657,1.6975,1.7285,1.7589,1.7887,1.818,1.8469,1.8753,1.9033,1.9582,2.0118],[1.6006,1.6075,1.6177,1.6345,1.651,1.6672,1.6991,1.7301,1.7605,1.7903,1.8196,1.8484,1.8767,1.9047,1.9594,2.0128],[1.602,1.6089,1.6192,1.6361,1.6527,1.669,1.7009,1.732,1.7624,1.7922,1.8214,1.8502,1.8785,1.9064,1.9609,2.0141],[1.6035,1.6105,1.6209,1.6379,1.6547,1.6711,1.7031,1.7343,1.7647,1.7945,1.8237,1.8524,1.8806,1.9084,1.9628,2.0158],[1.605,1.6122,1.6227,1.6399,1.6568,1.6733,1.7055,1.7368,1.7672,1.797,1.8262,1.8549,1.8831,1.9108,1.9651,2.0179],[1.6065,1.6138,1.6245,1.642,1.6591,1.6758,1.7082,1.7395,1.7701,1.7999,1.8291,1.8577,1.8859,1.9135,1.9677,2.0203],[1.6079,1.6154,1.6264,1.6442,1.6615,1.6784,1.711,1.7426,1.7732,1.8031,1.8323,1.8609,1.889,1.9167,1.9707,2.0231],[1.609,1.6167,1.628,1.6463,1.6639,1.681,1.7141,1.7458,1.7766,1.8065,1.8358,1.8644,1.8925,1.9201,1.974,2.0263],[1.6095,1.6176,1.6294,1.6482,1.6663,1.6837,1.7172,1.7492,1.7802,1.8102,1.8396,1.8682,1.8963,1.9239,1.9777,2.0299],[1.6091,1.6178,1.6302,1.6499,1.6685,1.6863,1.7204,1.7528,1.784,1.8142,1.8436,1.8723,1.9004,1.928,1.9817,2.0338],[1.6072,1.6167,1.6302,1.6509,1.6703,1.6887,1.7235,1.7564,1.7879,1.8183,1.8478,1.8766,1.9048,1.9324,1.986,2.038],[1.6025,1.6137,1.6287,1.6512,1.6716,1.6908,1.7265,1.76,1.7919,1.8226,1.8523,1.8812,1.9094,1.937,1.9906,2.0425],[1.5924,1.6071,1.6251,1.6501,1.672,1.6922,1.7292,1.7634,1.7958,1.8268,1.8567,1.8858,1.9141,1.9418,1.9954,2.0472],[1.5648,1.5939,1.6179,1.6471,1.6711,1.6926,1.7313,1.7665,1.7994,1.8308,1.8611,1.8903,1.9187,1.9465,2.0002,2.052]],"v":[[0.47,0.4746,0.4815,0.4929,0.5043,0.5156,0.5382,0.5606,0.5829,0.6051,0.6273,0.6494,0.6715,0.6935,0.7375,0.7814],[0.4058,0.4098,0.4157,0.4255,0.4353,0.445,0.4644,0.4836,0.5028,0.5218,0.5408,0.5598,0.5787,0.5975,0.6351,0.6727],[0.3504,0.3538,0.3589,0.3673,0.3757,0.3841,0.4007,0.4172,0.4337,0.45,0.4663,0.4825,0.4987,0.5148,0.547,0.5792],[0.3025,0.3054,0.3098,0.3171,0.3243,0.3315,0.3458,0.36,0.3741,0.3881,0.402,0.4159,0.4298,0.4436,0.4712,0.4987],[0.2611,0.2637,0.2674,0.2737,0.2799,0.2861,0.2984,0.3106,0.3227,0.3347,0.3467,0.3586,0.3705,0.3823,0.4059,0.4295],[0.2254,0.2276,0.2308,0.2362,0.2416,0.2469,0.2575,0.2679,0.2783,0.2887,0.2989,0.3092,0.3193,0.3295,0.3497,0.3699],[0.1945,0.1964,0.1992,0.2038,0.2085,0.213,0.2221,0.2312,0.2401,0.249,0.2578,0.2665,0.2753,0.284,0.3013,0.3186],[0.1678,0.1694,0.1718,0.1759,0.1798,0.1838,0.1916,0.1994,0.2071,0.2147,0.2223,0.2298,0.2373,0.2448,0.2597,0.2745],[0.1447,0.1461,0.1482,0.1517,0.1551,0.1586,0.1653,0.172,0.1786,0.1852,0.1917,0.1982,0.2046,0.211,0.2238,0.2365],[0.1247,0.1259,0.1278,0.1308,0.1338,0.1367,0.1426,0.1483,0.154,0.1597,0.1653,0.1709,0.1764,0.1819,0.1928,0.2037],[0.1075,0.1085,0.1101,0.1127,0.1153,0.1179,0.1229,0.1279,0.1328,0.1377,0.1425,0.1473,0.1521,0.1568,0.1662,0.1755],[0.09256,0.09349,0.09487,0.09714,0.09939,0.1016,0.106,0.1103,0.1145,0.1187,0.1229,0.127,0.1311,0.1352,0.1432,0.1513],[0.07967,0.08048,0.08168,0.08366,0.08561,0.08754,0.09134,0.09506,0.09873,0.1024,0.1059,0.1095,0.113,0.1165,0.1235,0.1303],[0.06852,0.06923,0.07028,0.07201,0.07371,0.07539,0.07868,0.08191,0.08509,0.08822,0.09131,0.09437,0.09741,0.1004,0.1064,0.1123],[0.05888,0.0595,0.06042,0.06193,0.06342,0.06488,0.06775,0.07055,0.07331,0.07602,0.07869,0.08134,0.08396,0.08656,0.09171,0.0968],[0.05054,0.05108,0.05189,0.05322,0.05452,0.0558,0.05831,0.06075,0.06314,0.06548,0.0678,0.07009,0.07235,0.0746,0.07903,0.08342],[0.04333,0.04381,0.04452,0.04569,0.04683,0.04796,0.05014,0.05227,0.05435,0.05639,0.0584,0.06038,0.06234,0.06428,0.06811,0.07189],[0.03709,0.03751,0.03815,0.03918,0.04019,0.04117,0.04309,0.04495,0.04677,0.04854,0.05029,0.052,0.0537,0.05538,0.05869,0.06195],[0.03169,0.03207,0.03263,0.03355,0.03444,0.03531,0.037,0.03863,0.04022,0.04176,0.04328,0.04477,0.04625,0.0477,0.05057,0.05338],[0.02702,0.02736,0.02786,0.02868,0.02948,0.03025,0.03174,0.03317,0.03456,0.03591,0.03724,0.03854,0.03982,0.04108,0.04356,0.046],[0.02297,0.02328,0.02374,0.02447,0.02518,0.02587,0.02719,0.02845,0.02967,0.03086,0.03202,0.03315,0.03427,0.03536,0.03752,0.03963],[0.01947,0.01975,0.02017,0.02083,0.02147,0.02209,0.02326,0.02438,0.02546,0.0265,0.02751,0.02851,0.02948,0.03044,0.03231,0.03414],[0.01643,0.0167,0.01708,0.01768,0.01826,0.01882,0.01987,0.02087,0.02182,0.02274,0.02363,0.0245,0.02535,0.02619,0.02782,0.02941],[0.0138,0.01405,0.0144,0.01496,0.01549,0.01599,0.01694,0.01783,0.01868,0.01949,0.02028,0.02104,0.02179,0.02252,0.02395,0.02533],[0.01151,0.01175,0.01208,0.01261,0.01309,0.01355,0.01441,0.01521,0.01597,0.01669,0.01739,0.01806,0.01872,0.01936,0.02061,0.02182],[0.009514,0.009747,0.01007,0.01057,0.01102,0.01145,0.01223,0.01296,0.01363,0.01428,0.0149,0.01549,0.01607,0.01664,0.01773,0.01879],[0.007762,0.008,0.008324,0.008805,0.009236,0.009633,0.01036,0.01101,0.01162,0.0122,0.01275,0.01328,0.01379,0.01429,0.01525,0.01618],[0.006205,0.006464,0.0068,0.007279,0.007694,0.00807,0.008741,0.009342,0.009895,0.01041,0.01091,0.01138,0.01183,0.01227,0.01312,0.01393],[0.004774,0.005095,0.005467,0.005959,0.006367,0.006726,0.007354,0.007907,0.00841,0.008877,0.009318,0.009739,0.01014,0.01053,0.01128,0.012],[0.003271,0.003842,0.004297,0.004819,0.005226,0.005573,0.006166,0.006676,0.007135,0.007558,0.007955,0.008331,0.008691,0.009037,0.009699,0.01033]],"axes":{"pmin":0.486,"pmax":30.4,"hmin":127.0,"hmax":491.0},"nom":"R1234yf","classe":"A2L","gwp":4,"coul":"vert"},"R32":{"Tc":78.11,"Pc":57.82,"M":52.02,"sat":[[-60.0,0.64955,101.38,492.11,0.5958,2.4289,0.0008092,0.5079],[-58.0,0.72517,104.53,493.17,0.6105,2.4169,0.0008128,0.4581],[-56.0,0.80772,107.7,494.22,0.6251,2.4051,0.0008164,0.414],[-54.0,0.89763,110.86,495.26,0.6396,2.3936,0.0008201,0.375],[-52.0,0.99537,114.04,496.27,0.654,2.3824,0.0008238,0.3403],[-50.0,1.1014,117.22,497.27,0.6683,2.3714,0.0008276,0.3094],[-48.0,1.2163,120.4,498.26,0.6824,2.3607,0.0008314,0.2819],[-46.0,1.3405,123.6,499.23,0.6965,2.3502,0.0008353,0.2572],[-44.0,1.4745,126.8,500.17,0.7105,2.3399,0.0008392,0.2351],[-42.0,1.6188,130.01,501.11,0.7244,2.3298,0.0008433,0.2153],[-40.0,1.7741,133.23,502.02,0.7382,2.32,0.0008473,0.1974],[-38.0,1.9409,136.45,502.91,0.7519,2.3103,0.0008515,0.1813],[-36.0,2.1197,139.69,503.78,0.7655,2.3008,0.0008557,0.1668],[-34.0,2.3111,142.93,504.63,0.7791,2.2916,0.00086,0.1536],[-32.0,2.5159,146.18,505.47,0.7926,2.2824,0.0008644,0.1417],[-30.0,2.7344,149.45,506.27,0.806,2.2735,0.0008688,0.1309],[-28.0,2.9675,152.72,507.06,0.8193,2.2647,0.0008734,0.1211],[-26.0,3.2157,156.01,507.83,0.8326,2.2561,0.000878,0.1121],[-24.0,3.4796,159.31,508.57,0.8458,2.2476,0.0008827,0.1039],[-22.0,3.76,162.62,509.28,0.8589,2.2392,0.0008875,0.09646],[-20.0,4.0575,165.94,509.97,0.872,2.231,0.0008924,0.08963],[-18.0,4.3728,169.28,510.64,0.885,2.2229,0.0008974,0.08337],[-16.0,4.7067,172.63,511.28,0.8979,2.2149,0.0009025,0.07762],[-14.0,5.0597,175.99,511.89,0.9109,2.207,0.0009077,0.07234],[-12.0,5.4327,179.37,512.47,0.9237,2.1992,0.000913,0.06749],[-10.0,5.8263,182.76,513.02,0.9365,2.1915,0.0009185,0.06301],[-8.0,6.2414,186.18,513.54,0.9493,2.1839,0.000924,0.05889],[-6.0,6.6786,189.6,514.03,0.962,2.1764,0.0009297,0.05508],[-4.0,7.1388,193.05,514.49,0.9747,2.169,0.0009356,0.05155],[-2.0,7.6226,196.52,514.91,0.9874,2.1616,0.0009415,0.04829],[0.0,8.131,200.0,515.3,1.0,2.1543,0.0009476,0.04527],[2.0,8.6647,203.5,515.65,1.0126,2.1471,0.0009539,0.04246],[4.0,9.2245,207.03,515.96,1.0252,2.1399,0.0009603,0.03986],[6.0,9.8113,210.58,516.24,1.0377,2.1327,0.000967,0.03743],[8.0,10.426,214.15,516.47,1.0503,2.1256,0.0009737,0.03518],[10.0,11.069,217.74,516.66,1.0628,2.1185,0.0009807,0.03308],[12.0,11.742,221.36,516.8,1.0753,2.1114,0.0009879,0.03112],[14.0,12.445,225.01,516.9,1.0878,2.1043,0.0009953,0.02929],[16.0,13.179,228.68,516.95,1.1003,2.0972,0.001003,0.02758],[18.0,13.946,232.39,516.95,1.1128,2.0902,0.001011,0.02598],[20.0,14.746,236.12,516.9,1.1253,2.0831,0.001019,0.02448],[22.0,15.579,239.89,516.79,1.1378,2.076,0.001027,0.02307],[24.0,16.448,243.69,516.62,1.1503,2.0688,0.001036,0.02175],[26.0,17.353,247.53,516.39,1.1629,2.0616,0.001045,0.02051],[28.0,18.295,251.4,516.09,1.1755,2.0544,0.001055,0.01935],[30.0,19.275,255.32,515.72,1.1881,2.0471,0.001064,0.01826],[32.0,20.294,259.28,515.29,1.2007,2.0397,0.001074,0.01722],[34.0,21.353,263.28,514.77,1.2134,2.0322,0.001085,0.01625],[36.0,22.454,267.34,514.17,1.2262,2.0246,0.001096,0.01533],[38.0,23.597,271.45,513.49,1.2391,2.0169,0.001108,0.01447],[40.0,24.783,275.61,512.71,1.252,2.0091,0.00112,0.01365],[42.0,26.014,279.84,511.82,1.265,2.0011,0.001133,0.01287],[44.0,27.292,284.13,510.83,1.2781,1.9929,0.001146,0.01214],[46.0,28.616,288.5,509.72,1.2914,1.9845,0.00116,0.01144],[48.0,29.989,292.95,508.48,1.3048,1.9759,0.001175,0.01078],[50.0,31.412,297.49,507.1,1.3183,1.967,0.001192,0.01015],[52.0,32.887,302.12,505.57,1.3321,1.9578,0.001209,0.009547],[54.0,34.415,306.87,503.86,1.3461,1.9482,0.001227,0.008974],[56.0,35.997,311.74,501.95,1.3603,1.9382,0.001247,0.008426],[58.0,37.635,316.75,499.82,1.3749,1.9277,0.001269,0.0079],[60.0,39.332,321.93,497.44,1.3898,1.9166,0.001293,0.007396],[62.0,41.089,327.3,494.76,1.4052,1.9048,0.00132,0.006909],[64.0,42.909,332.9,491.73,1.4211,1.8922,0.001349,0.006438],[66.0,44.793,338.78,488.26,1.4377,1.8785,0.001383,0.00598],[68.0,46.745,345.02,484.25,1.4553,1.8634,0.001422,0.00553],[70.0,48.768,351.73,479.52,1.474,1.8464,0.001469,0.005084],[72.0,50.866,359.11,473.77,1.4946,1.8268,0.001526,0.004634],[74.0,53.046,367.53,466.41,1.5179,1.8027,0.001601,0.004165]],"P":[0.64955,0.75695,0.88211,1.028,1.1979,1.396,1.6268,1.8958,2.2093,2.5746,3.0003,3.4964,4.0745,4.7482,5.5332,6.4481,7.5143,8.7568,10.205,11.892,13.858,16.15,18.82,21.932,25.558,29.784,34.709,40.448,47.135,54.929],"dT":[0,2,5,10,15,20,30,40,50,60,70,80,90,100,120,140],"h":[[492.11,493.77,496.23,500.29,504.3,508.29,516.25,524.22,532.23,540.31,548.48,556.75,565.15,573.67,591.13,609.18],[493.59,495.27,497.77,501.88,505.95,509.98,518.02,526.06,534.14,542.28,550.51,558.85,567.3,575.88,593.45,611.6],[495.08,496.8,499.33,503.5,507.62,511.7,519.83,527.94,536.09,544.3,552.6,561.0,569.51,578.15,595.84,614.1],[496.59,498.33,500.91,505.14,509.31,513.45,521.67,529.86,538.09,546.38,554.74,563.21,571.79,580.49,598.29,616.68],[498.11,499.88,502.5,506.8,511.03,515.22,523.54,531.83,540.14,548.5,556.94,565.47,574.12,582.89,600.82,619.33],[499.63,501.44,504.11,508.47,512.77,517.02,525.45,533.83,542.23,550.67,559.19,567.8,576.52,585.36,603.43,622.06],[501.15,503.0,505.72,510.16,514.53,518.84,527.38,535.87,544.36,552.89,561.5,570.19,578.98,587.9,606.11,624.88],[502.68,504.56,507.33,511.86,516.3,520.69,529.35,537.95,546.54,555.17,563.86,572.63,581.51,590.5,608.87,627.79],[504.19,506.12,508.95,513.57,518.09,522.54,531.34,540.06,548.76,557.49,566.27,575.14,584.11,593.18,611.71,630.78],[505.69,507.66,510.56,515.27,519.88,524.41,533.35,542.2,551.02,559.86,568.75,577.71,586.77,595.93,614.63,633.86],[507.17,509.19,512.15,516.97,521.67,526.29,535.39,544.37,553.32,562.27,571.27,580.34,589.5,598.76,617.64,637.04],[508.61,510.68,513.72,518.65,523.45,528.17,537.43,546.57,555.65,564.73,573.85,583.03,592.29,601.65,620.73,640.31],[510.01,512.14,515.26,520.31,525.22,530.04,539.49,548.78,558.01,567.23,576.47,585.77,595.15,604.62,623.9,643.67],[511.35,513.54,516.75,521.93,526.97,531.9,541.54,551.01,560.4,569.76,579.14,588.57,598.07,607.66,627.16,647.14],[512.61,514.87,518.18,523.51,528.68,533.73,543.59,553.25,562.81,572.33,581.86,591.43,601.06,610.77,630.5,650.7],[513.78,516.12,519.53,525.02,530.33,535.52,545.61,555.48,565.23,574.92,584.61,594.33,604.1,613.95,633.93,654.35],[514.82,517.24,520.77,526.45,531.92,537.25,547.6,557.7,567.65,577.53,587.39,597.27,607.19,617.19,637.43,658.11],[515.71,518.22,521.89,527.76,533.41,538.9,549.55,559.89,570.07,580.15,590.2,600.25,610.34,620.48,641.02,661.96],[516.39,519.02,522.84,528.94,534.79,540.46,551.42,562.04,572.46,582.77,593.02,603.26,613.52,623.84,644.68,665.91],[516.83,519.59,523.58,529.93,536.01,541.89,553.2,564.13,574.82,585.37,595.84,606.29,616.74,627.24,648.42,669.95],[516.95,519.86,524.06,530.71,537.05,543.16,554.87,566.14,577.12,587.94,598.65,609.32,619.99,630.68,652.22,674.07],[516.68,519.77,524.21,531.22,537.86,544.22,556.39,568.03,579.35,590.46,601.44,612.35,623.24,634.14,656.07,678.28],[515.9,519.21,523.95,531.37,538.37,545.04,557.72,569.79,581.47,592.9,604.17,615.36,626.49,637.63,659.98,682.56],[514.46,518.06,523.17,531.1,538.51,545.54,558.81,571.36,583.45,595.25,606.84,618.32,629.73,641.11,663.91,686.9],[512.16,516.14,521.72,530.29,538.21,545.66,559.61,572.71,585.27,597.46,609.41,621.21,632.91,644.57,667.87,691.3],[508.68,513.18,519.42,528.8,537.35,545.31,560.07,573.79,586.87,599.51,611.86,624.01,636.04,647.99,671.83,695.74],[503.51,508.83,515.98,526.46,535.79,544.38,560.09,574.54,588.21,601.35,614.13,626.68,639.06,651.34,675.76,700.18],[495.77,502.47,511.03,523.02,533.38,542.74,559.59,574.88,589.22,602.92,616.2,629.17,641.95,654.58,679.64,704.62],[483.39,493.04,503.99,518.19,529.91,540.23,558.45,574.72,589.83,604.16,617.98,631.44,644.64,657.67,683.41,708.99],[457.99,478.42,494.03,511.57,525.09,536.64,556.51,573.92,589.9,604.95,619.37,633.36,647.03,660.48,686.98,713.21]],"s":[[2.4289,2.4367,2.4481,2.4664,2.4842,2.5015,2.535,2.5671,2.5981,2.6282,2.6576,2.6863,2.7145,2.7422,2.7962,2.8488],[2.4122,2.42,2.4314,2.4497,2.4675,2.4848,2.5182,2.5502,2.5812,2.6113,2.6406,2.6692,2.6973,2.7249,2.7788,2.8313],[2.3955,2.4033,2.4147,2.4331,2.4509,2.4682,2.5015,2.5335,2.5644,2.5944,2.6236,2.6522,2.6803,2.7078,2.7616,2.8139],[2.3789,2.3867,2.3982,2.4166,2.4344,2.4517,2.485,2.5169,2.5478,2.5777,2.6069,2.6354,2.6634,2.6908,2.7445,2.7968],[2.3623,2.3702,2.3817,2.4001,2.418,2.4353,2.4686,2.5005,2.5313,2.5611,2.5903,2.6187,2.6466,2.6741,2.7276,2.7798],[2.3458,2.3537,2.3652,2.3838,2.4016,2.4189,2.4522,2.4841,2.5149,2.5447,2.5738,2.6022,2.6301,2.6574,2.7109,2.763],[2.3293,2.3372,2.3488,2.3674,2.3854,2.4027,2.436,2.4679,2.4986,2.5285,2.5575,2.5859,2.6137,2.641,2.6944,2.7464],[2.3128,2.3208,2.3325,2.3512,2.3692,2.3865,2.4199,2.4518,2.4825,2.5123,2.5413,2.5697,2.5975,2.6247,2.678,2.7299],[2.2964,2.3044,2.3162,2.335,2.353,2.3705,2.4039,2.4358,2.4665,2.4963,2.5253,2.5536,2.5814,2.6086,2.6619,2.7137],[2.28,2.2881,2.2999,2.3188,2.3369,2.3544,2.388,2.4199,2.4507,2.4805,2.5095,2.5378,2.5655,2.5927,2.6459,2.6976],[2.2635,2.2717,2.2836,2.3027,2.3209,2.3385,2.3721,2.4042,2.435,2.4648,2.4938,2.5221,2.5498,2.577,2.6301,2.6818],[2.247,2.2553,2.2673,2.2865,2.3049,2.3226,2.3564,2.3885,2.4194,2.4492,2.4782,2.5065,2.5342,2.5614,2.6145,2.6662],[2.2305,2.2389,2.251,2.2704,2.2889,2.3067,2.3407,2.3729,2.4039,2.4338,2.4628,2.4911,2.5189,2.5461,2.5991,2.6507],[2.2139,2.2224,2.2347,2.2543,2.2729,2.2909,2.325,2.3574,2.3885,2.4184,2.4475,2.4759,2.5037,2.5309,2.5839,2.6355],[2.1972,2.2058,2.2183,2.2381,2.2569,2.275,2.3094,2.342,2.3732,2.4032,2.4324,2.4608,2.4886,2.5158,2.5689,2.6205],[2.1803,2.1891,2.2017,2.2218,2.2409,2.2591,2.2938,2.3266,2.358,2.3881,2.4174,2.4459,2.4737,2.501,2.5541,2.6057],[2.1632,2.1721,2.185,2.2054,2.2247,2.2432,2.2782,2.3113,2.3428,2.3731,2.4025,2.4311,2.459,2.4863,2.5395,2.5911],[2.1458,2.155,2.1681,2.1888,2.2085,2.2272,2.2626,2.296,2.3277,2.3582,2.3877,2.4164,2.4444,2.4718,2.5251,2.5767],[2.1281,2.1374,2.1509,2.172,2.192,2.2111,2.247,2.2806,2.3127,2.3434,2.3731,2.4019,2.43,2.4574,2.5108,2.5626],[2.1098,2.1194,2.1333,2.1549,2.1753,2.1947,2.2312,2.2653,2.2976,2.3286,2.3584,2.3874,2.4156,2.4432,2.4968,2.5486],[2.0909,2.1009,2.1152,2.1375,2.1584,2.1782,2.2152,2.2498,2.2825,2.3138,2.3439,2.3731,2.4014,2.4291,2.4829,2.5348],[2.0712,2.0816,2.0964,2.1195,2.141,2.1612,2.1991,2.2342,2.2674,2.299,2.3294,2.3587,2.3873,2.4151,2.4691,2.5212],[2.0504,2.0614,2.0769,2.1008,2.1231,2.1439,2.1827,2.2185,2.2521,2.2841,2.3148,2.3445,2.3732,2.4013,2.4555,2.5077],[2.0282,2.0399,2.0562,2.0814,2.1045,2.1261,2.1659,2.2025,2.2367,2.2692,2.3003,2.3302,2.3592,2.3874,2.442,2.4945],[2.0041,2.0167,2.0342,2.0609,2.0851,2.1075,2.1487,2.1862,2.2211,2.2541,2.2856,2.3159,2.3452,2.3737,2.4286,2.4813],[1.9772,1.9912,2.0104,2.039,2.0646,2.0882,2.1308,2.1694,2.2052,2.2388,2.2708,2.3015,2.3311,2.3599,2.4152,2.4683],[1.9463,1.9625,1.9841,2.0154,2.0429,2.0678,2.1123,2.1522,2.1889,2.2232,2.2558,2.287,2.317,2.3461,2.4019,2.4553],[1.9092,1.9292,1.9545,1.9896,2.0194,2.046,2.0929,2.1343,2.1721,2.2073,2.2406,2.2723,2.3027,2.3321,2.3885,2.4423],[1.8602,1.8884,1.9202,1.9609,1.994,2.0227,2.0725,2.1157,2.1548,2.1909,2.2249,2.2572,2.2882,2.318,2.375,2.4293],[1.7764,1.8349,1.8792,1.9284,1.9658,1.9974,2.0506,2.0959,2.1365,2.1738,2.2086,2.2416,2.2732,2.3035,2.3612,2.416]],"v":[[0.5079,0.5134,0.5216,0.5351,0.5484,0.5616,0.5878,0.6136,0.6392,0.6647,0.69,0.7152,0.7403,0.7654,0.8154,0.8652],[0.44,0.4448,0.4519,0.4636,0.4751,0.4866,0.5091,0.5314,0.5535,0.5754,0.5972,0.6189,0.6405,0.6621,0.705,0.7479],[0.3812,0.3853,0.3915,0.4016,0.4116,0.4215,0.441,0.4602,0.4793,0.4981,0.5169,0.5356,0.5542,0.5728,0.6097,0.6465],[0.3302,0.3338,0.3391,0.3479,0.3566,0.3651,0.382,0.3986,0.415,0.4313,0.4475,0.4635,0.4796,0.4955,0.5273,0.559],[0.2859,0.2891,0.2937,0.3013,0.3088,0.3162,0.3308,0.3452,0.3593,0.3734,0.3873,0.4012,0.415,0.4287,0.4561,0.4833],[0.2476,0.2503,0.2543,0.261,0.2675,0.2739,0.2865,0.2989,0.3111,0.3233,0.3353,0.3472,0.3591,0.371,0.3945,0.4179],[0.2143,0.2167,0.2202,0.2259,0.2316,0.2372,0.2481,0.2588,0.2694,0.2799,0.2903,0.3006,0.3108,0.321,0.3413,0.3614],[0.1854,0.1875,0.1906,0.1956,0.2005,0.2053,0.2148,0.2241,0.2333,0.2423,0.2513,0.2602,0.269,0.2778,0.2953,0.3126],[0.1604,0.1622,0.1649,0.1692,0.1735,0.1777,0.1859,0.194,0.2019,0.2098,0.2175,0.2252,0.2328,0.2404,0.2554,0.2704],[0.1386,0.1402,0.1426,0.1464,0.1501,0.1538,0.1609,0.1679,0.1748,0.1816,0.1883,0.1949,0.2015,0.208,0.221,0.2339],[0.1198,0.1212,0.1232,0.1266,0.1298,0.133,0.1392,0.1453,0.1513,0.1571,0.1629,0.1687,0.1744,0.18,0.1912,0.2023],[0.1035,0.1047,0.1065,0.1094,0.1122,0.115,0.1204,0.1257,0.1309,0.136,0.141,0.146,0.1509,0.1558,0.1655,0.175],[0.08927,0.09034,0.09192,0.09448,0.09697,0.09941,0.1041,0.1087,0.1132,0.1177,0.122,0.1263,0.1306,0.1348,0.1432,0.1514],[0.07696,0.07791,0.0793,0.08155,0.08374,0.08587,0.09001,0.09403,0.09794,0.1018,0.1056,0.1093,0.113,0.1166,0.1239,0.131],[0.06629,0.06712,0.06835,0.07034,0.07226,0.07413,0.07776,0.08126,0.08468,0.08802,0.09131,0.09454,0.09774,0.1009,0.1072,0.1133],[0.05702,0.05777,0.05885,0.06061,0.0623,0.06395,0.06713,0.0702,0.07318,0.07609,0.07895,0.08177,0.08455,0.08729,0.09271,0.09806],[0.04899,0.04965,0.05061,0.05217,0.05367,0.05512,0.05792,0.06061,0.06322,0.06576,0.06825,0.0707,0.07312,0.0755,0.0802,0.08483],[0.04201,0.0426,0.04346,0.04485,0.04618,0.04746,0.04993,0.05229,0.05458,0.0568,0.05898,0.06112,0.06322,0.06529,0.06937,0.07338],[0.03596,0.03649,0.03726,0.0385,0.03968,0.04082,0.043,0.04508,0.04709,0.04904,0.05095,0.05281,0.05464,0.05645,0.06,0.06348],[0.03071,0.03119,0.03188,0.03299,0.03404,0.03506,0.037,0.03884,0.0406,0.04232,0.04398,0.04562,0.04722,0.04879,0.05188,0.0549],[0.02615,0.02658,0.02721,0.02821,0.02916,0.03007,0.03179,0.03342,0.03498,0.03649,0.03795,0.03938,0.04078,0.04216,0.04485,0.04748],[0.02219,0.02259,0.02316,0.02407,0.02492,0.02574,0.02728,0.02873,0.03011,0.03144,0.03273,0.03398,0.03521,0.03641,0.03876,0.04105],[0.01875,0.01912,0.01965,0.02048,0.02125,0.02199,0.02337,0.02466,0.02589,0.02706,0.0282,0.02931,0.03038,0.03144,0.03349,0.03549],[0.01576,0.01611,0.0166,0.01736,0.01807,0.01874,0.01998,0.02114,0.02223,0.02328,0.02428,0.02526,0.0262,0.02713,0.02893,0.03068],[0.01315,0.01348,0.01395,0.01466,0.01531,0.01592,0.01705,0.01809,0.01907,0.02,0.02089,0.02175,0.02258,0.0234,0.02498,0.02651],[0.01087,0.0112,0.01164,0.01231,0.01292,0.01348,0.01451,0.01545,0.01633,0.01716,0.01795,0.01871,0.01945,0.02017,0.02156,0.0229],[0.008868,0.009196,0.009636,0.01028,0.01085,0.01138,0.01232,0.01317,0.01396,0.0147,0.01541,0.01609,0.01674,0.01738,0.0186,0.01978],[0.007083,0.007435,0.007886,0.008519,0.009065,0.009555,0.01043,0.0112,0.01192,0.01258,0.01321,0.01382,0.0144,0.01496,0.01604,0.01708],[0.005443,0.005867,0.006355,0.006993,0.007521,0.007985,0.008794,0.009504,0.01015,0.01075,0.01132,0.01185,0.01237,0.01287,0.01383,0.01474],[0.003732,0.004442,0.005014,0.005675,0.006192,0.006633,0.007388,0.00804,0.008627,0.009168,0.009676,0.01016,0.01062,0.01106,0.01191,0.01271]],"axes":{"pmin":1.41,"pmax":52.0,"hmin":91.0,"hmax":626.0},"nom":"R32","classe":"A2L","gwp":675,"coul":"tiede"},"R410A":{"Tc":71.34,"Pc":49.012,"M":72.59,"sat":[[-60.0,0.64238,114.79,394.76,0.6509,1.9646,0.0007266,0.369],[-58.0,0.71728,117.51,395.84,0.6636,1.9574,0.0007299,0.3327],[-56.0,0.79902,120.24,396.91,0.6762,1.9504,0.0007332,0.3006],[-54.0,0.88804,122.97,397.96,0.6887,1.9436,0.0007366,0.2722],[-52.0,0.9848,125.71,399.01,0.701,1.937,0.00074,0.247],[-50.0,1.0898,128.45,400.05,0.7134,1.9306,0.0007435,0.2245],[-48.0,1.2034,131.19,401.08,0.7256,1.9244,0.000747,0.2044],[-46.0,1.3263,133.95,402.1,0.7377,1.9183,0.0007506,0.1865],[-44.0,1.4588,136.7,403.1,0.7497,1.9124,0.0007542,0.1704],[-42.0,1.6015,139.47,404.1,0.7617,1.9067,0.0007579,0.156],[-40.0,1.755,142.24,405.08,0.7736,1.9011,0.0007617,0.1431],[-38.0,1.9198,145.03,406.05,0.7854,1.8956,0.0007655,0.1314],[-36.0,2.0964,147.82,407.01,0.7972,1.8903,0.0007694,0.1208],[-34.0,2.2854,150.61,407.95,0.8089,1.885,0.0007733,0.1113],[-32.0,2.4875,153.42,408.88,0.8205,1.88,0.0007773,0.1026],[-30.0,2.7031,156.24,409.8,0.8321,1.875,0.0007814,0.0948],[-28.0,2.9329,159.06,410.7,0.8436,1.8701,0.0007856,0.08766],[-26.0,3.1776,161.9,411.58,0.855,1.8654,0.0007899,0.08116],[-24.0,3.4377,164.75,412.45,0.8664,1.8607,0.0007942,0.07523],[-22.0,3.7139,167.61,413.31,0.8778,1.8561,0.0007987,0.06982],[-20.0,4.0069,170.48,414.14,0.8891,1.8517,0.0008032,0.06487],[-18.0,4.3172,173.37,414.96,0.9003,1.8473,0.0008078,0.06033],[-16.0,4.6456,176.26,415.76,0.9115,1.843,0.0008126,0.05616],[-14.0,4.9927,179.18,416.54,0.9227,1.8387,0.0008174,0.05234],[-12.0,5.3593,182.1,417.3,0.9338,1.8345,0.0008223,0.04882],[-10.0,5.746,185.04,418.04,0.9449,1.8304,0.0008274,0.04557],[-8.0,6.1536,188.0,418.76,0.956,1.8264,0.0008326,0.04258],[-6.0,6.5828,190.97,419.45,0.967,1.8224,0.0008379,0.03982],[-4.0,7.0342,193.96,420.12,0.978,1.8184,0.0008434,0.03726],[-2.0,7.5087,196.97,420.77,0.989,1.8145,0.000849,0.0349],[0.0,8.0071,200.0,421.39,1.0,1.8106,0.0008547,0.03271],[2.0,8.5299,203.05,421.98,1.0109,1.8067,0.0008607,0.03067],[4.0,9.0782,206.11,422.54,1.0219,1.8029,0.0008668,0.02878],[6.0,9.6526,209.2,423.08,1.0328,1.7991,0.000873,0.02702],[8.0,10.254,212.31,423.58,1.0437,1.7952,0.0008795,0.02539],[10.0,10.883,215.45,424.05,1.0546,1.7914,0.0008862,0.02386],[12.0,11.541,218.61,424.48,1.0656,1.7876,0.0008931,0.02244],[14.0,12.228,221.79,424.88,1.0765,1.7838,0.0009002,0.02111],[16.0,12.945,225.01,425.24,1.0874,1.78,0.0009076,0.01986],[18.0,13.694,228.25,425.56,1.0983,1.7761,0.0009152,0.0187],[20.0,14.475,231.52,425.83,1.1093,1.7722,0.0009231,0.01761],[22.0,15.288,234.82,426.06,1.1202,1.7683,0.0009314,0.01658],[24.0,16.136,238.15,426.24,1.1312,1.7643,0.00094,0.01562],[26.0,17.018,241.53,426.37,1.1423,1.7603,0.0009489,0.01472],[28.0,17.936,244.93,426.44,1.1533,1.7561,0.0009582,0.01387],[30.0,18.891,248.38,426.46,1.1644,1.7519,0.000968,0.01307],[32.0,19.884,251.87,426.41,1.1756,1.7476,0.0009782,0.01231],[34.0,20.916,255.41,426.28,1.1868,1.7432,0.000989,0.0116],[36.0,21.988,258.99,426.09,1.1981,1.7387,0.001,0.01093],[38.0,23.101,262.63,425.81,1.2095,1.734,0.001012,0.01029],[40.0,24.256,266.32,425.45,1.2209,1.7291,0.001025,0.009687],[42.0,25.455,270.08,424.98,1.2325,1.7241,0.001038,0.009114],[44.0,26.699,273.91,424.41,1.2442,1.7188,0.001053,0.008569],[46.0,27.988,277.81,423.72,1.256,1.7133,0.001068,0.008051],[48.0,29.325,281.8,422.9,1.268,1.7074,0.001085,0.007557],[50.0,30.711,285.88,421.92,1.2802,1.7013,0.001103,0.007085],[52.0,32.147,290.08,420.77,1.2927,1.6947,0.001122,0.006632],[54.0,33.635,294.41,419.41,1.3054,1.6876,0.001144,0.006198],[56.0,35.176,298.89,417.82,1.3186,1.6799,0.001168,0.005779],[58.0,36.773,303.57,415.94,1.3321,1.6715,0.001195,0.005372],[60.0,38.426,308.48,413.7,1.3463,1.6622,0.001226,0.004976],[62.0,40.14,313.72,410.99,1.3614,1.6517,0.001263,0.004587],[64.0,41.915,319.41,407.67,1.3776,1.6394,0.001309,0.004198],[66.0,43.754,325.78,403.43,1.3957,1.6247,0.001368,0.003802],[68.0,45.661,333.4,397.65,1.4174,1.6057,0.001454,0.003381]],"P":[0.64238,0.74463,0.86315,1.0005,1.1598,1.3444,1.5584,1.8064,2.0939,2.4272,2.8135,3.2614,3.7805,4.3822,5.0797,5.8882,6.8254,7.9118,9.1711,10.631,12.323,14.284,16.558,19.193,22.248,25.789,29.894,34.652,40.168,46.561],"dT":[0,2,5,10,15,20,30,40,50,60,70,80,90,100,120,140],"h":[[394.8,396.34,398.63,402.42,406.18,409.94,417.47,425.06,432.74,440.53,448.43,456.47,464.63,472.94,489.97,507.59],[396.25,397.81,400.13,403.97,407.77,411.57,419.18,426.84,434.58,442.43,450.39,458.48,466.7,475.05,492.19,509.91],[397.72,399.3,401.66,405.55,409.4,413.24,420.93,428.66,436.47,444.38,452.4,460.55,468.82,477.23,494.47,512.29],[399.22,400.83,403.22,407.16,411.06,414.95,422.72,430.53,438.41,446.38,454.47,462.67,471.01,479.48,496.83,514.74],[400.74,402.37,404.8,408.8,412.76,416.7,424.56,432.44,440.4,448.44,456.59,464.86,473.26,481.79,499.25,517.28],[402.28,403.95,406.42,410.48,414.49,418.48,426.43,434.41,442.44,450.56,458.78,467.12,475.58,484.17,501.75,519.89],[403.85,405.54,408.05,412.18,416.26,420.3,428.35,436.42,444.54,452.73,461.03,469.44,477.96,486.62,504.33,522.59],[405.43,407.16,409.72,413.91,418.05,422.16,430.32,438.48,446.68,454.97,463.34,471.82,480.42,489.15,506.99,525.37],[407.03,408.8,411.4,415.67,419.88,424.05,432.32,440.59,448.89,457.26,465.71,474.28,482.95,491.75,509.73,528.24],[408.65,410.45,413.11,417.46,421.74,425.97,434.37,442.74,451.15,459.61,468.15,476.8,485.55,494.43,512.55,531.2],[410.28,412.12,414.83,419.27,423.62,427.93,436.46,444.95,453.46,462.02,470.66,479.39,488.23,497.19,515.46,534.25],[411.91,413.79,416.57,421.09,425.53,429.92,438.58,447.2,455.82,464.49,473.23,482.06,490.99,500.03,518.46,537.4],[413.54,415.47,418.31,422.93,427.46,431.93,440.75,449.5,458.24,467.02,475.87,484.8,493.82,502.95,521.56,540.65],[415.16,417.14,420.05,424.78,429.41,433.96,442.94,451.84,460.71,469.62,478.57,487.61,496.73,505.96,524.74,544.01],[416.76,418.79,421.78,426.63,431.36,436.01,445.17,454.22,463.23,472.27,481.34,490.49,499.72,509.05,528.03,547.47],[418.33,420.42,423.49,428.47,433.31,438.07,447.42,456.63,465.8,474.97,484.18,493.45,502.79,512.23,531.41,551.04],[419.85,422.01,425.17,430.29,435.26,440.13,449.68,459.08,468.41,477.73,487.08,496.48,505.94,515.5,534.89,554.71],[421.31,423.54,426.8,432.07,437.18,442.18,451.96,461.55,471.06,480.54,490.04,499.58,509.17,518.85,538.47,558.5],[422.66,424.98,428.36,433.81,439.07,444.21,454.23,464.04,473.74,483.4,493.06,502.74,512.48,522.29,542.15,562.4],[423.89,426.31,429.82,435.47,440.91,446.2,456.5,466.54,476.45,486.3,496.12,505.97,515.86,525.81,545.93,566.42],[424.95,427.48,431.16,437.03,442.66,448.13,458.73,469.03,479.17,489.22,499.24,509.26,519.31,529.41,549.81,570.55],[425.79,428.46,432.32,438.45,444.32,449.98,460.92,471.51,481.9,492.17,502.39,512.6,522.82,533.08,553.78,574.79],[426.32,429.16,433.25,439.7,445.82,451.72,463.04,473.95,484.61,495.14,505.58,515.99,526.4,536.83,557.85,579.14],[426.45,429.51,433.87,440.7,447.14,453.3,465.06,476.33,487.3,498.09,508.78,519.41,530.02,540.64,562.0,583.6],[426.02,429.37,434.1,441.41,448.22,454.69,466.95,478.62,489.94,501.03,511.98,522.85,533.68,544.51,566.24,588.16],[424.81,428.57,433.79,441.7,448.98,455.82,468.67,480.8,492.5,503.92,515.16,526.29,537.36,548.41,570.54,592.81],[422.45,426.86,432.77,441.48,449.33,456.62,470.16,482.82,494.95,506.74,518.3,529.72,541.05,552.34,574.9,597.55],[418.3,423.79,430.76,440.59,449.17,457.02,471.37,484.64,497.25,509.45,521.36,533.1,544.72,556.27,579.29,602.34],[410.82,418.66,427.41,438.82,448.36,456.9,472.22,486.19,499.35,512.0,524.31,536.4,548.33,560.16,583.67,607.17],[393.93,410.17,422.23,435.95,446.75,456.13,472.61,487.38,501.16,514.33,527.07,539.54,551.8,563.94,588.0,611.96]],"s":[[1.9643,1.9715,1.982,1.9992,2.0159,2.0321,2.0638,2.0943,2.1241,2.1531,2.1815,2.2094,2.2368,2.2637,2.3165,2.3678],[1.9547,1.9619,1.9725,1.9896,2.0063,2.0226,2.0542,2.0847,2.1144,2.1433,2.1717,2.1995,2.2268,2.2537,2.3063,2.3575],[1.9452,1.9524,1.963,1.9802,1.9969,2.0131,2.0447,2.0752,2.1048,2.1337,2.162,2.1897,2.2169,2.2438,2.2962,2.3473],[1.9358,1.943,1.9537,1.9709,1.9875,2.0038,2.0353,2.0658,2.0953,2.1242,2.1524,2.1801,2.2073,2.234,2.2863,2.3373],[1.9265,1.9337,1.9444,1.9616,1.9783,1.9946,2.0261,2.0565,2.086,2.1148,2.143,2.1706,2.1977,2.2244,2.2766,2.3275],[1.9172,1.9245,1.9352,1.9525,1.9692,1.9855,2.017,2.0474,2.0769,2.1056,2.1337,2.1613,2.1884,2.215,2.2671,2.3178],[1.9081,1.9154,1.9262,1.9435,1.9603,1.9766,2.0081,2.0384,2.0679,2.0966,2.1246,2.1522,2.1792,2.2058,2.2577,2.3084],[1.8991,1.9064,1.9172,1.9346,1.9514,1.9677,1.9992,2.0296,2.059,2.0877,2.1157,2.1432,2.1702,2.1967,2.2486,2.2991],[1.8901,1.8975,1.9083,1.9258,1.9426,1.959,1.9906,2.0209,2.0503,2.079,2.107,2.1344,2.1613,2.1878,2.2396,2.29],[1.8812,1.8887,1.8995,1.9171,1.934,1.9504,1.982,2.0124,2.0418,2.0704,2.0984,2.1258,2.1527,2.1791,2.2308,2.2811],[1.8724,1.8799,1.8908,1.9085,1.9254,1.9419,1.9736,2.004,2.0334,2.062,2.09,2.1173,2.1442,2.1706,2.2222,2.2724],[1.8636,1.8712,1.8822,1.8999,1.917,1.9335,1.9653,1.9957,2.0252,2.0538,2.0817,2.1091,2.1359,2.1623,2.2138,2.2639],[1.8549,1.8625,1.8736,1.8915,1.9086,1.9252,1.9571,1.9876,2.0171,2.0457,2.0737,2.101,2.1278,2.1541,2.2056,2.2556],[1.8462,1.8539,1.8651,1.8831,1.9004,1.917,1.949,1.9796,2.0092,2.0378,2.0658,2.0931,2.1199,2.1462,2.1976,2.2475],[1.8375,1.8453,1.8566,1.8748,1.8922,1.9089,1.9411,1.9718,2.0014,2.0301,2.0581,2.0854,2.1122,2.1385,2.1898,2.2397],[1.8288,1.8367,1.8481,1.8665,1.884,1.9009,1.9333,1.9641,1.9938,2.0225,2.0505,2.0779,2.1046,2.1309,2.1822,2.232],[1.82,1.828,1.8396,1.8582,1.8759,1.8929,1.9255,1.9565,1.9863,2.0151,2.0431,2.0705,2.0973,2.1236,2.1749,2.2246],[1.8111,1.8193,1.8311,1.8499,1.8678,1.885,1.9178,1.949,1.9789,2.0078,2.0359,2.0633,2.0902,2.1165,2.1677,2.2174],[1.802,1.8104,1.8224,1.8415,1.8597,1.8771,1.9102,1.9416,1.9717,2.0007,2.0289,2.0563,2.0832,2.1095,2.1608,2.2105],[1.7927,1.8013,1.8136,1.833,1.8515,1.8691,1.9026,1.9342,1.9645,1.9937,2.022,2.0495,2.0764,2.1028,2.1541,2.2037],[1.7831,1.7918,1.8045,1.8244,1.8432,1.8611,1.895,1.927,1.9574,1.9868,2.0152,2.0428,2.0698,2.0962,2.1476,2.1972],[1.7729,1.782,1.795,1.8155,1.8347,1.853,1.8874,1.9197,1.9505,1.98,2.0086,2.0363,2.0634,2.0898,2.1412,2.1909],[1.7621,1.7716,1.7852,1.8063,1.826,1.8446,1.8797,1.9124,1.9435,1.9733,2.002,2.0299,2.0571,2.0836,2.1351,2.1848],[1.7504,1.7604,1.7746,1.7966,1.8169,1.8361,1.8718,1.9051,1.9365,1.9666,1.9956,2.0236,2.0509,2.0776,2.1292,2.179],[1.7373,1.7481,1.7632,1.7862,1.8074,1.8271,1.8638,1.8977,1.9296,1.96,1.9892,2.0174,2.0449,2.0716,2.1234,2.1733],[1.7224,1.7343,1.7506,1.7751,1.7972,1.8178,1.8555,1.8901,1.9225,1.9533,1.9828,2.0113,2.0389,2.0658,2.1178,2.1678],[1.7046,1.7182,1.7364,1.7628,1.7863,1.8077,1.8467,1.8822,1.9152,1.9465,1.9764,2.0051,2.033,2.0601,2.1123,2.1624],[1.6822,1.6988,1.7198,1.7491,1.7742,1.7969,1.8375,1.874,1.9078,1.9396,1.9699,1.999,2.027,2.0543,2.1068,2.1571],[1.651,1.6743,1.7002,1.7335,1.7609,1.7851,1.8276,1.8654,1.9,1.9324,1.9632,1.9926,2.021,2.0485,2.1013,2.1519],[1.5939,1.6413,1.6762,1.7154,1.7459,1.772,1.8169,1.8561,1.8917,1.9248,1.9562,1.986,2.0148,2.0425,2.0958,2.1465]],"v":[[0.3676,0.3716,0.3776,0.3874,0.3972,0.4068,0.4258,0.4445,0.4631,0.4816,0.5,0.5183,0.5365,0.5547,0.5909,0.6271],[0.32,0.3235,0.3287,0.3373,0.3457,0.3541,0.3706,0.3869,0.403,0.419,0.4349,0.4507,0.4665,0.4822,0.5135,0.5448],[0.2785,0.2816,0.2861,0.2936,0.301,0.3082,0.3226,0.3367,0.3507,0.3645,0.3783,0.392,0.4056,0.4192,0.4463,0.4733],[0.2424,0.2451,0.249,0.2556,0.262,0.2683,0.2807,0.293,0.3051,0.3171,0.3291,0.3409,0.3527,0.3645,0.3879,0.4113],[0.2109,0.2133,0.2167,0.2224,0.228,0.2335,0.2443,0.255,0.2655,0.2759,0.2863,0.2965,0.3068,0.3169,0.3372,0.3574],[0.1835,0.1855,0.1886,0.1935,0.1984,0.2032,0.2126,0.2219,0.231,0.2401,0.249,0.2579,0.2668,0.2756,0.2932,0.3106],[0.1596,0.1614,0.164,0.1684,0.1726,0.1768,0.185,0.1931,0.201,0.2089,0.2166,0.2244,0.232,0.2397,0.2549,0.27],[0.1387,0.1403,0.1426,0.1464,0.1502,0.1538,0.161,0.168,0.1749,0.1817,0.1885,0.1952,0.2018,0.2084,0.2216,0.2346],[0.1206,0.1219,0.124,0.1273,0.1306,0.1338,0.14,0.1461,0.1521,0.1581,0.1639,0.1698,0.1755,0.1813,0.1927,0.204],[0.1047,0.1059,0.1077,0.1107,0.1135,0.1163,0.1218,0.1271,0.1323,0.1375,0.1426,0.1477,0.1527,0.1576,0.1675,0.1773],[0.09092,0.09199,0.09358,0.09615,0.09865,0.1011,0.1059,0.1105,0.1151,0.1196,0.124,0.1284,0.1328,0.1371,0.1457,0.1542],[0.07889,0.07984,0.08123,0.0835,0.0857,0.08785,0.09204,0.09611,0.1001,0.104,0.1079,0.1117,0.1155,0.1192,0.1267,0.134],[0.0684,0.06924,0.07047,0.07247,0.07441,0.0763,0.07998,0.08354,0.08702,0.09044,0.09381,0.09713,0.1004,0.1037,0.1101,0.1165],[0.05926,0.06,0.06109,0.06286,0.06457,0.06624,0.06946,0.07259,0.07564,0.07862,0.08156,0.08446,0.08733,0.09016,0.09578,0.1013],[0.05129,0.05195,0.05292,0.05448,0.05599,0.05746,0.06031,0.06305,0.06572,0.06833,0.0709,0.07343,0.07593,0.0784,0.08328,0.0881],[0.04434,0.04493,0.04579,0.04718,0.04852,0.04982,0.05233,0.05474,0.05708,0.05937,0.06162,0.06383,0.06601,0.06816,0.07241,0.0766],[0.03828,0.03881,0.03958,0.04081,0.042,0.04316,0.04537,0.0475,0.04956,0.05157,0.05353,0.05547,0.05737,0.05925,0.06296,0.0666],[0.033,0.03347,0.03416,0.03527,0.03633,0.03735,0.03932,0.04119,0.04301,0.04477,0.0465,0.04819,0.04986,0.0515,0.05473,0.0579],[0.02839,0.02882,0.02944,0.03043,0.03138,0.03229,0.03404,0.0357,0.0373,0.03886,0.04037,0.04186,0.04331,0.04475,0.04757,0.05034],[0.02437,0.02476,0.02532,0.02622,0.02707,0.02788,0.02944,0.03091,0.03233,0.0337,0.03504,0.03634,0.03762,0.03888,0.04135,0.04376],[0.02086,0.02122,0.02173,0.02254,0.02331,0.02404,0.02543,0.02675,0.028,0.02921,0.03039,0.03154,0.03266,0.03377,0.03593,0.03804],[0.0178,0.01813,0.0186,0.01934,0.02003,0.0207,0.02194,0.02312,0.02423,0.02531,0.02635,0.02736,0.02835,0.02932,0.03122,0.03306],[0.01513,0.01543,0.01587,0.01655,0.01718,0.01778,0.01891,0.01996,0.02095,0.02191,0.02283,0.02372,0.0246,0.02545,0.02712,0.02874],[0.01279,0.01307,0.01348,0.01411,0.01469,0.01524,0.01626,0.01721,0.0181,0.01895,0.01977,0.02056,0.02133,0.02208,0.02355,0.02497],[0.01073,0.01101,0.0114,0.01199,0.01253,0.01303,0.01396,0.01481,0.01561,0.01637,0.0171,0.0178,0.01849,0.01915,0.02045,0.02169],[0.00893,0.009204,0.009579,0.01014,0.01064,0.01111,0.01196,0.01273,0.01345,0.01413,0.01478,0.01541,0.01602,0.01661,0.01775,0.01884],[0.007331,0.007612,0.007985,0.008526,0.009003,0.009437,0.01022,0.01092,0.01157,0.01219,0.01277,0.01333,0.01387,0.01439,0.0154,0.01637],[0.005896,0.006202,0.006587,0.00712,0.007576,0.007985,0.008709,0.009353,0.009944,0.0105,0.01102,0.01152,0.012,0.01246,0.01336,0.01421],[0.004564,0.004939,0.005358,0.005896,0.006339,0.006726,0.007401,0.007992,0.00853,0.009029,0.009499,0.009946,0.01038,0.01079,0.01158,0.01234],[0.00316,0.003792,0.004279,0.004836,0.005268,0.005638,0.006269,0.006814,0.007304,0.007756,0.00818,0.008582,0.008966,0.009336,0.01004,0.01071]],"axes":{"pmin":1.39,"pmax":44.1,"hmin":105.0,"hmax":533.0},"nom":"R410A","classe":"A1","gwp":2088,"coul":"violet"},"R290":{"Tc":96.74,"Pc":42.512,"M":44.1,"sat":[[-60.0,0.42693,60.81,504.44,0.4294,2.5107,0.001664,0.9225],[-58.0,0.47408,65.17,506.85,0.4497,2.5026,0.00167,0.8372],[-56.0,0.52529,69.54,509.25,0.4699,2.4948,0.001676,0.7613],[-54.0,0.5808,73.93,511.66,0.4899,2.4874,0.001682,0.6936],[-52.0,0.64084,78.33,514.07,0.5099,2.4802,0.001689,0.6332],[-50.0,0.70569,82.75,516.48,0.5298,2.4734,0.001695,0.5791],[-48.0,0.77559,87.19,518.88,0.5495,2.4669,0.001702,0.5305],[-46.0,0.85082,91.65,521.29,0.5691,2.4606,0.001708,0.4868],[-44.0,0.93164,96.12,523.69,0.5887,2.4546,0.001715,0.4475],[-42.0,1.0183,100.61,526.08,0.6081,2.4488,0.001722,0.412],[-40.0,1.1112,105.12,528.48,0.6275,2.4433,0.001729,0.3798],[-38.0,1.2105,109.65,530.87,0.6468,2.438,0.001736,0.3508],[-36.0,1.3166,114.2,533.26,0.666,2.433,0.001743,0.3244],[-34.0,1.4297,118.77,535.64,0.6851,2.4282,0.00175,0.3004],[-32.0,1.5502,123.36,538.01,0.7041,2.4236,0.001757,0.2785],[-30.0,1.6783,127.97,540.38,0.7231,2.4192,0.001765,0.2586],[-28.0,1.8144,132.61,542.75,0.7419,2.415,0.001772,0.2404],[-26.0,1.9589,137.26,545.11,0.7607,2.4109,0.00178,0.2238],[-24.0,2.1119,141.94,547.46,0.7795,2.4071,0.001788,0.2085],[-22.0,2.2739,146.64,549.8,0.7982,2.4034,0.001796,0.1945],[-20.0,2.4452,151.36,552.13,0.8168,2.3999,0.001804,0.1817],[-18.0,2.6261,156.11,554.46,0.8353,2.3965,0.001812,0.1698],[-16.0,2.817,160.88,556.77,0.8538,2.3933,0.00182,0.1589],[-14.0,3.0181,165.68,559.08,0.8722,2.3903,0.001828,0.1489],[-12.0,3.23,170.5,561.37,0.8906,2.3874,0.001837,0.1396],[-10.0,3.4528,175.35,563.65,0.909,2.3846,0.001846,0.131],[-8.0,3.687,180.22,565.92,0.9273,2.3819,0.001855,0.1231],[-6.0,3.9329,185.12,568.18,0.9455,2.3794,0.001864,0.1157],[-4.0,4.1909,190.05,570.42,0.9637,2.3769,0.001873,0.1089],[-2.0,4.4613,195.01,572.65,0.9819,2.3746,0.001882,0.1025],[0.0,4.7446,200.0,574.87,1.0,2.3724,0.001892,0.09661],[2.0,5.041,205.02,577.06,1.0181,2.3703,0.001902,0.09111],[4.0,5.351,210.06,579.24,1.0362,2.3682,0.001912,0.08598],[6.0,5.6749,215.14,581.41,1.0542,2.3663,0.001922,0.0812],[8.0,6.0131,220.25,583.55,1.0722,2.3644,0.001932,0.07673],[10.0,6.366,225.4,585.67,1.0902,2.3626,0.001943,0.07255],[12.0,6.734,230.57,587.77,1.1082,2.3608,0.001954,0.06865],[14.0,7.1175,235.79,589.85,1.1261,2.3592,0.001965,0.06498],[16.0,7.5168,241.03,591.91,1.144,2.3575,0.001976,0.06155],[18.0,7.9324,246.32,593.94,1.162,2.356,0.001988,0.05833],[20.0,8.3646,251.64,595.95,1.1799,2.3544,0.002,0.0553],[22.0,8.8139,256.99,597.93,1.1978,2.3529,0.002012,0.05246],[24.0,9.2807,262.39,599.88,1.2157,2.3514,0.002025,0.04978],[26.0,9.7653,267.83,601.8,1.2336,2.35,0.002038,0.04726],[28.0,10.268,273.31,603.68,1.2515,2.3486,0.002051,0.04488],[30.0,10.79,278.83,605.54,1.2695,2.3471,0.002064,0.04264],[32.0,11.331,284.4,607.35,1.2874,2.3457,0.002078,0.04053],[34.0,11.891,290.01,609.13,1.3053,2.3443,0.002093,0.03853],[36.0,12.472,295.68,610.87,1.3233,2.3429,0.002108,0.03664],[38.0,13.072,301.39,612.57,1.3413,2.3414,0.002123,0.03485],[40.0,13.694,307.15,614.21,1.3594,2.3399,0.002139,0.03315],[42.0,14.337,312.96,615.81,1.3774,2.3384,0.002156,0.03154],[44.0,15.002,318.83,617.36,1.3955,2.3368,0.002173,0.03002],[46.0,15.69,324.76,618.86,1.4137,2.3352,0.00219,0.02857],[48.0,16.4,330.75,620.29,1.4319,2.3335,0.002209,0.0272],[50.0,17.133,336.8,621.66,1.4502,2.3317,0.002228,0.02589],[52.0,17.89,342.92,622.96,1.4685,2.3298,0.002248,0.02464],[54.0,18.672,349.11,624.19,1.487,2.3278,0.002268,0.02345],[56.0,19.478,355.37,625.34,1.5055,2.3257,0.00229,0.02232],[58.0,20.31,361.71,626.4,1.5241,2.3234,0.002313,0.02124],[60.0,21.168,368.14,627.36,1.5429,2.321,0.002337,0.0202],[62.0,22.052,374.65,628.22,1.5617,2.3183,0.002362,0.01922],[64.0,22.963,381.26,628.96,1.5808,2.3155,0.002388,0.01827],[66.0,23.903,387.97,629.58,1.6,2.3123,0.002416,0.01736],[68.0,24.871,394.8,630.06,1.6193,2.3089,0.002446,0.01649],[70.0,25.868,401.75,630.37,1.6389,2.3052,0.002478,0.01565],[72.0,26.895,408.84,630.51,1.6588,2.301,0.002512,0.01484],[74.0,27.952,416.08,630.45,1.6789,2.2964,0.002548,0.01405],[76.0,29.042,423.49,630.15,1.6994,2.2913,0.002588,0.0133],[78.0,30.164,431.1,629.6,1.7203,2.2856,0.002631,0.01256],[80.0,31.319,438.93,628.73,1.7417,2.2791,0.002679,0.01185],[82.0,32.509,447.03,627.49,1.7636,2.2718,0.002732,0.01115],[84.0,33.734,455.45,625.8,1.7863,2.2633,0.002792,0.01046],[86.0,34.997,464.28,623.54,1.81,2.2534,0.002861,0.00978],[88.0,36.299,473.63,620.53,1.8349,2.2416,0.002942,0.009098],[90.0,37.641,483.71,616.47,1.8616,2.2272,0.003041,0.008404],[92.0,39.027,494.9,610.83,1.8912,2.2086,0.003169,0.007677],[94.0,40.459,508.13,602.29,1.926,2.1825,0.003352,0.006871]],"P":[0.42693,0.49945,0.58428,0.68353,0.79963,0.93546,1.0944,1.2802,1.4977,1.7521,2.0497,2.3979,2.8052,3.2817,3.8391,4.4912,5.2541,6.1465,7.1906,8.412,9.8408,11.512,13.468,15.756,18.432,21.563,25.225,29.51,34.522,40.386],"dT":[0,2,5,10,15,20,30,40,50,60,70,80,90,100,120,140],"h":[[504.44,507.14,511.21,518.06,525.0,532.02,546.33,561.01,576.08,591.54,607.41,623.7,640.42,657.58,693.22,730.65],[508.06,510.79,514.91,521.84,528.85,535.94,550.39,565.22,580.42,596.03,612.05,628.48,645.35,662.65,698.58,736.3],[511.81,514.57,518.73,525.74,532.82,539.99,554.6,569.57,584.93,600.69,616.85,633.44,650.46,667.91,704.14,742.16],[515.68,518.47,522.68,529.77,536.93,544.19,558.95,574.08,589.6,605.52,621.84,638.59,655.76,673.38,709.92,748.25],[519.67,522.5,526.76,533.94,541.19,548.53,563.46,578.76,594.45,610.53,627.02,643.93,661.27,679.05,715.93,754.58],[523.8,526.66,530.98,538.25,545.59,553.02,568.13,583.61,599.47,615.73,632.4,649.48,667.0,684.95,722.16,761.16],[528.06,530.96,535.34,542.71,550.15,557.67,572.98,588.64,604.69,621.13,637.98,655.25,672.95,691.08,728.65,767.99],[532.46,535.41,539.85,547.32,554.87,562.49,578.0,593.86,610.11,626.74,643.79,661.25,679.14,697.45,735.4,775.11],[537.0,539.99,544.51,552.09,559.75,567.48,583.2,599.28,615.73,632.57,649.82,667.49,685.57,704.09,742.42,782.51],[541.68,544.73,549.32,557.02,564.8,572.65,588.6,604.9,621.57,638.63,656.1,673.97,692.27,710.99,749.74,790.22],[546.52,549.62,554.29,562.12,570.02,578.0,594.19,610.73,627.64,644.93,662.62,680.72,699.24,718.18,757.35,798.25],[551.5,554.66,559.41,567.38,575.42,583.54,599.99,616.79,633.95,651.48,669.41,687.75,706.5,725.67,765.29,806.62],[556.63,559.85,564.7,572.82,581.01,589.27,606.01,623.08,640.5,658.3,676.48,695.07,714.06,733.47,773.56,815.35],[561.91,565.2,570.15,578.44,586.79,595.2,612.24,629.6,647.31,665.38,683.84,702.69,721.94,741.6,782.19,824.45],[567.33,570.7,575.76,584.23,592.75,601.33,618.7,636.38,654.39,672.75,691.5,710.62,730.15,750.08,791.18,833.94],[572.89,576.34,581.52,590.19,598.9,607.67,625.39,643.41,661.74,680.42,699.47,718.89,738.71,758.92,800.57,843.85],[578.57,582.12,587.43,596.32,605.24,614.21,632.32,650.7,669.38,688.39,707.76,727.5,747.63,768.14,810.36,854.19],[584.37,588.01,593.48,602.61,611.76,620.95,639.48,658.25,677.31,696.68,716.4,736.47,756.92,777.75,820.58,864.99],[590.24,594.0,599.64,609.04,618.45,627.89,646.87,666.08,685.54,705.3,725.39,745.82,766.61,787.77,831.24,876.27],[596.16,600.06,605.9,615.6,625.3,635.01,654.5,674.17,694.07,714.25,734.73,755.55,776.7,798.22,842.37,888.04],[602.09,606.15,612.21,622.26,632.29,642.3,662.35,682.53,702.91,723.54,744.45,765.67,787.22,809.11,853.98,900.33],[607.94,612.19,618.52,628.98,639.38,649.73,670.41,691.16,712.06,733.17,754.54,776.2,798.17,820.47,866.1,913.17],[613.63,618.1,624.75,635.7,646.52,657.27,678.65,700.03,721.5,743.14,765.01,787.14,809.55,832.28,878.73,926.56],[618.99,623.76,630.81,642.33,653.66,664.86,687.05,709.12,731.22,753.45,775.85,798.49,821.39,844.58,891.9,940.54],[623.82,628.97,636.52,648.76,660.7,672.44,695.55,718.41,741.21,764.07,787.06,810.25,833.67,857.36,905.6,955.1],[627.76,633.43,641.66,654.82,667.52,679.9,704.08,727.84,751.42,774.98,798.62,822.41,846.39,870.61,919.84,970.26],[630.19,636.66,645.86,660.27,673.93,687.1,712.56,737.35,761.81,786.15,810.5,834.94,859.53,884.32,934.62,986.01],[629.95,637.86,648.6,664.78,679.7,693.86,720.85,746.84,772.3,797.51,822.64,847.79,873.05,898.46,949.89,1002.32],[624.46,635.54,649.02,667.86,684.5,699.93,728.79,756.17,782.78,808.96,834.95,860.89,886.86,912.94,965.6,1019.13],[602.83,626.55,645.75,668.84,687.86,704.94,736.09,765.11,793.01,820.29,847.24,874.03,900.78,927.58,981.55,1036.26]],"s":[[2.5107,2.5233,2.5421,2.5731,2.6039,2.6343,2.6944,2.7536,2.8119,2.8696,2.9267,2.9832,3.0393,3.0949,3.2052,3.3143],[2.4986,2.5112,2.5299,2.5609,2.5915,2.6219,2.6818,2.7409,2.7991,2.8566,2.9136,2.9701,3.0261,3.0817,3.1918,3.3008],[2.4869,2.4995,2.5182,2.549,2.5796,2.6099,2.6697,2.7286,2.7867,2.8442,2.901,2.9574,3.0133,3.0689,3.1789,3.2878],[2.4756,2.4881,2.5068,2.5376,2.5681,2.5983,2.658,2.7168,2.7748,2.8321,2.8889,2.9452,3.0011,3.0565,3.1665,3.2752],[2.4648,2.4772,2.4958,2.5266,2.557,2.5872,2.6467,2.7054,2.7633,2.8206,2.8773,2.9335,2.9893,3.0447,3.1546,3.2632],[2.4543,2.4668,2.4853,2.516,2.5464,2.5765,2.6359,2.6945,2.7524,2.8096,2.8662,2.9224,2.9781,3.0335,3.1432,3.2517],[2.4443,2.4567,2.4752,2.5059,2.5362,2.5663,2.6257,2.6842,2.7419,2.7991,2.8556,2.9118,2.9674,3.0227,3.1324,3.2408],[2.4347,2.4471,2.4656,2.4962,2.5265,2.5566,2.6159,2.6743,2.732,2.7891,2.8456,2.9017,2.9573,3.0126,3.1221,3.2305],[2.4255,2.4379,2.4565,2.4871,2.5173,2.5473,2.6066,2.665,2.7227,2.7797,2.8362,2.8922,2.9478,3.0031,3.1125,3.2208],[2.4168,2.4292,2.4478,2.4784,2.5086,2.5386,2.5979,2.6563,2.7139,2.7709,2.8274,2.8834,2.939,2.9942,3.1035,3.2117],[2.4086,2.421,2.4396,2.4702,2.5005,2.5305,2.5897,2.6481,2.7057,2.7627,2.8192,2.8752,2.9307,2.9859,3.0952,3.2033],[2.4008,2.4133,2.4318,2.4625,2.4928,2.5228,2.5821,2.6405,2.6982,2.7552,2.8117,2.8676,2.9232,2.9783,3.0876,3.1956],[2.3935,2.406,2.4246,2.4553,2.4857,2.5158,2.5751,2.6336,2.6913,2.7483,2.8048,2.8608,2.9163,2.9714,3.0807,3.1886],[2.3867,2.3992,2.4179,2.4487,2.4791,2.5093,2.5687,2.6273,2.685,2.7421,2.7986,2.8546,2.9101,2.9653,3.0745,3.1824],[2.3803,2.3929,2.4116,2.4426,2.4731,2.5033,2.563,2.6216,2.6794,2.7366,2.7931,2.8492,2.9047,2.9599,3.0691,3.177],[2.3744,2.387,2.4059,2.437,2.4676,2.498,2.5578,2.6166,2.6746,2.7318,2.7884,2.8445,2.9001,2.9553,3.0645,3.1723],[2.3688,2.3816,2.4006,2.4319,2.4627,2.4932,2.5533,2.6123,2.6704,2.7278,2.7845,2.8406,2.8963,2.9515,3.0607,3.1686],[2.3637,2.3766,2.3957,2.4273,2.4584,2.489,2.5494,2.6087,2.667,2.7245,2.7813,2.8375,2.8933,2.9485,3.0578,3.1656],[2.3588,2.3719,2.3913,2.4231,2.4545,2.4854,2.5462,2.6057,2.6643,2.722,2.7789,2.8353,2.8911,2.9464,3.0558,3.1636],[2.3543,2.3675,2.3872,2.4194,2.4511,2.4823,2.5436,2.6035,2.6623,2.7202,2.7774,2.8339,2.8898,2.9452,3.0547,3.1626],[2.3498,2.3633,2.3833,2.4161,2.4482,2.4798,2.5416,2.6019,2.6611,2.7193,2.7767,2.8333,2.8894,2.9449,3.0545,3.1624],[2.3453,2.3591,2.3796,2.413,2.4456,2.4777,2.5402,2.6011,2.6606,2.7191,2.7768,2.8337,2.8899,2.9455,3.0553,3.1633],[2.3405,2.3548,2.3758,2.41,2.4433,2.4759,2.5393,2.6008,2.6609,2.7198,2.7777,2.8348,2.8912,2.947,3.057,3.1651],[2.335,2.3499,2.3717,2.407,2.4412,2.4744,2.5388,2.6011,2.6618,2.7212,2.7795,2.8369,2.8935,2.9495,3.0597,3.168],[2.3284,2.3442,2.367,2.4037,2.4389,2.473,2.5388,2.602,2.6634,2.7233,2.782,2.8398,2.8967,2.9529,3.0634,3.1718],[2.3198,2.3367,2.3611,2.3996,2.4363,2.4715,2.5389,2.6032,2.6655,2.726,2.7853,2.8434,2.9007,2.9571,3.068,3.1766],[2.3076,2.3265,2.3531,2.3944,2.4329,2.4696,2.539,2.6048,2.668,2.7294,2.7892,2.8478,2.9054,2.9622,3.0735,3.1824],[2.289,2.3115,2.3419,2.3872,2.4283,2.4669,2.5389,2.6063,2.6708,2.7331,2.7936,2.8528,2.9109,2.968,3.0798,3.189],[2.2573,2.2881,2.3254,2.3769,2.4217,2.4628,2.5381,2.6077,2.6736,2.737,2.7984,2.8582,2.9168,2.9743,3.0868,3.1964],[2.1841,2.2486,2.3004,2.3621,2.4122,2.4566,2.5361,2.6083,2.676,2.7406,2.803,2.8636,2.9228,2.9808,3.0939,3.204]],"v":[[0.9225,0.9317,0.9456,0.9686,0.9915,1.014,1.06,1.105,1.151,1.196,1.241,1.285,1.33,1.375,1.464,1.554],[0.7977,0.8057,0.8176,0.8373,0.857,0.8766,0.9157,0.9546,0.9934,1.032,1.071,1.109,1.147,1.186,1.262,1.339],[0.6898,0.6966,0.7068,0.7238,0.7407,0.7576,0.7912,0.8246,0.8578,0.8909,0.924,0.9569,0.9898,1.023,1.088,1.153],[0.5964,0.6023,0.6111,0.6257,0.6403,0.6547,0.6836,0.7122,0.7408,0.7692,0.7975,0.8258,0.8539,0.882,0.9381,0.9941],[0.5157,0.5207,0.5283,0.5409,0.5534,0.5658,0.5906,0.6152,0.6397,0.6641,0.6884,0.7126,0.7368,0.7609,0.8089,0.8568],[0.4458,0.4501,0.4567,0.4675,0.4783,0.489,0.5103,0.5314,0.5525,0.5734,0.5943,0.615,0.6357,0.6564,0.6976,0.7386],[0.3853,0.3891,0.3947,0.404,0.4133,0.4225,0.4409,0.4591,0.4771,0.4951,0.513,0.5308,0.5486,0.5663,0.6016,0.6368],[0.3329,0.3362,0.3411,0.3491,0.3571,0.3651,0.3809,0.3965,0.4121,0.4275,0.4429,0.4582,0.4735,0.4887,0.5189,0.5491],[0.2876,0.2904,0.2946,0.3016,0.3085,0.3154,0.329,0.3425,0.3559,0.3692,0.3824,0.3955,0.4086,0.4217,0.4476,0.4735],[0.2484,0.2508,0.2545,0.2605,0.2665,0.2724,0.2842,0.2958,0.3073,0.3187,0.3301,0.3414,0.3527,0.3639,0.3862,0.4083],[0.2144,0.2166,0.2197,0.2249,0.2301,0.2352,0.2454,0.2554,0.2653,0.2752,0.285,0.2947,0.3044,0.314,0.3332,0.3522],[0.185,0.1869,0.1896,0.1941,0.1986,0.2031,0.2118,0.2205,0.2291,0.2376,0.246,0.2544,0.2627,0.271,0.2874,0.3038],[0.1596,0.1612,0.1636,0.1675,0.1714,0.1752,0.1828,0.1903,0.1977,0.2051,0.2124,0.2196,0.2267,0.2339,0.248,0.2621],[0.1375,0.1389,0.141,0.1444,0.1478,0.1512,0.1578,0.1643,0.1707,0.177,0.1833,0.1895,0.1957,0.2018,0.214,0.2261],[0.1184,0.1196,0.1215,0.1244,0.1274,0.1303,0.1361,0.1417,0.1472,0.1527,0.1581,0.1635,0.1688,0.1741,0.1846,0.195],[0.1019,0.1029,0.1045,0.1071,0.1097,0.1123,0.1173,0.1222,0.127,0.1317,0.1364,0.1411,0.1457,0.1503,0.1593,0.1682],[0.08753,0.08847,0.08987,0.09217,0.09444,0.09666,0.101,0.1053,0.1095,0.1136,0.1177,0.1217,0.1257,0.1296,0.1374,0.1451],[0.0751,0.07593,0.07717,0.0792,0.08119,0.08315,0.08697,0.0907,0.09435,0.09793,0.1015,0.105,0.1084,0.1118,0.1186,0.1252],[0.06433,0.06507,0.06617,0.06797,0.06973,0.07145,0.07481,0.07807,0.08126,0.08438,0.08745,0.09048,0.09347,0.09642,0.1023,0.108],[0.05499,0.05565,0.05664,0.05824,0.0598,0.06132,0.06428,0.06714,0.06993,0.07266,0.07534,0.07797,0.08057,0.08313,0.08819,0.09316],[0.04689,0.04749,0.04837,0.0498,0.05119,0.05255,0.05517,0.05769,0.06014,0.06253,0.06487,0.06716,0.06942,0.07165,0.07604,0.08034],[0.03986,0.0404,0.0412,0.0425,0.04374,0.04495,0.04728,0.04952,0.05167,0.05377,0.05582,0.05782,0.0598,0.06174,0.06555,0.06928],[0.03375,0.03425,0.03499,0.03616,0.03729,0.03838,0.04046,0.04244,0.04435,0.0462,0.048,0.04975,0.05148,0.05317,0.05649,0.05974],[0.02844,0.02891,0.02959,0.03067,0.0317,0.03268,0.03455,0.03632,0.03802,0.03965,0.04124,0.04278,0.04429,0.04578,0.04867,0.0515],[0.02381,0.02426,0.0249,0.0259,0.02685,0.02775,0.02945,0.03103,0.03254,0.03399,0.0354,0.03676,0.03809,0.03939,0.04192,0.04438],[0.01975,0.02019,0.02081,0.02177,0.02265,0.02348,0.02503,0.02646,0.02782,0.02911,0.03035,0.03156,0.03273,0.03387,0.03609,0.03825],[0.01618,0.01663,0.01725,0.01817,0.01901,0.01979,0.02121,0.02252,0.02373,0.02489,0.026,0.02707,0.0281,0.02911,0.03106,0.03295],[0.01299,0.01348,0.01412,0.01505,0.01586,0.01659,0.01792,0.01911,0.02021,0.02125,0.02224,0.02319,0.02411,0.025,0.02673,0.02838],[0.01003,0.01065,0.01137,0.01233,0.01313,0.01384,0.01508,0.01618,0.01718,0.01812,0.01901,0.01986,0.02067,0.02146,0.02299,0.02444],[0.006915,0.008045,0.008944,0.009975,0.01078,0.01146,0.01264,0.01365,0.01457,0.01542,0.01622,0.01698,0.01771,0.01841,0.01976,0.02104]],"axes":{"pmin":0.891,"pmax":38.3,"hmin":51.0,"hmax":807.0},"nom":"R290","classe":"A3","gwp":3,"coul":"chaud"}};
+var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"pc":10.1659,"h1":396.93,"s1":1.7494,"v1":0.1021,"h2s":431.64,"h3":249.01};
+/* FLUIDES:FIN */
+
+  var fr = Sim.fr, svg = Sim.svg, borne = Sim.borne, el = Sim.el;
+  var PATM = 1.013;
+
+  /* ---------- Les proprietes : interpolation dans les tables ---------- */
+  function satT(F, t) {
+    var S = F.sat, n = S.length, u = borne((t - S[0][0]) / 2, 0, n - 1 - 1e-9), i = Math.floor(u), k = u - i, a = S[i], b = S[i + 1];
+    function lin(j) { return a[j] + k * (b[j] - a[j]); }
+    function lg(j) { return Math.exp(Math.log(a[j]) + k * (Math.log(b[j]) - Math.log(a[j]))); }
+    return { t: a[0] + 2 * k, p: lg(1), hl: lin(2), hv: lin(3), sl: lin(4), sv: lin(5), vl: lin(6), vv: lg(7) };
+  }
+  function chercher(S, j, y) {                    // indice i tel que S[i][j] <= y < S[i+1][j]
+    var lo = 0, hi = S.length - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (S[m][j] <= y) lo = m; else hi = m; }
+    return lo;
+  }
+  function tsat(F, p) {
+    var S = F.sat, n = S.length;
+    if (p <= S[0][1]) return S[0][0];
+    if (p >= S[n - 1][1]) return S[n - 1][0];
+    var i = chercher(S, 1, p);
+    return S[i][0] + 2 * Math.log(p / S[i][1]) / Math.log(S[i + 1][1] / S[i][1]);
+  }
+  function tLiq(F, h) {                           // temperature du liquide d'enthalpie h
+    var S = F.sat, n = S.length;
+    if (h <= S[0][2]) return S[0][0];
+    if (h >= S[n - 1][2]) return S[n - 1][0];
+    var i = chercher(S, 2, h);
+    return S[i][0] + 2 * (h - S[i][2]) / (S[i + 1][2] - S[i][2]);
+  }
+  /* la grille vapeur : pressions en progression geometrique, surchauffes F.dT */
+  function colonne(F, tab, p, enLog) {
+    var P = F.P, n = P.length, u = borne(Math.log(p / P[0]) / Math.log(P[n - 1] / P[0]) * (n - 1), 0, n - 1 - 1e-9);
+    var i = Math.floor(u), k = u - i, a = tab[i], b = tab[i + 1], out = [];
+    for (var j = 0; j < a.length; j++) out.push(enLog ? Math.exp(Math.log(a[j]) + k * (Math.log(b[j]) - Math.log(a[j]))) : a[j] + k * (b[j] - a[j]));
+    return out;
+  }
+  function dansCol(F, col, d) {
+    var D = F.dT, n = D.length, j = 0; d = borne(d, 0, D[n - 1]);
+    while (j < n - 2 && D[j + 1] < d) j++;
+    return col[j] + (d - D[j]) / (D[j + 1] - D[j]) * (col[j + 1] - col[j]);
+  }
+  function invCol(F, col, y) {                    // la surchauffe qui donne y ; col est croissante
+    var D = F.dT, n = D.length, j = 0;
+    if (y <= col[0]) return 0;
+    if (y >= col[n - 1]) return D[n - 1] + (y - col[n - 1]) / (col[n - 1] - col[n - 2]) * (D[n - 1] - D[n - 2]);
+    while (j < n - 2 && col[j + 1] < y) j++;
+    return D[j] + (y - col[j]) / (col[j + 1] - col[j]) * (D[j + 1] - D[j]);
+  }
+  function vap(F, p, d) { return { h: dansCol(F, colonne(F, F.h, p), d), s: dansCol(F, colonne(F, F.s, p), d), v: dansCol(F, colonne(F, F.v, p, true), d) }; }
+  /* l'etat en un point du diagramme */
+  function etat(F, p, h) {
+    var ts = tsat(F, p), s = satT(F, ts);
+    if (h <= s.hl) { var t = tLiq(F, h), q = satT(F, t); return { zone: "liquide", t: t, s: q.sl, v: q.vl, sr: ts - t }; }
+    if (h < s.hv) { var x = (h - s.hl) / (s.hv - s.hl); return { zone: "mélange", t: ts, x: x, s: s.sl + x * (s.sv - s.sl), v: s.vl + x * (s.vv - s.vl) }; }
+    var d = invCol(F, colonne(F, F.h, p), h), e = vap(F, p, d);
+    return { zone: "vapeur", t: ts + d, s: e.s, v: e.v, d: d };
+  }
+
+  /* ---------- La machine ---------- */
+  var BANC = { UAe: 150, UAc: 200, qvE: 600, qvC: 1300, RHOC: 1.2 * 1005, etaM: 0.88, TPM: 2900 };
+  var PANNES = {
+    aucune: { nom: "aucune panne : le banc est sain" },
+    souscharge: { nom: "manque de fluide (sous-charge)", UAe: 0.5, sh: 13, sr: 0.5 },
+    surcharge: { nom: "excès de fluide (surcharge)", UAc: 0.62, sh: -2, sr: 13 },
+    condenseur: { nom: "condenseur encrassé", UAc: 0.45, qvC: 0.6 },
+    evaporateur: { nom: "évaporateur givré ou mal ventilé", UAe: 0.45, qvE: 0.5 },
+    detendeur: { nom: "détendeur trop fermé ou filtre colmaté", UAe: 0.5, sh: 14, sr: 10 },
+    incondensables: { nom: "air dans le circuit (incondensables)", dpAir: 0.055 },
+    compresseur: { nom: "compresseur usé : clapets non étanches", etaV: 0.55, etaIs: 0.8 }
+  };
+  /* un cycle a temperatures d'evaporation et de condensation donnees */
+  function cycle(F, te, tc, sh, sr, o) {
+    var e = satT(F, te), c = satT(F, tc), php = c.p + (o.dpAir || 0), a1 = vap(F, e.p, sh), tau = php / e.p;
+    var etaV = borne(0.96 - 0.045 * tau, 0.25, 0.95) * (o.etaV || 1), etaIs = borne(0.76 - 0.018 * tau, 0.4, 0.74) * (o.etaIs || 1);
+    var m = o.cyl * BANC.TPM / 60 * o.freq / 50 * etaV / a1.v;                          // kg/s
+    var colS = colonne(F, F.s, php), colH = colonne(F, F.h, php);
+    var h2s = dansCol(F, colH, invCol(F, colS, a1.s)), h2 = a1.h + (h2s - a1.h) / etaIs, d2 = invCol(F, colH, h2);
+    var t3 = tc - sr, h3 = satT(F, t3).hl;
+    return { te: te, tc: tc, pe: e.p, pc: php, t1: te + sh, h1: a1.h, s1: a1.s, v1: a1.v, t2: tsat(F, php) + d2, h2: h2, h2s: h2s, t3: t3, h3: h3, t4: te,
+      x4: borne((h3 - e.hl) / (e.hv - e.hl), 0, 1), m: m, etaV: etaV, etaIs: etaIs, tau: tau,
+      Q0: m * (a1.h - h3) * 1000, Qk: m * (h2 - h3) * 1000, Wi: m * (h2 - a1.h) * 1000 };
+  }
+  /* la cylindree qui donne environ 1,4 kW a -5 / +35 °C : un banc de meme taille quel que soit le fluide */
+  function cylindree(F) { var c = cycle(F, -5, 35, 6, 4, { cyl: 1e-6, freq: 50 }); return Math.round(1400 / c.Q0 * 2) / 2 * 1e-6; }
+  /* le regime etabli : les deux echangeurs fixent les deux temperatures */
+  function regime(F, r) {
+    var P = PANNES[r.panne] || {}, UAe = BANC.UAe * (P.UAe || 1), UAc = BANC.UAc * (P.UAc || 1);
+    var sh = Math.max(2, r.sh + (P.sh || 0)), sr = P.sr === undefined ? 4 : P.sr;
+    var o = { cyl: r.cyl, freq: r.freq, etaV: P.etaV, etaIs: P.etaIs, dpAir: (P.dpAir || 0) * F.Pc };
+    var tmax = F.sat[F.sat.length - 1][0] - 2, te = r.ta - 8, tc = r.tk + 9, c = null;
+    for (var k = 0; k < 90; k++) {
+      te = borne(te, Math.max(F.sat[0][0] + 2, -43), r.ta - 0.3); tc = borne(tc, Math.max(r.tk + 0.3, te + 6), tmax);
+      c = cycle(F, te, tc, sh, Math.min(sr, tc - te - 3), o);
+      te += 0.3 * (r.ta - c.Q0 / UAe - te); tc += 0.3 * (r.tk + c.Qk / UAc - tc);
+    }
+    c.tae = r.ta - c.Q0 / (BANC.RHOC * BANC.qvE * (P.qvE || 1) / 3600);
+    c.tac = r.tk + c.Qk / (BANC.RHOC * BANC.qvC * (P.qvC || 1) / 3600);
+    c.pel = c.Wi / BANC.etaM;
+    return c;
+  }
+
+  /* ---------- L'etat du banc ---------- */
+  var USAGES = {
+    froid: { nom: "Chambre froide", ta: 4, tk: 25, evap: "chambre froide", cond: "air du local", cop: "froid" },
+    clim: { nom: "Climatisation", ta: 26, tk: 35, evap: "local à rafraîchir", cond: "air extérieur", cop: "froid" },
+    pac: { nom: "Pompe à chaleur", ta: 7, tk: 20, evap: "air extérieur", cond: "local à chauffer", cop: "chaud" }
+  };
+  var R = { fluide: "R134a", usage: "froid", ta: 4, tk: 25, sh: 6, freq: 50, panne: "aucune", manos: "rel", vitesse: 10, cyl: 0 };
+  var F = FL[R.fluide], marche = false, secu = false, cible = null, A = null, SNAP = null, CEN = null, temps = 0, mode = "tracer";
+  var TAU = { pe: 8, pc: 8, t1: 20, t2: 35, t3: 25, t4: 12, tae: 18, tac: 18, pel: 4, m: 6 }, CLES = Object.keys(TAU);
+  function dpAir() { return ((PANNES[R.panne] || {}).dpAir || 0) * F.Pc; }
+  function repos() {
+    var p = satT(F, Math.min(R.ta, R.tk)).p + dpAir();
+    return { pe: p, pc: p, t1: R.tk, t2: R.tk, t3: R.tk, t4: R.ta, tae: R.ta, tac: R.tk, pel: 0, m: 0 };
+  }
+  function seuilHP() { return satT(F, Math.min(60, F.sat[F.sat.length - 1][0] - 4)).p; }      // pressostat regle a la saturation a 60 °C
+  function majCible() { cible = marche && !secu ? regime(F, R) : repos(); }
+  function etabli() {
+    if (!cible) return false;
+    return Math.abs(A.pe - cible.pe) < 0.012 * cible.pe && Math.abs(A.pc - cible.pc) < 0.012 * cible.pc &&
+      Math.abs(A.t1 - cible.t1) < 0.3 && Math.abs(A.t2 - cible.t2) < 0.4 && Math.abs(A.t3 - cible.t3) < 0.3 && Math.abs(A.tac - cible.tac) < 0.15 && Math.abs(A.tae - cible.tae) < 0.15;
+  }
+  function pasPhysique(dt) {
+    var lent = marche && !secu ? 1 : 3;
+    CLES.forEach(function (k) { var tau = TAU[k] * ((k === "pe" || k === "pc") ? lent : 1); A[k] += (cible[k] - A[k]) * (1 - Math.exp(-dt / tau)); });
+    if (marche && !secu && A.pc > seuilHP()) {
+      secu = true; majCible(); majBoutons();
+      message("Le pressostat haute pression a déclenché : le compresseur est arrêté. Cherche pourquoi la haute pression monte, corrige, puis réarme.");
+    }
+    temps += dt;
+  }
+  /* les quatre points du cycle, deduits des pressions et des temperatures d'un etat */
+  function pointsDe(a) {
+    var tse = tsat(F, a.pe), tsc = tsat(F, a.pc);
+    if (!(a.t1 > tse + 0.2) || !(a.t2 > tsc + 0.2) || !(a.t3 < tsc - 0.05) || a.pc < a.pe * 1.25) return null;
+    var h1 = vap(F, a.pe, a.t1 - tse).h, h2 = vap(F, a.pc, a.t2 - tsc).h, h3 = satT(F, a.t3).hl;
+    return [{ p: a.pe, h: h1 }, { p: a.pc, h: h2 }, { p: a.pc, h: h3 }, { p: a.pe, h: h3 }];
+  }
+
+  /* ---------- Les lectures ---------- */
+  var L = {};
+  function manoLu(p) { return Sim.mesure(R.manos === "rel" ? p - PATM : p, { absolu: 0.02, resolution: 0.05 }); }
+  function lire() {
+    L = { bp: manoLu(A.pe), hp: manoLu(A.pc),
+      t1: Sim.mesure(A.t1, { absolu: 0.12, resolution: 0.1 }), t2: Sim.mesure(A.t2, { absolu: 0.15, resolution: 0.1 }),
+      t3: Sim.mesure(A.t3, { absolu: 0.12, resolution: 0.1 }), t4: Sim.mesure(A.t4, { absolu: 0.12, resolution: 0.1 }),
+      tae: Sim.mesure(A.tae, { absolu: 0.05, resolution: 0.1 }), tac: Sim.mesure(A.tac, { absolu: 0.05, resolution: 0.1 }),
+      pel: Sim.mesure(A.pel, { relatif: 0.004, resolution: 5 }), m: Sim.mesure(A.m * 3600, { relatif: 0.012, resolution: 0.5 }) };
+  }
+
+  /* ---------- Les reglages ---------- */
+  var M = {};
+  function message(t) { document.getElementById("message").textContent = t || ""; }
+  function poserReglages() {
+    var Z = document.getElementById("reglages"); Z.innerHTML = "";
+    Sim.choix(Z, { label: "Le fluide", valeur: R.fluide, options: Object.keys(FL).map(function (n) { return { val: n, texte: n }; }), surChange: changerFluide });
+    Sim.choix(Z, { label: "L'usage du banc", valeur: R.usage, options: Object.keys(USAGES).map(function (u) { return { val: u, texte: USAGES[u].nom }; }),
+      surChange: function (u) { R.usage = u; R.ta = USAGES[u].ta; R.tk = USAGES[u].tk; M.ta.set(R.ta, true); M.tk.set(R.tk, true); etiquettes(); poserDefis(); majCible(); } });
+  }
+  function plaque() {
+    document.getElementById("plaque").innerHTML = "<b>Plaque du banc.</b> Fluide " + F.nom + ", classe " + F.classe + ", PRG " + fr(F.gwp, 0) +
+      " · compresseur de " + fr(R.cyl * 1e6, 1) + " cm³ par tour, " + fr(BANC.TPM, 0) + " tr/min à 50 Hz" +
+      " · ventilateur du condenseur : " + fr(BANC.qvC, 0) + " m³/h · ventilateur de l'évaporateur : " + fr(BANC.qvE, 0) + " m³/h" +
+      " · air : 1,2 kg/m³ et 1 005 J/(kg·K) · pression atmosphérique : 1,013 bar.";
+  }
+  function changerFluide(n) {
+    R.fluide = n; F = FL[n]; R.cyl = cylindree(F);
+    marche = false; secu = false; SNAP = null; ELEVE = [null, null, null, null]; majCible(); A = clone(cible); if (CEN) CEN.vider();
+    plaque(); dessinerDiagramme(); dessinerEleve(); echellesManos(); majBoutons(); effacerVerdict(); lire(); afficher();
+    message("Banc au repos, chargé en " + n + " : les deux manomètres lisent la même pression, celle de la saturation à la température la plus basse.");
+  }
+  function clone(o) { var c = {}; CLES.forEach(function (k) { c[k] = o[k]; }); return c; }
+
+  /* ---------- Les instruments ---------- */
+  var I = document.getElementById("instruments");
+  var AF = {
+    bp: Sim.afficheur(I, { nom: "Manomètre BP", unite: "bar", dec: 2, note: "" }),
+    hp: Sim.afficheur(I, { nom: "Manomètre HP", unite: "bar", dec: 2, note: "" }),
+    t1: Sim.afficheur(I, { nom: "Sonde 1 · aspiration", unite: "°C", dec: 1 }),
+    t2: Sim.afficheur(I, { nom: "Sonde 2 · refoulement", unite: "°C", dec: 1 }),
+    t3: Sim.afficheur(I, { nom: "Sonde 3 · sortie condenseur", unite: "°C", dec: 1 }),
+    t4: Sim.afficheur(I, { nom: "Sonde 4 · sortie détendeur", unite: "°C", dec: 1 }),
+    pel: Sim.afficheur(I, { nom: "Wattmètre", unite: "W", dec: 0, note: "compresseur seul" }),
+    m: Sim.afficheur(I, { nom: "Débitmètre", unite: "kg/h", dec: 1, note: "ligne liquide" }),
+    tae: Sim.afficheur(I, { nom: "Air, sortie évaporateur", unite: "°C", dec: 1 }),
+    tac: Sim.afficheur(I, { nom: "Air, sortie condenseur", unite: "°C", dec: 1 })
+  };
+  Sim.choix("#vitesse", { label: "Vitesse du temps", valeur: R.vitesse, options: [{ val: 0, texte: "pause" }, { val: 1, texte: "× 1" }, { val: 10, texte: "× 10" }], surChange: function (v) { R.vitesse = v; } });
+  Sim.choix("#manos", { label: "Les manomètres lisent", valeur: R.manos, options: [{ val: "rel", texte: "des bars relatifs" }, { val: "abs", texte: "des bars absolus" }],
+    surChange: function (v) { R.manos = v; lire(); afficher(); } });
+  function afficher() {
+    var u = R.manos === "rel" ? "relatif : 0 à l'air libre" : "absolu";
+    AF.bp.set(L.bp, 2); AF.bp.note(u); AF.hp.set(L.hp, 2); AF.hp.note(u);
+    ["t1", "t2", "t3", "t4", "tae", "tac"].forEach(function (k) { AF[k].set(L[k], 1); });
+    AF.pel.set(L.pel, 0); AF.m.set(L.m, 1);
+    var Eb = document.getElementById("etatBanc");
+    if (secu) { Eb.className = "etat-banc defaut"; Eb.textContent = "Sécurité haute pression déclenchée : compresseur arrêté."; }
+    else if (!marche) { Eb.className = "etat-banc attente"; Eb.textContent = etabli() ? "Banc à l'arrêt, pressions égalisées." : "Banc à l'arrêt : les pressions s'égalisent."; }
+    else if (etabli()) { Eb.className = "etat-banc ok"; Eb.textContent = "Régime établi : tu peux relever."; }
+    else { Eb.className = "etat-banc attente"; Eb.textContent = "Le banc se stabilise : attends avant de relever."; }
+  }
+  function majBoutons() {
+    document.getElementById("bMarche").textContent = marche ? "Arrêter le compresseur" : "Mettre en marche";
+    document.getElementById("bRearmer").hidden = !secu;
+  }
+
+  /* ---------- La scene ---------- */
+  var S = document.getElementById("scene"), D = {};
+  function texteS(p, x, y, t, o) { o = o || {}; return svg("text", { x: x, y: y, "class": o.classe || "etiq", "text-anchor": o.ancre || "start", texte: t }, p); }
+  function batterie(p, x, y, w, h) {
+    svg("rect", { x: x, y: y, width: w, height: h, rx: 4, "class": "objet" }, p);
+    var d = "M" + x + " " + (y + h / 2), n = 10, pas = w / n;
+    for (var i = 0; i < n; i++) d += " l" + pas / 2 + " " + (i % 2 ? h * 0.32 : -h * 0.32) + " l" + pas / 2 + " " + (i % 2 ? -h * 0.32 : h * 0.32);
+    return svg("path", { d: d, "class": "trait", "stroke-width": 1.6 }, p);
+  }
+  function ventilateur(p, cx, cy, r) {
+    svg("circle", { cx: cx, cy: cy, r: r, "class": "objet", "stroke-width": 1.5 }, p);
+    var g = svg("g", {}, p);
+    for (var k = 0; k < 3; k++) { var a = k * 2 * Math.PI / 3; svg("line", { x1: cx, y1: cy, x2: cx + (r - 3) * Math.cos(a), y2: cy + (r - 3) * Math.sin(a), stroke: "var(--encre2)", "stroke-width": 3, "stroke-linecap": "round" }, g); }
+    return { g: g, cx: cx, cy: cy, a: 0 };
+  }
+  function manometre(p, cx, cy, nom) {
+    svg("circle", { cx: cx, cy: cy, r: 31, "class": "cadran" }, p);
+    for (var k = 0; k <= 10; k++) { var a = (-225 + 27 * k) * Math.PI / 180; svg("line", { x1: cx + 24 * Math.cos(a), y1: cy + 24 * Math.sin(a), x2: cx + 29 * Math.cos(a), y2: cy + 29 * Math.sin(a), "class": "grad" }, p); }
+    var ai = svg("line", { x1: cx, y1: cy, x2: cx, y2: cy - 22, "class": "aiguille" }, p);
+    svg("circle", { cx: cx, cy: cy, r: 3, fill: "var(--encre)" }, p);
+    texteS(p, cx, cy + 16, nom, { classe: "etiq-titre", ancre: "middle" });
+    svg("rect", { x: cx - 30, y: cy + 35, width: 60, height: 17, rx: 2, "class": "lcd" }, p);
+    return { ai: ai, cx: cx, cy: cy, val: texteS(p, cx, cy + 47.5, "", { classe: "lcd-txt", ancre: "middle" }), max: 10 };
+  }
+  function sonde(p, x, y, n, dx, dy) {
+    svg("line", { x1: x, y1: y, x2: x + dx, y2: y + dy, stroke: "var(--encre)", "stroke-width": 1.4 }, p);
+    svg("circle", { cx: x + dx, cy: y + dy, r: 10, "class": "pastille" }, p);
+    texteS(p, x + dx, y + dy + 3.8, String(n), { classe: "pastille-txt", ancre: "middle" });
+  }
+  function tuyau(p, d, coul) {
+    svg("path", { d: d, "class": "tuyau", stroke: coul }, p);
+    return svg("path", { d: d, "class": "flux" }, p);
+  }
+  function pointe(defs, id, coul) {
+    var m = svg("marker", { id: id, viewBox: "0 0 10 10", refX: 3, refY: 5, markerWidth: 2.6, markerHeight: 2.6, orient: "auto" }, defs);
+    svg("path", { d: "M0 0 L10 5 L0 10 Z", fill: coul }, m);
+  }
+  function flecheEnergie(p, x1, y1, x2, y2, coul, id, nom, tx, ty) {
+    var l = svg("line", { x1: x1, y1: y1, x2: x2, y2: y2, "class": "energie", stroke: coul, "marker-end": "url(#" + id + ")" }, p);
+    var e = svg("text", { x: tx, y: ty, "class": "energie-txt", fill: coul, texte: nom }, p);
+    return { l: l, e: e };
+  }
+  function basculerMarche() {
+    if (secu) { message("Le pressostat haute pression est déclenché : réarme-le d'abord."); return; }
+    marche = !marche; majCible(); majBoutons(); if (D.indice) D.indice.style.display = "none";
+    message(marche ? "Compresseur en marche : la basse pression descend, la haute monte. Attends le régime établi avant de relever." : "Compresseur arrêté : les deux pressions se rejoignent.");
+  }
+  function dessinerScene() {
+    S.innerHTML = "";
+    var defs = svg("defs", {}, S);
+    pointe(defs, "pointeFroid", "var(--bpm)"); pointe(defs, "pointeChaud", "var(--hpv)"); pointe(defs, "pointeTravail", "var(--tiede)");
+    var G = svg("g", {}, S);
+    // la chambre et l'evaporateur
+    svg("rect", { x: 318, y: 246, width: 252, height: 118, rx: 6, "class": "chambre" }, G);
+    D.etiqEvap = texteS(G, 328, 356, "", { classe: "etiq" });
+    // les tuyaux, dans l'ordre du fluide
+    D.flux = [
+      tuyau(G, "M120 262 L120 75 L220 75", "var(--hpv)"),
+      tuyau(G, "M420 75 L590 75 L590 150", "var(--hpl)"),
+      tuyau(G, "M590 184 L590 300 L540 300", "var(--bpm)"),
+      tuyau(G, "M340 300 L156 300", "var(--bpv)")
+    ];
+    // le condenseur et son ventilateur
+    batterie(G, 220, 50, 200, 50);
+    texteS(G, 220, 42, "CONDENSEUR", { classe: "etiq-titre" });
+    D.ventC = ventilateur(G, 438, 30, 12);
+    D.etiqCond = texteS(G, 320, 118, "", { classe: "etiq", ancre: "middle" });
+    // l'evaporateur
+    batterie(G, 340, 275, 200, 50);
+    texteS(G, 340, 268, "ÉVAPORATEUR", { classe: "etiq-titre" });
+    D.ventE = ventilateur(G, 524, 262, 11);
+    // le compresseur : on le touche pour le mettre en marche
+    var gc = svg("g", { "class": "clic", role: "button", tabindex: "0", "aria-label": "Mettre en marche ou arrêter le compresseur" }, G);
+    D.comp = svg("circle", { cx: 120, cy: 300, r: 36, "class": "objet" }, gc);
+    svg("path", { d: "M100 322 L120 276 L140 322", "class": "trait" }, gc);
+    gc.addEventListener("click", basculerMarche);
+    gc.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); basculerMarche(); } });
+    D.indice = texteS(G, 164, 284, "◀ touche-moi", { classe: "indice" });
+    texteS(G, 120, 354, "COMPRESSEUR", { classe: "etiq-titre", ancre: "middle" });
+    // la ligne liquide : filtre, voyant, debitmetre
+    svg("rect", { x: 462, y: 65, width: 30, height: 20, rx: 4, "class": "objet" }, G);
+    texteS(G, 477, 58, "filtre", { ancre: "middle" });
+    svg("circle", { cx: 512, cy: 75, r: 8, "class": "objet" }, G);
+    D.voyant = svg("circle", { cx: 512, cy: 75, r: 4, fill: "var(--hpl)" }, G);
+    svg("rect", { x: 534, y: 62, width: 34, height: 26, rx: 3, "class": "lcd" }, G);
+    texteS(G, 551, 79, "kg/h", { classe: "lcd-txt", ancre: "middle" });
+    texteS(G, 551, 55, "débitmètre", { ancre: "middle" });
+    // le detendeur et son bulbe
+    svg("path", { d: "M578 150 L602 150 L590 167 Z M578 184 L602 184 L590 167 Z", "class": "objet" }, G);
+    texteS(G, 608, 171, "DÉTENDEUR", { classe: "etiq-titre" });
+    svg("path", { d: "M300 292 L300 222 L570 222 L570 167 L582 167", fill: "none", stroke: "var(--encre2)", "stroke-width": 1.2, "stroke-dasharray": "3 3" }, G);
+    svg("rect", { x: 288, y: 293, width: 24, height: 8, rx: 3, fill: "var(--encre2)" }, G);
+    texteS(G, 300, 216, "bulbe", { ancre: "middle" });
+    // les sondes
+    sonde(G, 190, 300, 1, 0, 26); sonde(G, 120, 190, 2, 26, 0); sonde(G, 440, 75, 3, 0, 26); sonde(G, 590, 262, 4, -26, 0);
+    // les manometres et le wattmetre
+    svg("line", { x1: 236, y1: 300, x2: 236, y2: 364, stroke: "var(--bpv)", "stroke-width": 3 }, G);
+    svg("line", { x1: 120, y1: 150, x2: 84, y2: 150, stroke: "var(--hpv)", "stroke-width": 3 }, G);
+    D.bp = manometre(G, 236, 380, "BP");
+    D.hp = manometre(G, 52, 150, "HP");
+    svg("rect", { x: 14, y: 372, width: 78, height: 30, rx: 4, "class": "objet" }, G);
+    svg("rect", { x: 20, y: 378, width: 66, height: 18, rx: 2, "class": "lcd" }, G);
+    D.watt = texteS(G, 82, 391.5, "", { classe: "lcd-txt", ancre: "end" });
+    texteS(G, 53, 416, "wattmètre", { ancre: "middle" });
+    // l'invisible : la chaleur prise, la chaleur cedee, le travail
+    D.fK = flecheEnergie(G, 320, 46, 320, 24, "var(--hpv)", "pointeChaud", "chaleur cédée", 330, 30);
+    D.f0 = flecheEnergie(G, 470, 362, 470, 334, "var(--bpm)", "pointeFroid", "chaleur prise", 480, 356);
+    D.fW = flecheEnergie(G, 58, 370, 86, 330, "var(--tiede)", "pointeTravail", "travail", 14, 352);
+    // les quatre reglages, a tourner au doigt
+    M.tk = Sim.molette(G, { x: 628, y: 44, zone: 49, min: 10, max: 45, pas: 1, valeur: R.tk, unite: "°C", label: "Air à l'entrée du condenseur", titreCourt: "air du condenseur",
+      surChange: function (v) { R.tk = v; majCible(); } });
+    M.sh = Sim.molette(G, { x: 640, y: 238, r: 15, zone: 49, min: 3, max: 15, pas: 1, valeur: R.sh, unite: "K", label: "Vis du détendeur : surchauffe réglée", titreCourt: "surchauffe",
+      surChange: function (v) { R.sh = v; majCible(); } });
+    M.ta = Sim.molette(G, { x: 622, y: 392, zone: 49, min: -20, max: 30, pas: 1, valeur: R.ta, unite: "°C", label: "Air à l'entrée de l'évaporateur", titreCourt: "air de l'évaporateur",
+      surChange: function (v) { R.ta = v; majCible(); } });
+    M.freq = Sim.molette(G, { x: 152, y: 400, zone: 49, min: 30, max: 60, pas: 1, valeur: R.freq, unite: "Hz", label: "Variateur du compresseur", titreCourt: "variateur",
+      surChange: function (v) { R.freq = v; majCible(); } });
+    etiquettes(); echellesManos();
+  }
+  function etiquettes() {
+    var U = USAGES[R.usage];
+    if (D.etiqEvap) D.etiqEvap.textContent = U.evap;
+    if (D.etiqCond) D.etiqCond.textContent = U.cond + " ↑";
+  }
+  function pleineEchelle(p) { var c = [4, 6, 10, 16, 25, 40, 60], i = 0; while (i < c.length - 1 && c[i] < p) i++; return c[i]; }
+  function echellesManos() {
+    if (!D.bp) return;
+    D.bp.max = pleineEchelle(satT(F, 32).p * 1.15); D.hp.max = pleineEchelle(seuilHP() * 1.05);
+  }
+  var phase = 0;
+  function majScene(dt) {
+    [["bp", L.bp], ["hp", L.hp]].forEach(function (q) {
+      var M = D[q[0]], f = borne(q[1] / M.max, -0.04, 1.03);
+      M.ai.setAttribute("transform", "rotate(" + (-135 + 270 * f) + " " + M.cx + " " + M.cy + ")");
+      M.val.textContent = fr(q[1], 2);
+    });
+    D.watt.textContent = fr(L.pel, 0) + " W";
+    // les fleches d'energie : la largeur suit la puissance, sans la chiffrer
+    var pp = pointsDe(A), q0 = pp ? Math.max(0, A.m * (pp[0].h - pp[3].h) * 1000) : 0, qk = q0 + A.pel * BANC.etaM;
+    [[D.f0, q0], [D.fK, qk], [D.fW, A.pel]].forEach(function (q) {
+      var voir = q[1] > 30; q[0].l.style.display = voir ? "" : "none"; q[0].e.style.display = voir ? "" : "none";
+      q[0].l.setAttribute("stroke-width", (1.5 + q[1] / 330).toFixed(1));
+    });
+    var tourne = marche && !secu, vit = A.m / 0.01;
+    D.comp.setAttribute("fill", tourne ? "var(--accent-doux)" : "var(--carte)");
+    if (R.vitesse > 0) {
+      phase -= dt * 40 * vit;
+      D.flux.forEach(function (f) { f.setAttribute("stroke-dashoffset", phase.toFixed(1)); f.style.display = A.m > 2e-4 ? "" : "none"; });
+      [D.ventC, D.ventE].forEach(function (v) { if (tourne) v.a += dt * 300; v.g.setAttribute("transform", "rotate(" + v.a.toFixed(0) + " " + v.cx + " " + v.cy + ")"); });
+    }
+    // le voyant de la ligne liquide : des bulles quand le liquide n'est pas sous-refroidi
+    D.voyant.setAttribute("fill", tsat(F, A.pc) - A.t3 < 1.2 && A.m > 2e-4 ? "#fff" : "var(--hpl)");
+  }
+
+  /* ---------- Le diagramme ---------- */
+  var DG = document.getElementById("diagramme"), W = 920, H = 600, MG = 60, MD = 20, MH = 16, MB = 44, ax, K = {};
+  var COUCHES = { isot: true, isos: true, titre: true, isov: false };
+  function Xh(h) { return MG + (h - ax.hmin) / (ax.hmax - ax.hmin) * (W - MG - MD); }
+  function Yp(p) { return H - MB - Math.log(p / ax.pmin) / Math.log(ax.pmax / ax.pmin) * (H - MH - MB); }
+  function hX(x) { return ax.hmin + (x - MG) / (W - MG - MD) * (ax.hmax - ax.hmin); }
+  function pY(y) { return ax.pmin * Math.exp((H - MB - y) / (H - MH - MB) * Math.log(ax.pmax / ax.pmin)); }
+  function chemin(pts) { var d = ""; pts.forEach(function (q, i) { d += (i ? "L" : "M") + Xh(q[0]).toFixed(1) + " " + Yp(q[1]).toFixed(1); }); return d; }
+  function pasJoli(etendue, n) { var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p; return (r < 1.5 ? 1 : r < 3.5 ? 2 : r < 7.5 ? 5 : 10) * p; }
+  function dessinerDiagramme() {
+    ax = F.axes; DG.innerHTML = "";
+    var defs = svg("defs", {}, DG), cp = svg("clipPath", { id: "zoneTrace" }, defs);
+    svg("rect", { x: MG, y: MH, width: W - MG - MD, height: H - MH - MB }, cp);
+    svg("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--carte)" }, DG);
+    var G = svg("g", {}, DG);
+    // la grille : enthalpie tous les 10, pression en 1-2-5 et intermediaires
+    for (var h = Math.ceil(ax.hmin / 10) * 10; h <= ax.hmax; h += 10) {
+      var fort = h % 50 === 0;
+      svg("line", { x1: Xh(h), y1: MH, x2: Xh(h), y2: H - MB, "class": "d-grille" + (fort ? " fort" : "") }, G);
+      if (fort) svg("text", { x: Xh(h), y: H - MB + 16, "text-anchor": "middle", "class": "d-axe", texte: String(h) }, G);
+    }
+    var etiq = { 0.5: 1, 1: 1, 2: 1, 3: 1, 5: 1, 7: 1, 10: 1, 15: 1, 20: 1, 30: 1, 40: 1, 50: 1 };
+    [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 40, 50].forEach(function (p) {
+      if (p < ax.pmin || p > ax.pmax) return;
+      svg("line", { x1: MG, y1: Yp(p), x2: W - MD, y2: Yp(p), "class": "d-grille" + (etiq[p] ? " fort" : "") }, G);
+      if (etiq[p]) svg("text", { x: MG - 7, y: Yp(p) + 4, "text-anchor": "end", "class": "d-axe", texte: fr(p, p < 1 ? 1 : 0) }, G);
+    });
+    svg("rect", { x: MG, y: MH, width: W - MG - MD, height: H - MH - MB, fill: "none", stroke: "var(--encre)", "stroke-width": 1.3 }, G);
+    svg("text", { x: W - MD, y: H - 8, "text-anchor": "end", "class": "d-titre", texte: "enthalpie massique h, en kJ/kg" }, G);
+    var ty = svg("text", { x: 0, y: 0, "text-anchor": "end", "class": "d-titre", transform: "translate(15 " + MH + ") rotate(-90)", texte: "pression absolue p, en bar" }, G);
+    // les pressions des courbes : 90 points en progression geometrique
+    var PS = []; for (var i = 0; i <= 90; i++) PS.push(ax.pmin * Math.pow(ax.pmax / ax.pmin, i / 90));
+    var tmaxSat = F.sat[F.sat.length - 1][0];
+    // les titres
+    K.titre = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    for (var x = 1; x <= 9; x++) {
+      var pts = F.sat.filter(function (r) { return r[1] <= ax.pmax * 1.02; }).map(function (r) { return [r[2] + x / 10 * (r[3] - r[2]), r[1]]; });
+      svg("path", { d: chemin(pts), "class": "d-titrex" }, K.titre);
+      var s0 = satT(F, tsat(F, ax.pmin * 1.12));
+      svg("text", { x: Xh(s0.hl + x / 10 * (s0.hv - s0.hl)) + 2, y: Yp(ax.pmin * 1.12), "class": "d-titrex-txt", texte: "0," + x }, K.titre);
+    }
+    // les isothermes : vapeur, palier, liquide
+    K.isot = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    for (var T = -50; T <= tmaxSat + 60; T += 10) {
+      var pv = [];
+      PS.forEach(function (p) { var ts = tsat(F, p), d = T - ts; if (d > 0 && d <= 140) { var hh = vap(F, p, d).h; if (hh <= ax.hmax + 5) pv.push([hh, p]); } });
+      var sousCloche = T < tmaxSat - 1 && satT(F, T).p >= ax.pmin;
+      if (sousCloche) {
+        var q = satT(F, T);
+        pv.push([q.hv, q.p]); pv.push([q.hl, q.p]); pv.push([q.hl, ax.pmax]);
+        svg("text", { x: Xh((q.hl + q.hv) / 2), y: Yp(q.p) - 3, "text-anchor": "middle", "class": "d-isot-txt", texte: T + " °C" }, K.isot);
+      }
+      if (pv.length > 1) svg("path", { d: chemin(pv), "class": "d-isot" }, K.isot);
+      // dans la vapeur, l'etiquette se pose en bas : c'est la que les isothermes sont le mieux espacees
+      if (pv.length > 1 && pv[0][1] <= ax.pmin * 1.001 && Xh(pv[0][0]) < W - MD - 12)
+        svg("text", { x: 0, y: 0, "class": "d-isot-txt", transform: "translate(" + (Xh(pv[0][0]) + 10).toFixed(1) + " " + (H - MB - 5) + ") rotate(-90)", texte: String(T) }, K.isot);
+    }
+    // les isentropes, dans la vapeur
+    K.isos = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    var smin = 1e9, smax = -1e9;
+    PS.forEach(function (p) { var c = colonne(F, F.s, p); smin = Math.min(smin, c[0]); smax = Math.max(smax, dansCol(F, c, 100)); });
+    var ps = pasJoli(smax - smin, 9);
+    for (var s = Math.ceil(smin / ps) * ps; s <= smax; s += ps) {
+      var pl = [];
+      PS.forEach(function (p) { var c = colonne(F, F.s, p); if (s >= c[0]) { var d = invCol(F, c, s); if (d <= 140) { var hh = dansCol(F, colonne(F, F.h, p), d); if (hh <= ax.hmax) pl.push([hh, p]); } } });
+      if (pl.length < 2) continue;
+      svg("path", { d: chemin(pl), "class": "d-isos" }, K.isos);
+      var b2 = pl[pl.length - 1], b1 = pl[pl.length - 2], ang = Math.atan2(Yp(b2[1]) - Yp(b1[1]), Xh(b2[0]) - Xh(b1[0])) * 180 / Math.PI;
+      var tx = Math.min(Xh(b2[0]), W - MD - 6), tyy = Math.max(Yp(b2[1]), MH + 6);
+      svg("text", { x: 0, y: 0, "text-anchor": "end", "class": "d-isos-txt", transform: "translate(" + (tx - 3).toFixed(1) + " " + (tyy + 12).toFixed(1) + ") rotate(" + ang.toFixed(0) + ")", texte: fr(s, ps < 0.1 ? 2 : 1) }, K.isos);
+    }
+    // les isochores, sous la cloche et dans la vapeur
+    K.isov = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    var vmin = satT(F, tsat(F, ax.pmax)).vv, vmax = vap(F, ax.pmin, 100).v;
+    [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2].forEach(function (v) {
+      if (v < vmin * 0.9 || v > vmax) return;
+      var pl = [];
+      PS.forEach(function (p) {
+        var q = satT(F, tsat(F, p)), hh;
+        if (v <= q.vv) { var xx = (v - q.vl) / (q.vv - q.vl); if (xx < 0.02) return; hh = q.hl + xx * (q.hv - q.hl); }
+        else { var d = invCol(F, colonne(F, F.v, p, true), v); if (d > 140) return; hh = dansCol(F, colonne(F, F.h, p), d); }
+        if (hh <= ax.hmax) pl.push([hh, p]);
+      });
+      if (pl.length < 2) return;
+      svg("path", { d: chemin(pl), "class": "d-isov" }, K.isov);
+      var b = pl[pl.length - 1];
+      svg("text", { x: Math.min(Xh(b[0]), W - MD - 4) - 3, y: Math.max(Yp(b[1]), MH + 8) + 22, "text-anchor": "end", "class": "d-isov-txt", texte: fr(v, v < 0.01 ? 3 : v < 0.1 ? 2 : 1) + " m³/kg" }, K.isov);
+    });
+    // la cloche
+    var cl = F.sat.filter(function (r) { return r[1] <= ax.pmax * 1.05; });
+    var gc = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    svg("path", { d: chemin(cl.map(function (r) { return [r[2], r[1]]; })), "class": "d-cloche" }, gc);
+    svg("path", { d: chemin(cl.map(function (r) { return [r[3], r[1]]; })), "class": "d-cloche" }, gc);
+    svg("rect", { x: MG + 8, y: MH + 8, width: 14 + 8.2 * F.nom.length, height: 24, rx: 4, fill: "var(--carte)", stroke: "var(--trait)" }, DG);
+    svg("text", { x: MG + 15, y: MH + 25, "class": "d-titre", "font-size": 14, texte: F.nom }, DG);
+    K.vrai = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    K.eleve = svg("g", {}, DG);
+    K.curseur = svg("g", { "clip-path": "url(#zoneTrace)" }, DG);
+    couches();
+  }
+  function couches() { Object.keys(COUCHES).forEach(function (k) { if (K[k]) K[k].style.display = COUCHES[k] ? "" : "none"; }); }
+  (function () {
+    var Z = document.getElementById("couches");
+    [["isot", "Isothermes, en °C"], ["isos", "Isentropes, en kJ/(kg·K)"], ["titre", "Titres en vapeur"], ["isov", "Volumes massiques"]].forEach(function (c) {
+      var inp = el("input", { type: "checkbox" }); inp.checked = COUCHES[c[0]];
+      inp.addEventListener("change", function () { COUCHES[c[0]] = inp.checked; couches(); });
+      Z.appendChild(el("label", { classe: "case" }, [inp, el("span", { texte: c[1] })]));
+    });
+  })();
+  /* le pointeur : lire un point du diagramme, comme a la regle sur le papier */
+  function pointDG(ev) { var p = DG.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; return p.matrixTransform(DG.getScreenCTM().inverse()); }
+  function lecturePoint(q) {
+    if (q.x < MG || q.x > W - MD || q.y < MH || q.y > H - MB) return null;
+    return { h: hX(q.x), p: pY(q.y) };
+  }
+  function texteEtat(pt) {
+    var e = etat(F, pt.p, pt.h), t = "p = " + fr(pt.p, 2) + " bar · h = " + fr(pt.h, 0) + " kJ/kg · θ = " + fr(e.t, 1) + " °C · ";
+    if (e.zone === "liquide") t += "liquide" + (e.sr > 0.5 ? " sous-refroidi" : "");
+    else if (e.zone === "mélange") t += "mélange, titre " + fr(e.x, 2);
+    else t += "vapeur" + (e.d > 0.5 ? " surchauffée" : " saturante");
+    return t + " · s = " + fr(e.s, 2) + " kJ/(kg·K) · v = " + fr(e.v, e.v < 0.01 ? 4 : 3) + " m³/kg";
+  }
+  DG.addEventListener("pointermove", function (ev) {
+    var pt = lecturePoint(pointDG(ev)); K.curseur.innerHTML = "";
+    if (!pt) { document.getElementById("lecture").textContent = ""; return; }
+    svg("line", { x1: Xh(pt.h), y1: MH, x2: Xh(pt.h), y2: H - MB, "class": "d-curseur" }, K.curseur);
+    svg("line", { x1: MG, y1: Yp(pt.p), x2: W - MD, y2: Yp(pt.p), "class": "d-curseur" }, K.curseur);
+    document.getElementById("lecture").textContent = texteEtat(pt);
+  });
+  DG.addEventListener("pointerleave", function () { K.curseur.innerHTML = ""; });
+  /* les points de l'eleve */
+  var ELEVE = [null, null, null, null], aPlacer = 0, cPlacer = null;
+  cPlacer = Sim.choix("#placer", { label: "Je place le point", valeur: 0,
+    options: [{ val: 0, texte: "1 · aspiration" }, { val: 1, texte: "2 · refoulement" }, { val: 2, texte: "3 · sortie condenseur" }, { val: 3, texte: "4 · sortie détendeur" }],
+    surChange: function (v) { aPlacer = v; } });
+  DG.addEventListener("click", function (ev) {
+    var pt = lecturePoint(pointDG(ev)); if (!pt) return;
+    ELEVE[aPlacer] = pt; effacerVerdict();
+    if (aPlacer < 3) { aPlacer++; cPlacer.set(aPlacer, true); }
+    dessinerEleve();
+  });
+  function dessinerEleve() {
+    K.eleve.innerHTML = "";
+    for (var i = 0; i < 4; i++) {
+      var a = ELEVE[i], b = ELEVE[(i + 1) % 4];
+      if (a && b) svg("line", { x1: Xh(a.h), y1: Yp(a.p), x2: Xh(b.h), y2: Yp(b.p), "class": "d-eleve" }, K.eleve);
+    }
+    ELEVE.forEach(function (a, i) {
+      if (!a) return;
+      svg("circle", { cx: Xh(a.h), cy: Yp(a.p), r: 9, "class": "d-eleve-pt" }, K.eleve);
+      svg("text", { x: Xh(a.h), y: Yp(a.p) + 4, "text-anchor": "middle", "class": "d-eleve-txt", texte: String(i + 1) }, K.eleve);
+    });
+    var T = document.getElementById("tablePoints"); T.innerHTML = "";
+    if (!ELEVE.some(function (a) { return a; })) return;
+    T.appendChild(el("tr", null, [el("th", { texte: "Mon point" }), el("th", { texte: "p (bar abs.)" }), el("th", { texte: "h (kJ/kg)" })]));
+    ELEVE.forEach(function (a, i) { if (a) T.appendChild(el("tr", null, [el("td", { texte: String(i + 1) }), el("td", { classe: "mono", texte: fr(a.p, 2) }), el("td", { classe: "mono", texte: fr(a.h, 0) })])); });
+  }
+  function dessinerVrai() {
+    K.vrai.innerHTML = "";
+    var voir = document.getElementById("voirCycle").checked, pts = voir ? pointsDe(A) : (SNAP && SNAP.revele ? SNAP.pts : null);
+    if (!pts) return;
+    svg("path", { d: chemin(pts.map(function (q) { return [q.h, q.p]; })) + "Z", "class": "d-vrai" }, K.vrai);
+    pts.forEach(function (q) { svg("circle", { cx: Xh(q.h), cy: Yp(q.p), r: 4, "class": "d-vrai-pt" }, K.vrai); });
+  }
+  function effacerVerdict() { document.getElementById("verdict").innerHTML = ""; }
+  var METHODES = [
+    "sur l'isobare de la basse pression absolue, à la température de la sonde 1 : il est dans la vapeur surchauffée, à droite de la cloche.",
+    "sur l'isobare de la haute pression absolue, à la température de la sonde 2 : suis l'isotherme jusqu'à cette pression.",
+    "sur l'isobare de la haute pression, dans le liquide, à la température de la sonde 3 : dans le liquide, les isothermes sont verticales.",
+    "à la verticale du point 3, sur l'isobare de la basse pression : la détente se fait à enthalpie constante."
+  ];
+  function verifierTrace() {
+    var V = document.getElementById("verdict"); V.innerHTML = "";
+    if (document.getElementById("voirCycle").checked) { V.appendChild(el("li", { texte: "Le cycle du banc est affiché : décoche la case pour que ton tracé soit vérifié." })); return; }
+    if (!SNAP || !SNAP.pts) { V.appendChild(el("li", { texte: "Prends d'abord une mesure, banc en marche et régime établi : le tracé se vérifie sur la dernière ligne du tableau." })); return; }
+    if (!SNAP.etabli) V.appendChild(el("li", { html: "<span class=\"methode\">Ta dernière mesure a été prise pendant que le banc se stabilisait : ses valeurs ne vont pas bien ensemble. Attends le régime établi et reprends-en une.</span>" }));
+    var tout = true;
+    ELEVE.forEach(function (a, i) {
+      var v = SNAP.pts[i], ok = a && Math.abs(a.p / v.p - 1) <= 0.07 && Math.abs(a.h - v.h) <= 5;
+      if (!ok) tout = false;
+      V.appendChild(el("li", { html: ok ? "<span class=\"juste\">Point " + (i + 1) + " : juste.</span>" :
+        "<span class=\"faux\">Point " + (i + 1) + " : pas encore.</span> <span class=\"methode\">Il se place " + METHODES[i] + (R.manos === "rel" && (!a || Math.abs(a.p / v.p - 1) > 0.07) ? " Les manomètres lisent des bars relatifs : ajoute la pression atmosphérique." : "") + "</span>" }));
+    });
+    if (tout) { SNAP.revele = true; V.appendChild(el("li", { html: "<span class=\"juste\">Les quatre points sont justes : le cycle du banc s'affiche en vert sous le tien.</span>" })); dessinerVrai(); }
+  }
+  document.getElementById("bVerifTrace").addEventListener("click", verifierTrace);
+  document.getElementById("bEffacer").addEventListener("click", function () { ELEVE = [null, null, null, null]; aPlacer = 0; cPlacer.set(0, true); dessinerEleve(); effacerVerdict(); });
+  document.getElementById("voirCycle").addEventListener("change", function () { effacerVerdict(); dessinerVrai(); });
+
+  /* ---------- Le releve ---------- */
+  /* Chaque ligne garde, a cote de ce qu'ont lu les instruments, l'etat vrai du banc a cet instant :
+     c'est lui que les verifications emploient. La derniere ligne du tableau fait foi. */
+  function ligneLue() {
+    lire();
+    var v = clone(A); v.pts = marche && !secu ? pointsDe(A) : null; v.tk = R.tk; v.ta = R.ta; v.etabli = marche && !secu && etabli(); v.revele = false;
+    return { bp: L.bp, hp: L.hp, t1: L.t1, t2: L.t2, t3: L.t3, t4: L.t4, pel: L.pel, m: L.m, tae: L.tae, tac: L.tac, _vrai: v };
+  }
+  CEN = Sim.centrale("#releve", {
+    temps: { cle: "t", titre: "t", unite: "s", dec: 0, echelle: 1 },
+    voies: [{ cle: "bp", titre: "BP", unite: "bar", dec: 2 }, { cle: "hp", titre: "HP", unite: "bar", dec: 2 },
+      { cle: "t1", titre: "θ1 aspiration", unite: "°C", dec: 1 }, { cle: "t2", titre: "θ2 refoulement", unite: "°C", dec: 1 },
+      { cle: "t3", titre: "θ3 sortie condenseur", unite: "°C", dec: 1 }, { cle: "t4", titre: "θ4 sortie détendeur", unite: "°C", dec: 1 },
+      { cle: "pel", titre: "Wattmètre", unite: "W", dec: 0 }, { cle: "m", titre: "Débit", unite: "kg/h", dec: 1 },
+      { cle: "tae", titre: "Air sortie évaporateur", unite: "°C", dec: 1, cache: true }, { cle: "tac", titre: "Air sortie condenseur", unite: "°C", dec: 1, cache: true }],
+    periodes: [{ val: 5, texte: "5 s" }, { val: 10, texte: "10 s" }, { val: 30, texte: "30 s" }], valeur: 10,
+    durees: [{ val: 0, texte: "jamais" }, { val: 180, texte: "3 min" }, { val: 600, texte: "10 min" }], duree: 180,
+    trace: ["bp", "hp"], nomFichier: "banc-froid.csv", max: 300,
+    lire: ligneLue,
+    surChange: function (lignes) {
+      var v = lignes.length ? lignes[lignes.length - 1]._vrai : null;
+      if (v !== SNAP) { SNAP = v; effacerVerdict(); dessinerVrai(); }
+    }
+  });
+  function mesureMaintenant() { CEN.ajouter(ligneLue()); }
+
+  /* ---------- Les verifications ---------- */
+  function snap(f) { return function () { return SNAP && SNAP.pts ? f(SNAP, SNAP.pts) : NaN; }; }
+  function poserDefis() {
+    var Z = document.getElementById("defis"), chaud = USAGES[R.usage].cop === "chaud"; Z.innerHTML = "";
+    document.getElementById("consigneDefis").innerHTML = "Les vérifications portent sur <b>la dernière ligne du tableau</b>, prise banc en marche et régime établi. Lis les enthalpies sur le diagramme, à la pression <b>absolue</b>.";
+    Sim.defi(Z, { question: "Surchauffe à l'aspiration : θ<sub>1</sub> moins la température de saturation à la basse pression.", unite: "K",
+      attendu: snap(function (s) { return s.t1 - tsat(F, s.pe); }), tolerance: 0, toleranceAbsolue: 1.5,
+      methode: "Lis sur le diagramme la température du palier à la basse pression absolue, puis retranche-la de la sonde 1. Prends d'abord une mesure en régime établi." });
+    Sim.defi(Z, { question: "Sous-refroidissement : la température de saturation à la haute pression moins θ<sub>3</sub>.", unite: "K",
+      attendu: snap(function (s) { return tsat(F, s.pc) - s.t3; }), tolerance: 0, toleranceAbsolue: 1.5,
+      methode: "Lis la température du palier à la haute pression absolue, puis retranche la sonde 3." });
+    Sim.defi(Z, { question: "Production frigorifique massique : q<sub>0</sub> = h<sub>1</sub> − h<sub>4</sub>.", unite: "kJ/kg",
+      attendu: snap(function (s, p) { return p[0].h - p[3].h; }), tolerance: 0.05,
+      methode: "Lis h<sub>1</sub> et h<sub>4</sub> sur l'axe des enthalpies ; h<sub>4</sub> est égale à h<sub>3</sub>." });
+    Sim.defi(Z, { question: "Travail massique du compresseur : w = h<sub>2</sub> − h<sub>1</sub>.", unite: "kJ/kg",
+      attendu: snap(function (s, p) { return p[1].h - p[0].h; }), tolerance: 0.12,
+      methode: "Lis h<sub>2</sub> au refoulement, à la haute pression et à la température de la sonde 2." });
+    Sim.defi(Z, { question: chaud ? "COP en chaud de la pompe à chaleur : (h<sub>2</sub> − h<sub>3</sub>) ÷ (h<sub>2</sub> − h<sub>1</sub>)." : "COP en froid : (h<sub>1</sub> − h<sub>4</sub>) ÷ (h<sub>2</sub> − h<sub>1</sub>).", unite: "",
+      attendu: snap(function (s, p) { return (chaud ? p[1].h - p[2].h : p[0].h - p[3].h) / (p[1].h - p[0].h); }), tolerance: 0.14,
+      methode: chaud ? "Ce qui est utile, c'est la chaleur cédée au condenseur ; ce qui est payé, c'est le travail du compresseur." : "Ce qui est utile, c'est la chaleur prise à l'évaporateur ; ce qui est payé, c'est le travail du compresseur." });
+    Sim.defi(Z, { question: chaud ? "Puissance cédée par le fluide au condenseur : débit massique × (h<sub>2</sub> − h<sub>3</sub>)." : "Puissance frigorifique : débit massique × (h<sub>1</sub> − h<sub>4</sub>).", unite: "W",
+      attendu: snap(function (s, p) { return s.m * (chaud ? p[1].h - p[2].h : p[0].h - p[3].h) * 1000; }), tolerance: 0.08,
+      methode: "Le débitmètre lit des kg/h : divise par 3 600 pour des kg/s. Des kJ/kg multipliés par des kg/s donnent des kW." });
+    Sim.defi(Z, { question: "Puissance reçue par l'air au condenseur, par le bilan côté air : ρ × q<sub>v</sub> × c × (θ<sub>sortie</sub> − θ<sub>entrée</sub>).", unite: "W",
+      attendu: snap(function (s) { return BANC.RHOC * BANC.qvC / 3600 * (s.tac - s.tk); }), tolerance: 0.1,
+      methode: "Le débit d'air du condenseur est sur la plaque du banc, en m³/h : divise par 3 600. Compare ensuite au bilan côté fluide, débit × (h<sub>2</sub> − h<sub>3</sub>)." });
+  }
+
+  /* ---------- Le diagnostic ---------- */
+  var SEL = document.getElementById("choixPanne");
+  SEL.appendChild(el("option", { value: "", texte: "choisir…" }));
+  Object.keys(PANNES).forEach(function (k) { SEL.appendChild(el("option", { value: k, texte: PANNES[k].nom })); });
+  function poserPanne(k, discret) {
+    R.panne = k; if (secu) { secu = false; marche = false; }
+    majCible(); majBoutons();
+    var Rd = document.getElementById("retourDiag"); Rd.className = "retour"; Rd.textContent = ""; SEL.value = "";
+    if (!discret) message(k === "aucune" ? "Le banc est remis en état : attends le régime établi." : "Une panne vient d'être posée sur le banc. Attends le nouveau régime, relève, compare au banc sain.");
+  }
+  document.getElementById("bPanne").addEventListener("click", function () {
+    var ks = Object.keys(PANNES).filter(function (k) { return k !== "aucune" && k !== R.panne; });
+    poserPanne(ks[Math.floor(Math.random() * ks.length)]);
+  });
+  document.getElementById("bSain").addEventListener("click", function () { poserPanne("aucune"); });
+  document.getElementById("bDiag").addEventListener("click", function () {
+    var Rd = document.getElementById("retourDiag");
+    if (!SEL.value) { Rd.className = "retour"; Rd.textContent = "Choisis un diagnostic."; return; }
+    var ok = SEL.value === R.panne;
+    Rd.className = "retour " + (ok ? "juste" : "faux");
+    Rd.innerHTML = ok ? "Juste." : "Pas encore. <span class=\"methode\">Compare quatre grandeurs au banc sain : la basse pression, la haute pression, la surchauffe et le sous-refroidissement. Regarde aussi l'écart de température de l'air sur chaque échangeur, le voyant de la ligne liquide, et la pression d'équilibre à l'arrêt.</span>";
+  });
+
+  /* ---------- Les gestes ---------- */
+  document.getElementById("bMarche").addEventListener("click", basculerMarche);
+  document.getElementById("bRearmer").addEventListener("click", function () {
+    if (A.pc > seuilHP() * 0.8) { message("La haute pression est encore trop forte : attends qu'elle redescende avant de réarmer."); return; }
+    secu = false; marche = false; majCible(); majBoutons(); message("Pressostat réarmé. Le banc peut repartir : si la cause est toujours là, il redéclenchera.");
+  });
+
+  /* ---------- La boucle ---------- */
+  var cumulLect = 0, cumulDess = 0;
+  function pas(dt) {
+    var dts = dt * R.vitesse, n = Math.max(1, Math.ceil(dts / 0.5));
+    if (dts > 0) for (var i = 0; i < n; i++) { pasPhysique(dts / n); CEN.tic(temps); }
+    cumulLect += dt; cumulDess += dt;
+    if (cumulLect >= 0.6) { cumulLect = 0; lire(); afficher(); if (document.getElementById("voirCycle").checked) dessinerVrai(); }
+    majScene(dt);
+  }
+
+  /* ---------- Les deux temps ---------- */
+  Sim.onglets("#temps", function (id) {
+    mode = id === "vueDiag" ? "diag" : "tracer";
+    if (mode === "tracer" && R.panne !== "aucune" && A) { poserPanne("aucune", true); message("Retour au banc sain pour tracer le cycle."); }
+  });
+
+  /* ---------- Depart ---------- */
+  R.cyl = cylindree(F);
+  poserReglages(); plaque(); majCible(); A = clone(cible);
+  dessinerScene(); dessinerDiagramme(); dessinerEleve(); poserDefis(); majBoutons();
+  lire(); afficher(); majScene(0);
+  message("Banc au repos. Lance la centrale d'acquisition, touche le compresseur, et regarde le régime s'établir.");
+  Sim.animer(pas);
+
+  /* Porte des essais : la page se pilote sans doigt, dans un navigateur qui ne dessine pas. */
+  window.bancfroid = {
+    reglage: R, etat: function () { return A; }, cible: function () { return cible; }, lectures: function () { lire(); return L; }, snap: function () { return SNAP; },
+    fluide: function (n) { changerFluide(n); poserReglages(); }, marche: function (oui) { if (marche !== oui) document.getElementById("bMarche").click(); },
+    regler: function (k, v) { R[k] = v; if (M[k]) M[k].set(v, true); majCible(); }, panne: poserPanne, stabiliser: function () { A = clone(cible); lire(); afficher(); majScene(0); dessinerVrai(); },
+    garder: mesureMaintenant, centrale: function () { return CEN; }, placer: function (i, p, h) { ELEVE[i] = { p: p, h: h }; dessinerEleve(); }, verifierTrace: verifierTrace, points: function () { return pointsDe(A); },
+    regime: function () { return regime(F, R); },
+    /* l'interpolation de la page contre le cycle de reference calcule par CoolProp */
+    eprouver: function () {
+      var G = FL[REF_COOLPROP.fluide], e = satT(G, REF_COOLPROP.te), c = satT(G, REF_COOLPROP.tc), a1 = vap(G, e.p, REF_COOLPROP.sc);
+      var h2s = dansCol(G, colonne(G, G.h, c.p), invCol(G, colonne(G, G.s, c.p), a1.s));
+      return { pe: [e.p, REF_COOLPROP.pe], pc: [c.p, REF_COOLPROP.pc], h1: [a1.h, REF_COOLPROP.h1], s1: [a1.s, REF_COOLPROP.s1], v1: [a1.v, REF_COOLPROP.v1],
+        h2s: [h2s, REF_COOLPROP.h2s], h3: [satT(G, REF_COOLPROP.tc - REF_COOLPROP.sr).hl, REF_COOLPROP.h3] };
+    }
+  };
+})();
+</script>
+<footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
+</div>
+</body>
+</html>

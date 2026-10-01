@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La pompe à chaleur air-eau</title>
+<meta name="description" content="Une pompe à chaleur air-eau dans sa chambre climatique, puis une journée de grand froid dans une maison. On tourne au doigt l&#x27;air de la chambre, le variateur du compresseur et le banc de charge, on lit les manomètres du R32 et le wattmètre ; la centrale d&#x27;acquisition enregistre la marche, les dégivrages et les compteurs dans le temps.">
+<meta name="etiquette" content="Simulation · J13">
+<style>
+/* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
+   Palette du kit web (kit.css) : papier, graphite, un seul accent. Polices du systeme : la page
+   s'ouvre sans reseau, depuis une cle ou le poste de la salle. */
+:root{
+  --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
+  --trait:#c9c5bf; --trait2:#dedbd6; --accent:#2c6da6; --accent-doux:#dfe8f1;
+  --juste:#2f7a55; --juste-doux:#e2efe7; --faux:#ab432a; --faux-doux:#f5e3dd; --tiede:#b8801f;
+  --scene:#f6f5f2; --ombre:0 1px 2px rgba(25,26,28,.05),0 10px 26px rgba(25,26,28,.07); --r:6px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+    --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+    --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+    --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --fond:#131315; --carte:#1c1d20; --carte2:#232427; --encre:#eceae6; --encre2:#a6a49f;
+  --trait:#4a4a4d; --trait2:#333437; --accent:#63a6dd; --accent-doux:#1d2a36;
+  --juste:#5cc08d; --juste-doux:#17281f; --faux:#ef7a58; --faux-doux:#34201a; --tiede:#dfae4e;
+  --scene:#18191b; --ombre:0 1px 2px rgba(0,0,0,.5),0 12px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--fond);color:var(--encre);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,Arial,sans-serif;font-size:16px;line-height:1.5}
+.page{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+.mono,.afficheur .val,.curseur .val,table.releve td{font-family:ui-monospace,"Cascadia Mono",Consolas,"Roboto Mono",monospace;font-variant-numeric:tabular-nums}
+h1,h2,h3{line-height:1.2;margin:0;text-wrap:balance}
+sub,sup{font-size:.72em;line-height:0}
+
+/* En-tete */
+.tete{padding:6px 0 16px;border-bottom:1px solid var(--trait);margin-bottom:16px}
+.surtitre{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--encre2);font-weight:600}
+.tete h1{font-size:clamp(1.45rem,4vw,2rem);margin:4px 0 6px;font-weight:750}
+.chapeau{margin:0;color:var(--encre2);max-width:70ch}
+
+/* Onglets : un par protocole ou par ecran */
+.onglets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+.onglets button{font:inherit;font-weight:650;font-size:.95rem;padding:9px 14px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre2);cursor:pointer}
+.onglets button[aria-selected="true"]{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.onglets button:not([aria-selected="true"]):hover{border-color:var(--encre2);color:var(--encre)}
+.vue[hidden]{display:none}
+
+/* Mise en page : la scene a gauche, les commandes a droite ; une colonne sous 820 px */
+.plan{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:16px;align-items:start}
+@media (max-width:820px){.plan{grid-template-columns:1fr}}
+.carte{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);box-shadow:var(--ombre);padding:16px;margin-bottom:16px}
+.carte > h2{font-size:1.08rem;margin-bottom:10px;font-weight:700}
+.carte > h2 .num{color:var(--accent);margin-right:.35em}
+.consigne{color:var(--encre2);margin:0 0 12px;font-size:.95rem}
+.scene{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r);overflow:hidden;position:relative}
+.scene svg,.scene canvas{display:block;width:100%;height:auto}
+.legende{font-size:.82rem;color:var(--encre2);margin-top:6px}
+
+/* Commandes */
+.commandes{display:flex;flex-direction:column;gap:14px}
+.curseur label{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;font-weight:600;margin-bottom:2px}
+.curseur .val{font-weight:600;color:var(--encre)}
+.curseur input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+.curseur .bornes{display:flex;justify-content:space-between;font-size:.75rem;color:var(--encre2)}
+.choix .titre{font-size:.9rem;font-weight:600;margin-bottom:4px}
+.choix .boutons{display:flex;flex-wrap:wrap;gap:6px}
+.choix button,.bouton{font:inherit;font-size:.9rem;font-weight:600;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;min-height:40px}
+.choix button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.bouton:hover,.choix button:hover{border-color:var(--encre2)}
+.bouton.principal{background:var(--encre);border-color:var(--encre);color:var(--carte)}
+.bouton:disabled{opacity:.45;cursor:not-allowed}
+.rangee{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* Afficheurs : ce que lit un instrument */
+.afficheurs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.afficheur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:8px 10px}
+.afficheur .nom{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--encre2);font-weight:650}
+.afficheur .val{font-size:1.45rem;font-weight:650;white-space:nowrap}
+.afficheur .unite{font-size:.95rem;color:var(--encre2);margin-left:.25em}
+.afficheur .note{font-size:.75rem;color:var(--encre2)}
+
+/* Releve de mesures et graphe */
+.releve-zone{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:14px;align-items:start}
+@media (max-width:820px){.releve-zone{grid-template-columns:1fr}}
+table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
+table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
+table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
+table.releve tr.vide td{color:var(--encre2);font-style:italic}
+.graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
+.graphe canvas{display:block;width:100%;height:auto}
+
+/* Enregistreur : une mesure toute seule, a intervalle regulier du temps simule */
+.enregistreur{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px;display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.enr-lampe{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--trait)}
+.enr-lampe.actif{background:var(--faux)}
+.enr-lampe.eclair{animation:eclair .6s ease-out}
+@keyframes eclair{from{box-shadow:0 0 0 0 var(--faux)}to{box-shadow:0 0 0 10px transparent}}
+.enr-info{font-size:.88rem;color:var(--encre2)}
+
+/* Defi : l'eleve propose une valeur, la page dit juste ou pas encore, jamais la reponse */
+.defi{border:1px dashed var(--trait);border-radius:var(--r);padding:12px 14px;background:var(--carte2)}
+.defi p{margin:0 0 8px}
+.defi .saisie{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.defi input{font:inherit;width:9em;padding:7px 9px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.defi .retour{margin-top:8px;font-weight:600;min-height:1.4em}
+.defi .retour.juste{color:var(--juste)}
+.defi .retour.faux{color:var(--faux)}
+.defi .methode{font-weight:400;color:var(--encre2)}
+
+/* Encadres */
+.note-modele{margin-top:6px}
+details.modele{border-top:1px solid var(--trait);padding-top:10px;margin-top:8px}
+details.modele summary{cursor:pointer;font-weight:650}
+details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-size:.92rem}
+.alerte{border-left:4px solid var(--tiede);background:var(--carte2);padding:8px 12px;border-radius:0 var(--r) var(--r) 0;font-size:.92rem}
+.pied{margin-top:24px;padding-top:10px;border-top:1px solid var(--trait);font-size:.8rem;color:var(--encre2)}
+
+@media print{
+  body{background:#fff}
+  .onglets,.commandes .bouton,.defi{display:none}
+  .carte{box-shadow:none;break-inside:avoid}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Centrale d'acquisition : periode, duree, deux courbes en direct, tableau defilant, export */
+.centrale{display:flex;flex-direction:column;gap:12px}
+.centrale-reglages{display:flex;flex-wrap:wrap;gap:12px 22px;border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.centrale-traces{display:flex;flex-wrap:wrap;gap:8px 18px}
+.centrale-traces label{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.centrale-traces select{font:inherit;font-size:.9rem;padding:7px 8px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);min-height:40px;max-width:100%}
+.centrale-pastille{display:inline-block;width:14px;height:4px;border-radius:2px}
+.centrale-table{max-height:300px;overflow:auto;border:1px solid var(--trait2);border-radius:var(--r)}
+.centrale-table table.releve th{position:sticky;top:0;z-index:1}
+.centrale-table table.releve{border-collapse:separate;border-spacing:0}
+
+/* Molette posee sur la scene : on la tourne au doigt */
+.molette{cursor:grab;touch-action:none;outline:none}
+.molette.tourne{cursor:grabbing}
+.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
+.molette.tourne .molette-corps{fill:var(--accent-doux)}
+.molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
+.molette-graduation{stroke:var(--encre2);stroke-width:1.2}
+.molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
+.molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
+
+</style>
+<script>
+/* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
+   Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
+   Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
+"use strict";
+var Sim = (function () {
+
+  /* Nombres a la francaise : virgule, espace fine insecable entre les milliers. */
+  function fr(x, dec) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (dec === undefined) dec = 2;
+    var s = Math.abs(x).toFixed(dec).split(".");
+    s[0] = s[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return (x < 0 && Number(x.toFixed(dec)) !== 0 ? "−" : "") + s.join(",");
+  }
+  /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
+  function lire(txt) {
+    if (txt === null || txt === undefined) return NaN;
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
+    return t === "" ? NaN : Number(t);
+  }
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    if (attrs) for (var k in attrs) {
+      if (k === "texte") n.textContent = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k === "classe") n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function $(sel) { return typeof sel === "string" ? document.querySelector(sel) : sel; }
+  function borne(x, a, b) { return Math.max(a, Math.min(b, x)); }
+
+  /* Un instrument ne donne jamais la valeur exacte : bruit gaussien relatif, puis resolution. */
+  function gauss() { var u = 1 - Math.random(), v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function mesure(vraie, opts) {
+    opts = opts || {};
+    var x = vraie * (1 + (opts.relatif || 0) * gauss()) + (opts.absolu || 0) * gauss();
+    if (opts.resolution) x = Math.round(x / opts.resolution) * opts.resolution;
+    return x;
+  }
+
+  /* Onglets : boutons [data-vue="id"] qui montrent la section #id. */
+  function onglets(nav, surChange) {
+    nav = $(nav);
+    var boutons = Array.prototype.slice.call(nav.querySelectorAll("button[data-vue]"));
+    nav.setAttribute("role", "tablist");
+    function montrer(id) {
+      boutons.forEach(function (b) {
+        var actif = b.getAttribute("data-vue") === id;
+        b.setAttribute("aria-selected", actif ? "true" : "false");
+        b.setAttribute("role", "tab");
+        var v = document.getElementById(b.getAttribute("data-vue"));
+        if (v) v.hidden = !actif;
+      });
+      if (surChange) surChange(id);
+    }
+    boutons.forEach(function (b) { b.addEventListener("click", function () { montrer(b.getAttribute("data-vue")); }); });
+    montrer(boutons[0].getAttribute("data-vue"));
+    return { montrer: montrer };
+  }
+
+  /* Curseur avec son etiquette, sa valeur affichee et ses bornes. */
+  function curseur(parent, o) {
+    var dec = o.dec === undefined ? 0 : o.dec;
+    var id = o.id || ("c" + Math.random().toString(36).slice(2, 8));
+    var val = el("span", { classe: "val" });
+    var inp = el("input", { type: "range", id: id, min: o.min, max: o.max, step: o.pas || 1, value: o.valeur });
+    var bloc = el("div", { classe: "curseur" }, [
+      el("label", { "for": id }, [el("span", { texte: o.label }), val]), inp,
+      el("div", { classe: "bornes" }, [el("span", { texte: fr(o.min, dec) + " " + (o.unite || "") }), el("span", { texte: fr(o.max, dec) + " " + (o.unite || "") })])
+    ]);
+    function maj() { val.textContent = fr(Number(inp.value), dec) + (o.unite ? " " + o.unite : ""); }
+    inp.addEventListener("input", function () { maj(); if (o.surChange) o.surChange(Number(inp.value)); });
+    maj();
+    $(parent).appendChild(bloc);
+    return {
+      get: function () { return Number(inp.value); },
+      set: function (v, silencieux) { inp.value = v; maj(); if (!silencieux && o.surChange) o.surChange(Number(inp.value)); },
+      activer: function (oui) { inp.disabled = !oui; },
+      noeud: bloc
+    };
+  }
+
+  /* Groupe de boutons dont un seul est enfonce. options : [{val, texte}] */
+  function choix(parent, o) {
+    var courant = o.valeur;
+    var zone = el("div", { classe: "boutons", role: "group", "aria-label": o.label || "" });
+    var boutons = o.options.map(function (op) {
+      var b = el("button", { type: "button", texte: op.texte });
+      b.addEventListener("click", function () { poser(op.val); });
+      zone.appendChild(b);
+      return { b: b, val: op.val };
+    });
+    function poser(v, silencieux) {
+      courant = v;
+      boutons.forEach(function (x) { x.b.setAttribute("aria-pressed", x.val === v ? "true" : "false"); });
+      if (!silencieux && o.surChange) o.surChange(v);
+    }
+    var bloc = el("div", { classe: "choix" }, [o.label ? el("div", { classe: "titre", texte: o.label }) : null, zone]);
+    $(parent).appendChild(bloc);
+    poser(courant, true);
+    return { get: function () { return courant; }, set: poser, noeud: bloc };
+  }
+
+  /* Afficheur d'instrument : nom, valeur, unite, et une note facultative. */
+  function afficheur(parent, o) {
+    var v = el("span", { classe: "val", texte: "—" });
+    var n = el("div", { classe: "note", texte: o.note || "" });
+    var bloc = el("div", { classe: "afficheur" }, [el("div", { classe: "nom", texte: o.nom }), el("div", null, [v, el("span", { classe: "unite", texte: o.unite || "" })]), o.note !== undefined ? n : null]);
+    $(parent).appendChild(bloc);
+    return {
+      set: function (x, dec) { v.textContent = typeof x === "string" ? x : fr(x, dec === undefined ? (o.dec === undefined ? 2 : o.dec) : dec); },
+      note: function (t) { n.textContent = t; },
+      noeud: bloc
+    };
+  }
+
+  /* Graphe sur canvas, net sur les ecrans haute densite. Axes, grille, courbes, points. */
+  function graphe(parent, o) {
+    var larg = o.largeur || 640, haut = o.hauteur || 380;
+    var cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": o.titre || "graphe" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    $(parent).appendChild(cadre);
+    var ctx = cv.getContext("2d");
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    cv.width = larg * dpr; cv.height = haut * dpr; ctx.scale(dpr, dpr);
+    var m = { g: 62, d: 16, h: 16, b: 48 };
+    var ax = { xmin: o.xmin, xmax: o.xmax, ymin: o.ymin, ymax: o.ymax };
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+    function X(x) { return m.g + (x - ax.xmin) / (ax.xmax - ax.xmin) * (larg - m.g - m.d); }
+    function Y(y) { return haut - m.b - (y - ax.ymin) / (ax.ymax - ax.ymin) * (haut - m.h - m.b); }
+    function pasJoli(etendue, n) {
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function fond() {
+      ctx.clearRect(0, 0, larg, haut);
+      ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var px = o.pasX || pasJoli(ax.xmax - ax.xmin, 8), py = o.pasY || pasJoli(ax.ymax - ax.ymin, 6);
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2");
+      ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = Math.ceil(ax.xmin / px) * px; x <= ax.xmax + 1e-9; x += px) {
+        ctx.beginPath(); ctx.moveTo(X(x), Y(ax.ymin)); ctx.lineTo(X(x), Y(ax.ymax)); ctx.stroke();
+        ctx.fillText(fr(x, o.decX !== undefined ? o.decX : decimales(px)), X(x), Y(ax.ymin) + 5);
+      }
+      ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      for (var y = Math.ceil(ax.ymin / py) * py; y <= ax.ymax + 1e-9; y += py) {
+        ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y)); ctx.lineTo(X(ax.xmax), Y(y)); ctx.stroke();
+        ctx.fillText(fr(y, o.decY !== undefined ? o.decY : decimales(py)), X(ax.xmin) - 6, Y(y));
+      }
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.4;
+      var y0 = borne(0, ax.ymin, ax.ymax), x0 = borne(0, ax.xmin, ax.xmax);
+      ctx.beginPath(); ctx.moveTo(X(ax.xmin), Y(y0)); ctx.lineTo(X(ax.xmax), Y(y0)); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(X(x0), Y(ax.ymin)); ctx.lineTo(X(x0), Y(ax.ymax)); ctx.stroke();
+      ctx.fillStyle = css("--encre"); ctx.font = "600 13px system-ui, Segoe UI, Arial, sans-serif";
+      ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(o.titreX || "", larg - m.d, haut - 4);
+      ctx.save(); ctx.translate(14, m.h); ctx.rotate(-Math.PI / 2); ctx.textAlign = "right"; ctx.textBaseline = "top";
+      ctx.fillText(o.titreY || "", 0, 0); ctx.restore();
+    }
+    function couleur(c) { return c && c.indexOf("--") === 0 ? css(c) : (c || css("--accent")); }
+    var api = {
+      axes: function (n) { for (var k in n) ax[k] = n[k]; return api; },
+      effacer: function () { fond(); return api; },
+      /* f : fonction x -> y, ou tableau de [x, y] */
+      courbe: function (f, opts) {
+        opts = opts || {};
+        ctx.save(); ctx.beginPath();
+        ctx.rect(m.g, m.h, larg - m.g - m.d, haut - m.h - m.b); ctx.clip();
+        ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = opts.epaisseur || 2.2;
+        if (opts.pointille) ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        if (typeof f === "function") {
+          var n = opts.pas || 400, prem = true;
+          for (var i = 0; i <= n; i++) {
+            var x = ax.xmin + (ax.xmax - ax.xmin) * i / n, y = f(x);
+            if (!isFinite(y)) { prem = true; continue; }
+            if (prem) { ctx.moveTo(X(x), Y(y)); prem = false; } else ctx.lineTo(X(x), Y(y));
+          }
+        } else {
+          f.forEach(function (p, i) { if (i === 0) ctx.moveTo(X(p[0]), Y(p[1])); else ctx.lineTo(X(p[0]), Y(p[1])); });
+        }
+        ctx.stroke(); ctx.restore();
+        return api;
+      },
+      points: function (pts, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.strokeStyle = css("--carte");
+        pts.forEach(function (p) {
+          var r = opts.rayon || 4.5;
+          ctx.beginPath();
+          if (opts.forme === "croix") {
+            ctx.strokeStyle = couleur(opts.couleur); ctx.lineWidth = 2;
+            ctx.moveTo(X(p[0]) - r, Y(p[1]) - r); ctx.lineTo(X(p[0]) + r, Y(p[1]) + r);
+            ctx.moveTo(X(p[0]) + r, Y(p[1]) - r); ctx.lineTo(X(p[0]) - r, Y(p[1]) + r); ctx.stroke();
+          } else { ctx.arc(X(p[0]), Y(p[1]), r, 0, 2 * Math.PI); ctx.fill(); ctx.lineWidth = 1; ctx.stroke(); }
+        });
+        return api;
+      },
+      texte: function (x, y, t, opts) {
+        opts = opts || {};
+        ctx.fillStyle = couleur(opts.couleur); ctx.font = (opts.gras ? "600 " : "") + "13px system-ui, Segoe UI, Arial, sans-serif";
+        ctx.textAlign = opts.align || "left"; ctx.textBaseline = "middle";
+        ctx.fillText(t, X(x) + (opts.dx || 0), Y(y) + (opts.dy || 0));
+        return api;
+      },
+      X: X, Y: Y, ctx: ctx, canvas: cv
+    };
+    fond();
+    return api;
+  }
+
+  /* Releve : l'eleve garde une mesure dans un tableau, qui peut alimenter un graphe.
+     colonnes : [{cle, titre, unite, dec}] ; graphe : {x, y, ...options de Sim.graphe} */
+  function releve(parent, o) {
+    var lignes = [];
+    var zone = el("div", { classe: "releve-zone" });
+    var gauche = el("div");
+    var table = el("table", { classe: "releve" });
+    var tete = el("tr"); o.colonnes.forEach(function (c) { tete.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+    table.appendChild(el("thead", null, [tete]));
+    var corps = el("tbody"); table.appendChild(corps);
+    var boutons = el("div", { classe: "rangee", style: "margin-top:8px" });
+    var bAnnuler = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    boutons.appendChild(bAnnuler); boutons.appendChild(bVider);
+    gauche.appendChild(table); gauche.appendChild(boutons);
+    zone.appendChild(gauche);
+    var gr = null;
+    if (o.graphe) { var droite = el("div"); zone.appendChild(droite); gr = graphe(droite, o.graphe); }
+    $(parent).appendChild(zone);
+    function dessiner() {
+      corps.innerHTML = "";
+      if (!lignes.length) {
+        var tr = el("tr", { classe: "vide" }); tr.appendChild(el("td", { colspan: o.colonnes.length, texte: o.vide || "Aucune mesure gardée pour l'instant." })); corps.appendChild(tr);
+      }
+      lignes.forEach(function (l) {
+        var tr = el("tr");
+        o.colonnes.forEach(function (c) { tr.appendChild(el("td", { texte: typeof l[c.cle] === "number" ? fr(l[c.cle], c.dec === undefined ? 2 : c.dec) : (l[c.cle] || "") })); });
+        corps.appendChild(tr);
+      });
+      if (gr) {
+        gr.effacer();
+        if (o.avantPoints) o.avantPoints(gr, lignes);
+        gr.points(lignes.map(function (l) { return [l[o.graphe.x], l[o.graphe.y]]; }), { couleur: o.graphe.couleur });
+      }
+      if (o.surChange) o.surChange(lignes);
+    }
+    bAnnuler.addEventListener("click", function () { lignes.pop(); dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; dessiner(); });
+    dessiner();
+    return {
+      ajouter: function (l) { if (o.max && lignes.length >= o.max) lignes.shift(); lignes.push(l); dessiner(); },
+      lignes: function () { return lignes.slice(); },
+      vider: function () { lignes = []; dessiner(); },
+      redessiner: dessiner,
+      graphe: gr
+    };
+  }
+
+  /* Enregistreur : garde une ligne du releve tout seul, a intervalle regulier du temps SIMULE,
+     comme une centrale d'acquisition. La simulation appelle tic(t) a chaque pas de calcul.
+     o : { periodes: [{val, texte}], valeur, lire: function (tPlanifie, tLancement) -> ligne ou null, label } */
+  function enregistreur(parent, rel, o) {
+    var periode = o.valeur, actif = false, prochain = null, dernier = 0, debut = 0;
+    var zone = el("div", { classe: "enregistreur" });
+    choix(zone, { label: o.label || "Enregistrement automatique : une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; } });
+    var b = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'enregistrement" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [b, lampe, info]));
+    $(parent).appendChild(zone);
+    function majInfo() {
+      var n = rel.lignes().length;
+      info.textContent = (actif ? "enregistre" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") + " dans le tableau" : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      b.textContent = oui ? "Arrêter l'enregistrement" : "Lancer l'enregistrement";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo();
+      if (o.surEtat) o.surEtat(oui);
+    }
+    b.addEventListener("click", function () { poser(!actif); });
+    majInfo();
+    return {
+      tic: function (t) {
+        if (!actif) return;
+        if (prochain === null) { prochain = t; debut = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;      // un pas trop long : pas de rattrapage en rafale
+        if (l) {
+          rel.ajouter(l); majInfo();
+          lampe.classList.remove("eclair"); void lampe.offsetWidth; lampe.classList.add("eclair");
+        }
+      },
+      actif: function () { return actif; },
+      lancer: function () { if (!actif) poser(true); },
+      arreter: function () { if (actif) poser(false); },
+      majInfo: majInfo,
+      noeud: zone
+    };
+  }
+
+  /* Centrale d'acquisition : l'enregistreur, le tableau et la courbe reunis, comme sur un vrai
+     enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
+     tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
+     Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+           lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
+           nomFichier, surChange } */
+  var COULEURS_VOIES = ["--accent", "--faux"];
+  function centrale(parent, o) {
+    var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
+    var periode = o.valeur, duree = o.duree || 0, TP = o.temps, voies = o.voies;
+    var montree = {}; voies.forEach(function (v) { montree[v.cle] = !v.cache; });
+    var trace = (o.trace || [voies[0].cle]).concat([null]).slice(0, 2);
+    var zone = el("div", { classe: "centrale" });
+    function css(nom) { return getComputedStyle(document.documentElement).getPropertyValue(nom).trim() || "#333"; }
+
+    /* Les reglages de l'acquisition */
+    var reg = el("div", { classe: "centrale-reglages" });
+    choix(reg, { label: "Une mesure toutes les", valeur: periode, options: o.periodes,
+      surChange: function (v) { periode = v; if (actif && prochain !== null) prochain = dernier + v; majInfo(); } });
+    if (o.durees) choix(reg, { label: "Arrêt automatique au bout de", valeur: duree, options: o.durees, surChange: function (v) { duree = v; majInfo(); } });
+    zone.appendChild(reg);
+    var bLancer = el("button", { type: "button", classe: "bouton principal", texte: "Lancer l'acquisition" });
+    var bMain = el("button", { type: "button", classe: "bouton", texte: "Une mesure maintenant" });
+    var lampe = el("span", { classe: "enr-lampe", "aria-hidden": "true" });
+    lampe.addEventListener("animationend", function () { lampe.classList.remove("eclair"); });
+    var info = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bLancer, bMain, lampe, info]));
+
+    /* La courbe en direct : deux voies au choix, chacune sur son axe */
+    var selects = [0, 1].map(function (i) {
+      var s = el("select", { "aria-label": i ? "Courbe 2, axe de droite" : "Courbe 1, axe de gauche" });
+      if (i) s.appendChild(el("option", { value: "", texte: "aucune" }));
+      voies.forEach(function (v) { s.appendChild(el("option", { value: v.cle, texte: v.titre + (v.unite ? " (" + v.unite + ")" : "") })); });
+      s.value = trace[i] || "";
+      s.addEventListener("change", function () { trace[i] = s.value || null; dessinerCourbe(); });
+      return s;
+    });
+    var pastille = function (i) { return el("span", { classe: "centrale-pastille", style: "background:" + css(COULEURS_VOIES[i]) }); };
+    var pastilles = [pastille(0), pastille(1)];
+    zone.appendChild(el("div", { classe: "centrale-traces" }, [
+      el("label", null, [pastilles[0], el("span", { texte: "Courbe 1, à gauche" }), selects[0]]),
+      el("label", null, [pastilles[1], el("span", { texte: "Courbe 2, à droite" }), selects[1]])
+    ]));
+    /* Le canevas se dessine a la largeur reelle de son cadre : sur un telephone, les graduations
+       restent lisibles au lieu d'etre reduites de moitie. */
+    var larg = 640, haut = 300, cv = el("canvas", { width: larg, height: haut, role: "img", "aria-label": "courbe de l'acquisition" });
+    var cadre = el("div", { classe: "graphe" }, [cv]);
+    zone.appendChild(cadre);
+    var ctx = cv.getContext("2d"), dpr = 1;
+    function dimensionner() {
+      var w = cadre.clientWidth ? Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) : 640, h = Math.round(w < 480 ? w * 0.72 : Math.min(320, w * 0.47)), d = Math.max(1, window.devicePixelRatio || 1);
+      if (w === larg && h === haut && d === dpr && cv.width === Math.round(w * d)) return;
+      larg = w; haut = h; dpr = d; cv.width = Math.round(w * d); cv.height = Math.round(h * d); ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    /* redessiner quand le cadre change de taille, y compris quand son onglet devient visible */
+    if (window.ResizeObserver) new ResizeObserver(function () { if (cadre.clientWidth && Math.round(Math.min(760, Math.max(280, cadre.clientWidth - 2))) !== larg) dessinerCourbe(); }).observe(cadre);
+    else window.addEventListener("resize", function () { dessinerCourbe(); });
+
+    /* Les voies du tableau */
+    var puces = el("div", { classe: "boutons" });
+    voies.forEach(function (v) {
+      var b = el("button", { type: "button", texte: v.titre, "aria-pressed": montree[v.cle] ? "true" : "false" });
+      b.addEventListener("click", function () { montree[v.cle] = !montree[v.cle]; b.setAttribute("aria-pressed", montree[v.cle] ? "true" : "false"); dessinerTable(); });
+      puces.appendChild(b);
+    });
+    zone.appendChild(el("div", { classe: "choix" }, [el("div", { classe: "titre", texte: "Colonnes du tableau (tout est enregistré)" }), puces]));
+    var table = el("table", { classe: "releve" }), boite = el("div", { classe: "centrale-table" }, [table]);
+    zone.appendChild(boite);
+    var bCopier = el("button", { type: "button", classe: "bouton", texte: "Copier pour un tableur" });
+    var bCsv = el("button", { type: "button", classe: "bouton", texte: "Enregistrer en CSV" });
+    var bRetirer = el("button", { type: "button", classe: "bouton", texte: "Retirer la dernière" });
+    var bVider = el("button", { type: "button", classe: "bouton", texte: "Tout effacer" });
+    var retour = el("span", { classe: "enr-info", "aria-live": "polite" });
+    zone.appendChild(el("div", { classe: "rangee" }, [bCopier, bCsv, bRetirer, bVider, retour]));
+    $(parent).appendChild(zone);
+
+    function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
+    var corps = null;
+    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
+    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function dessinerTable() {
+      var cs = colonnes(); table.innerHTML = "";
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      table.appendChild(el("thead", null, [tr]));
+      corps = el("tbody");
+      if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
+      lignes.forEach(function (l) { corps.appendChild(ligneTable(l, cs)); });
+      table.appendChild(corps);
+      boite.scrollTop = boite.scrollHeight;
+    }
+    function pasJoli(etendue, n) {
+      if (!(etendue > 0)) return 1;
+      var brut = etendue / n, p = Math.pow(10, Math.floor(Math.log10(brut))), r = brut / p;
+      return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
+    }
+    function bornes(cle) {
+      var a = Infinity, b = -Infinity;
+      lignes.forEach(function (l) { var y = l[cle]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } });
+      if (!isFinite(a)) return null;
+      if (b - a < 1e-9) { var d = Math.max(Math.abs(a) * 0.05, 0.5); a -= d; b += d; }
+      var marge = (b - a) * 0.04; a -= marge; b += marge;
+      var pas = pasJoli(b - a, 5); return { min: Math.floor(a / pas) * pas, max: Math.ceil(b / pas) * pas, pas: pas };
+    }
+    function decimales(pas) { return Math.max(0, -Math.floor(Math.log10(pas) + 1e-9)); }
+    function dessinerCourbe() {
+      dimensionner();
+      var mg = 52, md = trace[1] ? 52 : 14, mh = 26, mb = 38, w = larg - mg - md, h = haut - mh - mb;
+      ctx.clearRect(0, 0, larg, haut); ctx.fillStyle = css("--carte"); ctx.fillRect(0, 0, larg, haut);
+      ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif";
+      var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
+      var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
+      if (x1 - x0 < 1e-9) x1 = x0 + 1;
+      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
+      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
+      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      trace.forEach(function (cle, i) {
+        if (!cle) return;
+        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
+        ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.fillStyle = coul; ctx.textBaseline = "top";
+        ctx.textAlign = i ? "right" : "left"; ctx.fillText(v.titre + (v.unite ? " (" + v.unite + ")" : ""), i ? larg - 6 : 6, 5);
+        if (!b) return;
+        var Y = function (y) { return mh + h - (y - b.min) / (b.max - b.min) * h; };
+        ctx.font = "12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textBaseline = "middle"; ctx.textAlign = i ? "left" : "right";
+        for (var y = b.min; y <= b.max + 1e-9; y += b.pas) {
+          if (!i) { ctx.strokeStyle = css("--trait2"); ctx.beginPath(); ctx.moveTo(mg, Y(y)); ctx.lineTo(mg + w, Y(y)); ctx.stroke(); }
+          ctx.fillText(fr(y, decimales(b.pas)), i ? mg + w + 6 : mg - 6, Y(y));
+        }
+        ctx.strokeStyle = coul; ctx.lineWidth = 2; ctx.beginPath();
+        var prem = true;
+        lignes.forEach(function (l) { var yy = l[cle], xx = l[TP.cle]; if (typeof yy !== "number" || !isFinite(yy)) { prem = true; return; }
+          if (prem) { ctx.moveTo(X(xx), Y(yy)); prem = false; } else ctx.lineTo(X(xx), Y(yy)); });
+        ctx.stroke();
+        ctx.fillStyle = coul;
+        if (lignes.length <= 80) lignes.forEach(function (l) { var yy = l[cle]; if (typeof yy === "number" && isFinite(yy)) { ctx.beginPath(); ctx.arc(X(l[TP.cle]), Y(yy), 3, 0, 2 * Math.PI); ctx.fill(); } });
+      });
+      ctx.strokeStyle = css("--encre"); ctx.lineWidth = 1.2; ctx.strokeRect(mg, mh, w, h);
+      pastilles[1].style.visibility = trace[1] ? "visible" : "hidden";
+    }
+    function dessiner() { dessinerTable(); dessinerCourbe(); majInfo(); if (o.surChange) o.surChange(lignes); }
+    /* A chaque mesure, une ligne de plus au tableau et une courbe redessinee au plus quatre fois par seconde :
+       a grande vitesse, refaire tout le tableau a chaque point finit par figer la page. */
+    var dernierTrace = 0, traceEnAttente = null;
+    var suivre = true;      // le tableau defile avec les mesures, sauf si on est remonte le lire
+    boite.addEventListener("scroll", function () { suivre = boite.scrollTop + boite.clientHeight >= boite.scrollHeight - 8; });
+    function tracer() { dernierTrace = Date.now(); dessinerCourbe(); if (suivre) boite.scrollTop = boite.scrollHeight; }
+    function courbePlusTard() {
+      if (Date.now() - dernierTrace > 250) { tracer(); return; }
+      if (!traceEnAttente) traceEnAttente = setTimeout(function () { traceEnAttente = null; tracer(); }, 260);
+    }
+    function ecoule() { return Math.max(0, dernier - depart); }
+    function texteDuree(s) { return s >= 3600 ? fr(s / 3600, s % 3600 ? 1 : 0) + " h" : s >= 60 ? fr(s / 60, s % 60 ? 1 : 0) + " min" : fr(s, 0) + " s"; }
+    function majInfo() {
+      var n = lignes.length;
+      info.textContent = (actif ? "acquisition en cours" : "à l'arrêt") + (n ? " · " + n + " mesure" + (n > 1 ? "s" : "") : "") +
+        (actif && duree ? " · " + texteDuree(ecoule()) + " sur " + texteDuree(duree) : "");
+    }
+    function poser(oui) {
+      actif = oui; prochain = null;
+      bLancer.textContent = oui ? "Arrêter l'acquisition" : "Lancer l'acquisition";
+      lampe.className = "enr-lampe" + (oui ? " actif" : "");
+      majInfo(); if (o.surEtat) o.surEtat(oui);
+    }
+    function ajouter(l) {
+      if (!l) return;
+      if (l[TP.cle] === undefined) l[TP.cle] = (tCourant - (debut === null ? 0 : debut)) / (TP.echelle || 1);
+      lignes.push(l);
+      if (o.max && lignes.length > o.max) { lignes.shift(); dessinerTable(); }
+      else if (corps) {
+        if (lignes.length === 1) dessinerTable();
+        else corps.appendChild(ligneTable(l, colonnes()));
+      }
+      courbePlusTard(); majInfo(); if (o.surChange) o.surChange(lignes);
+      lampe.classList.remove("eclair"); lampe.classList.add("eclair");
+    }
+    function versTexte(sep, decimale) {
+      var cs = colonnes(), lignesTxt = [cs.map(function (c) { return c.titre + (c.unite ? " (" + c.unite + ")" : ""); }).join(sep)];
+      lignes.forEach(function (l) { lignesTxt.push(cs.map(function (c) { var x = l[c.cle]; return typeof x === "number" ? (isFinite(x) ? x.toFixed(c.dec === undefined ? 2 : c.dec).replace(".", decimale) : "") : (x || ""); }).join(sep)); });
+      return lignesTxt.join("\r\n");
+    }
+    function dire(t) { retour.textContent = t; setTimeout(function () { if (retour.textContent === t) retour.textContent = ""; }, 4000); }
+    /* Relancer apres un arret continue la meme serie, sur le meme temps ; tout effacer la remet a zero. */
+    function lancer() { if (!lignes.length) debut = null; poser(true); }
+    bLancer.addEventListener("click", function () { if (actif) poser(false); else lancer(); });
+    bMain.addEventListener("click", function () { if (debut === null) debut = tCourant; ajouter(o.lire(tCourant, debut)); });
+    bRetirer.addEventListener("click", function () { lignes.pop(); if (!lignes.length && !actif) debut = null; dessiner(); });
+    bVider.addEventListener("click", function () { lignes = []; if (!actif) debut = null; dessiner(); });
+    bCopier.addEventListener("click", function () {
+      var t = versTexte("\t", ",");
+      function secours() {
+        var ta = el("textarea", { style: "position:fixed;left:-9999px;top:0" }); ta.value = t; document.body.appendChild(ta); ta.select();
+        var ok = false; try { ok = document.execCommand("copy"); } catch (x) { ok = false; }
+        document.body.removeChild(ta); dire(ok ? "Copié : colle-le dans le tableur." : "La copie est refusée par ce navigateur : enregistre en CSV.");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { dire("Copié : colle-le dans le tableur."); }, secours);
+      else secours();
+    });
+    bCsv.addEventListener("click", function () {
+      var blob = new Blob(["﻿" + versTexte(";", ",")], { type: "text/csv;charset=utf-8" });
+      var a = el("a", { href: URL.createObjectURL(blob), download: o.nomFichier || "acquisition.csv" });
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      dire("Fichier CSV enregistré, séparateur point-virgule.");
+    });
+    dessiner();
+    return {
+      tic: function (t) {
+        tCourant = t;
+        if (!actif) return;
+        if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
+        if (t + 1e-9 < prochain) return;
+        var l = o.lire(prochain, debut);
+        dernier = prochain; prochain += periode;
+        if (prochain <= t) prochain = t + periode;
+        if (l) { if (l[TP.cle] === undefined) l[TP.cle] = (dernier - debut) / (TP.echelle || 1); ajouter(l); }
+        if (duree && dernier - depart >= duree - 1e-9) poser(false);
+        else majInfo();
+      },
+      ajouter: ajouter, lignes: function () { return lignes.slice(); }, vider: function () { lignes = []; if (!actif) debut = null; dessiner(); },
+      lancer: function () { if (!actif) lancer(); }, arreter: function () { if (actif) poser(false); },
+      actif: function () { return actif; }, majInfo: majInfo, redessiner: dessiner,
+      tracer: function (c1, c2) { trace = [c1 || trace[0], c2 === undefined ? trace[1] : c2]; selects[0].value = trace[0]; selects[1].value = trace[1] || ""; dessinerCourbe(); },
+      periode: function () { return periode; }, noeud: zone
+    };
+  }
+
+  /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
+     pour monter), a la molette de la souris ou aux fleches du clavier.
+     o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
+  function molette(parent, o) {
+    var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
+    var g = svg("g", { "class": "molette", transform: "translate(" + o.x + " " + o.y + ")", tabindex: "0", role: "slider",
+      "aria-label": o.label || "", "aria-valuemin": o.min, "aria-valuemax": o.max }, parent);
+    svg("circle", { r: o.zone || 46, fill: "transparent" }, g);
+    for (var k = 0; k <= 10; k++) {
+      var a = (-135 + 27 * k) * Math.PI / 180;
+      svg("line", { x1: Math.sin(a) * (r + 3), y1: -Math.cos(a) * (r + 3), x2: Math.sin(a) * (r + (k % 5 ? 6 : 8)), y2: -Math.cos(a) * (r + (k % 5 ? 6 : 8)), "class": "molette-graduation" }, g);
+    }
+    svg("circle", { r: r, "class": "molette-corps" }, g);
+    var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
+    var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
+    var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    function maj() {
+      var f = (v - o.min) / (o.max - o.min);
+      index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
+      val.textContent = o.format ? o.format(v) : fr(v, dec) + (o.unite ? " " + o.unite : "");
+      g.setAttribute("aria-valuenow", v); g.setAttribute("aria-valuetext", val.textContent);
+    }
+    function poser(x, silencieux) {
+      var p = o.pas || 1; x = borne(Math.round(x / p) * p, o.min, o.max); x = Number(x.toFixed(6));
+      var change = x !== v; v = x; maj();
+      if (change && !silencieux && o.surChange) o.surChange(v);
+    }
+    g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
+    g.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
+      g.classList.add("tourne");
+      function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
+      function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
+      g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
+    });
+    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("keydown", function (e) {
+      var p = o.pas || 1;
+      if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
+      if (e.key === "ArrowDown" || e.key === "ArrowLeft") { poser(v - p); e.preventDefault(); }
+    });
+    maj();
+    return { get: function () { return v; }, set: poser, noeud: g, montrer: function (oui) { g.style.display = oui ? "" : "none"; } };
+  }
+
+  /* Defi : une valeur a trouver. La page dit juste ou pas encore, et rappelle la methode,
+     jamais la valeur attendue. attendu : nombre ou fonction qui le calcule au moment du clic. */
+  function defi(parent, o) {
+    var inp = el("input", { type: "text", inputmode: "decimal", "aria-label": o.question });
+    var b = el("button", { type: "button", classe: "bouton", texte: "Vérifier" });
+    var retour = el("div", { classe: "retour", "aria-live": "polite" });
+    var bloc = el("div", { classe: "defi" }, [el("p", { html: o.question }), el("div", { classe: "saisie" }, [inp, o.unite ? el("span", { texte: o.unite }) : null, b]), retour]);
+    function verifier() {
+      var v = lire(inp.value), a = typeof o.attendu === "function" ? o.attendu() : o.attendu;
+      retour.className = "retour";
+      if (!isFinite(v)) { retour.textContent = "Écris un nombre."; return; }
+      var tol = o.tolerance === undefined ? 0.05 : o.tolerance;
+      var ok = Math.abs(v - a) <= Math.abs(a) * tol + (o.toleranceAbsolue || 0);
+      retour.className = "retour " + (ok ? "juste" : "faux");
+      retour.innerHTML = ok ? "Juste." : "Pas encore. <span class=\"methode\">" + (o.methode || "") + "</span>";
+      if (o.surReponse) o.surReponse(ok, v);
+    }
+    b.addEventListener("click", verifier);
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+    $(parent).appendChild(bloc);
+    return { noeud: bloc, effacer: function () { inp.value = ""; retour.textContent = ""; retour.className = "retour"; } };
+  }
+
+  /* Boucle d'animation : f(dt en secondes). S'arrete seule quand l'onglet est cache.
+     Sim.avancer(s) fait tourner les boucles a la main : c'est la porte des essais, dans un
+     navigateur qui ne dessine pas (onglet cache, capture sans affichage). */
+  var boucles = [];
+  function avancer(secondes, pasDt) {
+    pasDt = pasDt || 0.05;
+    for (var t = 0; t < secondes - 1e-9; t += pasDt) boucles.forEach(function (f) { f(pasDt); });
+  }
+  function animer(f) {
+    boucles.push(f);
+    var avant = null, actif = true, id = null;
+    function pas(t) {
+      if (avant === null) avant = t;
+      var dt = Math.min(0.1, (t - avant) / 1000); avant = t;
+      if (actif) f(dt);
+      id = requestAnimationFrame(pas);
+    }
+    id = requestAnimationFrame(pas);
+    return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
+  }
+
+  /* Petit utilitaire SVG. */
+  var NS = "http://www.w3.org/2000/svg";
+  function svg(tag, attrs, parent) {
+    var n = document.createElementNS(NS, tag);
+    for (var k in attrs) { if (k === "texte") n.textContent = attrs[k]; else n.setAttribute(k, attrs[k]); }
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+
+  return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
+    afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
+    defi: defi, animer: animer, avancer: avancer, svg: svg };
+})();
+
+</script>
+</head>
+<body>
+<div class="page">
+<header class="tete">
+<div class="surtitre">BTS FED · séance 13, la PAC et son COP</div>
+<h1>La pompe à chaleur air-eau</h1>
+<p class="chapeau">Une pompe à chaleur air-eau dans sa chambre climatique, puis une journée de grand froid dans une maison. On tourne au doigt l'air de la chambre, le variateur du compresseur et le banc de charge, on lit les manomètres du R32 et le wattmètre ; la centrale d'acquisition enregistre la marche, les dégivrages et les compteurs dans le temps.</p>
+</header>
+<style>
+:root{--chaud:#c0392b;--froid:#2c6da6;--fluide:#7b4fa0}
+.objet{fill:var(--carte);stroke:var(--encre);stroke-width:2;stroke-linejoin:round}
+.etiq{font-size:11px;fill:var(--encre2)}
+.etiq-titre{font-size:12px;font-weight:700;fill:var(--encre)}
+.lcd{fill:#cfd8cf;stroke:var(--encre2);stroke-width:1}
+.lcd-txt{font-family:ui-monospace,Consolas,monospace;font-size:11px;font-weight:600;fill:#1d2a1d}
+.cadran{fill:var(--carte);stroke:var(--encre);stroke-width:2}
+.carte [hidden]{display:none!important}
+.case{display:flex;gap:8px;align-items:center;font-size:.92rem;font-weight:600}
+.case input{width:20px;height:20px;accent-color:var(--accent)}
+.fiche{font-size:.9rem;color:var(--encre2);margin:0}
+.fiche b{color:var(--encre)}
+#fluxBloc{background:var(--scene);border:1px solid var(--trait2);border-radius:var(--r)}
+#fluxBloc svg{display:block;width:100%;height:auto}
+</style>
+
+<nav class="onglets" id="experiences" aria-label="Expériences">
+  <button type="button" data-vue="vueBanc">Le banc de la PAC</button>
+  <button type="button" data-vue="vueJour">Une journée de grand froid</button>
+</nav>
+
+<div class="carte">
+  <h2><span class="num">1</span><span id="titreReglages">La chambre climatique</span></h2>
+  <p class="consigne" id="consigneReglages"></p>
+  <div class="commandes" id="reglages"></div>
+  <p class="fiche" id="fiche"></p>
+</div>
+
+<div class="plan">
+  <div class="carte">
+    <h2><span class="num">2</span><span id="titreScene">La PAC sur son banc</span></h2>
+    <div class="scene">
+      <svg id="scene" viewBox="0 0 640 440" role="img" aria-label="La pompe à chaleur, ses manomètres, son wattmètre et son circuit d'eau"></svg>
+    </div>
+    <p class="legende" id="legende"></p>
+  </div>
+  <div class="carte">
+    <h2><span class="num">3</span>Règle et mesure</h2>
+    <div class="commandes">
+      <div id="cmd" class="commandes"></div>
+      <div class="rangee">
+        <button type="button" class="bouton principal" id="bMarche">Démarrer la PAC</button>
+      </div>
+      <div class="afficheurs" id="instruments"></div>
+      <div id="vitesse"></div>
+      <label class="case"><input type="checkbox" id="voirFlux"> Montrer où va l'énergie</label>
+      <div id="fluxBloc" hidden><svg id="flux" viewBox="0 0 320 178" role="img" aria-label="Où va la puissance, en ce moment"></svg></div>
+      <p class="alerte" id="etat"></p>
+    </div>
+  </div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">4</span>La centrale d'acquisition</h2>
+  <p class="consigne" id="consigneReleve"></p>
+  <div id="vueBanc" class="vue"></div>
+  <div id="vueJour" class="vue"></div>
+</div>
+
+<div class="carte">
+  <h2><span class="num">5</span>Le résultat</h2>
+  <p class="consigne" id="consigneResultat"></p>
+  <div class="commandes" id="defis"></div>
+  <details class="modele">
+    <summary>Ce que la simulation simplifie</summary>
+    <ul>
+      <li>Le COP vaut 52 % de la limite de Carnot calculée sur les températures d'évaporation et de condensation, plafonné à 6,5. L'évaporation se fait 2 à 8 °C sous l'air, la condensation 1 à 4 °C au-dessus de l'eau de départ, selon la vitesse du compresseur.</li>
+      <li>La pression de saturation du R32 suit ln p = 10,83 − 2 386 ÷ T, en bar absolus, à 2 % près de −30 à 60 °C. Les manomètres lisent en bar relatifs, avec l'échelle de température du R32.</li>
+      <li>La puissance de la PAC baisse de 2,5 % par degré de froid sous 7 °C, et de 0,8 % par degré d'eau au-dessus de 35 °C. Le givre se forme entre −7 et 6 °C quand l'air est humide ; le dégivrage dure quatre minutes, pris sur l'eau du chauffage ; pendant ce temps, dans la journée, l'appoint maintient le chauffage de la maison.</li>
+      <li>La maison a un GV de 200 W/K et 0,5 kW d'apports ; la loi d'eau est bien réglée sur ses émetteurs. L'appoint est une résistance électrique qui couvre ce que la PAC ne peut pas fournir.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function () {
+  /* ---------- Le R32 et la machine ---------- */
+  function psat(t) { return Math.exp(10.829 - 2385.6 / (t + 273.15)); }                  // bar absolus
+  function tsat(p) { return 2385.6 / (10.829 - Math.log(p)) - 273.15; }
+  var ETA = 0.52, COPMAX = 6.5, AUX = 0.08;
+  /* La machine a une vitesse s (0,3 a 1), l'air a ta, l'eau de depart a td, le givre g (0 a 1). */
+  function machine(Pnom, ta, td, s, g) {
+    var fcap = Math.max(0.3, (1 + 0.025 * (ta - 7)) * (1 - 0.008 * (td - 35))) * (1 - 0.2 * g);
+    var te = ta - (2 + 6 * s) - 4 * g, tc = td + (1 + 3 * s);
+    var cop = Math.min(COPMAX, ETA * (tc + 273.15) / (tc - te));
+    var Pc = Pnom * fcap * s, Pe = Pc / cop + AUX;
+    return { Pc: Pc, Pe: Pe, Pevap: Pc - (Pe - AUX), te: te, tc: tc, cop: cop, carnot: (tc + 273.15) / (tc - te), pBP: psat(te) - 1.013, pHP: psat(tc) - 1.013,
+      tRef: tc + 22 + 0.3 * (tc - te - 30), tAsp: te + 5, tLiq: tc - 4, fcap: fcap };
+  }
+
+  /* ---------- Les reglages ---------- */
+  var reg = { vitesse: 10, Pnom: 8, emetteurs: "plancher", tmoy: -5 };
+  var EMET = { plancher: { d: 35, r: 30, nom: "plancher chauffant 35/30" }, radiateurs: { d: 55, r: 45, nom: "radiateurs 55/45" } };
+  var GV = 200, TI = 19, GAINS = 0.5, PAPP = 6;
+  function tExt(h) { return reg.tmoy + 4 * Math.sin(2 * Math.PI * (h - 9) / 24); }
+
+  /* ---------- L'etat ---------- */
+  var exp = "banc", etats = {};
+  function E() { return etats[exp]; }
+  function etatNeuf(x) {
+    return { exp: x, t: 0, marche: false, ta: 7, hr: 85, trCons: 30, s: 0.7, Q: 1.2, givre: 0, degivre: 0, nDeg: 0,
+      Td: 20, Tr: 20, m: machine(8, 7, 35, 0.7, 0), Pc: 0, Pe: 0, wh: 0, kWhc: 0,
+      h: 0, jour: false, fini: false, z: { Qpac: 0, Qapp: 0, Epac: 0, Eapp: 0 }, Pdem: 0, Papp: 0, hist: [] };
+  }
+  function givreVitesse(ta, hr, s) { return ta < 6 && ta > -7 && hr > 60 ? s * (6 - Math.abs(ta)) / 6 * (hr - 60) / 40 / 1200 : 0; }
+
+  /* ---------- Le banc ---------- */
+  function pasBanc(e, dt) {
+    e.Tr += (e.trCons - e.Tr) * (1 - Math.exp(-dt / 40));
+    if (!e.marche) { e.Pc = 0; e.Pe = 0; e.Td += (e.Tr - e.Td) * (1 - Math.exp(-dt / 20)); e.t += dt; return; }
+    if (e.degivre > 0) {                                  // cycle inverse : la chaleur est reprise a l'eau
+      e.degivre -= dt; e.Pc = -2.5; e.Pe = 1.5; e.givre = Math.max(0, e.givre - dt / 240);
+      if (e.degivre <= 0) { e.givre = 0; message("Dégivrage terminé : la PAC chauffe de nouveau."); }
+    } else {
+      var m = machine(reg.Pnom, e.ta, e.Td, e.s, e.givre);
+      e.m = m; e.Pc = m.Pc; e.Pe = m.Pe;
+      e.givre = Math.min(1, e.givre + givreVitesse(e.ta, e.hr, e.s) * dt);
+      if (e.givre >= 1) { e.degivre = 240; e.nDeg++; message("L'évaporateur est pris de givre : la PAC inverse son cycle pour dégivrer, quatre minutes."); }
+    }
+    var Td = e.Tr + e.Pc / (1.163 * e.Q);
+    e.Td += (Td - e.Td) * (1 - Math.exp(-dt / 20));
+    e.wh += e.Pe * dt / 3.6; e.kWhc += e.Pc * dt / 3600;
+    e.t += dt;
+  }
+
+  /* ---------- La journee ---------- */
+  function pasJour(e, dt) {
+    if (!e.jour || e.fini) { e.Pc = 0; e.Pe = 0; e.Papp = 0; return; }
+    var h = e.h, R = EMET[reg.emetteurs], ta = tExt(h);
+    var Pdem = Math.max(0, GV * (TI - ta) / 1000 - GAINS), x = Pdem / (GV * 26 / 1000);
+    var td = TI + ((R.d + R.r) / 2 - TI) * Math.pow(Math.max(x, 0.01), 1 / (R.d > 40 ? 1.3 : 1.1)) + (R.d - R.r) * x / 2;
+    e.ta = ta; e.Pdem = Pdem; e.Td = td; e.Tr = td - (R.d - R.r) * x;
+    var Pc = 0, Pe = 0, Papp = 0;
+    if (e.degivre > 0) { e.degivre -= dt; Pc = -2.5; Pe = 1.5; Papp = Pdem + 2.5 > 0 ? Math.min(PAPP, Pdem + 2.5) : 0; e.givre = 0; }
+    else {
+      var full = machine(reg.Pnom, ta, td, 1, e.givre), s = Math.min(1, Math.max(0.3, Pdem / Math.max(full.Pc, 0.1)));
+      var m = machine(reg.Pnom, ta, td, s, e.givre);
+      if (Pdem < m.Pc) { var f = Pdem / m.Pc; Pc = Pdem; Pe = m.Pe * f; }          // marche-arret sous la vitesse mini
+      else { Pc = m.Pc; Pe = m.Pe; Papp = Math.min(PAPP, Pdem - m.Pc); }
+      e.m = m; e.s = s;
+      e.givre = Math.min(1, e.givre + givreVitesse(ta, 85, s) * dt);
+      if (e.givre >= 1) { e.degivre = 240; e.nDeg++; }
+    }
+    e.Pc = Pc; e.Pe = Pe; e.Papp = Papp;
+    e.z.Qpac += Pc * dt / 3600; e.z.Qapp += Papp * dt / 3600; e.z.Epac += Pe * dt / 3600; e.z.Eapp += Papp * dt / 3600;
+    e.h += dt / 3600; e.t += dt;
+    if (e.hist.length === 0 || e.h - e.hist[e.hist.length - 1].h >= 0.1) e.hist.push({ h: e.h, Pdem: Pdem, Pc: Math.max(0, Pc), Papp: Papp, ta: ta });
+    if (e.h >= 24) { e.h = 24; e.fini = true; e.jour = false; message("Fin de la journée : relève les compteurs d'électricité et le calorimètre."); }
+  }
+
+  /* ---------- Les lectures ---------- */
+  function lec(e) {
+    var m = e.m, on = e.marche || e.exp === "jour";
+    return { ta: Sim.mesure(e.ta, { absolu: 0.05, resolution: 0.1 }), Td: Sim.mesure(e.Td, { absolu: 0.05, resolution: 0.1 }), Tr: Sim.mesure(e.Tr, { absolu: 0.05, resolution: 0.1 }),
+      Q: Sim.mesure(e.Q, { relatif: 0.003, resolution: 0.01 }), Pe: Sim.mesure(e.Pe * 1000, { relatif: 0.003, resolution: 1 }),
+      pBP: on && e.degivre <= 0 && e.Pe > 0 ? Sim.mesure(m.pBP, { absolu: 0.05, resolution: 0.1 }) : NaN, pHP: on && e.degivre <= 0 && e.Pe > 0 ? Sim.mesure(m.pHP, { absolu: 0.1, resolution: 0.1 }) : NaN,
+      tRef: Sim.mesure(on && e.Pe > 0 ? m.tRef : e.Td, { absolu: 0.2, resolution: 0.1 }), tAsp: Sim.mesure(on && e.Pe > 0 ? m.tAsp : e.ta, { absolu: 0.1, resolution: 0.1 }),
+      wh: Math.floor(e.wh), kWhc: Math.floor(e.kWhc * 100) / 100,
+      eJour: Math.floor((e.z.Epac + e.z.Eapp) * 10) / 10, qJour: Math.floor((e.z.Qpac + e.z.Qapp) * 10) / 10, appJour: Math.floor(e.z.Eapp * 10) / 10 };
+  }
+  function heure(h) { var m = Math.floor(h * 60); return Math.floor(m / 60) + " h " + (m % 60 < 10 ? "0" : "") + (m % 60); }
+
+  /* ---------- Les reglages de la carte 1 ---------- */
+  function message(t) { if (t) document.getElementById("etat").textContent = t; }
+  function poserReglages() {
+    var R = document.getElementById("reglages"), e = E(); R.innerHTML = "";
+    Sim.choix(R, { label: "La PAC, puissance à +7 / 35 °C", valeur: reg.Pnom, options: [{ val: 6, texte: "6 kW" }, { val: 8, texte: "8 kW" }, { val: 11, texte: "11 kW" }],
+      surChange: function (v) { reg.Pnom = v; etats[exp] = etatNeuf(exp); poserCommandes(); poserDefis(); message("PAC de " + v + " kW montée."); } });
+    if (exp === "banc") {
+      document.getElementById("fiche").innerHTML = "PAC air-eau au <b>R32</b>, dans une chambre climatique. Le <b>banc de charge</b> impose le retour d'eau ; le <b>wattmètre</b> mesure toute l'électricité de la PAC, ventilateur compris. Les manomètres portent l'échelle de température du R32.";
+    } else {
+      Sim.choix(R, { label: "Les émetteurs", valeur: reg.emetteurs, options: Object.keys(EMET).map(function (k) { return { val: k, texte: EMET[k].nom }; }),
+        surChange: function (v) { reg.emetteurs = v; etats.jour = etatNeuf("jour"); poserCommandes(); } });
+      Sim.curseur(R, { label: "Température extérieure moyenne du jour", min: -12, max: 8, pas: 1, valeur: reg.tmoy, unite: "°C", dec: 0, surChange: function (v) { reg.tmoy = v; etats.jour = etatNeuf("jour"); poserCommandes(); } });
+      document.getElementById("fiche").innerHTML = "Une maison de <b>GV 200 W/K</b> à 19 °C : <b>5,2 kW</b> à −7 °C. Un <b>appoint électrique</b> de 6 kW couvre ce que la PAC ne fournit pas. Deux compteurs d'électricité, PAC et appoint, et un <b>calorimètre</b> sur le chauffage.";
+    }
+  }
+  var C = {};
+  function poserCommandes() {
+    var Z = document.getElementById("cmd"), e = E(); Z.innerHTML = ""; C = {};
+    Z.appendChild(Sim.el("p", { classe: "fiche", html: exp === "banc"
+      ? "Tout se règle <b>sur la scène</b>, au doigt : l'air et l'humidité de la chambre climatique, le variateur du compresseur, le retour du banc de charge. On touche le groupe extérieur pour démarrer la PAC."
+      : "Touche la PAC, ou le bouton, pour lancer la journée." }));
+    majMolettes(); poserInstruments(); afficher();
+  }
+  var I = document.getElementById("instruments"), A = {};
+  function poserInstruments() {
+    I.innerHTML = ""; A = {};
+    if (exp === "banc") {
+      A.Pe = Sim.afficheur(I, { nom: "Wattmètre", unite: "W", dec: 0 });
+      A.wh = Sim.afficheur(I, { nom: "Compteur électrique", unite: "Wh", dec: 0 });
+      A.Td = Sim.afficheur(I, { nom: "Eau · départ", unite: "°C", dec: 1 });
+      A.Tr = Sim.afficheur(I, { nom: "Eau · retour", unite: "°C", dec: 1 });
+      A.Q = Sim.afficheur(I, { nom: "Débitmètre", unite: "m³/h", dec: 2 });
+      A.bp = Sim.afficheur(I, { nom: "Manomètre BP", unite: "bar", dec: 1 });
+      A.hp = Sim.afficheur(I, { nom: "Manomètre HP", unite: "bar", dec: 1 });
+      A.ref = Sim.afficheur(I, { nom: "Refoulement compresseur", unite: "°C", dec: 1 });
+    } else {
+      A.h = Sim.afficheur(I, { nom: "Heure", unite: "", dec: 0 });
+      A.ta = Sim.afficheur(I, { nom: "Dehors", unite: "°C", dec: 1 });
+      A.Td = Sim.afficheur(I, { nom: "Eau · départ", unite: "°C", dec: 1 });
+      A.q = Sim.afficheur(I, { nom: "Calorimètre", unite: "kWh", dec: 1 });
+      A.e = Sim.afficheur(I, { nom: "Électricité · PAC et appoint", unite: "kWh", dec: 1 });
+      A.app = Sim.afficheur(I, { nom: "dont l'appoint", unite: "kWh", dec: 1 });
+      A.deg = Sim.afficheur(I, { nom: "Dégivrages", unite: "", dec: 0 });
+    }
+  }
+  function afficher() {
+    var e = E(), l = lec(e);
+    if (exp === "banc") {
+      A.Pe.set(l.Pe, 0); A.wh.set(l.wh, 0); A.Td.set(l.Td, 1); A.Tr.set(l.Tr, 1); A.Q.set(l.Q, 2);
+      A.bp.set(isFinite(l.pBP) ? l.pBP : "—", 1); A.hp.set(isFinite(l.pHP) ? l.pHP : "—", 1); A.ref.set(l.tRef, 1);
+    } else { A.h.set(heure(e.h)); A.ta.set(l.ta, 1); A.Td.set(l.Td, 1); A.q.set(l.qJour, 1); A.e.set(l.eJour, 1); A.app.set(l.appJour, 1); A.deg.set(e.nDeg, 0); }
+    var b = document.getElementById("bMarche");
+    b.textContent = exp === "banc" ? (e.marche ? "Arrêter la PAC" : "Démarrer la PAC") : (e.fini ? "Journée terminée" : e.jour ? "Pause" : e.h > 0 ? "Reprendre la journée" : "Lancer la journée");
+    b.disabled = exp === "jour" && e.fini;
+  }
+
+  /* ---------- Les releves ---------- */
+  /* ---------- La centrale d'acquisition, une par experience ---------- */
+  var CEN = {};
+  CEN.banc = Sim.centrale("#vueBanc", {
+    temps: { cle: "t", titre: "t", unite: "min", dec: 2, echelle: 60 },
+    voies: [{ cle: "ta", titre: "Air", unite: "°C", dec: 1 }, { cle: "Td", titre: "Départ", unite: "°C", dec: 1 }, { cle: "Tr", titre: "Retour", unite: "°C", dec: 1 },
+      { cle: "Q", titre: "Débit", unite: "m³/h", dec: 2, cache: true }, { cle: "Pe", titre: "Wattmètre", unite: "W", dec: 0 }, { cle: "bp", titre: "BP", unite: "bar", dec: 1 },
+      { cle: "hp", titre: "HP", unite: "bar", dec: 1 }, { cle: "tRef", titre: "Refoulement", unite: "°C", dec: 1, cache: true }, { cle: "wh", titre: "Compteur", unite: "Wh", dec: 0 }],
+    periodes: [{ val: 10, texte: "10 s" }, { val: 30, texte: "30 s" }, { val: 60, texte: "1 min" }, { val: 120, texte: "2 min" }], valeur: 30,
+    durees: [{ val: 0, texte: "jamais" }, { val: 600, texte: "10 min" }, { val: 1800, texte: "30 min" }, { val: 3600, texte: "1 h" }], duree: 0,
+    trace: ["Pe", "Td"], nomFichier: "pac-banc.csv",
+    lire: function () { var l = lec(etats.banc); return { ta: l.ta, Td: l.Td, Tr: l.Tr, Q: l.Q, Pe: l.Pe, bp: l.pBP, hp: l.pHP, tRef: l.tRef, wh: l.wh }; }
+  });
+  CEN.jour = Sim.centrale("#vueJour", {
+    temps: { cle: "h", titre: "Heure", unite: "h", dec: 2, echelle: 3600 },
+    voies: [{ cle: "ta", titre: "Dehors", unite: "°C", dec: 1 }, { cle: "Td", titre: "Départ", unite: "°C", dec: 1 }, { cle: "Pch", titre: "Chauffage", unite: "kW", dec: 2, cache: true },
+      { cle: "Pel", titre: "Électricité", unite: "kW", dec: 2, cache: true }, { cle: "q", titre: "Calorimètre", unite: "kWh", dec: 1 }, { cle: "e", titre: "Compteurs", unite: "kWh", dec: 1 },
+      { cle: "app", titre: "dont appoint", unite: "kWh", dec: 1 }],
+    periodes: [{ val: 900, texte: "15 min" }, { val: 1800, texte: "30 min" }, { val: 3600, texte: "1 h" }], valeur: 1800,
+    durees: [{ val: 0, texte: "jamais" }, { val: 21600, texte: "6 h" }, { val: 43200, texte: "12 h" }, { val: 86400, texte: "24 h" }], duree: 0,
+    trace: ["e", "ta"], nomFichier: "pac-journee.csv",
+    lire: function () { var e = etats.jour, l = lec(e); return { h: e.h, ta: l.ta, Td: l.Td, Pch: Sim.mesure(Math.max(0, e.Pc) + e.Papp, { relatif: 0.01, resolution: 0.01 }),
+      Pel: Sim.mesure(e.Pe + e.Papp, { relatif: 0.005, resolution: 0.01 }), q: l.qJour, e: l.eJour, app: l.appJour }; }
+  });
+
+  /* ---------- Les verifications ---------- */
+  function stable(e) { return e.marche && e.degivre <= 0 && Math.abs(e.Tr - e.trCons) < 0.5 && e.t > 150; }
+  function poserDefis() {
+    var D = document.getElementById("defis"); D.innerHTML = "";
+    if (exp === "banc") {
+      Sim.defi(D, { question: "Puissance de chauffage livrée à l'eau, P = 1,163 × Q × (θ<sub>départ</sub> − θ<sub>retour</sub>) :", unite: "kW",
+        attendu: function () { return stable(E()) ? E().Pc : NaN; }, tolerance: 0.03, toleranceAbsolue: 0.2,
+        methode: "Q en m³/h, l'écart en kelvins : P en kW. Attends un retour stable, hors dégivrage. L'écart ne fait que 4 ou 5 K : moyenne plusieurs lignes de la centrale plutôt qu'une lecture au dixième." });
+      Sim.defi(D, { question: "COP mesuré, puissance de chauffage ÷ puissance électrique :", unite: "",
+        attendu: function () { return stable(E()) ? E().Pc / E().Pe : NaN; }, tolerance: 0.07, methode: "Les deux puissances dans la même unité : le wattmètre est en watts." });
+      Sim.defi(D, { question: "Limite de Carnot, avec les températures de saturation lues sur les manomètres :", unite: "",
+        attendu: function () { return stable(E()) ? E().m.carnot : NaN; }, tolerance: 0.06, methode: "COP max = T cond ÷ (T cond − T évap), en kelvins. T évap sur l'échelle du R32 du manomètre BP, T cond sur celle du HP." });
+      Sim.defi(D, { question: "Chaleur prise à l'air extérieur par l'évaporateur :", unite: "kW",
+        attendu: function () { return stable(E()) ? E().m.Pevap : NaN; }, tolerance: 0.05, toleranceAbsolue: 0.2, methode: "Rien n'est créé : chaleur livrée = chaleur prise à l'air + travail du compresseur. Le ventilateur prend 80 W du wattmètre." });
+      document.getElementById("consigneResultat").innerHTML = "Démarre, attends que le retour soit stable, hors dégivrage, puis calcule avec <b>tes</b> lectures.";
+    } else {
+      Sim.defi(D, { question: "Chaleur livrée au chauffage pendant la journée :", unite: "kWh",
+        attendu: function () { var e = E(); return e.fini ? e.z.Qpac + e.z.Qapp : NaN; }, tolerance: 0.02, methode: "La lecture du calorimètre à minuit." });
+      Sim.defi(D, { question: "COP de la PAC seule sur la journée, dégivrages compris :", unite: "",
+        attendu: function () { var e = E(); return e.fini && e.z.Epac > 0 ? e.z.Qpac / e.z.Epac : NaN; }, tolerance: 0.04,
+        methode: "Chaleur de la PAC ÷ électricité de la PAC : l'appoint se retire des deux, il chauffe à 1 kWh pour 1 kWh." });
+      Sim.defi(D, { question: "COP de l'installation, appoint compris :", unite: "",
+        attendu: function () { var e = E(); return e.fini ? (e.z.Qpac + e.z.Qapp) / (e.z.Epac + e.z.Eapp) : NaN; }, tolerance: 0.04, methode: "Toute la chaleur ÷ toute l'électricité." });
+      document.getElementById("consigneResultat").innerHTML = "Lance la journée et laisse-la aller jusqu'à minuit. Puis change la météo ou les émetteurs, et compare.";
+    }
+  }
+
+  /* ---------- La scene ---------- */
+  var S = document.getElementById("scene"), svg = Sim.svg;
+  function css(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function texte(p, x, y, t, o) { o = o || {}; return svg("text", { x: x, y: y, "class": o.classe || "etiq", "text-anchor": o.ancre || "start", texte: t }, p); }
+  function lcd(G, x, y, w, val) { svg("rect", { x: x, y: y, width: w, height: 17, rx: 2, "class": "lcd" }, G); svg("text", { x: x + w / 2, y: y + 12.5, "text-anchor": "middle", "class": "lcd-txt", texte: val }, G); }
+  function couleurEau(t) { var k = Sim.borne((t - 15) / 45, 0, 1); return "rgb(" + Math.round(44 + 148 * k) + "," + Math.round(109 - 52 * k) + "," + Math.round(166 - 123 * k) + ")"; }
+  /* Un manometre a deux echelles : la pression relative dehors, la temperature du R32 dedans. */
+  function manometre(G, cx, cy, pmax, p, temps, coul, titre) {
+    svg("circle", { cx: cx, cy: cy, r: 40, "class": "cadran" }, G);
+    svg("circle", { cx: cx, cy: cy, r: 40, fill: "none", stroke: coul, "stroke-width": 4 }, G);
+    function ang(pr) { return (-135 + 270 * Sim.borne(pr / pmax, 0, 1)) * Math.PI / 180; }
+    for (var q = 0; q <= pmax; q += pmax / 10) {
+      var a = ang(q), r1 = 36, r2 = q % (pmax / 5) === 0 ? 29 : 32;
+      svg("line", { x1: cx + r1 * Math.sin(a), y1: cy - r1 * Math.cos(a), x2: cx + r2 * Math.sin(a), y2: cy - r2 * Math.cos(a), stroke: css("--encre"), "stroke-width": 1.2 }, G);
+      if (q % (pmax / 5) === 0) svg("text", { x: cx + 23 * Math.sin(a), y: cy - 23 * Math.cos(a) + 3, "text-anchor": "middle", "font-size": 7.5, fill: css("--encre"), texte: String(q) }, G);
+    }
+    temps.forEach(function (t) {
+      var a = ang(psat(t) - 1.013);
+      svg("text", { x: cx + 13 * Math.sin(a), y: cy - 13 * Math.cos(a) + 3, "text-anchor": "middle", "font-size": 6.5, fill: coul, "font-weight": 700, texte: String(t) }, G);
+    });
+    if (isFinite(p)) { var a2 = ang(p); svg("line", { x1: cx, y1: cy, x2: cx + 34 * Math.sin(a2), y2: cy - 34 * Math.cos(a2), stroke: css("--chaud"), "stroke-width": 2 }, G); }
+    svg("circle", { cx: cx, cy: cy, r: 3, fill: css("--encre") }, G);
+    texte(G, cx, cy + 54, titre, { ancre: "middle" });
+    texte(G, cx, cy + 66, "bar · °C du R32", { ancre: "middle" });
+  }
+  var Lc = {}; ["fond", "dyn"].forEach(function (k) { Lc[k] = svg("g", {}, S); });
+  Lc.molettes = svg("g", {}, S); Lc.groupe = svg("g", { "class": "clic" }, S);
+  var M = {};
+  M.ta = Sim.molette(Lc.molettes, { x: 62, y: 344, min: -15, max: 20, pas: 1, valeur: 7, unite: "°C", label: "Air de la chambre climatique", titreCourt: "air",
+    surChange: function (v) { etats.banc.ta = v; } });
+  M.hr = Sim.molette(Lc.molettes, { x: 154, y: 344, min: 30, max: 95, pas: 5, valeur: 85, unite: "%", label: "Humidité de l'air de la chambre", titreCourt: "humidité",
+    surChange: function (v) { etats.banc.hr = v; } });
+  M.s = Sim.molette(Lc.molettes, { x: 336, y: 372, min: 30, max: 100, pas: 5, valeur: 70, unite: "%", label: "Variateur du compresseur", titreCourt: "variateur",
+    surChange: function (v) { etats.banc.s = v / 100; } });
+  M.tr = Sim.molette(Lc.molettes, { x: 564, y: 250, r: 15, min: 20, max: 55, pas: 1, valeur: 30, unite: "°C", label: "Retour imposé par le banc de charge", titreCourt: "retour imposé",
+    surChange: function (v) { etats.banc.trCons = v; } });
+  function majMolettes() {
+    var e = etats.banc; Lc.molettes.style.display = exp === "banc" ? "" : "none"; if (!e) return;
+    M.ta.set(e.ta, true); M.hr.set(e.hr, true); M.s.set(Math.round(e.s * 100), true); M.tr.set(e.trCons, true);
+  }
+  function dessiner() {
+    Lc.fond.innerHTML = ""; Lc.dyn.innerHTML = ""; Lc.groupe.innerHTML = "";
+    if (exp === "banc") dessinerBanc(E()); else dessinerJour(E());
+    if (document.getElementById("voirFlux").checked) dessinerFlux(E());
+  }
+  function dessinerBanc(e) {
+    var G = Lc.dyn, F = Lc.fond, l = lec(e), m = e.m, deg = e.degivre > 0, on = e.marche;
+    // la chambre climatique et l'unite exterieure
+    svg("rect", { x: 10, y: 20, width: 200, height: 400, rx: 6, fill: e.ta < 0 ? "#dde8f3" : css("--scene"), stroke: css("--encre2"), "stroke-width": 1.5, "stroke-dasharray": "6 4" }, F);
+    texte(F, 110, 38, "chambre climatique", { ancre: "middle", classe: "etiq-titre" });
+    lcd(G, 70, 46, 80, Sim.fr(l.ta, 1) + " °C · " + e.hr + " %");
+    svg("rect", { x: 40, y: 80, width: 140, height: 170, rx: 6, "class": "objet" }, F);
+    for (var a = 0; a < 14; a++) svg("line", { x1: 50 + a * 9, y1: 90, x2: 50 + a * 9, y2: 240, stroke: css("--encre2"), "stroke-width": 1 }, G);
+    if (e.givre > 0.02) svg("rect", { x: 46, y: 86, width: 128, height: 158, rx: 4, fill: "#ffffff", opacity: 0.15 + 0.7 * e.givre }, G);
+    svg("circle", { cx: 110, cy: 165, r: 42, fill: "none", stroke: css("--encre"), "stroke-width": 2 }, G);
+    var rot = on && !deg ? e.t * 9 : 0;
+    for (var p = 0; p < 3; p++) { var an = rot + p * 2.09; svg("path", { d: "M110 165 Q " + (110 + 30 * Math.cos(an + 0.4)) + " " + (165 + 30 * Math.sin(an + 0.4)) + " " + (110 + 38 * Math.cos(an)) + " " + (165 + 38 * Math.sin(an)), fill: "none", stroke: css("--encre"), "stroke-width": 4 }, G); }
+    svg("rect", { x: 34, y: 74, width: 152, height: 202, fill: "transparent" }, Lc.groupe);
+    texte(Lc.groupe, 110, 266, deg ? "dégivrage en cours" : on ? "évaporateur et ventilateur" : "à l'arrêt · touche : marche", { ancre: "middle" });
+    // le circuit du fluide
+    svg("path", { d: "M180 120 L300 120", fill: "none", stroke: css("--froid"), "stroke-width": 5 }, F);     // aspiration
+    svg("circle", { cx: 300, cy: 200, r: 30, "class": "objet" }, F); texte(F, 300, 204, "C", { ancre: "middle", classe: "etiq-titre" });
+    svg("path", { d: "M300 120 L300 170", fill: "none", stroke: css("--froid"), "stroke-width": 5 }, F);
+    svg("path", { d: "M330 200 L400 200", fill: "none", stroke: css("--chaud"), "stroke-width": 5 }, F);   // refoulement
+    svg("rect", { x: 400, y: 160, width: 50, height: 120, rx: 4, "class": "objet" }, F);
+    for (var pl = 0; pl < 8; pl++) svg("line", { x1: 404, y1: 168 + pl * 14, x2: 446, y2: 168 + pl * 14, stroke: css("--encre2"), "stroke-width": 1 }, F);
+    texte(F, 425, 296, "condenseur", { ancre: "middle" });
+    svg("path", { d: "M400 260 L260 260 L260 300 L180 300", fill: "none", stroke: css("--fluide"), "stroke-width": 5 }, F);  // liquide puis detendeur
+    svg("path", { d: "M252 292 L268 308 M252 308 L268 292", stroke: css("--encre"), "stroke-width": 2.5 }, F);
+    texte(F, 260, 326, "détendeur", { ancre: "middle" });
+    texte(F, 300, 248, "compresseur", { ancre: "middle" });
+    // les manometres, et les thermometres de contact
+    manometre(G, 240, 72, 20, l.pBP, [-20, 0, 10], css("--froid"), "BP");
+    manometre(G, 360, 72, 50, l.pHP, [20, 40, 60], css("--chaud"), "HP");
+    lcd(G, 336, 208, 58, Sim.fr(l.tRef, 1) + " °C"); texte(G, 365, 236, "refoulement", { ancre: "middle" });
+    // l'eau et le banc de charge
+    svg("path", { d: "M450 180 L500 180", fill: "none", stroke: couleurEau(e.Td), "stroke-width": 7 }, F);
+    svg("path", { d: "M500 260 L450 260", fill: "none", stroke: couleurEau(e.Tr), "stroke-width": 7 }, F);
+    svg("rect", { x: 500, y: 112, width: 128, height: 194, rx: 8, "class": "objet" }, F);
+    texte(G, 564, 130, "banc de charge", { ancre: "middle", classe: "etiq-titre" });
+    lcd(G, 512, 140, 104, "départ " + Sim.fr(l.Td, 1) + " °C");
+    lcd(G, 512, 162, 104, "retour " + Sim.fr(l.Tr, 1) + " °C");
+    lcd(G, 512, 184, 104, Sim.fr(l.Q, 2) + " m³/h");
+    svg("path", { d: "M319 372 L300 372 L300 254", fill: "none", stroke: css("--accent"), "stroke-width": 1.5, "stroke-dasharray": "4 3" }, F);
+    // le wattmetre
+    svg("rect", { x: 500, y: 330, width: 128, height: 70, rx: 8, "class": "objet" }, G);
+    texte(G, 564, 348, "wattmètre de la PAC", { ancre: "middle" });
+    lcd(G, 512, 356, 104, Sim.fr(l.Pe, 0) + " W");
+    lcd(G, 512, 378, 104, Sim.fr(l.wh, 0) + " Wh");
+    // l'echelle des temperatures : ce que la machine doit franchir
+    if (on && !deg) {
+      var ex = 476, ey = 318, H = 92, ty = function (t) { return ey + H - (t + 25) / 95 * H; };
+      svg("line", { x1: ex, y1: ty(-25), x2: ex, y2: ty(70), stroke: css("--encre2"), "stroke-width": 1.5 }, G);
+      var reps = [["air", e.ta, css("--encre2")], ["évaporation", m.te, css("--froid")], ["condensation", m.tc, css("--chaud")], ["eau de départ", e.Td, css("--encre2")]]
+        .map(function (r) { return { nom: r[0], y: ty(r[1]), c: r[2] }; }).sort(function (a, b) { return a.y - b.y; });
+      reps[0].ly = reps[0].y;
+      for (var q = 1; q < reps.length; q++) reps[q].ly = Math.max(reps[q].y, reps[q - 1].ly + 11);
+      reps.forEach(function (r) {
+        svg("line", { x1: ex - 6, y1: r.y, x2: ex + 6, y2: r.y, stroke: r.c, "stroke-width": 3 }, G);
+        texte(G, ex - 10, (r.ly || r.y) + 4, r.nom, { ancre: "end" });
+      });
+      texte(G, ex + 8, ey + H + 16, "ce que la machine fait monter", { ancre: "end" });
+    }
+  }
+  function dessinerJour(e) {
+    var G = Lc.dyn, F = Lc.fond, l = lec(e);
+    // la maison, et la PAC dehors
+    var nuit = e.h < 7 || e.h >= 19;
+    svg("rect", { x: 0, y: 0, width: 640, height: 230, fill: nuit ? "#2a3242" : "#e7f0f8" }, F);
+    svg("rect", { x: 0, y: 230, width: 640, height: 210, fill: css("--carte2") }, F);
+    svg("path", { d: "M60 230 L60 120 L170 60 L280 120 L280 230 Z", "class": "objet" }, G);
+    for (var f = 0; f < 2; f++) svg("rect", { x: 90 + f * 110, y: 140, width: 50, height: 50, fill: nuit ? "#f7e7a8" : css("--scene"), stroke: css("--encre"), "stroke-width": 1.5 }, G);
+    var Gp = Lc.groupe;
+    svg("rect", { x: 290, y: 160, width: 90, height: 96, fill: "transparent" }, Gp);
+    svg("rect", { x: 300, y: 170, width: 70, height: 60, rx: 4, "class": "objet" }, Gp);
+    svg("circle", { cx: 335, cy: 200, r: 20, fill: e.givre > 0.05 ? "#ffffff" : "none", "fill-opacity": e.givre, stroke: css("--encre"), "stroke-width": 1.5 }, Gp);
+    texte(Gp, 335, 248, e.degivre > 0 ? "dégivrage" : e.fini ? "PAC" : e.jour ? "PAC · touche : pause" : "PAC · touche : lancer", { ancre: "middle" });
+    lcd(G, 400, 30, 90, Sim.fr(l.ta, 1) + " °C dehors");
+    texte(G, 20, 22, heure(e.h), { classe: "etiq-titre" });
+    // la courbe du jour : besoin, PAC, appoint
+    var gx = 40, gy = 270, gw = 560, gh = 150, X = function (h) { return gx + h / 24 * gw; }, Y = function (p) { return gy + gh - p / 10 * gh; };
+    svg("rect", { x: gx, y: gy, width: gw, height: gh, fill: css("--carte"), stroke: css("--trait"), "stroke-width": 1 }, G);
+    [0, 2, 4, 6, 8, 10].forEach(function (p) { texte(G, gx - 4, Y(p) + 4, String(p), { ancre: "end" }); });
+    [0, 6, 12, 18, 24].forEach(function (h) { texte(G, X(h), gy + gh + 14, h + " h", { ancre: "middle" }); });
+    texte(G, gx, gy - 8, "kW : le besoin de la maison, la PAC en bleu, l'appoint en rouge", {});
+    if (e.hist.length > 1) {
+      svg("path", { d: "M" + X(e.hist[0].h) + " " + Y(0) + " L" + e.hist.map(function (p) { return X(p.h) + " " + Y(p.Pc + p.Papp); }).join(" L") + " L" + X(e.hist[e.hist.length - 1].h) + " " + Y(0) + " Z", fill: css("--chaud"), opacity: 0.35 }, G);
+      svg("path", { d: "M" + X(e.hist[0].h) + " " + Y(0) + " L" + e.hist.map(function (p) { return X(p.h) + " " + Y(p.Pc); }).join(" L") + " L" + X(e.hist[e.hist.length - 1].h) + " " + Y(0) + " Z", fill: css("--froid"), opacity: 0.45 }, G);
+      svg("path", { d: "M" + e.hist.map(function (p) { return X(p.h) + " " + Y(p.Pdem); }).join(" L"), fill: "none", stroke: css("--encre"), "stroke-width": 1.6, "stroke-dasharray": "4 3" }, G);
+    }
+  }
+  /* Ou va la puissance en ce moment. */
+  function dessinerFlux(e) {
+    var Z = document.getElementById("flux"), k = 150 / 12, m = e.m, deg = e.degivre > 0, on = exp === "jour" ? e.jour : e.marche;
+    Z.innerHTML = "";
+    var lignes = deg ? [["électricité, dégivrage", 1.5, "#2c6da6"], ["chaleur reprise à l'eau", 2.5, "#c0392b"]]
+      : [["électricité du compresseur", on ? Math.max(0, e.Pe - AUX) : 0, "#2c6da6"], ["chaleur prise à l'air", on && e.Pc > 0 ? e.Pc - Math.max(0, e.Pe - AUX) : 0, "#5c9bd1"], ["chaleur livrée à l'eau", on ? Math.max(0, e.Pc) : 0, "#2f7a55"],
+        ["ventilateur", on ? AUX : 0, "#8a8f96"], ["appoint électrique", exp === "jour" ? e.Papp : 0, "#c0392b"]];
+    lignes.forEach(function (l, i) {
+      var y = 8 + i * 26;
+      svg("text", { x: 4, y: y + 12, "font-size": 10, fill: css("--encre"), texte: l[0] }, Z);
+      svg("rect", { x: 150, y: y + 2, width: Math.max(0, Math.min(166, l[1] * k)), height: 14, rx: 3, fill: l[2] }, Z);
+    });
+    svg("text", { x: 4, y: 172, "font-size": 9.5, fill: css("--encre2"), texte: "Chaleur livrée = chaleur prise à l'air + compresseur." }, Z);
+  }
+
+  /* ---------- Les boutons ---------- */
+  document.getElementById("bMarche").addEventListener("click", function () {
+    var e = E();
+    if (exp === "banc") { e.marche = !e.marche; message(e.marche ? "PAC en marche. Attends que le retour se stabilise." : "PAC arrêtée."); }
+    else { if (e.fini) return; e.jour = !e.jour; message(e.jour ? "La journée tourne : la PAC suit le besoin, l'appoint complète." : "Journée en pause."); }
+    afficher();
+  });
+  Lc.groupe.addEventListener("click", function () { document.getElementById("bMarche").click(); });
+  var cVit = Sim.choix("#vitesse", { label: "Vitesse du temps", valeur: reg.vitesse, options: [{ val: 0, texte: "pause" }, { val: 1, texte: "× 1" }, { val: 10, texte: "× 10" }, { val: 600, texte: "× 600" }],
+    surChange: function (v) { reg.vitesse = v; } });
+  document.getElementById("voirFlux").addEventListener("change", function (ev) { document.getElementById("fluxBloc").hidden = !ev.target.checked; });
+
+  /* ---------- La boucle ---------- */
+  var cumul = 0, dernierDessin = 0;
+  function pas(dt) {
+    var e = E(), dts = dt * reg.vitesse, n = Math.max(1, Math.ceil(dts / (exp === "jour" ? 20 : 0.5)));
+    if (dts > 0) for (var i = 0; i < n; i++) { if (exp === "banc") pasBanc(e, dts / n); else pasJour(e, dts / n); CEN[exp].tic(e.t); }
+    cumul += dt;
+    if (cumul >= 0.25) { cumul = 0; afficher(); }
+    var t = performance.now();
+    if (t - dernierDessin > 30) { dernierDessin = t; dessiner(); }
+  }
+
+  /* ---------- Changer d'experience ---------- */
+  var TEXTES = {
+    banc: { titre: "La PAC sur son banc", reglages: "La chambre climatique", consigne: "La chambre impose l'air extérieur ; le banc de charge impose le retour d'eau, comme un réseau de chauffage.",
+      legende: "Les manomètres portent deux échelles : la pression en bar relatifs, et la température de saturation du R32. Le refoulement du compresseur est le point le plus chaud du circuit.",
+      releve: "Lance l'acquisition avec la PAC : trace le wattmètre et le départ, et un dégivrage se voit comme un trou dans la chauffe. Les manomètres s'enregistrent aussi.",
+      accueil: "Touche le groupe extérieur pour démarrer la PAC à 7 °C d'air et 30 °C de retour, puis tourne l'air vers le froid et le retour vers le chaud : regarde le COP fondre." },
+    jour: { titre: "Une journée de grand froid", reglages: "La maison et la journée", consigne: "La loi d'eau suit la température extérieure ; la PAC module, puis l'appoint complète.",
+      legende: "La courbe pointillée est le besoin de la maison ; le bleu, ce que la PAC fournit ; le rouge, l'appoint électrique. Chaque dégivrage creuse la courbe bleue.",
+      releve: "Une mesure par demi-heure, arrêt au bout de 24 h : les compteurs cumulent l'électricité, PAC et appoint ; la puissance de chauffage se coche dans les colonnes.",
+      accueil: "Choisis la météo et les émetteurs, lance la journée, et relève les compteurs à minuit. Le temps « × 600 » fait passer dix minutes par seconde." }
+  };
+  function changerExp(x) {
+    exp = x;
+    if (!etats[x]) etats[x] = etatNeuf(x);
+    if (x === "jour" && reg.vitesse < 600) { reg.vitesse = 600; cVit.set(600, true); }
+    if (x === "banc" && reg.vitesse > 10) { reg.vitesse = 10; cVit.set(10, true); }
+    document.getElementById("titreScene").textContent = TEXTES[x].titre;
+    document.getElementById("titreReglages").textContent = TEXTES[x].reglages;
+    document.getElementById("consigneReglages").textContent = TEXTES[x].consigne;
+    document.getElementById("legende").textContent = TEXTES[x].legende;
+    document.getElementById("consigneReleve").textContent = TEXTES[x].releve;
+    poserReglages(); poserCommandes(); poserDefis(); majMolettes(); dessiner();
+    message(TEXTES[x].accueil);
+  }
+  var og = Sim.onglets("#experiences", function (id) { changerExp(id === "vueBanc" ? "banc" : "jour"); });
+  if (location.hash === "#journee") og.montrer("vueJour");
+  Sim.animer(pas);
+
+  /* Porte des essais. */
+  window.pac = { etat: E, reglage: reg, machine: machine, psat: psat, tsat: tsat, lectures: function () { return lec(E()); }, enr: function () { return CEN[exp]; },
+    releve: function () { return CEN[exp]; }, centrale: function () { return CEN[exp]; }, molettes: M, dessiner: function () { dessiner(); afficher(); } };
+})();
+</script>
+<footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
+</div>
+</body>
+</html>
