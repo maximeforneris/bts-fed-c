@@ -358,9 +358,127 @@ table.controle{border-collapse:collapse;width:100%;font-size:.86rem}
 @keyframes entre{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
+/* habillage : charte « fluides » */
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  /* le fond de plan */
+  --fond:#e8eae6;
+  --carte:#f7f8f5;
+  --carte2:#eceee9;
+  --encre:#16181a;
+  --encre2:#535a5e;
+  --trait:#a9b0af;
+  --trait2:#ccd2cf;
+
+  /* Le repérage des réseaux. Cinq séquences, cinq fluides : ce n'est pas
+     une palette de série, c'est un code de tuyauterie. */
+  --r1:#c1392b;   /* chauffage, départ */
+  --r2:#2a6497;   /* chauffage, retour */
+  --r3:#1f8f97;   /* eau glacée */
+  --r4:#5a8a35;   /* air soufflé */
+  --r5:#7a4fa3;   /* fluide frigorigène */
+
+  --froid:#2a6497;
+  --tiede:#8a6414;
+  --chaud:#c1392b;
+  --vert:#2f7448;
+  --violet:#7a4fa3;
+  --ombre:0 1px 0 rgba(22,24,26,.12);
+  --r:0px;
+  --teinte:var(--r1);
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --fond:#101314;--carte:#181c1d;--carte2:#1f2425;--encre:#e9edeb;--encre2:#98a2a4;
+    --trait:#39413f;--trait2:#262c2c;
+    --r1:#e2675a;--r2:#5d9ccd;--r3:#3fc0c7;--r4:#8cc45f;--r5:#b48ada;
+    --froid:#5d9ccd;--chaud:#e2675a;--vert:#5fbd82;--violet:#b48ada;
+    --ombre:0 1px 0 rgba(0,0,0,.6);
+  }
+}
+:root{--police:Barlow,"Helvetica Neue",Arial,sans-serif;--police-titres:Barlow,"Helvetica Neue",Arial,sans-serif;--police-mono:"Chivo Mono",ui-monospace,monospace}
+/* Entrainement · l'habillage d'un site de classe, la part commune.
+
+   L'assembleur la pose apres jeu.css, derriere les polices et les jetons qu'il a releves
+   dans la charte du site (_commun/modeles/web/<charte>.css) : la page jointe prend la
+   palette, les polices, les angles et les ombres de son site, sans en charger la feuille,
+   dont les classes (.page, .barre, .chapeau) rencontreraient celles du jeu. Puis vient la
+   signature propre a la charte, habillages/<charte>.css. Pose le 6 octobre 2026. */
+
+/* Les roles du jeu pris sur les jetons de la charte. Le meme selecteur que les blocs
+   sombres de jeu.css, pour passer apres eux aussi. */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{
+  --accent:var(--froid);
+  --juste:var(--vert);
+  --faux:var(--chaud);
+  --accent-doux:color-mix(in srgb,var(--froid) 13%,var(--carte));
+  --juste-doux:color-mix(in srgb,var(--vert) 13%,var(--carte));
+  --faux-doux:color-mix(in srgb,var(--chaud) 12%,var(--carte));
+  --mono:var(--police-mono);
+}
+body{font-family:var(--police)}
+/* les titres de rubrique comme ceux des pages du site : plus grands, et le court filet
+   de couleur au-dessus, qui est celui du kit commun */
+.rubrique>h2,h2.form-titre{font-size:clamp(22px,3vw,28px);font-weight:700;letter-spacing:-.02em;margin:8px 0 6px}
+.rubrique>h2::before,h2.form-titre::before{content:"";display:block;width:34px;height:3px;background:var(--froid);margin-bottom:12px;border-radius:2px}
+h1,h2,h3,.titre-carte,.titre-jeu h1,.form-titre,.calc-res{font-family:var(--police-titres)}
+
+/* La barre du site, comme en haut de ses autres pages : son nom, qui ramene a l'accueil.
+   Retiree quand la page est ouverte seule, depuis un disque ou l'ENT : le lien n'y menerait
+   nulle part (le petit script pose par l'assembleur). */
+.barre-site-jeu{
+  position:sticky;top:0;z-index:15;
+  display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px;
+  background:var(--carte);border-bottom:1px solid var(--trait);color:var(--encre);
+}
+.barre-site-jeu .titre{
+  font-family:var(--police-titres);font-weight:700;font-size:15px;letter-spacing:-.01em;
+  color:var(--encre);text-decoration:none;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.barre-site-jeu .titre::before{content:"← ";color:var(--encre2)}
+.barre-site-jeu .titre:hover{text-decoration:underline;text-underline-offset:3px}
+.barre-site-jeu .ou{
+  margin-left:auto;flex:none;font-family:var(--police-mono);font-size:11.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--encre2);
+}
+@media (max-width:520px){ .barre-site-jeu .ou{display:none} }
+body:has(.barre-site-jeu) .annonces{top:64px}
+@media print{ .barre-site-jeu{display:none} }
+
+/* Entrainement · la signature de la charte « fluides », site du BTS FED.
+   La plaque signaletique de l'en-tete, filet du haut dans le bleu des seances, comme les
+   pages du site. */
+.entete{
+  background:var(--carte);border:1px solid var(--encre);border-top:5px solid var(--froid);
+  padding:22px 22px 20px;margin-top:8px;
+}
+.entete .surtitre{font-family:"Barlow Semi Condensed",var(--police);font-weight:600;letter-spacing:.18em;font-size:12px}
+.entete h1{letter-spacing:-.015em}
+.groupe{border-bottom-color:var(--trait)}
+.carte{border-color:var(--trait2)}
+
 </style>
 </head>
 <body>
+<div class="barre-site-jeu"><a class="titre">BTS FED option C</a><span class="ou">S'entraîner</span></div>
+<script>(function(){var b=document.querySelector(".barre-site-jeu");if(!b)return;if(location.protocol==="file:")b.parentNode.removeChild(b);else b.querySelector("a").setAttribute("href","../index.html");})();</script>
 <main id="app" class="page"></main>
 <div id="annonces" class="annonces" aria-live="polite"></div>
 <noscript><p>Cet entraînement demande JavaScript. Rien n'est envoyé : tout se calcule dans le navigateur.</p></noscript>
@@ -1502,632 +1620,7 @@ var Generateurs = (function () {
 })();
 
 </script>
-<script>/* moteur/generateurs-calcul.js */
-/* Entrainement · les fabriques du calcul general : la consolidation du CAP (fiches 01 a 35)
-   et les automatismes de seconde (fiches AUTO-01 a AUTO-17, salves 1 a 4).
 
-   Une fabrique sert aux deux classes. Le parametre `univers` de la definition choisit
-   l'habillage : "chantier" pour le CAP, comme les cas concrets des fiches ; rien pour la
-   seconde, dont les fiches AUTO sont des nombres nus. Le geste et les erreurs, eux, ne
-   changent pas.
-
-   Les reperes sont ceux des fiches : g = 10 N/kg ; gravier 1,6 t/m³, sable 1,5, terre 1,4 ;
-   foisonnement 1,25 pour la terre, 1,15 pour le sable ; f = 1 / T avec T en secondes ;
-   km/h ÷ 3,6 = m/s ; une pente de 15 %, c'est 15 m pour 100 m. */
-"use strict";
-(function () {
-  var G = Generateurs, N = Nombres;
-  var un = G.un, plage = G.plage, err = G.err, net = G.net;
-  /* Toutes ces fabriques ecrivent leurs nombres en decimal plein : jamais de notation
-     scientifique, sauf quand c'est l'exercice (les puissances de dix). */
-  function definir(nom, f) {
-    G.definir(nom, function (spec, niveau) {
-      var q = f(spec, niveau);
-      if (q.type === "choix") return q;
-      q.decimale = true;
-      if (q.arrondi !== undefined) q.enonce += " (arrondi au " + (q.arrondi === 2 ? "centième" : q.arrondi === 1 ? "dixième" : "millième") + ")";
-      return q;
-    });
-  }
-  function v(x, unite) { return N.ecrireDecimal(Number(x.toPrecision(10))) + (unite ? " " + unite : ""); }
-  function nb(x) { return N.ecrireDecimal(x); }
-  function entier(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
-  function calc(txt) { return '<span class="nb">' + txt + "</span>"; }
-  function chantier(spec) { return spec.univers === "chantier"; }
-  function choix(enonce, juste, faux, methode, contexte) {
-    return {
-      type: "choix", contexte: contexte, enonce: enonce, methode: methode,
-      choix: [{ texte: juste, juste: true }].concat(faux.map(function (f) { return { texte: f[0], erreur: f[1], explication: f[2] }; }))
-    };
-  }
-
-  var E = {
-    sens: { nom: "Sens inversé", explication: "Multiplier par 10, 100, 1 000 agrandit le nombre ; diviser le rapetisse." },
-    rangPlus: { nom: "Un rang de trop", explication: "Un zéro, un rang : × 100 décale de deux rangs, pas de trois." },
-    rangMoins: { nom: "Un rang de moins", explication: "Un zéro, un rang : × 1 000 décale de trois rangs, pas de deux." },
-    alignement: { nom: "Virgules mal alignées", explication: "On aligne les virgules, et on complète par des zéros : 12,5 = 12,50." },
-    divise: { nom: "Divisé seulement", explication: "Les 3/4 : on divise par 4, puis on multiplie par 3." },
-    multiplie: { nom: "Multiplié seulement", explication: "Les 3/4 : on divise par 4, puis on multiplie par 3." },
-    fracRenversee: { nom: "Fraction renversée", explication: "Le dénominateur divise, le numérateur multiplie." },
-    fracVirgule: { nom: "Fraction lue comme un nombre à virgule", explication: "3/4 n'est pas 3,4 : c'est 3 ÷ 4 = 0,75." },
-    pas100: { nom: "Pas multiplié par 100", explication: "Un pourcentage, c'est la fraction × 100." },
-    troncature: { nom: "Coupé au lieu d'arrondi", explication: "On regarde le chiffre suivant : 5 ou plus, on monte." },
-    mauvaisRang: { nom: "Arrondi au mauvais rang", explication: "Au dixième : un chiffre après la virgule." },
-    procheCommande: { nom: "Arrondi au plus proche", explication: "Pour commander, il faut assez : on arrondit toujours au-dessus." },
-    dessous: { nom: "Arrondi au-dessous", explication: "Il en manquerait : pour commander ou transporter, on arrondit au-dessus." },
-    gaucheDroite: { nom: "Calculé de gauche à droite", explication: "La multiplication et la division passent avant l'addition." },
-    parentheses: { nom: "Parenthèses oubliées", explication: "À la calculatrice, la parenthèse se tape : sinon seul le dernier nombre est divisé." },
-    racine: { nom: "Racine sur le premier nombre seulement", explication: "√( … ) : la racine porte sur toute la parenthèse." },
-    minutesDecimales: { nom: "Minutes prises pour des décimales", explication: "30 min, c'est une demi-heure : 0,5 h, et jamais 0,30 h." },
-    fois60: { nom: "Multiplié au lieu de diviser", explication: "Des minutes vers des heures : on divise par 60." },
-    decimalesMinutes: { nom: "Décimales lues comme des minutes", explication: "0,5 h, c'est 30 min : on multiplie la partie décimale par 60." },
-    fois100: { nom: "Multiplié par 100", explication: "Une heure compte 60 minutes, pas 100." },
-    ecart: { nom: "Écart ajouté au lieu de multiplier", explication: "Proportionnel : on passe par l'unité, ou on multiplie par le même coefficient." },
-    croix: { nom: "Produit en croix mal posé", explication: "Le prix d'une unité d'abord : prix ÷ quantité, puis × la nouvelle quantité." },
-    unitRenverse: { nom: "Rapport renversé", explication: "Prix d'une unité = prix ÷ quantité, pas l'inverse." },
-    pcNombre: { nom: "Pourcentage ajouté comme un nombre", explication: "20 % de 800, ce n'est pas 20 : c'est 800 × 20 ÷ 100." },
-    pcSeul: { nom: "Seule la part calculée", explication: "La part trouvée s'ajoute ou se retranche au prix de départ : × 1,20 ou × 0,80." },
-    pcSensInverse: { nom: "Augmentation et diminution confondues", explication: "Ajouter 20 % : × 1,20. Retirer 20 % : × 0,80." },
-    pcDivise: { nom: "Divisé par le pourcentage", explication: "p % de x : x × p ÷ 100." },
-    pcSans100: { nom: "÷ 100 oublié", explication: "p % de x : x × p ÷ 100." },
-    pcAdditionnes: { nom: "Pourcentages additionnés", explication: "Les coefficients se multiplient : × 0,85 puis × 1,20." },
-    tvaOubliee: { nom: "Un pourcentage oublié", explication: "Les deux s'appliquent, l'un après l'autre." },
-    coefPart: { nom: "La part au lieu du coefficient", explication: "Une hausse de 12 % multiplie par 1 + 0,12 = 1,12." },
-    coefPourcent: { nom: "Pourcentage pris pour le coefficient", explication: "12 % = 0,12 ; le coefficient de la hausse est 1,12." },
-    rhoDivise: { nom: "Divisé par la masse volumique", explication: "Masse = volume × masse volumique." },
-    rhoOubliee: { nom: "Masse volumique oubliée", explication: "Un mètre cube de gravier ne pèse pas une tonne : 1,6 t." },
-    foisDivise: { nom: "Divisé par le coefficient", explication: "La terre gonfle en sortant du trou : on multiplie par le coefficient." },
-    foisOublie: { nom: "Foisonnement oublié", explication: "Terre remuée : volume foisonné = volume en place × 1,25." },
-    foisNombre: { nom: "Coefficient ajouté comme un nombre", explication: "1,25 se multiplie, il ne s'ajoute pas." },
-    echCm: { nom: "Resté en centimètres", explication: "Plan × échelle donne des cm : ÷ 100 pour des mètres." },
-    echDivise: { nom: "Divisé par l'échelle", explication: "Du plan au réel : on multiplie par l'échelle." },
-    echOubliee: { nom: "Échelle oubliée", explication: "Au 1/100, 1 cm du plan vaut 100 cm en vrai." },
-    echMultiplie: { nom: "Multiplié par l'échelle", explication: "Du réel au plan : on divise par l'échelle." },
-    echMetres: { nom: "Mètres non convertis", explication: "On passe d'abord les mètres en centimètres, puis ÷ l'échelle." },
-    echMelange: { nom: "Unités mélangées", explication: "Les deux longueurs dans la même unité, en cm, avant de diviser." },
-    ms36: { nom: "3 600 au lieu de 3,6", explication: "km/h ÷ 3,6 = m/s : le 3,6 vient de 3 600 ÷ 1 000." },
-    kmM: { nom: "Kilomètres et mètres mélangés", explication: "Distance et vitesse dans la même unité de longueur." },
-    heuresLaissees: { nom: "Resté en heures", explication: "d ÷ v donne des heures : × 60 pour des minutes." },
-    msNonConverties: { nom: "Millisecondes non converties", explication: "f = 1 ÷ T avec T en secondes : 20 ms = 0,020 s." },
-    tPourF: { nom: "Période prise pour la fréquence", explication: "La fréquence est l'inverse de la période : f = 1 ÷ T." },
-    resteS: { nom: "Resté en secondes", explication: "T = 1 ÷ f donne des secondes : × 1 000 pour des ms." },
-    gOublie: { nom: "g oublié", explication: "P = m × g : un poids en newtons, pas une masse en kilogrammes." },
-    gDivise: { nom: "Divisé par g", explication: "P = m × g : de la masse au poids, on multiplie." },
-    grammes: { nom: "Grammes non convertis", explication: "La masse en kilogrammes : 500 g = 0,5 kg." },
-    gMultiplie: { nom: "Multiplié par g", explication: "Du poids à la masse : m = P ÷ g." },
-    mauvaisNombre: { nom: "Divisé par un mauvais nombre", explication: "On divise par le nombre de valeurs, et on les compte." },
-    sommeSeule: { nom: "Somme sans division", explication: "La moyenne : la somme, divisée par le nombre de valeurs." },
-    milieu: { nom: "Valeur du milieu prise", explication: "La moyenne se calcule : on additionne tout, puis on divise." },
-    freqRenversee: { nom: "Rapport renversé", explication: "Fréquence = effectif ÷ total, toujours sous 100 %." },
-    freqTotal: { nom: "Divisé par le mauvais total", explication: "On divise par le total de la série, pas par le reste." },
-    favDefav: { nom: "Favorables sur défavorables", explication: "Probabilité = cas favorables ÷ cas possibles, tous les cas." },
-    probaRenversee: { nom: "Rapport renversé", explication: "Une probabilité est entre 0 et 1 : favorables ÷ possibles." },
-    probaPourcent: { nom: "En pour cent sans le dire", explication: "La probabilité s'écrit entre 0 et 1 ; en % il faut l'annoncer." },
-    airePerim: { nom: "Aire et périmètre confondus", explication: "Aire : on multiplie, en m². Périmètre : on fait le tour, en m." },
-    demiPerim: { nom: "Demi-périmètre", explication: "Le tour compte deux longueurs et deux largeurs." },
-    diametre: { nom: "Diamètre pris pour le rayon", explication: "Le rayon est la moitié du diamètre." },
-    perimDisque: { nom: "Périmètre au lieu de l'aire", explication: "Aire du disque : π × r × r ; périmètre : 2 × π × r." },
-    rSansCarre: { nom: "Rayon non élevé au carré", explication: "Aire du disque : π × r²." },
-    aireDisque: { nom: "Aire au lieu du périmètre", explication: "Périmètre du cercle : 2 × π × r ; aire : π × r²." },
-    racineOubliee: { nom: "Racine oubliée", explication: "a² + b² donne le carré de l'hypoténuse : il reste la racine." },
-    cotesAdd: { nom: "Côtés additionnés", explication: "Pythagore additionne les carrés, pas les côtés." },
-    hypo: { nom: "Hypoténuse mal placée", explication: "L'hypoténuse est le plus grand côté : côté² = hypoténuse² − autre côté²." },
-    sans100Pente: { nom: "÷ 100 oublié", explication: "15 %, c'est 15 m pour 100 m : longueur × 15 ÷ 100." },
-    penteRenversee: { nom: "Rapport renversé", explication: "Pente = dénivelé ÷ longueur × 100." },
-    penteSans100: { nom: "× 100 oublié", explication: "Le rapport dénivelé ÷ longueur se multiplie par 100 pour des %." },
-    multiplieAuLieu: { nom: "Multiplié au lieu de diviser", explication: "On défait la multiplication : on divise." },
-    ordreInverse: { nom: "Opérations défaites dans le mauvais ordre", explication: "On retire d'abord ce qui s'ajoute, puis on divise." },
-    signeB: { nom: "Signe changé à tort", explication: "Ce qui s'ajoute passe de l'autre côté en se retranchant." },
-    cosSin: { nom: "cos et sin confondus", explication: "Opposé : sin ; adjacent : cos ; on nomme les côtés depuis l'angle." },
-    radian: { nom: "Calculatrice en radians", explication: "Les angles sont en degrés : vérifier le mode DEG." },
-    trigoDivise: { nom: "Divisé au lieu de multiplier", explication: "Côté = hypoténuse × sin (ou cos) de l'angle." },
-    tanRenversee: { nom: "tan renversée", explication: "tan = opposé ÷ adjacent : opposé = adjacent × tan." },
-    expMultiplies: { nom: "Exposants multipliés", explication: "10ᵃ × 10ᵇ = 10ᵃ⁺ᵇ : les exposants s'additionnent." },
-    expSigne: { nom: "Signe de l'exposant", explication: "Un nombre plus petit que 1 a un exposant négatif." },
-    expRang: { nom: "Un rang de décalage", explication: "On compte les rangs jusqu'au premier chiffre non nul." },
-    expDivision: { nom: "Exposants additionnés", explication: "10ᵃ ÷ 10ᵇ = 10ᵃ⁻ᵇ : les exposants se retranchent." },
-    imageOrdre: { nom: "Ordre des opérations", explication: "f(x) = ax + b : on multiplie x par a, puis on ajoute b." },
-    imageSigne: { nom: "Signe de b", explication: "On ajoute b, avec son signe." },
-    imagePourAnte: { nom: "Image au lieu de l'antécédent", explication: "L'antécédent de y : le x tel que f(x) = y ; on résout ax + b = y." },
-    diviseurRenverse: { nom: "Mauvaise résistance au numérateur", explication: "U₂ = U × R₂ ÷ (R₁ + R₂) : la résistance dont on veut la tension." },
-    diviseurSomme: { nom: "Somme oubliée", explication: "On divise par la résistance totale, R₁ + R₂." },
-    bitsOctets: { nom: "Bits et octets mélangés", explication: "1 octet = 8 bits : on met taille et débit dans la même unité." },
-    tolerancePart: { nom: "Seule la tolérance calculée", explication: "La valeur extrême = nominale ± la part de tolérance." }
-  };
-
-  /* ═══════════════════════════════════════════ A · les nombres et le calcul */
-  function decimal(maxDec) { var d = entier(1, maxDec); return net(entier(11, 9999) / Math.pow(10, d)); }
-  definir("virgule", function (spec, niveau) {
-    var x = niveau === 2 ? entier(2, 999) : decimal(3), p = un([10, 100, 1000]), fois = niveau === 2 ? false : Math.random() < 0.5;
-    if (niveau === 3) {
-      var q = un([0.1, 0.01, 0.001]), r = net(x * q);
-      return {
-        enonce: calc(nb(x) + " × " + nb(q)), unite: "", reponse: r, tolerance: 1e-9,
-        methode: "× 0,1, c'est ÷ 10 ; × 0,01, c'est ÷ 100 : la virgule va vers la gauche.",
-        erreurs: [err(net(x / q), { nom: "× 0,1 lu comme × 10", explication: "Multiplier par 0,1 rapetisse le nombre : c'est diviser par 10." }),
-                  err(net(r * 10), E.rangMoins), err(net(r / 10), E.rangPlus)]
-      };
-    }
-    var rep = fois ? net(x * p) : net(x / p);
-    return {
-      enonce: calc(nb(x) + (fois ? " × " : " ÷ ") + N.ecrire(p, 4)), unite: "", reponse: rep, tolerance: 1e-9,
-      methode: "× 10, 100, 1 000 : la virgule va à droite d'un, deux, trois rangs ; ÷ : à gauche.",
-      erreurs: [err(fois ? net(x / p) : net(x * p), E.sens), err(fois ? net(rep * 10) : net(rep / 10), E.rangPlus), err(fois ? net(rep / 10) : net(rep * 10), E.rangMoins)]
-    };
-  });
-
-  definir("operations", function (spec, niveau) {
-    var a = net(entier(11, 999) / 10), b = net(entier(101, 9999) / 100), r, txt, faux;
-    if (niveau === 1) { r = net(a + b); txt = nb(a) + " + " + nb(b); faux = net(a / 10 + b); }
-    else if (niveau === 2) { a = net(entier(2001, 9999) / 100); b = net(entier(11, 199) / 10); r = net(a - b); txt = nb(a) + " − " + nb(b); faux = net(a - b / 10); }
-    else {
-      a = net(entier(11, 99) / 10); b = net(entier(11, 99) / 10); r = net(a * b); txt = nb(a) + " × " + nb(b);
-      return { enonce: calc(txt), unite: "", reponse: r, tolerance: 1e-9,
-        methode: "On multiplie sans les virgules, puis on remet autant de décimales qu'en tout dans les deux nombres.",
-        erreurs: [err(net(r * 10), { nom: "Décimales mal comptées", explication: "Une décimale dans chaque facteur : deux décimales au résultat." }),
-                  err(net(r / 10), { nom: "Décimales mal comptées", explication: "Une décimale dans chaque facteur : deux décimales au résultat." }),
-                  err(net(Math.floor(a) * Math.floor(b) + (a % 1) * (b % 1)), { nom: "Parties multipliées séparément", explication: "On ne multiplie pas les entiers d'un côté, les décimales de l'autre." })] };
-    }
-    return { enonce: calc(txt), unite: "", reponse: r, tolerance: 1e-9,
-      methode: "On pose en alignant les virgules, et on complète par des zéros.",
-      erreurs: [err(faux, E.alignement)] };
-  });
-
-  var FRACTIONS = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [1, 5], [2, 5], [3, 5], [4, 5], [1, 10], [3, 10], [7, 10]];
-  definir("fraction", function (spec, niveau) {
-    var f = un(FRACTIONS), k = f[0], n = f[1];
-    if (niveau === 1) {
-      var Q = n * entier(2, 15), r = Q / n * k;
-      return {
-        contexte: chantier(spec) ? "Un tas de " + v(Q, "t") + " de gravier : on en charge les " + k + "/" + n + "." : null,
-        enonce: chantier(spec) ? "Combien de tonnes chargées ?" : calc(k + "/" + n + " de " + Q), unite: chantier(spec) ? "t" : "",
-        reponse: r, tolerance: 1e-9, methode: "Les k/n d'une quantité : on divise par n, puis on multiplie par k.",
-        erreurs: [err(Q / n, E.divise), err(Q * k, E.multiplie), err(Q * n / k, E.fracRenversee)]
-      };
-    }
-    var g = un([[1, 2], [1, 4], [3, 4], [1, 5], [2, 5], [3, 8], [1, 8], [7, 20], [3, 25], [9, 10]]);
-    k = g[0]; n = g[1];
-    var lu = Number(k + "." + n);
-    if (niveau === 2) return {
-      enonce: calc(k + "/" + n) + " en écriture décimale ?", unite: "", reponse: k / n, tolerance: 1e-9,
-      methode: "k/n, c'est k ÷ n.", erreurs: [err(lu, E.fracVirgule), err(n / k, E.fracRenversee)]
-    };
-    return {
-      enonce: calc(k + "/" + n) + " en pourcentage ?", unite: "%", reponse: k / n * 100, tolerance: 1e-9,
-      methode: "k ÷ n donne un décimal ; × 100 pour un pourcentage.",
-      erreurs: [err(k / n, E.pas100), err(lu, E.fracVirgule), err(n / k * 100, E.fracRenversee)]
-    };
-  });
-
-  definir("comparer", function (spec) {
-    var a = entier(2, 9), b = entier(1, 9), x = a / 10, y = net((a - 1) / 10 + b / 100), z = a / 100;
-    var quoi = chantier(spec) ? un(["Des épaisseurs de tôle, en mm.", "Des diamètres de gaine, en cm.", "Des forets, en cm."]) : null;
-    var x2 = x.toFixed(2).replace(".", ","), regle = "On compare les dixièmes, puis les centièmes ; on complète par des zéros : 0,8 = 0,80.";
-    if (Math.random() < 0.4) return choix("Le plus petit :", nb(y),
-      [[nb(x), "Partie décimale lue comme un entier", nb(x) + " = " + x2 + " : " + Math.round(x * 100) + " centièmes, plus que " + Math.round(y * 100) + "."]], regle, quoi);
-    return choix("Le plus grand :", nb(x),
-      [[nb(y), "Plus de chiffres, plus grand", "On compare rang par rang, les dixièmes d'abord : " + nb(x) + " = " + x2 + "."],
-       [nb(z), "Zéro après la virgule ignoré", nb(z) + " a 0 dixième : c'est le plus petit des trois."]], regle, quoi);
-  });
-
-  definir("arrondir", function (spec, niveau) {
-    if (niveau === 2 && chantier(spec)) {
-      var besoin = net(entier(101, 989) / 10), lot = un([1, 5, 10, 25]), n0 = besoin / lot;
-      if (n0 % 1 >= 0.5 || n0 % 1 === 0) besoin = net(Math.floor(n0) * lot + lot * 0.3);
-      n0 = besoin / lot;
-      var objet = lot === 1 ? "mètres de câble, vendus au mètre" : lot === 25 ? "kg de mortier, en sacs de 25 kg" : "mètres de gaine, en couronnes de " + lot + " m";
-      var unite = lot === 1 ? "m" : lot === 25 ? "sacs" : "couronnes";
-      return {
-        contexte: "Il faut " + v(besoin, lot === 25 ? "kg" : "m") + " : des " + objet + ".", enonce: "Combien en commander ?", unite: unite,
-        reponse: Math.ceil(n0), tolerance: 1e-9, methode: "Pour commander, il faut assez : on arrondit toujours au-dessus.",
-        erreurs: [err(Math.floor(n0), E.procheCommande),
-                  lot === 1 ? err(besoin, { nom: "Valeur non arrondie", explication: "On commande des mètres entiers : on arrondit, au-dessus." })
-                            : err(besoin, { nom: "Quantité au lieu du nombre de lots", explication: "On divise par la taille d'un lot, puis on arrondit au-dessus." })]
-      };
-    }
-    var x = net(entier(1001, 99999) / 1000), rang = un([[1, "au dixième"], [0, "à l'unité"], [2, "au centième"]]);
-    var p = Math.pow(10, rang[0]), r = Math.round(x * p) / p, t = Math.floor(x * p) / p;
-    if (t === r) { x = net(x + 0.5 / p); r = Math.round(x * p) / p; t = Math.floor(x * p) / p; }
-    var autre = rang[0] === 1 ? Math.round(x * 100) / 100 : Math.round(x * 10) / 10;
-    return {
-      enonce: calc(nb(x)) + " arrondi " + rang[1] + " ?", unite: "", reponse: r, tolerance: 1e-9,
-      methode: "On regarde le chiffre juste après le rang voulu : de 0 à 4 on garde, de 5 à 9 on monte.",
-      erreurs: [err(t, E.troncature), err(autre, E.mauvaisRang)]
-    };
-  });
-
-  definir("ordre-grandeur", function (spec) {
-    var a = entier(12, 98), b = entier(12, 98), ra = Math.round(a / 10) * 10, rb = Math.round(b / 10) * 10, est = ra * rb;
-    var ctx = chantier(spec) ? "Un devis : " + a + " m de câble à " + b + " € le mètre." : null;
-    var u = chantier(spec) ? "€" : "", faux = [[v(est / 10, u), "Un zéro de moins", "On arrondit chaque nombre à la dizaine, puis on multiplie : " + ra + " × " + rb + "."],
-      [v(est * 10, u), "Un zéro de trop", "On arrondit chaque nombre à la dizaine, puis on multiplie : " + ra + " × " + rb + "."]];
-    if (ra + rb !== est / 10) faux.push([v(ra + rb, u), "Additionné au lieu de multiplier", "Un prix au mètre se multiplie par la longueur."]);
-    return choix(chantier(spec) ? "L'ordre de grandeur du total :" : "L'ordre de grandeur de " + a + " × " + b + " :", v(est, u), faux,
-      "On arrondit chaque nombre à la dizaine, puis on calcule de tête.", ctx);
-  });
-
-  definir("priorites", function (spec, niveau) {
-    var a = entier(2, 20), b = entier(2, 9), c = entier(2, 9);
-    if (niveau === 1) return {
-      enonce: calc(a + " + " + b + " × " + c), unite: "", reponse: a + b * c, tolerance: 1e-9,
-      methode: "La multiplication passe avant l'addition.", erreurs: [err((a + b) * c, E.gaucheDroite)]
-    };
-    if (niveau === 2) { var d = un([2, 4, 5]), s = d * entier(3, 20), a2 = entier(1, s - 1), b2 = s - a2;
-      return { enonce: calc("(" + a2 + " + " + b2 + ") ÷ " + d), unite: "", reponse: s / d, tolerance: 1e-9,
-        methode: "La parenthèse d'abord ; à la calculatrice, on la tape.", erreurs: [err(a2 + b2 / d, E.parentheses)] }; }
-    var t = un([[3, 4], [6, 8], [5, 12], [8, 15], [9, 12], [12, 16], [7, 24]]);
-    return { enonce: calc("√(" + t[0] * t[0] + " + " + t[1] * t[1] + ")"), unite: "", reponse: Math.sqrt(t[0] * t[0] + t[1] * t[1]), tolerance: 1e-9,
-      methode: "La racine porte sur toute la parenthèse : on additionne d'abord.", erreurs: [err(t[0] + t[1] * t[1], E.racine), err(t[0] * t[0] + t[1] * t[1], { nom: "Racine oubliée", explication: "La touche √ s'applique au résultat de la parenthèse." })] };
-  });
-
-  /* ═══════════════════════════════════════════ B · les durees et les vitesses */
-  var MINUTES = [6, 12, 15, 18, 24, 30, 36, 42, 45, 48, 54];
-  definir("durees", function (spec, niveau) {
-    var m = un(MINUTES), h = entier(1, 9);
-    if (niveau === 1) return {
-      enonce: calc(m + " min") + " en heures ?", unite: "h", reponse: m / 60, tolerance: 1e-9,
-      methode: "Des minutes vers des heures : on divise par 60. 30 min = 0,5 h.",
-      erreurs: [err(m / 100, E.minutesDecimales), err(m * 60, E.fois60)]
-    };
-    if (niveau === 2) { var hd = net(h + m / 60);
-      return { enonce: calc(nb(hd) + " h") + " en minutes ?", unite: "min", reponse: hd * 60, tolerance: 1e-9,
-        methode: "Des heures vers des minutes : × 60. 1,5 h = 90 min.",
-        erreurs: [err(h * 60 + Math.round((hd - h) * 100), E.decimalesMinutes), err(hd * 100, E.fois100)] }; }
-    if (chantier(spec)) { var taux = un([11, 12, 13, 14, 15]), rp = (h + m / 60) * taux;
-      return { contexte: "Feuille d'heures : " + h + " h " + m + " min de travail, payées " + v(taux, "€") + " de l'heure.",
-        enonce: "Le montant ?", unite: "€", reponse: rp, tolerance: 0.005, methode: "On passe d'abord en heures décimales : " + m + " min = " + m + " ÷ 60 h ; puis × le taux horaire.",
-        erreurs: [err((h + m / 100) * taux, E.minutesDecimales), err((h * 60 + m) * taux, { nom: "Minutes payées comme des heures", explication: "Le taux est par heure : la durée en heures." })] }; }
-    return { enonce: calc(h + " h " + m + " min") + " en heures ?", unite: "h", reponse: h + m / 60, tolerance: 1e-9,
-      methode: "Les minutes ÷ 60, puis on ajoute les heures.", erreurs: [err(h + m / 100, E.minutesDecimales), err(h + m * 60, E.fois60)] };
-  });
-
-  definir("vitesse", function (spec, niveau) {
-    if (niveau === 1) { var k = un([18, 36, 45, 54, 72, 90, 108]), ms = k / 3.6;
-      return { contexte: chantier(spec) ? "Un tombereau roule à " + v(k, "km/h") + " sur la piste." : null,
-        enonce: chantier(spec) ? "Sa vitesse en m/s ?" : calc(v(k, "km/h")) + " en m/s ?", unite: "m/s", reponse: ms, tolerance: 0.01, arrondi: 2,
-        methode: "km/h ÷ 3,6 = m/s.", erreurs: [err(k * 3.6, { nom: "Sens inversé", explication: "Des km/h vers des m/s, le nombre diminue : ÷ 3,6." }), err(k / 3600, E.ms36), err(k / 1000, { nom: "÷ 1 000 seulement", explication: "Les kilomètres deviennent des mètres, mais les heures aussi deviennent des secondes : ÷ 3,6." })] }; }
-    if (niveau === 2) { var s = un([5, 10, 15, 20, 25, 30]), kh = s * 3.6;
-      return { enonce: calc(v(s, "m/s")) + " en km/h ?", unite: "km/h", reponse: kh, tolerance: 0.01, methode: "m/s × 3,6 = km/h.",
-        erreurs: [err(s / 3.6, { nom: "Sens inversé", explication: "Des m/s vers des km/h, le nombre augmente : × 3,6." }), err(s * 3600, E.ms36)] }; }
-    var vkm = un([12, 15, 18, 20, 24, 30]), d = un([300, 450, 600, 900, 1200, 1500]), mn = d / 1000 / vkm * 60;
-    return { contexte: (chantier(spec) ? "Un engin roule à " : "Un véhicule roule à ") + v(vkm, "km/h") + " sur " + v(d, "m") + ".",
-      enonce: "La durée du trajet, en minutes ?", unite: "min", reponse: mn, tolerance: 0.02, arrondi: 2,
-      methode: "t = d ÷ v avec d en km et v en km/h donne des heures ; × 60 pour des minutes.",
-      erreurs: [err(d / vkm, E.kmM), err(d / 1000 / vkm, E.heuresLaissees), err(vkm / (d / 1000) * 60, { nom: "Vitesse divisée par la distance", explication: "t = d ÷ v : la distance au numérateur." })] };
-  });
-
-  /* ═══════════════════════════════════════════ C · la proportionnalite */
-  var ARTICLES = [
-    { q: "sacs de ciment", pu: [5.2, 9.8, 0.1] }, { q: "mètres de gaine", pu: [0.8, 2.6, 0.1] },
-    { q: "tonnes de gravier", pu: [15, 30, 1] }, { q: "m² de dalles", pu: [12, 35, 1] }, { q: "heures de location", pu: [35, 65, 5] }
-  ];
-  definir("quatrieme-proportionnelle", function (spec, niveau) {
-    var art = chantier(spec) ? un(ARTICLES) : { q: "objets", pu: [1.5, 9.5, 0.5] };
-    var a = entier(2, 9), b = entier(2, 15); if (b === a) b = a + 3;
-    var pu = plage(art.pu); if (niveau >= 2) pu = net(pu + 0.05 * entier(1, 9));
-    var pa = net(a * pu);
-    if (niveau === 3) return {
-      contexte: v(a, art.q) + " coûtent " + v(pa, "€") + ".", enonce: "Le prix d'une unité ?", unite: "€", reponse: pu, tolerance: 0.005,
-      methode: "Le prix d'une unité : prix total ÷ quantité.", erreurs: [err(a / pa, E.unitRenverse), err(pa * a, E.croix)]
-    };
-    return {
-      contexte: v(a, art.q) + " coûtent " + v(pa, "€") + ".", enonce: "Combien coûtent " + b + " " + art.q + " ?", unite: "€", reponse: b * pu, tolerance: 0.005,
-      methode: "On passe par l'unité : " + v(pa, "€") + " ÷ " + a + ", puis × " + b + ".",
-      erreurs: [err(pa + (b - a), E.ecart), err(pa * a / b, E.croix), err(a / pa * b, E.unitRenverse)]
-    };
-  });
-
-  definir("pourcentage", function (spec, niveau) {
-    var p = un([5, 10, 15, 20, 25, 30, 40, 50, 75]), x = un([40, 60, 80, 120, 160, 200, 240, 300, 400, 500, 800, 1200, 2400]);
-    var unite = chantier(spec) ? "€" : "", d = chantier(spec) ? "Un devis de " + v(x, "€") + "." : null;
-    if (niveau === 1) return {
-      contexte: d, enonce: chantier(spec) ? p + " % de ce montant ?" : calc(p + " % de " + nb(x)), unite: unite, reponse: x * p / 100, tolerance: 1e-9,
-      methode: "p % de x : x × p ÷ 100. 10 %, c'est ÷ 10 ; 25 %, le quart.",
-      erreurs: [err(x / p, E.pcDivise), err(p, E.pcNombre), err(x * p, E.pcSans100)]
-    };
-    if (niveau === 2) { var plus = Math.random() < 0.5, r = x * (1 + (plus ? p : -p) / 100);
-      return { contexte: d, enonce: chantier(spec) ? (plus ? "Majoré de " : "Avec une remise de ") + p + " % ?" : calc(nb(x) + (plus ? " augmenté de " : " diminué de ") + p + " %"),
-        unite: unite, reponse: r, tolerance: 1e-9, methode: "Ajouter p % : × (1 + p/100). Retirer p % : × (1 − p/100).",
-        erreurs: [err(plus ? x + p : x - p, E.pcNombre), err(x * p / 100, E.pcSeul), err(x * (1 + (plus ? -p : p) / 100), E.pcSensInverse)] }; }
-    if (chantier(spec)) { var rem = un([5, 10, 15, 20]), rf = x * (1 - rem / 100) * 1.2;
-      return { contexte: "Un devis de " + v(x, "€") + " hors taxes, avec une remise de " + rem + " %, puis la TVA de 20 %.", enonce: "Le prix final ?", unite: "€", reponse: rf, tolerance: 1e-6,
-        methode: "Les coefficients se multiplient : × " + N.ecrire(1 - rem / 100, 3) + " puis × 1,20.",
-        erreurs: [err(x * (1 + (20 - rem) / 100), E.pcAdditionnes), err(x * (1 - rem / 100), E.tvaOubliee), err(x * 1.2, E.tvaOubliee)] }; }
-    var h = un([3, 5, 8, 12, 15, 25, 30]), baisse = Math.random() < 0.4;
-    return { enonce: "Le coefficient d'une " + (baisse ? "baisse" : "hausse") + " de " + h + " % ?", unite: "", reponse: 1 + (baisse ? -h : h) / 100, tolerance: 1e-9,
-      methode: "Une hausse de p % multiplie par 1 + p/100 ; une baisse, par 1 − p/100.",
-      erreurs: [err(h / 100, E.coefPart), err(h, E.coefPourcent), err(1 + (baisse ? h : -h) / 100, E.pcSensInverse)] };
-  });
-
-  var MATERIAUX = [{ nom: "gravier", rho: 1.6, coef: 1.25 }, { nom: "sable", rho: 1.5, coef: 1.15 }, { nom: "terre", rho: 1.4, coef: 1.25 }];
-  definir("chantier", function (spec, niveau) {
-    var m = un(MATERIAUX), V = plage([2, 30, 0.5]);
-    if (niveau === 1) return {
-      contexte: v(V, "m³") + " de " + m.nom + ", masse volumique " + v(m.rho, "t/m³") + ".", enonce: "Leur masse, en tonnes ?", unite: "t",
-      reponse: V * m.rho, tolerance: 1e-6, methode: "Masse = volume × masse volumique.",
-      erreurs: [err(V / m.rho, E.rhoDivise), err(V, E.rhoOubliee), err(V * m.rho * 1000, { nom: "Tonnes et kilogrammes", explication: "En t/m³ et m³, le résultat est déjà en tonnes." })]
-    };
-    var terre = m.nom === "sable" ? m : { nom: "terre", coef: 1.25 };
-    if (niveau === 2) return {
-      contexte: "On extrait " + v(V, "m³") + " de " + terre.nom + " en place ; coefficient de foisonnement " + N.ecrire(terre.coef, 3) + ".",
-      enonce: "Le volume foisonné ?", unite: "m³", reponse: V * terre.coef, tolerance: 1e-6,
-      methode: "Volume foisonné = volume en place × coefficient.",
-      erreurs: [err(V / terre.coef, E.foisDivise), err(V, E.foisOublie), err(V + (terre.coef - 1) * 100, E.foisNombre)]
-    };
-    var C = un([8, 10, 12, 14, 20]), Vp = plage([20, 150, 1]), q = Vp * 1.25 / C;
-    if (q % 1 === 0 || q % 1 > 0.85) { Vp += 3; q = Vp * 1.25 / C; }
-    return {
-      contexte: "Une tranchée : " + v(Vp, "m³") + " de terre en place, foisonnement 1,25, camions de " + v(C, "m³") + ".",
-      enonce: "Combien de rotations de camion ?", unite: "camions", reponse: Math.ceil(q), tolerance: 1e-9,
-      methode: "Volume foisonné ÷ capacité d'un camion, puis on arrondit au-dessus : un camion à moitié plein compte.",
-      erreurs: [err(Math.ceil(Vp / C), E.foisOublie), err(Math.floor(q), E.dessous), err(Math.ceil(Vp / 1.25 / C), E.foisDivise)]
-    };
-  });
-
-  definir("echelle", function (spec, niveau) {
-    var e = un([50, 100, 200]);
-    if (niveau === 1) { var cm = plage([1.5, 20, 0.5]);
-      return { contexte: chantier(spec) ? "Sur un plan au 1/" + e + ", une tranchée mesure " + v(cm, "cm") + "." : "Un plan au 1/" + e + " ; une longueur de " + v(cm, "cm") + ".",
-        enonce: "Sa longueur réelle, en mètres ?", unite: "m", reponse: cm * e / 100, tolerance: 1e-9,
-        methode: "Au 1/" + e + ", 1 cm du plan vaut " + e + " cm en vrai : × " + e + ", puis ÷ 100 pour des mètres.",
-        erreurs: [err(cm * e, E.echCm), err(cm / e, E.echDivise), err(cm / 100, E.echOubliee)] }; }
-    if (niveau === 2) { var m = plage([2, 30, 0.5]);
-      return { contexte: "Une longueur réelle de " + v(m, "m") + ", à reporter sur un plan au 1/" + e + ".", enonce: "Sa longueur sur le plan, en cm ?", unite: "cm",
-        reponse: m * 100 / e, tolerance: 1e-9, methode: "En cm d'abord (× 100), puis ÷ " + e + ".",
-        erreurs: [err(m * 100 * e, E.echMultiplie), err(m / e, E.echMetres)] }; }
-    var pc = un([2, 3, 4, 5, 6, 8]), ee = un([50, 100, 200, 250, 500]), reel = pc * ee / 100;
-    return { contexte: v(pc, "cm") + " sur le plan représentent " + v(reel, "m") + " en vrai.", enonce: "L'échelle du plan : 1/… ?", unite: "", reponse: ee, tolerance: 1e-9,
-      methode: "Les deux longueurs en cm, puis réel ÷ plan.", erreurs: [err(reel / pc, E.echMelange), err(pc / (reel * 100), { nom: "Rapport renversé", explication: "L'échelle 1/n : n = longueur réelle ÷ longueur du plan." })] };
-  });
-
-  definir("periode-frequence", function (spec, niveau) {
-    if (niveau === 1) { var T = un([0.5, 0.25, 0.2, 0.1, 0.05, 0.02, 0.01]);
-      return { enonce: "Une période de " + calc(v(T, "s")) + " : la fréquence ?", unite: "Hz", reponse: 1 / T, tolerance: 1e-9, methode: "f = 1 ÷ T, avec T en secondes.",
-        erreurs: [err(T, E.tPourF), err(1 / (T * 1000), { nom: "Secondes converties à tort", explication: "T est déjà en secondes : f = 1 ÷ T." })] }; }
-    if (niveau === 2) { var ms = un([1, 2, 4, 5, 10, 20, 25, 40, 50]);
-      return { enonce: "Une période de " + calc(v(ms, "ms")) + " : la fréquence ?", unite: "Hz", reponse: 1000 / ms, tolerance: 1e-9,
-        methode: "On passe en secondes (÷ 1 000), puis f = 1 ÷ T.", erreurs: [err(1 / ms, E.msNonConverties), err(ms, E.tPourF)] }; }
-    var f = un([2, 5, 10, 20, 25, 40, 50, 100, 200, 250, 500, 1000]);
-    return { enonce: "Une fréquence de " + calc(v(f, "Hz")) + " : la période, en ms ?", unite: "ms", reponse: 1000 / f, tolerance: 1e-9,
-      methode: "T = 1 ÷ f donne des secondes ; × 1 000 pour des ms.", erreurs: [err(1 / f, E.resteS), err(f, { nom: "Fréquence prise pour la période", explication: "La période est l'inverse de la fréquence." })] };
-  });
-
-  definir("poids", function (spec, niveau) {
-    var g = spec.g || 10, gt = N.ecrire(g, 3);
-    if (niveau === 1) { var m = un([2, 5, 8, 12, 15, 20, 25, 40, 50, 85, 120]);
-      return { contexte: chantier(spec) ? "Une armoire électrique de " + v(m, "kg") + "." : "Une masse de " + v(m, "kg") + ".", enonce: "Son poids, en newtons ?", unite: "N",
-        reponse: m * g, tolerance: 1e-9, methode: "P = m × g, avec m en kg et g = " + gt + " N/kg.", erreurs: [err(m, E.gOublie), err(m / g, E.gDivise)] }; }
-    if (niveau === 2) { var gr = un([200, 250, 400, 500, 750, 800, 1500]);
-      return { contexte: "Un objet de " + v(gr, "g") + ".", enonce: "Son poids, en newtons ?", unite: "N", reponse: gr / 1000 * g, tolerance: 1e-9,
-        methode: "La masse en kg d'abord, puis P = m × g.", erreurs: [err(gr * g, E.grammes), err(gr / 1000, E.gOublie)] }; }
-    var P = un([50, 120, 300, 450, 800, 1200]);
-    return { contexte: "Un poids de " + v(P, "N") + ".", enonce: "La masse correspondante, en kg ?", unite: "kg", reponse: P / g, tolerance: 1e-9,
-      methode: "m = P ÷ g.", erreurs: [err(P * g, E.gMultiplie), err(P, E.gOublie)] };
-  });
-
-  /* ═══════════════════════════════════════════ D · lire, moyenne, frequence, probabilite */
-  definir("tableau-double", function (spec) {
-    var diam = [16, 20, 25], longs = [25, 50, 100], base = un([0.5, 0.6, 0.7]);
-    var prix = diam.map(function (d, i) { return longs.map(function (l, j) { return net(Math.round(l * (base + 0.25 * i) * (1 - 0.05 * j))); }); });
-    var i = entier(0, 2), j = entier(0, 2), autreJ = (j + 1) % 3, autreI = (i + 1) % 3;
-    var table = '<table class="donnees"><tr><th>Gaine</th>' + longs.map(function (l) { return "<th>" + l + " m</th>"; }).join("") + "</tr>" +
-      diam.map(function (d, k) { return "<tr><td>Ø " + d + "</td>" + prix[k].map(function (p) { return "<td>" + nb(p) + " €</td>"; }).join("") + "</tr>"; }).join("") + "</table>";
-    var erreurs = [err(prix[autreI][j], { nom: "Mauvaise ligne", explication: "La ligne donne le diamètre, la colonne la longueur : on croise les deux." }),
-                   err(prix[i][autreJ], { nom: "Mauvaise colonne", explication: "La colonne donne la longueur du rouleau : on suit celle qui est demandée." })];
-    if (i !== j && i < 3 && j < 3) erreurs.unshift(err(prix[j][i], { nom: "Ligne et colonne inversées", explication: "On lit la ligne du diamètre, puis la colonne de la longueur." }));
-    return { contexte: "Le tarif des gaines, par rouleau :" + table, enonce: "Le prix d'un rouleau de " + longs[j] + " m en Ø " + diam[i] + " ?", unite: "€",
-      reponse: prix[i][j], tolerance: 1e-9, methode: "On repère la ligne, puis la colonne, et on lit à leur croisement.", erreurs: erreurs };
-  });
-
-  definir("moyenne", function (spec, niveau) {
-    var n = niveau === 1 ? entier(3, 4) : entier(5, 6), vals = [], dec = niveau === 3;
-    for (var i = 0; i < n; i++) vals.push(dec ? net(entier(45, 55) / 10) : entier(niveau === 1 ? 2 : 10, niveau === 1 ? 20 : 60));
-    /* la derniere valeur est ajustee pour que la moyenne tombe juste : un entier, ou un dixieme */
-    var pas = dec ? 0.1 : 1, tot0 = vals.reduce(function (a, b) { return a + b; }, 0), reste = Math.round(tot0 / pas) % n;
-    if (reste) vals[n - 1] = net(vals[n - 1] + (n - reste) * pas);
-    var somme = net(vals.reduce(function (a, b) { return a + b; }, 0)), tri = vals.slice().sort(function (a, b) { return a - b; });
-    var liste = vals.map(function (x) { return nb(x); }).join(" ; ");
-    var ctx = chantier(spec) ? "Le gazole consommé par la pelle sur " + n + " jours, en litres : " + liste + "." : dec ? "Six mesures d'une tension, en V : " + liste + "." : "La série : " + liste + ".";
-    var errs = [err(somme / (n - 1), E.mauvaisNombre), err(somme, E.sommeSeule)];
-    if (n % 2 === 1) errs.push(err(tri[(n - 1) / 2], E.milieu));
-    return { contexte: ctx, enonce: "La moyenne ?", unite: chantier(spec) ? "L" : dec ? "V" : "", reponse: somme / n, tolerance: 0.005,
-      methode: "On additionne toutes les valeurs, puis on divise par leur nombre.", erreurs: errs };
-  });
-
-  definir("frequence-stat", function (spec) {
-    var total = un([20, 25, 40, 50, 80, 100, 200, 250]), k = entier(1, Math.floor(total * 0.4));
-    var ctx = chantier(spec) ? "Sur " + total + " prises contrôlées en fin de chantier, " + k + " sont défectueuses." : "Sur " + total + " pièces contrôlées, " + k + " sont hors tolérance.";
-    return { contexte: ctx, enonce: "La fréquence des défauts, en % ?", unite: "%", reponse: k / total * 100, tolerance: 0.005, arrondi: 2,
-      methode: "Fréquence = effectif ÷ total, × 100 pour des %.",
-      erreurs: [err(k / total, E.pas100), err(total / k * 100, E.freqRenversee), err(k / (total - k) * 100, E.freqTotal)] };
-  });
-
-  definir("probabilite", function (spec) {
-    var n = un([10, 20, 25, 40, 50, 100]), k = entier(1, Math.floor(n / 3));
-    var ctx = chantier(spec) ? "Un carton de " + n + " douilles, dont " + k + " fêlées. On en tire une au hasard." : "Un sac de " + n + " jetons, dont " + k + " rouges. On en tire un au hasard.";
-    return { contexte: ctx, enonce: chantier(spec) ? "La probabilité qu'elle soit fêlée ?" : "La probabilité qu'il soit rouge ?", unite: "", reponse: k / n, tolerance: 0.005, arrondi: 3,
-      methode: "Probabilité = cas favorables ÷ cas possibles : un nombre entre 0 et 1.",
-      erreurs: [err(k / (n - k), E.favDefav), err(n / k, E.probaRenversee), err(k / n * 100, E.probaPourcent)] };
-  });
-
-  /* ═══════════════════════════════════════════ E · geometrie et calcul litteral */
-  definir("aire-perimetre", function (spec, niveau) {
-    if (niveau === 1) {
-      var L = entier(5, 40), l = entier(3, L - 1), aire = Math.random() < 0.5;
-      var ctx = chantier(spec) ? "Une plateforme rectangulaire de " + v(L, "m") + " sur " + v(l, "m") + "." : "Un rectangle de " + v(L, "m") + " sur " + v(l, "m") + ".";
-      if (aire) return { contexte: ctx, enonce: chantier(spec) ? "La surface à empierrer ?" : "Son aire ?", unite: "m²", reponse: L * l, tolerance: 1e-9,
-        methode: "Aire = longueur × largeur, en m².", erreurs: [err(2 * (L + l), E.airePerim), err(L + l, E.demiPerim)] };
-      return { contexte: ctx, enonce: chantier(spec) ? "La longueur de grillage pour en faire le tour ?" : "Son périmètre ?", unite: "m", reponse: 2 * (L + l), tolerance: 1e-9,
-        methode: "Périmètre = 2 × (longueur + largeur), en m.", erreurs: [err(L * l, E.airePerim), err(L + l, E.demiPerim)] };
-    }
-    if (niveau === 2) {
-      var d = un([2, 4, 6, 8, 10, 12, 1.2, 1.6, 3]), r = d / 2, a2 = Math.random() < 0.5;
-      var obj = chantier(spec) ? "Un regard circulaire de " + v(d, "m") + " de diamètre." : "Un disque de " + v(d, "m") + " de diamètre.";
-      if (a2) return { contexte: obj, enonce: "Son aire ?", unite: "m²", reponse: Math.PI * r * r, tolerance: 0.01, arrondi: 2,
-        methode: "Aire = π × r², avec r la moitié du diamètre.", erreurs: [err(Math.PI * d * d, E.diametre), err(2 * Math.PI * r, E.perimDisque), err(Math.PI * r, E.rSansCarre)] };
-      return { contexte: obj, enonce: "Son périmètre ?", unite: "m", reponse: Math.PI * d, tolerance: 0.01, arrondi: 2,
-        methode: "Périmètre = 2 × π × r = π × d.", erreurs: [err(Math.PI * r * r, E.aireDisque), err(2 * Math.PI * d, E.diametre)] };
-    }
-    var Lg = entier(10, 30), lg = entier(6, 15), c = entier(2, Math.min(lg, Lg) - 2);
-    return { contexte: (chantier(spec) ? "Une dalle rectangulaire de " : "Un rectangle de ") + v(Lg, "m") + " sur " + v(lg, "m") + ", dont on retire un carré de " + v(c, "m") + " de côté.",
-      enonce: "L'aire restante ?", unite: "m²", reponse: Lg * lg - c * c, tolerance: 1e-9, methode: "Aire du grand rectangle − aire du carré retiré.",
-      erreurs: [err(Lg * lg + c * c, { nom: "Carré ajouté", explication: "Le carré est retiré : on soustrait son aire." }), err(Lg * lg - 4 * c, { nom: "Périmètre du carré retiré", explication: "On retire une aire, c × c, pas un périmètre." })] };
-  });
-
-  var TRIPLETS = [[3, 4, 5], [6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [1.5, 2, 2.5], [2.4, 3.2, 4], [7, 24, 25]];
-  definir("pythagore", function (spec, niveau) {
-    if (niveau === 1) {
-      var a = net(plage([1.5, 12, 0.5])), b = net(plage([1.5, 12, 0.5])), c = Math.sqrt(a * a + b * b);
-      var ctx = chantier(spec) ? "Une dalle rectangulaire de " + v(a, "m") + " sur " + v(b, "m") + "." : "Un triangle rectangle : les côtés de l'angle droit mesurent " + v(a, "m") + " et " + v(b, "m") + ".";
-      return { contexte: ctx, enonce: chantier(spec) ? "Sa diagonale ?" : "L'hypoténuse ?", unite: "m", reponse: c, tolerance: 0.01, arrondi: 2,
-        methode: "Hypoténuse² = a² + b², puis la racine.", erreurs: [err(a * a + b * b, E.racineOubliee), err(a + b, E.cotesAdd), err(Math.sqrt(a + b), { nom: "Carrés oubliés", explication: "On additionne les carrés des côtés, pas les côtés." })] };
-    }
-    if (niveau === 2) {
-      var hy = plage([5, 15, 0.5]), x = plage([1.5, hy - 1, 0.5]), y = Math.sqrt(hy * hy - x * x);
-      var ctx2 = chantier(spec) ? "Une échelle de " + v(hy, "m") + ", son pied à " + v(x, "m") + " du mur." : "Un triangle rectangle d'hypoténuse " + v(hy, "m") + ", un côté de l'angle droit de " + v(x, "m") + ".";
-      return { contexte: ctx2, enonce: chantier(spec) ? "La hauteur atteinte sur le mur ?" : "L'autre côté de l'angle droit ?", unite: "m", reponse: y, tolerance: 0.01, arrondi: 2,
-        methode: "Côté² = hypoténuse² − autre côté², puis la racine.", erreurs: [err(Math.sqrt(hy * hy + x * x), E.hypo), err(hy * hy - x * x, E.racineOubliee), err(hy - x, { nom: "Côtés soustraits", explication: "On soustrait les carrés, pas les côtés." })] };
-    }
-    var t = un(TRIPLETS), k = un([1, 1, 1, 2]), droit = Math.random() < 0.55, d3 = droit ? t[2] * k : net(t[2] * k + un([0.2, 0.3, -0.2, 0.5]));
-    var ctx3 = chantier(spec) ? "Équerrage d'une implantation : " + v(t[0] * k, "m") + " et " + v(t[1] * k, "m") + " sur les côtés, la diagonale mesure " + v(d3, "m") + "."
-      : "Un triangle de côtés " + v(t[0] * k, "cm") + ", " + v(t[1] * k, "cm") + " et " + v(d3, "cm") + ".";
-    return droit
-      ? choix("L'angle est-il droit ?", "oui : le carré du grand côté égale la somme des deux autres",
-        [["non : les nombres ne sont pas ronds", "Impression au lieu de calcul", "On compare grand côté² et somme des deux autres carrés."]],
-        "Réciproque de Pythagore : si c² = a² + b², l'angle est droit.", ctx3)
-      : choix("L'angle est-il droit ?", "non : le carré du grand côté n'égale pas la somme des deux autres",
-        [["oui : c'est presque 3-4-5", "« Presque » pris pour égal", "Un écart de quelques centimètres suffit : l'angle n'est pas droit."]],
-        "Réciproque de Pythagore : si c² = a² + b², l'angle est droit ; sinon, il ne l'est pas.", ctx3);
-  });
-
-  definir("pente", function (spec, niveau) {
-    var L = un([20, 40, 50, 60, 80, 100, 120, 150, 200, 250, 300]), p = entier(2, 15);
-    var lieu = chantier(spec) ? "Une rampe d'accès" : "Une route";
-    if (niveau === 1) return { contexte: lieu + " de " + v(L, "m") + " à " + p + " %.", enonce: "Le dénivelé ?", unite: "m", reponse: L * p / 100, tolerance: 1e-9,
-      methode: "Dénivelé = longueur × pourcentage ÷ 100.", erreurs: [err(L * p, E.sans100Pente), err(L / p, { nom: "Divisé par la pente", explication: "15 % : 15 m pour 100 m, donc longueur × 15 ÷ 100." })] };
-    var d = net(L * p / 100);
-    if (niveau === 2) return { contexte: lieu + " monte de " + v(d, "m") + " sur " + v(L, "m") + ".", enonce: "Sa pente, en % ?", unite: "%", reponse: p, tolerance: 1e-9,
-      methode: "Pente = dénivelé ÷ longueur × 100.", erreurs: [err(d / L, E.penteSans100), err(L / d * 100, E.penteRenversee)] };
-    return { contexte: "Il faut rattraper " + v(d, "m") + " de dénivelé à " + p + " % au plus.", enonce: "La longueur de rampe ?", unite: "m", reponse: L, tolerance: 1e-9,
-      methode: "Longueur = dénivelé × 100 ÷ pente.", erreurs: [err(d * p / 100, { nom: "Multiplié par la pente", explication: "On retourne : longueur = dénivelé × 100 ÷ pourcentage." }), err(d / p, { nom: "× 100 oublié", explication: "Longueur = dénivelé × 100 ÷ pourcentage." })] };
-  });
-
-  definir("equation", function (spec, niveau) {
-    if (niveau === 1) { var a = entier(2, 9), x = entier(2, 12) * (Math.random() < 0.2 ? -1 : 1), b = a * x;
-      return { enonce: calc(a + "x = " + nb(b)) + " : x ?", unite: "", reponse: x, tolerance: 1e-9, methode: "On divise les deux membres par " + a + ".",
-        erreurs: [err(a * b, E.multiplieAuLieu), err(a / b, { nom: "Rapport renversé", explication: "x = b ÷ a : le second membre au numérateur." }), err(b - a, { nom: "Soustrait au lieu de diviser", explication: "a multiplie x : on divise." })] }; }
-    if (niveau === 2) { var a2 = entier(2, 30), x2 = entier(-10, 40), s; if (x2 === 0) x2 = 7; s = a2 + x2;
-      if (Math.random() < 0.5) return { enonce: calc(a2 + " + x = " + s) + " : x ?", unite: "", reponse: x2, tolerance: 1e-9, methode: "On retranche " + a2 + " des deux côtés.",
-        erreurs: [err(s + a2, E.signeB), err(s / a2, { nom: "Divisé au lieu de soustraire", explication: "a s'ajoute à x : on le retranche." }),
-                  err(a2 - s, { nom: "Soustraction à l'envers", explication: "x = " + s + " − " + a2 + " : le second membre moins a." })] };
-      var q = entier(2, 6), r = net(entier(2, 30) / 2);
-      return { enonce: calc("x ÷ " + q + " = " + nb(r)) + " : x ?", unite: "", reponse: r * q, tolerance: 1e-9, methode: "On multiplie les deux membres par " + q + ".",
-        erreurs: [err(r / q, { nom: "Divisé au lieu de multiplier", explication: "x est divisé par " + q + " : on défait en multipliant." }), err(r + q, E.signeB),
-                  err(q / r, { nom: "Rapport renversé", explication: "x ÷ " + q + " = " + nb(r) + " donne x = " + nb(r) + " × " + q + "." })] }; }
-    var a3 = entier(2, 9), x3 = entier(2, 15), b3 = entier(1, 30), c3 = a3 * x3 + b3;
-    if (chantier(spec)) {
-      var f = un([40, 50, 60, 80]), j = entier(2, 9), pj = un([45, 60, 75, 90, 120]), tot = f + j * pj;
-      return { contexte: "Location d'une mini-pelle : " + v(f, "€") + " de forfait, plus " + v(pj, "€") + " par jour. La facture fait " + v(tot, "€") + ".",
-        enonce: "Combien de jours ?", unite: "jours", reponse: j, tolerance: 1e-9, methode: "On retire le forfait, puis on divise par le prix d'un jour.",
-        erreurs: [err(tot / pj - f, E.ordreInverse), err((tot + f) / pj, E.signeB), err(tot / pj, { nom: "Forfait oublié", explication: "Le forfait se paie une fois : on le retire avant de diviser." })] };
-    }
-    return { enonce: calc(a3 + "x + " + b3 + " = " + c3) + " : x ?", unite: "", reponse: x3, tolerance: 1e-9, methode: "On retranche " + b3 + ", puis on divise par " + a3 + ".",
-      erreurs: [err(c3 / a3 - b3, E.ordreInverse), err((c3 + b3) / a3, E.signeB), err(c3 - b3 - a3, { nom: "a retranché au lieu de divisé", explication: "a multiplie x : on divise par a." })] };
-  });
-
-  var RAD = Math.PI / 180;
-  definir("trigonometrie", function (spec, niveau) {
-    var ang = un([20, 25, 30, 35, 40, 45, 50, 60, 65, 70, 75]);
-    if (niveau === 1) { var H = plage([2, 12, 0.5]), op = Math.random() < 0.5, r = H * (op ? Math.sin(ang * RAD) : Math.cos(ang * RAD));
-      var ctx = chantier(spec) ? "Une échelle de " + v(H, "m") + " posée contre un mur fait un angle de " + ang + "° avec le sol." : "Un triangle rectangle : hypoténuse " + v(H, "m") + ", un angle de " + ang + "°.";
-      return { contexte: ctx, enonce: chantier(spec) ? (op ? "La hauteur atteinte sur le mur ?" : "La distance du pied au mur ?") : (op ? "Le côté opposé à l'angle ?" : "Le côté adjacent à l'angle ?"),
-        unite: "m", reponse: r, tolerance: 0.01, arrondi: 2, methode: "Opposé = hypoténuse × sin ; adjacent = hypoténuse × cos ; calculatrice en degrés.",
-        erreurs: [err(H * (op ? Math.cos(ang * RAD) : Math.sin(ang * RAD)), E.cosSin), err(Math.abs(H * (op ? Math.sin(ang) : Math.cos(ang))), E.radian), err(H / (op ? Math.sin(ang * RAD) : Math.cos(ang * RAD)), E.trigoDivise)] }; }
-    if (niveau === 2) { var A = plage([2, 20, 0.5]), o = A * Math.tan(ang * RAD);
-      return { contexte: (chantier(spec) ? "Un talus : " : "Un triangle rectangle : ") + "côté adjacent " + v(A, "m") + ", angle " + ang + "°.", enonce: "Le côté opposé ?", unite: "m", reponse: o, tolerance: 0.01, arrondi: 2,
-        methode: "tan = opposé ÷ adjacent, donc opposé = adjacent × tan.", erreurs: [err(A / Math.tan(ang * RAD), E.tanRenversee), err(A * Math.sin(ang * RAD), { nom: "sin au lieu de tan", explication: "Adjacent et opposé, sans l'hypoténuse : c'est la tangente." }), err(Math.abs(A * Math.tan(ang)), E.radian)] }; }
-    var O = plage([1, 8, 0.5]), Ad = plage([3, 15, 0.5]), al = Math.atan(O / Ad) / RAD;
-    return { contexte: (chantier(spec) ? "Une rampe monte de " : "Un triangle rectangle : côté opposé ") + v(O, "m") + (chantier(spec) ? " sur " : ", côté adjacent ") + v(Ad, "m") + (chantier(spec) ? " de distance horizontale." : "."),
-      enonce: "L'angle, en degrés ?", unite: "°", reponse: al, tolerance: 0.01, arrondi: 1, methode: "tan(angle) = opposé ÷ adjacent, puis tan⁻¹ en mode degrés.",
-      erreurs: [err(Math.atan(Ad / O) / RAD, { nom: "Rapport renversé", explication: "tan = opposé ÷ adjacent." }), err(Math.atan(O / Ad), E.radian), err(O / Ad, { nom: "tan⁻¹ oubliée", explication: "Le rapport donne la tangente : la touche tan⁻¹ donne l'angle." })] };
-  });
-
-  /* ═══════════════════════════════════════════ seconde · puissances, fonctions, electricite */
-  definir("puissances-dix", function (spec, niveau) {
-    var a = entier(-6, 9), b = entier(-6, 9);
-    if (niveau === 1) { if (a + b === 0 || a * b === a + b) b = b + 2;
-      return { enonce: calc("10" + exp(a) + " × 10" + exp(b)) + " = 10ⁿ : n ?", unite: "", reponse: a + b, tolerance: 1e-9, methode: "10ᵃ × 10ᵇ = 10ᵃ⁺ᵇ.",
-        erreurs: [err(a * b, E.expMultiplies), err(a - b, { nom: "Exposants retranchés", explication: "Pour un produit, les exposants s'additionnent." }), err(-(a + b), E.expSigne)] }; }
-    if (niveau === 2) { var e = un([-5, -4, -3, -2, 2, 3, 4, 5, 6]), m = entier(11, 99) / 10, x = net(m * Math.pow(10, e));
-      return { enonce: calc(nb(x, 8)) + " en écriture scientifique : l'exposant ?", unite: "", reponse: e, tolerance: 1e-9,
-        methode: "Un seul chiffre non nul avant la virgule ; on compte les rangs de décalage. Moins de 1 : exposant négatif.",
-        erreurs: [err(e + 1, E.expRang), err(e - 1, E.expRang), err(-e, E.expSigne)] }; }
-    if (b === 0) b = -2; if (a === b || a + b === 0) a = a + 3;
-    return { enonce: calc("10" + exp(a) + " ÷ 10" + exp(b)) + " = 10ⁿ : n ?", unite: "", reponse: a - b, tolerance: 1e-9, methode: "10ᵃ ÷ 10ᵇ = 10ᵃ⁻ᵇ.",
-      erreurs: [err(a + b, E.expDivision), err(b - a, { nom: "Soustraction renversée", explication: "L'exposant du numérateur moins celui du dénominateur." }),
-                err(a * b, E.expMultiplies)] };
-  });
-  function exp(n) {
-    var X = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
-    return String(n).split("").map(function (c) { return X[c]; }).join("");
-  }
-
-  definir("image-antecedent", function (spec, niveau) {
-    var a, b, k, x, y, a3, k3, r;
-    do { a = un([-4, -3, -2, 2, 3, 4, 5]); b = entier(-9, 9); } while (b === 0);
-    var f = "f(x) = " + nb(a) + "x " + (b < 0 ? "− " + -b : "+ " + b);
-    if (niveau === 1) {
-      do { k = entier(-5, 6); r = a * k + b; } while (r === 0 || k === 0);
-      return { enonce: calc(f) + " : l'image de " + nb(k) + " ?", unite: "", reponse: r, tolerance: 1e-9, methode: "On remplace x par " + nb(k) + " : a × x, puis + b.",
-        erreurs: [err(a * (k + b), E.imageOrdre), err(a * k - b, E.imageSigne), err(-a * k + b, { nom: "Règle des signes", explication: "Moins par moins donne plus ; moins par plus donne moins." })] };
-    }
-    if (niveau === 2) {
-      do { x = entier(-5, 8); } while (x === 0);
-      y = a * x + b;
-      return { enonce: calc(f) + " : l'antécédent de " + nb(y) + " ?", unite: "", reponse: x, tolerance: 1e-9, methode: "On résout " + nb(a) + "x " + (b < 0 ? "− " + -b : "+ " + b) + " = " + nb(y) + ".",
-        erreurs: [err(a * y + b, E.imagePourAnte), err((y + b) / a, E.signeB), err(y / a - b, E.ordreInverse), err(-x, { nom: "Règle des signes", explication: "Moins par moins donne plus ; moins par plus donne moins." })] };
-    }
-    do { k3 = entier(-4, 5); a3 = un([2, 3, -1, -2]); r = a3 * k3 * k3 + b; } while (r === 0 || k3 === 0);
-    return { enonce: calc("f(x) = " + nb(a3) + "x² " + (b < 0 ? "− " + -b : "+ " + b)) + " : l'image de " + nb(k3) + " ?", unite: "", reponse: r, tolerance: 1e-9,
-      methode: "Le carré d'abord, puis × a, puis + b. Un carré n'est jamais négatif.",
-      erreurs: [err(a3 * k3 * a3 * k3 + b, { nom: "(ax)² au lieu de ax²", explication: "Seul x est au carré, pas a." }), err(a3 * k3 + b, { nom: "Carré oublié", explication: "x² = x × x." }), err(-a3 * k3 * k3 + b, { nom: "Signe du carré", explication: "(−3)² = 9 : le carré d'un négatif est positif." })] };
-  });
-
-  definir("diviseur", function (spec, niveau) {
-    var R = [100, 150, 220, 330, 470, 680, 1000, 1500, 2200, 3300], R1 = un(R), R2 = un(R), U = un([5, 9, 12, 24]);
-    if (R1 === R2) R2 = un(R.filter(function (x) { return x !== R1; }));
-    var U2 = U * R2 / (R1 + R2);
-    if (niveau === 3) { var I = U / (R1 + R2) * 1000;
-      return { contexte: "R₁ = " + v(R1, "Ω") + " et R₂ = " + v(R2, "Ω") + " en série, sous " + v(U, "V") + ".", enonce: "L'intensité, en mA ?", unite: "mA", reponse: I, tolerance: 0.01, arrondi: 2,
-        methode: "I = U ÷ (R₁ + R₂), en A ; × 1 000 pour des mA.",
-        erreurs: [err(I / 1000, { nom: "Resté en ampères", explication: "U ÷ R donne des ampères ; 1 A = 1 000 mA." }), err(U / R1 * 1000, E.diviseurSomme), err(U / R1 * 1000 + U / R2 * 1000, { nom: "Courants additionnés", explication: "En série, un seul courant : I = U ÷ (R₁ + R₂)." })] }; }
-    return { contexte: "Un diviseur de tension : R₁ = " + v(R1, "Ω") + " et R₂ = " + v(R2, "Ω") + " en série, sous " + v(U, "V") + ".", enonce: "La tension aux bornes de R₂ ?", unite: "V", reponse: U2, tolerance: 0.01, arrondi: 2,
-      methode: "U₂ = U × R₂ ÷ (R₁ + R₂) : la tension se partage dans le rapport des résistances.",
-      erreurs: [err(U * R1 / (R1 + R2), E.diviseurRenverse), err(U * R2 / R1, E.diviseurSomme), err(U / 2, { nom: "Partage en deux", explication: "Moitié-moitié seulement si R₁ = R₂." })] };
-  });
-
-  definir("transfert", function (spec, niveau) {
-    if (niveau === 1) { var Mo = un([120, 240, 360, 480, 600, 720, 960]), d = un([4, 6, 8, 12, 20, 24]);
-      return { contexte: "Un fichier de " + v(Mo, "Mo") + " téléchargé à " + v(d, "Mo/s") + ".", enonce: "La durée, en s ?", unite: "s", reponse: Mo / d, tolerance: 0.005, arrondi: 1,
-        methode: "Durée = taille ÷ débit, dans la même unité.", erreurs: [err(Mo * d, { nom: "Multiplié au lieu de diviser", explication: "Plus le débit est grand, plus c'est court : on divise." }), err(d / Mo, { nom: "Rapport renversé", explication: "Durée = taille ÷ débit." })] }; }
-    var Go = un([1, 2, 4, 8, 12, 16]), Mbit = un([50, 100, 200, 400, 500, 1000]), s = Go * 8000 / Mbit;
-    return { contexte: "Une sauvegarde de " + v(Go, "Go") + " sur une liaison à " + v(Mbit, "Mbit/s") + ".", enonce: "La durée, en s ?", unite: "s", reponse: s, tolerance: 0.005,
-      methode: "1 Go = 1 000 Mo = 8 000 Mbit ; durée = taille en Mbit ÷ débit en Mbit/s.",
-      erreurs: [err(Go * 1000 / Mbit, E.bitsOctets), err(Go * 8 / Mbit, { nom: "Go non convertis", explication: "Taille et débit dans la même unité : Go en Mbit." }), err(s / 60, { nom: "Exprimé en minutes", explication: "La question demande des secondes." })] };
-  });
-
-  definir("tolerance", function (spec, niveau) {
-    var Rn = un([100, 220, 470, 1000, 2200, 4700]), t = un([1, 2, 5, 10]), max = Math.random() < 0.5;
-    if (niveau >= 2) { var mes = net(Rn * (1 + un([-6, -3, 3, 4, 7, 8]) / 100)), ecart = (mes - Rn) / Rn * 100;
-      return { contexte: "Une résistance marquée " + v(Rn, "Ω") + " ; on mesure " + v(mes, "Ω") + ".", enonce: "L'écart à la valeur nominale, en % ?", unite: "%", reponse: ecart, tolerance: 0.01, arrondi: 2,
-        methode: "Écart = (mesure − nominale) ÷ nominale × 100.", erreurs: [err((mes - Rn) / mes * 100, { nom: "Rapporté à la mesure", explication: "L'écart se rapporte à la valeur nominale." }), err(mes - Rn, { nom: "Écart en ohms", explication: "En %, on divise par la nominale et × 100." }), err(-ecart, { nom: "Signe inversé", explication: "Mesure − nominale : positif si la mesure est au-dessus." })] }; }
-    var r = Rn * (1 + (max ? t : -t) / 100);
-    return { contexte: "Une résistance de " + v(Rn, "Ω") + " ± " + t + " %.", enonce: max ? "Sa valeur maximale ?" : "Sa valeur minimale ?", unite: "Ω", reponse: r, tolerance: 1e-6,
-      methode: "Valeur extrême = nominale × (1 ± t/100).", erreurs: [err(Rn * t / 100, E.tolerancePart), err(Rn + (max ? t : -t), E.pcNombre), err(Rn * (1 + (max ? -t : t) / 100), E.pcSensInverse)] };
-  });
-})();
-
-</script>
 <script>/* moteur/calculette.js */
 /* Entrainement · la calculatrice.
    Ecrite pour le depot : aucun droit a demander, aucune requete, rien d'enregistre.
@@ -3072,7 +2565,7 @@ var Entrainement = (function () {
       var rejouer = h("button", { type: "button", classe: "bouton principal" }, "Rejouer");
       rejouer.addEventListener("click", function () { demarrerChrono(c, a); });
       afficher([
-        barre({ href: "#/" + c.id, texte: c.nom }),
+        barre({ href: "#/" + c.id, texte: "L'entraînement" }),
         h("div", { classe: "fin" }, [
           h("p", { classe: "surtitre", texte: (raison === "temps" ? "Temps écoulé" : "Plus de cœurs") + " · " + a.titre }),
           h("h1", { texte: rg.actuel.titre }),
@@ -3115,7 +2608,7 @@ var Entrainement = (function () {
     }));
     afficher([
       /* la calculatrice seulement : le formulaire est deja la page */
-      barre({ href: "#/" + c.id, texte: c.nom }, c.calculatrice ? { calculatrice: true, formulaire: false, classe: c } : null),
+      barre({ href: "#/" + c.id, texte: "L'entraînement" }, c.calculatrice ? { calculatrice: true, formulaire: false, classe: c } : null),
       entete(c.nom, "Formulaire", "Les formules à connaître, avec leurs unités, les repères utiles et le piège qui revient."),
       h("div", { classe: "form-actions rangee" }, [parts[0], imprimer]),
       sommaire,
@@ -3159,7 +2652,7 @@ var Entrainement = (function () {
     document.title = l.titre + " · " + c.nom;
     var st = etoilesDe(c, l);
     afficher([
-      barre({ href: "#/" + c.id, texte: c.nom }),
+      barre({ href: "#/" + c.id, texte: "L'entraînement" }),
       entete(l.seance ? "Leçon · " + l.seance : "Leçon", l.titre, l.intro),
       h("ol", { classe: "parcours" }, l.etapes.map(function (e, i) {
         var ouverte = i === 0 || st[i - 1] > 0, n = st[i] || 0;
