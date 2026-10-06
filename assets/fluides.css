@@ -313,6 +313,16 @@ nav.portes .porte{
 }
 nav.portes .porte::before{display:none}
 nav.portes .porte:hover{background:var(--carte2)}
+/* la porte mise en avant s'inverse : encre en fond, la teinte de l'eau glacee en
+   filet, comme le lien du plan qui la double */
+nav.portes .porte.vedette{background:var(--encre);color:var(--carte);border-color:var(--encre);
+  border-left:5px solid var(--r3)}
+nav.portes .porte.vedette:hover{background:color-mix(in srgb,var(--encre) 86%,var(--r3))}
+nav.portes .porte.vedette .t{color:var(--carte)}
+nav.portes .porte.vedette .d{color:color-mix(in srgb,var(--carte) 78%,var(--encre))}
+/* la teinte melee a la carte reste lisible sur le fond inverse, de jour comme de nuit */
+nav.portes .porte.vedette .n{color:color-mix(in srgb,var(--r3) 50%,var(--carte))}
+nav.portes .porte.vedette .ico{stroke:color-mix(in srgb,var(--r3) 50%,var(--carte))}
 
 /* ─── les fiches transversales ─── */
 .espace>h2{
