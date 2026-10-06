@@ -2591,7 +2591,8 @@ var Entrainement = (function () {
   /* un champ qui ne garde que les sections ou le mot apparait, accents ignores */
   function formulaireFiltre(c, compact) {
     var contenu = h("div", { classe: "form-contenu" }, formulaireDOM(c, compact));
-    var champ = h("input", { type: "search", classe: "form-filtre", placeholder: "Chercher : débit, GV, mCE, rosée…", "aria-label": "Chercher une formule" });
+    var champ = h("input", { type: "search", classe: "form-filtre", /* `chercher:` de la classe : quatre mots de son formulaire, pour montrer ce qu'on peut taper */
+      placeholder: "Chercher : " + (c.chercher || "un mot, une unité") + "…", "aria-label": "Chercher une formule" });
     champ.addEventListener("input", function () {
       var q = sansAccent(champ.value.trim());
       [].forEach.call(contenu.querySelectorAll(".form-section"), function (x) { x.hidden = !!q && sansAccent(x.textContent).indexOf(q) < 0; });
@@ -3102,15 +3103,20 @@ var Entrainement = (function () {
     imprimer.addEventListener("click", function () { window.print(); });
     var parts = formulaireFiltre(c, false);
     /* un sommaire en boutons : une ancre « # » changerait la route */
-    var sommaire = h("div", { classe: "form-sommaire" }, [].map.call(parts[1].querySelectorAll(".form-section"), function (sec) {
-      var b = h("button", { type: "button", classe: "pastille" }, (sec.querySelector(".form-entete .pastille") || sec.querySelector(".form-entete span")).textContent);
+    /* le libelle de la seance, et son titre en plus quand deux sections le partagent */
+    var secs = [].slice.call(parts[1].querySelectorAll(".form-section"));
+    var libelles = secs.map(function (sec) { var p = sec.querySelector(".form-entete .pastille"); return p ? p.textContent : ""; });
+    var sommaire = h("div", { classe: "form-sommaire" }, secs.map(function (sec, i) {
+      var titre = sec.querySelector(".form-entete span:last-child").textContent, l = libelles[i];
+      var double = l && libelles.filter(function (x) { return x === l; }).length > 1;
+      var b = h("button", { type: "button", classe: "pastille" }, !l ? titre : double ? l + " · " + titre : l);
       b.addEventListener("click", function () { sec.scrollIntoView({ behavior: "smooth", block: "start" }); });
       return b;
     }));
     afficher([
       /* la calculatrice seulement : le formulaire est deja la page */
       barre({ href: "#/" + c.id, texte: c.nom }, c.calculatrice ? { calculatrice: true, formulaire: false, classe: c } : null),
-      entete(c.nom, "Formulaire", "Les formules des séances, avec leurs unités, les repères à connaître et le piège qui revient."),
+      entete(c.nom, "Formulaire", "Les formules à connaître, avec leurs unités, les repères utiles et le piège qui revient."),
       h("div", { classe: "form-actions rangee" }, [parts[0], imprimer]),
       sommaire,
       parts[1],
@@ -3404,6 +3410,7 @@ var Entrainement = (function () {
     /* La calculatrice a cote de chaque question. Un automatisme ou une etape qui
        doit se faire de tete porte calculatrice: false. */
     calculatrice: true,
+    chercher: "débit, GV, mCE, rosée",
     themes: [THERMO, HYDRO, CONV],
     rangs: [
       { points: 0, titre: "Stagiaire" },
