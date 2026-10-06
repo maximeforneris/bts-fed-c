@@ -11,8 +11,8 @@
 <style>
 /* Entrainement · la feuille.
    Palette du kit web, reprise des simulations du labo : papier, graphite, un seul
-   accent. Le jeu tient a la structure — tableau de bord, schema de l'installation,
-   parcours en ligne — et pas a la couleur. Polices du systeme : la page s'ouvre sans
+   accent. Le jeu tient a la structure — tableau de bord, parcours en
+   ligne — et pas a la couleur. Polices du systeme : la page s'ouvre sans
    reseau, depuis une cle ou le poste de la salle. */
 :root{
   --fond:#e9e7e3; --carte:#fbfaf9; --carte2:#f2f0ec; --encre:#191a1c; --encre2:#5d5b57;
@@ -51,15 +51,15 @@ noscript p{padding:16px;max-width:60ch}
 
 /* ─────────── Barre, en-tete, pied ─────────── */
 .barre{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;margin-bottom:6px}
-.lien-retour{text-decoration:none;color:var(--encre2);font-weight:600;font-size:.92rem;padding:10px 0}
+.lien-retour{text-decoration:none;color:var(--encre2);font-weight:600;font-size:.92rem;padding:10px 0;white-space:nowrap}
 .lien-retour:hover{color:var(--encre)}
 .bouton-son{font-size:.8rem;font-weight:600;color:var(--encre2);background:none;border:1px solid var(--trait);
   border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
 .bouton-son[aria-pressed="true"]{color:var(--encre);border-color:var(--encre2)}
 .bouton-calc[aria-pressed="true"]{color:var(--carte);background:var(--encre);border-color:var(--encre)}
-.barre .rangee{gap:6px}
+.barre .rangee{gap:6px;justify-content:flex-end;flex-wrap:wrap}
 
-/* ─────────── La calculatrice : un panneau a droite, par-dessus sur telephone ─────────── */
+/* ─────────── Le panneau d'outils, calculatrice et formulaire : a droite, par-dessus sur telephone ─────────── */
 .calculatrice{position:fixed;top:0;right:0;bottom:0;width:min(100%,380px);z-index:20;display:flex;flex-direction:column;
   background:var(--carte);border-left:1px solid var(--trait);box-shadow:var(--ombre)}
 .calculatrice[hidden]{display:none}
@@ -93,6 +93,13 @@ noscript p{padding:16px;max-width:60ch}
 .calc-touches .op{font-size:1.15rem}
 .calc-touches .efface{color:var(--faux)}
 .calc-touches .egal{background:var(--encre);border-color:var(--encre);color:var(--carte);font-size:1.15rem}
+/* les onglets du panneau, quand la classe a les deux outils */
+.outils-onglets{display:flex;border:1px solid var(--trait);border-radius:999px;overflow:hidden}
+.outil-onglet{font-size:.8rem;font-weight:650;padding:7px 12px;border:0;background:none;color:var(--encre2);cursor:pointer;min-height:34px}
+.outil-onglet[aria-selected="true"]{background:var(--encre);color:var(--carte)}
+.outil-onglet[hidden]{display:none}
+.form-corps{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 16px;display:flex;flex-direction:column;gap:10px}
+.form-corps[hidden],.calc-corps[hidden]{display:none}
 /* tablette en portrait : a cote, plus etroite ; la question prend la mise en page du telephone */
 @media (min-width:640px) and (max-width:899px){
   .calculatrice{width:300px}
@@ -169,18 +176,6 @@ noscript p{padding:16px;max-width:60ch}
 .pulse{animation:pulse .35s ease-out}
 .flotte{position:absolute;right:12px;top:-4px;font-weight:700;color:var(--juste);pointer-events:none;animation:monte .95s ease-out forwards}
 
-/* L'installation : un trait de schema, un noeud par organe remis en service */
-.bloc-installation{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);padding:8px 12px 10px;margin-bottom:12px}
-.installation{list-style:none;margin:8px 0 0;padding:0;display:flex}
-.installation li{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;text-align:center;min-width:0}
-.installation li::before{content:"";position:absolute;top:7px;left:-50%;right:50%;height:2px;background:var(--trait2)}
-.installation li:first-child::before{display:none}
-.installation li.en-service::before{background:var(--accent)}
-.noeud{width:16px;height:16px;border-radius:50%;border:2px solid var(--trait);background:var(--carte);position:relative;z-index:1}
-.en-service .noeud{background:var(--accent);border-color:var(--accent);animation:allume .4s ease-out}
-.organe{font-size:.72rem;color:var(--encre2);line-height:1.2;padding:0 2px;overflow-wrap:break-word}
-.en-service .organe{color:var(--encre);font-weight:600}
-
 /* L'avancement d'une etape */
 .pas{list-style:none;display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 0;padding:0}
 .pas li{width:26px;height:8px;border-radius:4px;background:var(--trait2)}
@@ -247,6 +242,53 @@ table.donnees th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;
 .methode{display:flex;flex-direction:column;gap:2px;padding-top:8px;border-top:1px dashed var(--trait)}
 .etiquette{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--encre2)}
 
+/* ─────────── Le formulaire : une page imprimable, et un onglet du panneau ─────────── */
+.form-actions{display:flex;gap:8px;align-items:stretch;margin:0 0 10px}
+.form-filtre{flex:1;min-width:0;width:100%;font:inherit;font-size:1rem;padding:8px 10px;border:1.5px solid var(--trait);
+  border-radius:var(--r);background:var(--carte);color:var(--encre)}
+.form-filtre:focus{outline:none;border-color:var(--accent)}
+.form-sommaire{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px}
+.form-sommaire button{background:none;cursor:pointer;padding:4px 10px}
+.form-sommaire button:hover{border-color:var(--encre2);color:var(--encre)}
+.form-groupe{margin:0 0 26px}
+.form-groupe[hidden],.form-section[hidden]{display:none}
+.form-titre{font-size:1.15rem;font-weight:700;margin:0 0 8px}
+h3.form-titre{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--encre2);margin:6px 0 6px;
+  padding-bottom:4px;border-bottom:1px solid var(--trait2)}
+.form-section{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r);padding:12px 16px 14px;
+  margin:0 0 10px;scroll-margin-top:12px}
+.form-entete{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-weight:700}
+/* une formule par ligne, ses unites a droite ; l'une sous l'autre quand la place manque */
+.form-liste{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);margin:0}
+.form-liste dt,.form-liste dd{padding:7px 0;border-top:1px dashed var(--trait2)}
+.form-liste dt:first-of-type,.form-liste dt:first-of-type + dd{border-top:0}
+.form-liste dt{font-size:1.05rem;font-weight:650;font-variant-numeric:tabular-nums;padding-right:14px;overflow-wrap:anywhere}
+.form-liste dd{margin:0;font-size:.86rem;color:var(--encre2)}
+.form-reperes{margin:8px 0 0;padding:8px 0 0 18px;border-top:1px solid var(--trait2);font-size:.88rem}
+.form-reperes li{margin:2px 0}
+.form-piege{display:flex;gap:8px;align-items:baseline;margin:10px 0 0;padding:7px 10px;border-left:3px solid var(--faux);
+  background:var(--faux-doux);border-radius:0 var(--r) var(--r) 0;font-size:.88rem}
+.form-piege .etiquette{color:var(--faux);flex:none}
+.form-corps .form-section{padding:10px 12px 12px;box-shadow:none}
+.form-corps .form-liste,.form-corps .form-liste dd{display:block}
+.form-corps .form-liste dt{padding:6px 0 0}
+.form-corps .form-liste dd{border-top:0;padding:0 0 6px}
+@container (max-width:528px){
+  .form-liste{display:block}
+  .form-liste dt{padding:7px 0 0}
+  .form-liste dd{border-top:0;padding:1px 0 7px}
+}
+/* a l'impression : les formules seules, sans barre ni champ, une section jamais coupee */
+@media print{
+  body{background:#fff;color:#000;padding-right:0!important}
+  .barre,.form-actions,.form-sommaire,.calculatrice,.annonces,.pied{display:none!important}
+  .page{max-width:none;padding:0}
+  .entete{padding-bottom:8px;margin-bottom:12px}
+  .form-section{break-inside:avoid;box-shadow:none;border-color:#999}
+  .form-titre{break-after:avoid}
+  .form-piege{background:none}
+}
+
 /* ─────────── Annonces ─────────── */
 .annonces{position:fixed;top:12px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;
   gap:6px;z-index:10;pointer-events:none;width:max-content;max-width:calc(100% - 32px)}
@@ -304,7 +346,6 @@ table.controle{border-collapse:collapse;width:100%;font-size:.86rem}
   .question{padding:14px 14px 16px}
   .reponse{min-height:56px;padding:10px 10px 10px 28px}
   .touche{left:9px;top:7px}
-  .organe{font-size:.6rem}
 }
 
 /* ─────────── Mouvements ─────────── */
@@ -312,7 +353,6 @@ table.controle{border-collapse:collapse;width:100%;font-size:.86rem}
 @keyframes casse{0%{transform:scale(1)}30%{transform:scale(1.35) rotate(-10deg)}100%{transform:scale(1)}}
 @keyframes pulse{0%{transform:scale(1)}40%{transform:scale(1.25)}100%{transform:scale(1)}}
 @keyframes monte{0%{opacity:0;transform:translateY(6px)}20%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
-@keyframes allume{0%{transform:scale(.6)}60%{transform:scale(1.4)}100%{transform:scale(1)}}
 @keyframes entre{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 
@@ -2344,8 +2384,10 @@ var Calculette = (function () {
    Deux modes, une seule facon de poser une question :
    - le CONTRE-LA-MONTRE des automatismes : des questions fabriquees au hasard, un
      chrono, trois coeurs, une serie qui multiplie les points, un niveau qui monte
-     tous les cinq bons coups, et l'installation de la classe qui se remet en service
-     organe par organe ;
+     tous les cinq bons coups, et un palier toutes les quinze bonnes reponses (la
+     chaufferie remise en service : +1 000 points, +10 s). Le schema de l'installation
+     qui s'allumait organe par organe a ete retire le 6 octobre 2026 : il occupait
+     l'ecran sans rien apprendre ;
    - le PARCOURS d'une lecon : des etapes dans l'ordre, chacune a reussir pour ouvrir
      la suivante, notee d'une a trois etoiles.
 
@@ -2380,9 +2422,10 @@ var Entrainement = (function () {
   function completer(id, ajout) {
     var c = trouver(CLASSES, id);
     if (!c) { PROBLEMES.push(id + " : classe à compléter introuvable ; son fichier doit être chargé avant."); return; }
-    PROBLEMES = PROBLEMES.concat(controler({ id: id, nom: c.nom, automatismes: ajout.automatismes, lecons: ajout.lecons }));
+    PROBLEMES = PROBLEMES.concat(controler({ id: id, nom: c.nom, automatismes: ajout.automatismes, lecons: ajout.lecons, formulaire: ajout.formulaire }));
     c.automatismes = (c.automatismes || []).concat(ajout.automatismes || []);
     c.lecons = (c.lecons || []).concat(ajout.lecons || []);
+    c.formulaire = (c.formulaire || []).concat(ajout.formulaire || []);
   }
   function controlerQuestion(q, lieu, p) {
     if (q.type === "choix") {
@@ -2411,6 +2454,13 @@ var Entrainement = (function () {
       if (!a.id || !a.titre) p.push(lieu + " : un automatisme sans id ou sans titre.");
       if (!a.generateurs || !a.generateurs.length) p.push(lieu + " : aucun générateur.");
       (a.generateurs || []).forEach(function (g) { controlerGenerateur(g, lieu, p); });
+    });
+    (def.formulaire || []).forEach(function (g, i) {
+      if (!g.titre || !g.sections || !g.sections.length) p.push(ou + " / formulaire, groupe " + (i + 1) + " : un titre et des sections.");
+      (g.sections || []).forEach(function (sec, j) {
+        if (!sec.titre || !sec.formules || !sec.formules.length) p.push(ou + " / formulaire, « " + g.titre + " », section " + (j + 1) + " : un titre et des formules.");
+        (sec.formules || []).forEach(function (f) { if (!Array.isArray(f) || !f[0]) p.push(ou + " / formulaire, « " + sec.titre + " » : une formule s'écrit [formule, unités]."); });
+      });
     });
     (def.lecons || []).forEach(function (l) {
       if (!l.etapes || !l.etapes.length) p.push(ou + " / " + l.id + " : aucune étape.");
@@ -2504,45 +2554,125 @@ var Entrainement = (function () {
     };
   })();
 
-  /* ═══════════════════════════════════════════ LA CALCULATRICE
-     Pour les classes qui ont `calculatrice: true` : un bouton dans la barre des parties
-     et des etapes ouvre la calculatrice du depot (moteur/calculette.js) dans un panneau,
-     a droite de la question, par-dessus sur telephone. Le panneau est garde d'une
-     question a l'autre : l'historique et Ans restent. L'emulateur NumWorks a ete essaye
-     puis ecarte le 6 octobre 2026 : ses CGU en interdisent la diffusion. */
-  var Calculatrice = (function () {
-    var panneau = null, calc = null, ouverte = false, boutons = [];
+  /* ═══════════════════════════════════════════ LE FORMULAIRE
+     Les formules d'une classe, avec leurs unites, leurs reperes et leurs pieges :
+     `formulaire: [ { theme, titre, sections: [ { seance, titre, formules: [[f, unites]],
+     reperes: [...], piege } ] } ]`. Il a sa page (#/<classe>/formulaire), imprimable,
+     et il s'ouvre aussi dans le panneau d'outils pendant une partie. */
+  function sansAccent(t) { return String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[\u00a0\u202f]/g, " "); }
+  /* les insecables, poses au rendu : « 3 600 », « 20 K » et « : » ne se coupent pas en fin de ligne */
+  function insecables(t) {
+    return String(t || "").replace(/(\d) (?=\d{3}(?!\d))/g, "$1\u00a0").replace(/(\d) (?=[A-Za-zµ°%€])/g, "$1\u00a0")
+      .replace(/ ([:;!?»])/g, "\u00a0$1").replace(/« /g, "«\u00a0");
+  }
+  function formulaireDOM(c, compact) {
+    var groupes = [];
+    parTheme(c, c.formulaire || []).forEach(function (g) { groupes = groupes.concat(g[1]); });
+    return groupes.map(function (grp) {
+      return h("section", { classe: "form-groupe" }, [
+        h(compact ? "h3" : "h2", { classe: "form-titre", texte: grp.titre }),
+        grp.sections.map(function (sec) {
+          return h("div", { classe: "form-section" }, [
+            h("p", { classe: "form-entete" }, [sec.seance ? h("span", { classe: "pastille", texte: sec.seance }) : null, h("span", { html: insecables(sec.titre) })]),
+            h("dl", { classe: "form-liste" }, sec.formules.map(function (f) {
+              /* la police du texte, pas la mono : son zero barre se lit comme un diametre, et Φ comme un zero */
+              return [h("dt", { html: insecables(f[0]) }), h("dd", { html: insecables(f[1]) })];
+            })),
+            sec.reperes && sec.reperes.length ? h("ul", { classe: "form-reperes" }, sec.reperes.map(function (r) { return h("li", { html: insecables(r) }); })) : null,
+            sec.piege ? h("p", { classe: "form-piege" }, [h("span", { classe: "etiquette", texte: "Piège" }), h("span", { html: insecables(sec.piege) })]) : null
+          ]);
+        })
+      ]);
+    });
+  }
+  /* un champ qui ne garde que les sections ou le mot apparait, accents ignores */
+  function formulaireFiltre(c, compact) {
+    var contenu = h("div", { classe: "form-contenu" }, formulaireDOM(c, compact));
+    var champ = h("input", { type: "search", classe: "form-filtre", placeholder: "Chercher : débit, GV, mCE, rosée…", "aria-label": "Chercher une formule" });
+    champ.addEventListener("input", function () {
+      var q = sansAccent(champ.value.trim());
+      [].forEach.call(contenu.querySelectorAll(".form-section"), function (x) { x.hidden = !!q && sansAccent(x.textContent).indexOf(q) < 0; });
+      [].forEach.call(contenu.querySelectorAll(".form-groupe"), function (x) { x.hidden = !x.querySelector(".form-section:not([hidden])"); });
+    });
+    return [champ, contenu];
+  }
+
+  /* ═══════════════════════════════════════════ LE PANNEAU D'OUTILS
+     A droite de la question, par-dessus sur telephone : la calculatrice du depot
+     (moteur/calculette.js, pour les classes qui ont `calculatrice: true`) et le
+     formulaire (pour celles qui en ont un). Un bouton par outil dans la barre des
+     parties et des etapes ; le panneau est garde d'une question a l'autre, l'historique
+     de la calculatrice et Ans restent. L'emulateur NumWorks a ete essaye puis ecarte le
+     6 octobre 2026 : ses CGU en interdisent la diffusion. */
+  var Outils = (function () {
+    var NOMS = { calculatrice: "Calculatrice", formulaire: "Formulaire" };
+    var panneau = null, onglets = {}, corps = {}, calc = null, actif = null, dispo = {}, boutons = {}, classe = null, formDe = null;
     function construire() {
       var fermer = h("button", { type: "button", classe: "bouton-son" }, "Fermer");
-      fermer.addEventListener("click", function () { montrer(false); });
-      var corps = h("div", { classe: "calc-corps" });
-      panneau = h("aside", { classe: "calculatrice", "aria-label": "Calculatrice", hidden: true }, [
-        h("div", { classe: "calc-tete" }, [h("span", { classe: "hud-nom", texte: "Calculatrice" }), fermer]),
-        corps
-      ]);
+      fermer.addEventListener("click", fermerPanneau);
+      var tabs = h("div", { classe: "outils-onglets", role: "tablist" });
+      panneau = h("aside", { classe: "calculatrice", "aria-label": "Outils", hidden: true }, [h("div", { classe: "calc-tete" }, [tabs, fermer])]);
+      Object.keys(NOMS).forEach(function (n) {
+        var t = h("button", { type: "button", role: "tab", classe: "outil-onglet", "aria-selected": "false" }, NOMS[n]);
+        t.addEventListener("click", function () { ouvrir(n, true); });
+        tabs.appendChild(t);
+        onglets[n] = t;
+        corps[n] = h("div", { classe: n === "calculatrice" ? "calc-corps" : "form-corps", hidden: true });
+        panneau.appendChild(corps[n]);
+      });
       document.body.appendChild(panneau);
-      calc = Calculette.monter(corps);
     }
-    function montrer(oui) {
-      if (oui && !panneau) construire();
-      if (!panneau) return;
-      ouverte = oui;
-      panneau.hidden = !oui;
-      document.body.classList.toggle("calc-ouverte", oui);
-      boutons.forEach(function (b) { b.setAttribute("aria-pressed", oui ? "true" : "false"); });
-      if (oui) setTimeout(calc.focus, 40);
+    function remplirFormulaire() {
+      if (!classe || formDe === classe.id) return;
+      formDe = classe.id;
+      vider(corps.formulaire);
+      formulaireFiltre(classe, true).forEach(function (x) { corps.formulaire.appendChild(x); });
     }
-    function bouton() {
-      var b = h("button", { type: "button", classe: "bouton-son bouton-calc", "aria-pressed": ouverte ? "true" : "false" }, "Calculatrice");
-      b.addEventListener("click", function () { montrer(!ouverte); });
-      boutons = [b];
-      return b;
+    function ouvrir(n, focus) {
+      if (!panneau) construire();
+      if (n === "calculatrice" && !calc) calc = Calculette.monter(corps.calculatrice);
+      if (n === "formulaire") remplirFormulaire();
+      actif = n;
+      panneau.hidden = false;
+      document.body.classList.add("calc-ouverte");
+      Object.keys(NOMS).forEach(function (x) {
+        onglets[x].hidden = !dispo[x];
+        onglets[x].setAttribute("aria-selected", x === n ? "true" : "false");
+        corps[x].hidden = x !== n;
+      });
+      majBoutons();
+      if (focus && n === "calculatrice") setTimeout(calc.focus, 40);
     }
-    return { bouton: bouton, fermer: function () { montrer(false); } };
+    function fermerPanneau() {
+      actif = null;
+      if (panneau) panneau.hidden = true;
+      document.body.classList.remove("calc-ouverte");
+      majBoutons();
+    }
+    function majBoutons() {
+      Object.keys(boutons).forEach(function (x) { boutons[x].setAttribute("aria-pressed", actif === x ? "true" : "false"); });
+    }
+    /* Les boutons de la barre, pour un ecran qui offre ces outils. Le panneau deja
+       ouvert reste ouvert, sans voler le focus de la question. */
+    function boutonsPour(o) {
+      dispo = { calculatrice: !!o.calculatrice, formulaire: !!o.formulaire };
+      classe = o.classe;
+      boutons = {};
+      var liste = Object.keys(NOMS).filter(function (x) { return dispo[x]; }).map(function (x) {
+        var b = h("button", { type: "button", classe: "bouton-son bouton-calc", "aria-pressed": "false" }, NOMS[x]);
+        b.addEventListener("click", function () { if (actif === x) fermerPanneau(); else ouvrir(x, true); });
+        boutons[x] = b;
+        return b;
+      });
+      if (actif) { if (dispo[actif]) ouvrir(actif, false); else fermerPanneau(); }
+      return liste;
+    }
+    return { boutonsPour: boutonsPour, fermer: fermerPanneau };
   })();
 
   /* ═══════════════════════════════════════════ LES PIECES COMMUNES DES ECRANS */
-  function barre(retour, calculatrice) {
+  /* outils : { calculatrice, formulaire, classe } pour les ecrans de jeu ; rien ailleurs */
+  function barre(retour, outils) {
     function libelle() { return etat.reglages.son ? "Son : activé" : "Son : coupé"; }
     var bouton = h("button", { type: "button", classe: "bouton-son", "aria-pressed": etat.reglages.son ? "true" : "false" }, libelle());
     bouton.addEventListener("click", function () {
@@ -2551,11 +2681,15 @@ var Entrainement = (function () {
       bouton.textContent = libelle();
       Son.juste();
     });
-    if (!calculatrice) Calculatrice.fermer();
+    var extra = [];
+    if (outils) extra = Outils.boutonsPour(outils); else Outils.fermer();
     return h("div", { classe: "barre" }, [
       retour ? h("a", { classe: "lien-retour", href: retour.href }, "← " + retour.texte) : h("span"),
-      h("div", { classe: "rangee" }, [calculatrice ? Calculatrice.bouton() : null, bouton])
+      h("div", { classe: "rangee" }, extra.concat([bouton]))
     ]);
+  }
+  function outilsDe(c, calc) {
+    return { calculatrice: calc, formulaire: !!(c.formulaire && c.formulaire.length), classe: c };
   }
   function entete(surtitre, titre, chapeau) {
     return h("header", { classe: "entete" }, [
@@ -2617,9 +2751,20 @@ var Entrainement = (function () {
   function pageClasse(c) {
     document.title = c.nom + " · Entraînement";
     etat.reglages.classe = c.id; sauver();
-    var autos = c.automatismes || [], lecons = c.lecons || [];
+    var autos = c.automatismes || [], lecons = c.lecons || [], form = c.formulaire || [];
     /* une page qui ne porte qu'une classe (le fichier assemble pour un site) s'ouvre sur elle */
     var blocs = [barre(CLASSES.length > 1 ? { href: "#/", texte: "Les classes" } : null), entete(c.niveau, c.nom, c.scenario)];
+    if (form.length) {
+      var nf = form.reduce(function (n, g) { return n + g.sections.reduce(function (m, sec) { return m + sec.formules.length; }, 0); }, 0);
+      blocs.push(h("section", { classe: "rubrique" }, [
+        h("h2", { texte: "Formulaire" }),
+        h("div", { classe: "grille" }, [h("a", { classe: "carte carte-lien", href: "#/" + c.id + "/formulaire" }, [
+          h("span", { classe: "titre-carte", texte: "Les formules à réviser" }),
+          h("span", { classe: "detail", texte: "Avec leurs unités, leurs repères et leurs pièges. Il s'ouvre aussi pendant une partie, à côté de la question." }),
+          h("span", { classe: "carte-pied" }, [h("span", { classe: "pastille mono", texte: nf + " formules" }), h("span", { classe: "detail", texte: "imprimable" })])
+        ])])
+      ]));
+    }
     if (autos.length) blocs.push(h("section", { classe: "rubrique" }, [
       h("h2", { texte: "Automatismes" }),
       h("p", { classe: "consigne", texte: "Contre la montre, trois cœurs. Une bonne réponse rend deux secondes ; trois d'affilée doublent les points. Au niveau 3, c'est à vous d'écrire la réponse." }),
@@ -2819,9 +2964,9 @@ var Entrainement = (function () {
     document.title = a.titre + " · " + c.nom;
     var duree = (a.duree || 90) * 1000, bonus = (a.bonus === undefined ? 2 : a.bonus) * 1000;
     var viesMax = a.vies || 3, saisie = a.saisie || "mixte";
-    var organes = c.organes || [], parOrgane = c.parOrgane || 3, parNiveau = 5;
+    var parPalier = c.parPalier || 15, parNiveau = 5;
     var J = { score: 0, vies: viesMax, serie: 0, meilleure: 0, bonnes: 0, total: 0, niveau: 1,
-              erreurs: {}, allumes: 0, interventions: 0 };
+              erreurs: {}, paliers: 0 };
     var restant = duree, depuis = 0, enPause = true, fini = false, tic = 0, minuteries = [];
 
     var elVies = h("span"), elTemps = h("span", { classe: "temps mono" }), elJauge = h("span", { classe: "jauge-remplie" });
@@ -2829,27 +2974,18 @@ var Entrainement = (function () {
     var elNiveau = h("span", { classe: "pastille" }), elSerie = h("span", { classe: "pastille" });
     var blocTemps = h("div", { classe: "hud-bloc hud-temps" }, [h("span", { classe: "hud-nom", texte: "Temps" }), elTemps, h("span", { classe: "jauge" }, [elJauge])]);
     var blocScore = h("div", { classe: "hud-bloc hud-score" }, [h("span", { classe: "hud-nom", texte: "Score" }), h("span", { classe: "score-ligne" }, [elMult, elScore])]);
-    var elInstall = organes.length ? h("ol", { classe: "installation" }) : null;
     var zone = h("div", { classe: "zone-question" });
 
     afficher([
-      barre({ href: "#/" + c.id, texte: "Arrêter" }, a.calculatrice !== undefined ? a.calculatrice : c.calculatrice),
+      barre({ href: "#/" + c.id, texte: "Arrêter" }, outilsDe(c, a.calculatrice !== undefined ? a.calculatrice : c.calculatrice)),
       h("div", { classe: "titre-jeu" }, [h("h1", { texte: a.titre }), h("div", { classe: "rangee" }, [elNiveau, elSerie])]),
       h("div", { classe: "hud" }, [h("div", { classe: "hud-bloc" }, [h("span", { classe: "hud-nom", texte: "Cœurs" }), elVies]), blocTemps, blocScore]),
-      elInstall ? h("div", { classe: "bloc-installation" }, [h("p", { classe: "hud-nom", texte: c.installation || "L'installation" }), elInstall]) : null,
       zone
     ]);
 
     function plus(fn, ms) { minuteries.push(setTimeout(fn, ms)); }
     function multiplicateur() { return Math.min(4, 1 + Math.floor(J.serie / 3)); }
     function dessinerVies(casse) { vider(elVies); elVies.appendChild(coeurs(J.vies, viesMax, casse)); }
-    function dessinerInstall() {
-      if (!elInstall) return;
-      vider(elInstall);
-      organes.forEach(function (o, i) {
-        elInstall.appendChild(h("li", { classe: i < J.allumes ? "en-service" : "" }, [h("span", { classe: "noeud" }), h("span", { classe: "organe", texte: o })]));
-      });
-    }
     function dessinerCompteurs() {
       elScore.textContent = N.ecrire(J.score, 9);
       var m = multiplicateur();
@@ -2894,15 +3030,10 @@ var Entrainement = (function () {
             Son.niveau();
             annoncer(J.niveau === 3 && saisie === "mixte" ? "Niveau 3 · à vous d'écrire la réponse" : "Niveau " + J.niveau);
           }
-          if (organes.length && J.bonnes % parOrgane === 0) {
-            J.allumes++;
-            if (J.allumes >= organes.length) {
-              J.interventions++; J.score += 1000;
-              restant = Math.min(duree, restant + 10000);
-              annoncer((c.remise || "Installation remise en service") + " · +1 000");
-              plus(function () { J.allumes = 0; dessinerInstall(); }, 1400);
-            }
-            dessinerInstall();
+          if (c.palier && J.bonnes % parPalier === 0) {
+            J.paliers++; J.score += 1000;
+            restant = Math.min(duree, restant + 10000);
+            annoncer(c.palier + " · +1 000");
           }
           dessinerCompteurs(); battre();
           plus(suivante, 750);
@@ -2935,7 +3066,7 @@ var Entrainement = (function () {
         ["Meilleure série", String(J.meilleure)],
         ["Niveau atteint", String(J.niveau)]
       ];
-      if (organes.length) stats.push([c.installation ? "Remises en service" : "Interventions", String(J.interventions)]);
+      if (c.palier) stats.push([c.paliers || "Paliers", String(J.paliers)]);
       var rejouer = h("button", { type: "button", classe: "bouton principal" }, "Rejouer");
       rejouer.addEventListener("click", function () { demarrerChrono(c, a); });
       afficher([
@@ -2958,9 +3089,32 @@ var Entrainement = (function () {
     }
 
     arretEnCours = arreter;
-    dessinerVies(); dessinerInstall(); dessinerCompteurs(); battre();
+    dessinerVies(); dessinerCompteurs(); battre();
     tic = setInterval(battre, 100);
     suivante();
+  }
+
+  /* ═══════════════════════════════════════════ LA PAGE DU FORMULAIRE */
+  function pageFormulaire(c) {
+    document.title = "Formulaire · " + c.nom;
+    var imprimer = h("button", { type: "button", classe: "bouton" }, "Imprimer");
+    imprimer.addEventListener("click", function () { window.print(); });
+    var parts = formulaireFiltre(c, false);
+    /* un sommaire en boutons : une ancre « # » changerait la route */
+    var sommaire = h("div", { classe: "form-sommaire" }, [].map.call(parts[1].querySelectorAll(".form-section"), function (sec) {
+      var b = h("button", { type: "button", classe: "pastille" }, (sec.querySelector(".form-entete .pastille") || sec.querySelector(".form-entete span")).textContent);
+      b.addEventListener("click", function () { sec.scrollIntoView({ behavior: "smooth", block: "start" }); });
+      return b;
+    }));
+    afficher([
+      /* la calculatrice seulement : le formulaire est deja la page */
+      barre({ href: "#/" + c.id, texte: c.nom }, c.calculatrice ? { calculatrice: true, formulaire: false, classe: c } : null),
+      entete(c.nom, "Formulaire", "Les formules des séances, avec leurs unités, les repères à connaître et le piège qui revient."),
+      h("div", { classe: "form-actions rangee" }, [parts[0], imprimer]),
+      sommaire,
+      parts[1],
+      pied()
+    ]);
   }
 
   /* ═══════════════════════════════════════════ LE PARCOURS D'UNE LECON */
@@ -3034,7 +3188,7 @@ var Entrainement = (function () {
     var zone = h("div", { classe: "zone-question" });
     var calc = [e.calculatrice, l.calculatrice, c.calculatrice].filter(function (x) { return x !== undefined; })[0];
     afficher([
-      barre({ href: "#/" + c.id + "/lecon/" + l.id, texte: l.titre }, calc),
+      barre({ href: "#/" + c.id + "/lecon/" + l.id, texte: l.titre }, outilsDe(c, calc)),
       h("div", { classe: "titre-jeu" }, [h("div", {}, [
         h("p", { classe: "surtitre", texte: "Étape " + (i + 1) + " sur " + l.etapes.length }),
         h("h1", { texte: e.titre })
@@ -3165,6 +3319,7 @@ var Entrainement = (function () {
     var p = decodeURIComponent(location.hash.replace(/^#\/?/, "")).split("/").filter(Boolean);
     var c = p.length ? trouver(CLASSES, p[0]) : null;
     if (!c) return CLASSES.length === 1 ? pageClasse(CLASSES[0]) : accueil();
+    if (p[1] === "formulaire" && c.formulaire && c.formulaire.length) return pageFormulaire(c);
     if (p[1] === "chrono") { var a = trouver(c.automatismes, p[2]); return a ? lancerChrono(c, a) : pageClasse(c); }
     if (p[1] === "lecon") {
       var l = trouver(c.lecons, p[2]);
@@ -3244,10 +3399,9 @@ var Entrainement = (function () {
     id: "bts-fed-c",
     nom: "BTS FED option C",
     niveau: "2e année",
-    scenario: "Une chaufferie est en défaut et vous intervenez. Toutes les trois bonnes réponses, un organe repart ; les cinq en marche, la chaufferie est remise en service.",
-    installation: "La chaufferie",
-    organes: ["Brûleur", "Circulateur", "Vase d'expansion", "Vanne trois voies", "Émetteurs"],
-    remise: "Chaufferie remise en service",
+    scenario: "Une chaufferie est en défaut et vous intervenez. Toutes les quinze bonnes réponses, elle est remise en service : 1 000 points et 10 secondes de plus.",
+    palier: "Chaufferie remise en service",
+    paliers: "Remises en service",
     /* La calculatrice a cote de chaque question. Un automatisme ou une etape qui
        doit se faire de tete porte calculatrice: false. */
     calculatrice: true,
@@ -3356,6 +3510,43 @@ var Entrainement = (function () {
               { generateur: { nom: "vitesse-eau" }, niveau: 3, saisie: "libre" }
             ]
           }
+        ]
+      }
+    ],
+    /* Les conversions, en tete du formulaire de la classe ; la thermique et
+       l'hydraulique ajoutent les leurs par completer(). */
+    formulaire: [
+      {
+        theme: CONV, titre: "Conversions d'unités",
+        sections: [
+          { titre: "Pressions",
+            formules: [
+              ["1 bar = 100 kPa = 100 000 Pa", ""],
+              ["1 bar = 1 000 mbar", ""],
+              ["1 mbar = 1 hPa = 100 Pa", ""],
+              ["1 mCE = 9 810 Pa", "≈ 10 kPa · 1 bar ≈ 10 mCE"]
+            ] },
+          { titre: "Volumes et débits",
+            formules: [
+              ["1 m³ = 1 000 L", ""],
+              ["1 L = 1 dm³", ""],
+              ["1 m³/h = 1 000 L/h", ""],
+              ["1 L/s = 3,6 m³/h", "3 600 s dans une heure, 1 000 L dans un m³"]
+            ] },
+          { titre: "Énergie et puissance",
+            formules: [
+              ["1 kWh = 3 600 kJ = 3,6 MJ", ""],
+              ["1 Wh = 3 600 J", ""],
+              ["1 kW = 1 000 W", ""],
+              ["1 MWh = 1 000 kWh", ""]
+            ],
+            piege: "Un watt est une puissance, un wattheure une énergie : la durée fait le passage de l'un à l'autre." },
+          { titre: "Aires",
+            formules: [
+              ["1 m² = 10 000 cm²", "une aire se convertit au carré : 100²"],
+              ["1 cm² = 100 mm²", ""]
+            ],
+            piege: "Une aire se convertit au carré, un volume au cube." }
         ]
       }
     ]
@@ -3759,6 +3950,75 @@ var Entrainement = (function () {
           { titre: "La mesure a-t-elle un sens", objectif: "L'incertitude face à l'écart.", questions: [J6[2], g("surface-paroi", 3, 2, "libre")] }
         ]
       }
+    ],
+    /* Le formulaire des seances 1 a 6, releve sur SEQ1-WEB et les pages J3 a J6 :
+       les memes formules, les memes unites, les memes pieges que le cours. */
+    formulaire: [
+      {
+        theme: THEME, titre: "Thermique du bâtiment",
+        sections: [
+          { seance: "J1", titre: "Puissance et énergie",
+            formules: [
+              ["E = P × t", "E en kWh, P en kW, t en h"],
+              ["P = Q × 1 163 × ΔT", "l'eau · P en W, Q en m³/h, ΔT en K"],
+              ["P = Q × 0,34 × ΔT", "l'air · mêmes unités"]
+            ],
+            reperes: [
+              "1 163 et 0,34 sont la même formule : ρ × c<sub>p</sub> / 3 600, pour l'eau puis pour l'air.",
+              "1 kW sous 20 K : 43 L d'eau par heure, ou 147 m³ d'air."
+            ],
+            piege: "Un écart en °C vaut le même écart en K : de 70 à 50 °C, 20 K. On n'ajoute pas 273." },
+          { seance: "J3", titre: "λ, R et U",
+            formules: [
+              ["R = e / λ", "R en m²·K/W, e <b>en m</b>, λ en W/(m·K)"],
+              ["R<sub>tot</sub> = R<sub>si</sub> + Σ e/λ + R<sub>se</sub>", "mur vertical : R<sub>si</sub> = 0,13 · R<sub>se</sub> = 0,04"],
+              ["U = 1 / R<sub>tot</sub>", "U en W/(m²·K) : plus il est petit, mieux la paroi isole"],
+              ["e = R × λ", "à l'envers : R = 1/U, on retire R<sub>si</sub>, R<sub>se</sub> et les autres couches"]
+            ],
+            reperes: [
+              "Un isolant : λ inférieur à 0,05 W/(m·K).",
+              "R<sub>si</sub> change avec le sens du flux : 0,10 en toiture, 0,17 en plancher bas."
+            ],
+            piege: "L'épaisseur se met en mètres : une couche de 10 cm, c'est 0,10." },
+          { seance: "J4", titre: "Les déperditions du bâtiment",
+            formules: [
+              ["Φ = U × S × ΔT", "une paroi · Φ en W, S en m²"],
+              ["Φ = Ψ × L × ΔT", "un pont thermique · Ψ en W/(m·K), L en m"],
+              ["Φ = 0,34 × Q × ΔT", "l'air neuf · Q en m³/h"],
+              ["P = Φ<sub>total</sub> × 1,15", "la puissance à installer : 15 % de marge"]
+            ],
+            reperes: [
+              "Chaque paroi a son propre écart : un plancher sur vide sanitaire à 8 °C, pour 19 °C dedans, voit 11 K.",
+              "L'unité contient la formule : W/(m²·K), il manque des m² et des K, donc × S × ΔT.",
+              "Pour aller plus loin, le coefficient b = (θ<sub>i</sub> − θ<sub>u</sub>) / (θ<sub>i</sub> − θ<sub>e</sub>) pondère l'écart d'un local non chauffé."
+            ],
+            piege: "Ψ se multiplie par une longueur, jamais par une surface." },
+          { seance: "J5", titre: "Le besoin et le coût",
+            formules: [
+              ["GV = Φ<sub>total</sub> / ΔT", "GV en W/K : la signature du bâtiment, sans la météo"],
+              ["B<sub>brut</sub> = GV × DJU × 24 / 1 000", "en kWh : × 24 pour des heures, ÷ 1 000 pour des kW"],
+              ["B<sub>net</sub> = B<sub>brut</sub> × 0,75", "apports gratuits : 25 % en première approche"],
+              ["coût = énergie × prix", "€ = kWh × €/kWh"],
+              ["temps de retour = coût des travaux / économie annuelle", "en années"]
+            ],
+            reperes: [
+              "DJU base 18 : littoral méditerranéen 1 000 à 1 600 · façade atlantique 1 700 à 2 300 · bassin parisien 2 200 à 2 500 · Est et montagne 2 700 à 4 000.",
+              "On isole d'abord ce qui n'est pas isolé : doubler un isolant se rentabilise très lentement.",
+              "Le DPE porte deux étiquettes, énergie et carbone ; la classe retenue est la plus mauvaise."
+            ],
+            piege: "GV × DJU / 24 est faux : les DJU comptent des jours, il faut des heures, donc × 24." },
+          { seance: "J6", titre: "La paroi mesurée",
+            formules: [
+              ["θ<sub>i</sub> − θ<sub>si</sub> = U × R<sub>si</sub> × (θ<sub>i</sub> − θ<sub>e</sub>)", "la chute de température devant la paroi, en K"],
+              ["U = (θ<sub>i</sub> − θ<sub>si</sub>) / (R<sub>si</sub> × (θ<sub>i</sub> − θ<sub>e</sub>))", "la même, retournée : le U d'une paroi mesurée"]
+            ],
+            reperes: [
+              "Il y a condensation dès que la surface descend au point de rosée : 12,0 °C pour un air à 20 °C et 60 %.",
+              "Mesurer par grand froid : un écart double divise l'incertitude relative par deux."
+            ],
+            piege: "La formule donne la chute, pas la surface : on la retranche ensuite à la température de l'air." }
+        ]
+      }
     ]
   });
 })();
@@ -3968,6 +4228,62 @@ var Entrainement = (function () {
           { titre: "E = V × 1,163 × ΔT", objectif: "En litres, en Wh, puis en kWh.", questions: [g("ecs", 1, 3), J10[12]] },
           { titre: "La pointe et le ballon", objectif: "Instantané ou semi-accumulation.", questions: [g("ecs", 2, 2, "libre"), g("ecs", 3, 2, "libre"), J10[11]] },
           { titre: "Les règles sanitaires", objectif: "Températures, légionelle, bouclage.", questions: [J10[5], J10[6], J10[7], J10[10], J10[8], J10[9]] }
+        ]
+      }
+    ],
+    /* Le formulaire des seances 7 a 10, releve sur SEQ2-WEB et les pages J7 a J10. */
+    formulaire: [
+      {
+        theme: THEME, titre: "Hydraulique et ECS",
+        sections: [
+          { seance: "J7", titre: "Les réseaux",
+            formules: [
+              ["Q = P / (1 163 × ΔT)", "Q en m³/h, P en W, ΔT en K"],
+              ["v = Q / (0,36 × S)", "v en m/s, Q en m³/h, S <b>en cm²</b>"]
+            ],
+            reperes: [
+              "Vitesse sous 1 m/s en habitation.",
+              "À puissance constante, doubler le ΔT divise le débit par deux.",
+              "L'eau prend le chemin qui lui résiste le moins : retour inversé, ou équilibrage."
+            ],
+            piege: "Le 0,36 fait les conversions à votre place : la section reste en cm², le débit en m³/h." },
+          { seance: "J8", titre: "Les pertes de charge",
+            formules: [
+              ["Δp = j × (L + L<sub>éq</sub>)", "Δp en Pa, j en Pa/m, longueurs en m"],
+              ["1 mCE = 9 810 Pa", "≈ 10 kPa · 1 bar ≈ 10 mCE"]
+            ],
+            reperes: [
+              "Un tronçon se valide sur deux critères : vitesse sous 1 m/s, perte linéique sous 200 Pa/m environ.",
+              "Les singularités font couramment la moitié à deux tiers de la longueur totale.",
+              "On additionne toutes les longueurs, puis on multiplie une seule fois par j."
+            ],
+            piege: "Oublier les singularités, c'est se tromper d'un facteur deux ou trois." },
+          { seance: "J9", titre: "Le point de fonctionnement",
+            formules: [
+              ["Δp = k × Q²", "la courbe du réseau · Δp en mCE, Q en m³/h"],
+              ["k = Δp / Q²", "d'un seul point connu du réseau"],
+              ["Δp<sub>2</sub> = Δp<sub>1</sub> × (Q<sub>2</sub> / Q<sub>1</sub>)²", "doubler le débit multiplie la perte par quatre"],
+              ["Q = √( H<sub>0</sub> / (a + k) )", "le croisement avec la pompe H = H<sub>0</sub> − a × Q²"],
+              ["Q ∝ N · H ∝ N² · P ∝ N³", "le circulateur, N sa vitesse de rotation"]
+            ],
+            reperes: [
+              "Le point de fonctionnement est imposé par les deux courbes, pas choisi.",
+              "Réduire le débit de 20 % réduit la puissance de la pompe de moitié environ : le cube."
+            ],
+            piege: "Trop de débit écrase le ΔT : P = Q × 1 163 × ΔT, à puissance égale, ΔT baisse quand Q monte." },
+          { seance: "J10", titre: "L'eau chaude sanitaire",
+            formules: [
+              ["E = V × 1,163 × ΔT", "E en Wh, V <b>en litres</b>, ΔT en K"],
+              ["P = V<sub>pointe</sub> × 1,163 × ΔT", "production instantanée, pointe d'une heure : P en W"],
+              ["P = (V<sub>pointe</sub> − V<sub>ballon</sub>) × 1,163 × ΔT", "semi-accumulation : le ballon fournit sa part"],
+              ["pertes = L × W/m × 8 760 h", "le bouclage, en Wh par an"]
+            ],
+            reperes: [
+              "60 °C au ballon · 55 °C en tout point du bouclage · 50 °C au plus au puisage.",
+              "La légionelle prolifère entre 25 et 45 °C.",
+              "Chauffer 1 000 L de 10 à 60 °C : environ 58 kWh."
+            ],
+            piege: "L'énergie dépend du volume de la journée, la puissance de l'heure de pointe : deux questions, et le stockage les sépare." }
         ]
       }
     ]
