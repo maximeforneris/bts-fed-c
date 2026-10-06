@@ -115,6 +115,8 @@ noscript p{padding:16px;max-width:60ch}
   display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .entete h1{font-size:clamp(1.65rem,5vw,2.3rem);font-weight:750;margin:4px 0 8px;letter-spacing:-.01em}
 .chapeau{margin:0;color:var(--encre2);max-width:62ch}
+.entete-actions{margin-top:14px}
+a.bouton{display:inline-block;text-decoration:none;color:inherit}
 .pied{margin-top:36px;padding-top:14px;border-top:1px solid var(--trait);font-size:.84rem;color:var(--encre2)}
 .problemes{border:1px solid var(--faux);background:var(--faux-doux);border-radius:var(--r);padding:12px 14px 12px 30px;
   margin:0 0 18px;font-size:.9rem}
@@ -2384,10 +2386,11 @@ var Calculette = (function () {
    Deux modes, une seule facon de poser une question :
    - le CONTRE-LA-MONTRE des automatismes : des questions fabriquees au hasard, un
      chrono, trois coeurs, une serie qui multiplie les points, un niveau qui monte
-     tous les cinq bons coups, et un palier toutes les quinze bonnes reponses (la
-     chaufferie remise en service : +1 000 points, +10 s). Le schema de l'installation
-     qui s'allumait organe par organe a ete retire le 6 octobre 2026 : il occupait
-     l'ecran sans rien apprendre ;
+     tous les cinq bons coups, et un palier toutes les quinze bonnes reponses
+     (+1 000 points, +10 s). Le schema de l'installation qui s'allumait organe par
+     organe, puis le scenario de la chaufferie, ont ete retires le 6 octobre 2026 :
+     le premier ne changeait jamais, le second ne parlait que d'une chaufferie a une
+     classe qui revise aussi l'hydraulique et les conversions ;
    - le PARCOURS d'une lecon : des etapes dans l'ordre, chacune a reussir pour ouvrir
      la suivante, notee d'une a trois etoiles.
 
@@ -2691,11 +2694,12 @@ var Entrainement = (function () {
   function outilsDe(c, calc) {
     return { calculatrice: calc, formulaire: !!(c.formulaire && c.formulaire.length), classe: c };
   }
-  function entete(surtitre, titre, chapeau) {
+  function entete(surtitre, titre, chapeau, actions) {
     return h("header", { classe: "entete" }, [
       surtitre ? h("p", { classe: "surtitre", texte: surtitre }) : null,
       h("h1", { texte: titre }),
-      chapeau ? h("p", { classe: "chapeau", html: chapeau }) : null
+      chapeau ? h("p", { classe: "chapeau", html: chapeau }) : null,
+      actions && actions.length ? h("div", { classe: "entete-actions rangee" }, actions) : null
     ]);
   }
   function pied() {
@@ -2753,21 +2757,18 @@ var Entrainement = (function () {
     etat.reglages.classe = c.id; sauver();
     var autos = c.automatismes || [], lecons = c.lecons || [], form = c.formulaire || [];
     /* une page qui ne porte qu'une classe (le fichier assemble pour un site) s'ouvre sur elle */
-    var blocs = [barre(CLASSES.length > 1 ? { href: "#/", texte: "Les classes" } : null), entete(c.niveau, c.nom, c.scenario)];
+    /* Le formulaire est un bouton de l'en-tete, pas une rubrique : il ne repousse pas
+       les lecons, qui ouvrent la page (decide le 6 octobre 2026). */
+    var actions = [];
     if (form.length) {
       var nf = form.reduce(function (n, g) { return n + g.sections.reduce(function (m, sec) { return m + sec.formules.length; }, 0); }, 0);
-      blocs.push(h("section", { classe: "rubrique" }, [
-        h("h2", { texte: "Formulaire" }),
-        h("div", { classe: "grille" }, [h("a", { classe: "carte carte-lien", href: "#/" + c.id + "/formulaire" }, [
-          h("span", { classe: "titre-carte", texte: "Les formules à réviser" }),
-          h("span", { classe: "detail", texte: "Avec leurs unités, leurs repères et leurs pièges. Il s'ouvre aussi pendant une partie, à côté de la question." }),
-          h("span", { classe: "carte-pied" }, [h("span", { classe: "pastille mono", texte: nf + " formules" }), h("span", { classe: "detail", texte: "imprimable" })])
-        ])])
-      ]));
+      actions.push(h("a", { classe: "bouton", href: "#/" + c.id + "/formulaire" }, "Le formulaire · " + nf + " formules"));
     }
-    if (autos.length) blocs.push(h("section", { classe: "rubrique" }, [
+    var blocs = [barre(CLASSES.length > 1 ? { href: "#/", texte: "Les classes" } : null), entete(c.niveau, c.nom, c.accroche, actions)];
+    var blocLecons = null, blocAutos = null;
+    if (autos.length) blocAutos = h("section", { classe: "rubrique" }, [
       h("h2", { texte: "Automatismes" }),
-      h("p", { classe: "consigne", texte: "Contre la montre, trois cœurs. Une bonne réponse rend deux secondes ; trois d'affilée doublent les points. Au niveau 3, c'est à vous d'écrire la réponse." }),
+      h("p", { classe: "consigne", texte: "Contre la montre, trois cœurs. Une bonne réponse rend deux secondes ; trois d'affilée doublent les points ; quinze, et c'est 1 000 points et dix secondes de plus. Au niveau 3, c'est à vous d'écrire la réponse." }),
       grilleParTheme(c, autos, function (a) {
         var r = etat.records[c.id + "/" + a.id];
         return h("a", { classe: "carte carte-lien", href: "#/" + c.id + "/chrono/" + a.id }, [
@@ -2780,8 +2781,8 @@ var Entrainement = (function () {
           ])
         ]);
       })
-    ]));
-    if (lecons.length) blocs.push(h("section", { classe: "rubrique" }, [
+    ]);
+    if (lecons.length) blocLecons = h("section", { classe: "rubrique" }, [
       h("h2", { texte: "Leçons" }),
       h("p", { classe: "consigne", texte: "Une leçon vue en classe, reprise par étapes de plus en plus exigeantes. Une étape réussie ouvre la suivante." }),
       grilleParTheme(c, lecons, function (l) {
@@ -2798,8 +2799,8 @@ var Entrainement = (function () {
           ])
         ]);
       })
-    ]));
-    blocs.push(pied());
+    ]);
+    blocs.push(blocLecons, blocAutos, pied());
     afficher(blocs);
   }
 
@@ -2964,7 +2965,7 @@ var Entrainement = (function () {
     document.title = a.titre + " · " + c.nom;
     var duree = (a.duree || 90) * 1000, bonus = (a.bonus === undefined ? 2 : a.bonus) * 1000;
     var viesMax = a.vies || 3, saisie = a.saisie || "mixte";
-    var parPalier = c.parPalier || 15, parNiveau = 5;
+    var parPalier = c.parPalier === undefined ? 15 : c.parPalier, parNiveau = 5;
     var J = { score: 0, vies: viesMax, serie: 0, meilleure: 0, bonnes: 0, total: 0, niveau: 1,
               erreurs: {}, paliers: 0 };
     var restant = duree, depuis = 0, enPause = true, fini = false, tic = 0, minuteries = [];
@@ -3030,10 +3031,10 @@ var Entrainement = (function () {
             Son.niveau();
             annoncer(J.niveau === 3 && saisie === "mixte" ? "Niveau 3 · à vous d'écrire la réponse" : "Niveau " + J.niveau);
           }
-          if (c.palier && J.bonnes % parPalier === 0) {
+          if (parPalier && J.bonnes % parPalier === 0) {
             J.paliers++; J.score += 1000;
             restant = Math.min(duree, restant + 10000);
-            annoncer(c.palier + " · +1 000");
+            annoncer(J.bonnes + " bonnes réponses · +1 000 · +10 s");
           }
           dessinerCompteurs(); battre();
           plus(suivante, 750);
@@ -3066,7 +3067,7 @@ var Entrainement = (function () {
         ["Meilleure série", String(J.meilleure)],
         ["Niveau atteint", String(J.niveau)]
       ];
-      if (c.palier) stats.push([c.paliers || "Paliers", String(J.paliers)]);
+      if (parPalier) stats.push(["Paliers de " + parPalier, String(J.paliers)]);
       var rejouer = h("button", { type: "button", classe: "bouton principal" }, "Rejouer");
       rejouer.addEventListener("click", function () { demarrerChrono(c, a); });
       afficher([
@@ -3399,9 +3400,7 @@ var Entrainement = (function () {
     id: "bts-fed-c",
     nom: "BTS FED option C",
     niveau: "2e année",
-    scenario: "Une chaufferie est en défaut et vous intervenez. Toutes les quinze bonnes réponses, elle est remise en service : 1 000 points et 10 secondes de plus.",
-    palier: "Chaufferie remise en service",
-    paliers: "Remises en service",
+    accroche: "Les séances 1 à 10 reprises en leçons, étape par étape ; des automatismes contre la montre pour les calculs qui doivent devenir des réflexes ; et le formulaire pour réviser.",
     /* La calculatrice a cote de chaque question. Un automatisme ou une etape qui
        doit se faire de tete porte calculatrice: false. */
     calculatrice: true,
