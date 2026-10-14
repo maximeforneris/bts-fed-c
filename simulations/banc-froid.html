@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light" style="color-scheme:light">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -95,6 +95,7 @@ table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
 table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
 table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
 table.releve tr.vide td{color:var(--encre2);font-style:italic}
+table.releve td.jour-heure{white-space:nowrap}
 .graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
 .graphe canvas{display:block;width:100%;height:auto}
 
@@ -153,8 +154,679 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
 .molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
 
+/* Parcours : une simulation menee comme un projet, cinq phases et un livrable (CAP, seconde) */
+.pc-tete{position:sticky;top:0;z-index:5;background:var(--fond);padding:8px 0 10px;margin:-6px 0 12px;
+  border-bottom:1px solid var(--trait2);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.pc-chemin{list-style:none;margin:0;padding:0;display:flex;align-items:flex-start;gap:0;flex:1 1 420px;min-width:0}
+.pc-chemin li{flex:1 1 0;display:flex;justify-content:center;position:relative}
+.pc-chemin li+li::before{content:"";position:absolute;top:21px;right:calc(50% + 22px);left:calc(-50% + 22px);height:2px;background:var(--trait)}
+.pc-noeud{font:inherit;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--encre2);cursor:pointer;min-width:44px;min-height:44px}
+.pc-noeud:disabled{cursor:default;opacity:.55}
+.pc-rond{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:1.05rem;
+  border:2px solid var(--trait);background:var(--carte);color:var(--encre2);transition:transform .2s,background .2s}
+.pc-comp{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.pc-etoiles{font-size:.78rem;color:var(--tiede);min-height:1.1em;letter-spacing:1px}
+.pc-noeud.pc-fait .pc-rond{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-noeud.pc-ici .pc-rond{border-color:var(--encre);box-shadow:0 0 0 4px var(--accent-doux);transform:scale(1.06);color:var(--encre)}
+.pc-noeud.pc-fait.pc-ici .pc-rond{color:#fff}
+.pc-noeud.pc-ici .pc-comp{color:var(--encre)}
+.pc-drapeau .pc-rond{font-size:1.15rem}
+.pc-info{display:flex;gap:12px;align-items:center;font-size:.9rem;font-weight:650;color:var(--encre2)}
+.pc-score{color:var(--tiede);font-variant-numeric:tabular-nums}
+.pc-niveau:empty,.pc-temps:empty{display:none}
+.pc-niveau{border:1px solid var(--trait);border-radius:999px;padding:2px 10px;font-size:.8rem}
+.pc-ecran[hidden]{display:none}
+.pc-surtitre{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.pc-phase-tete{margin:4px 0 14px}
+.pc-phase-tete h2{font-size:clamp(1.25rem,3.4vw,1.6rem);font-weight:750}
+.pc-bulle{position:relative;margin:10px 0 0;padding:10px 14px;background:var(--carte);border:1px solid var(--trait2);
+  border-radius:var(--r);border-left:4px solid var(--accent);max-width:70ch;color:var(--encre)}
+.pc-commande .pc-client{font-weight:700;margin:0 0 6px}
+.pc-texte p{margin:0 0 8px}
+.pc-livrable{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--trait)}
+.pc-illus:empty{display:none}
+.pc-plan{margin:0 0 12px;padding-left:1.2em}
+.pc-plan li{margin:4px 0}
+.pc-choix-niveau{margin:6px 0 14px}
+.pc-partir{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-questions h2{font-size:1rem}
+.pc-q{border:1px solid var(--trait);border-radius:var(--r);padding:12px;margin-bottom:12px;background:var(--carte2);transition:border-color .2s,background .2s}
+.pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
+.pc-q[data-etat="faux"]{border-color:var(--faux)}
+.pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+.pc-q-lib{margin:0 0 8px;font-weight:600}
+.pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
+  font-size:.8rem;margin-right:.5em;vertical-align:.1em}
+.pc-q[data-etat="juste"] .pc-q-num{background:var(--juste)}
+.pc-q-champ{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.pc-q-champ input,.pc-remise input{font:inherit;font-size:1.05rem;width:9em;min-height:44px;padding:7px 10px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-remise input{width:min(100%,18em)}
+.pc-unite{font-weight:600;color:var(--encre2)}
+.pc-options{display:flex;flex-wrap:wrap;gap:6px}
+.pc-option{font:inherit;font-size:.92rem;font-weight:600;min-height:44px;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;text-align:left}
+.pc-option[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-option:disabled{cursor:default}
+.pc-classer{display:flex;flex-direction:column;gap:8px;width:100%}
+.pc-classer-ligne{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--trait2);padding-bottom:6px}
+.pc-classer-item{font-weight:600}
+.pc-aide{margin:0;font-size:.9rem;color:var(--encre2)}
+.pc-retour{margin-top:8px;font-weight:650;min-height:1.4em}
+.pc-retour.juste{color:var(--juste)}
+.pc-retour.faux{color:var(--faux)}
+.pc-retour .methode{font-weight:400;color:var(--encre2)}
+.pc-q-bravo{font-weight:400;color:var(--encre)}
+.pc-q .bouton{min-height:44px}
+.pc-pied{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:flex-end;margin:4px 0 20px}
+.pc-bravo{margin:0;flex:1 1 280px;color:var(--juste);font-weight:650}
+.pc-suite{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-vers-fin{min-height:44px;margin-right:auto;color:var(--encre2)}
+.pc-apercu{width:100%;margin-top:10px;font-family:ui-monospace,Consolas,monospace;font-size:.8rem;border:1px solid var(--trait);
+  border-radius:var(--r);background:var(--carte2);color:var(--encre);padding:8px}
+.pc-recap td,.pc-recap th{text-align:left}
+.pc-score-final{font-size:1.2rem;margin:12px 0 4px;color:var(--tiede)}
+.pc-grade{margin:0;font-weight:650}
+.pc-objet{cursor:grab;touch-action:none}
+.pc-objet:active{cursor:grabbing}
+.pc-cible{fill:var(--accent);fill-opacity:.07;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+@media (max-width:620px){
+  .pc-rond{width:36px;height:36px;font-size:.95rem}
+  .pc-chemin li+li::before{top:18px;right:calc(50% + 19px);left:calc(-50% + 19px)}
+  .pc-comp{font-size:.62rem;letter-spacing:.04em}
+}
+.plan.pc-large{grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr)}
+@media (max-width:820px){.plan.pc-large{grid-template-columns:1fr}}
+/* Pendant le parcours, la page laisse la place a la scene : le chapeau se replie */
+.pc-en-cours .tete{padding-bottom:6px;margin-bottom:6px}
+.pc-en-cours .tete .chapeau{display:none}
+.pc-en-cours .tete h1{font-size:1.3rem;margin:2px 0 0}
+@media print{.pc-tete,.pc-remise,.pc-q .rangee{display:none}}
+/* Entrainement au CCF (premiere, terminale) : deux modes, la paillasse empruntee, les appels professeur */
+.pc [hidden],.pc-voile[hidden],.pc-modes [hidden]{display:none!important}
+.pc-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.pc-mode{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:12px 14px;min-height:56px;cursor:pointer;
+  border-radius:var(--r);border:1.5px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-mode b{font-size:1rem}
+.pc-mode span{font-size:.85rem;color:var(--encre2)}
+.pc-mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.pc-en-cours .pc-modes{display:none}
+@media (max-width:480px){.pc-modes{grid-template-columns:1fr}}
+.pc-problematique{margin:12px 0 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--carte2);border-radius:0 var(--r) var(--r) 0}
+.pc-grille{list-style:none;margin:10px 0;padding:0;border-top:1px solid var(--trait2)}
+.pc-grille li{padding:7px 0;border-bottom:1px solid var(--trait2)}
+.pc-grille-ligne{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.pc-grille-ou{font-size:.85rem;font-weight:650;color:var(--accent);text-align:right}
+.pc-grille-cap{font-size:.84rem;color:var(--encre2);margin-top:2px}
+.pc-appel-annonce{display:flex;gap:8px;align-items:flex-start}
+.pc-main{font-size:1.25rem;line-height:1;margin-right:.35em}
+.pc-q.pc-appel{border-style:dashed;border-color:var(--accent);background:var(--carte)}
+.pc-q[data-etat="attente"]{border-color:var(--tiede);border-style:solid}
+.pc-badge-appel{font:inherit;font-weight:700;font-size:.85rem;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:2px solid var(--tiede);background:var(--carte);color:var(--encre);animation:pc-pulse 1.6s ease-in-out infinite}
+@keyframes pc-pulse{50%{box-shadow:0 0 0 5px var(--accent-doux)}}
+.pc-methode{margin:6px 0 0;font-size:.92rem;color:var(--encre2);border-left:3px solid var(--trait);padding-left:8px}
+.pc-aide-btn{color:var(--encre2)}
+.pc-autonomie{margin:10px 0 0}
+.pc-voile{position:fixed;inset:0;z-index:30;background:rgba(20,20,22,.5);display:grid;place-items:center;padding:16px}
+.pc-prof{width:min(100%,600px);max-height:90vh;overflow:auto;margin:0}
+.pc-prof-liste .pc-q{margin-top:10px}
+.pc-attendus{margin:0 0 10px;padding-left:1.2em;font-size:.92rem}
+.pc-cotes .pc-option{flex:1 1 9em}
+.pc-prof-pied{justify-content:flex-end;margin-top:10px}
+/* une partie qui emprunte la paillasse : la simulation a gauche, les questions a droite, qui restent en vue */
+.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr)}
+.pc-paillasse .plan{grid-template-columns:1fr}
+.pc-paillasse > .carte,.pc-paillasse .plan > .carte{background:var(--carte2);box-shadow:none;margin-bottom:12px}
+/* la scene reste a l'ecran pendant qu'on fait defiler les questions (demande de l'utilisateur, 14 octobre 2026) :
+   sur tablette et ordinateur, la colonne de gauche se fixe sous la tete du parcours et defile seule si elle est plus haute */
+@media (min-width:821px){.pc-ecran > .plan > .pc-scene{position:sticky;top:calc(var(--pc-haut,88px) + 4px);max-height:calc(100vh - var(--pc-haut,88px) - 16px);overflow:auto;overscroll-behavior:contain}}
+@media (max-width:820px){.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1fr)}.pc-avec-paillasse > .pc-questions{position:static;max-height:none}}
+/* une colonne bornee ne grandit pas a la taille de son contenu : ce qui est large defile dans son cadre */
+.pc-avec-paillasse > *,.pc-paillasse,.pc-paillasse > *{min-width:0}
+.pc-paillasse .releve-zone{grid-template-columns:minmax(0,1fr)}
+.pc-paillasse .releve-zone > div,.pc-paillasse table.releve{overflow-x:auto}
+/* les documents d'un sujet : fiches, consignes, annexe */
+.pc-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.pc-docs section{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.pc-docs h3{font-size:.95rem;margin:0 0 6px}
+.pc-docs p{margin:0 0 6px;font-size:.93rem}
+.pc-docs table{width:100%}
+.pc-docs td{font-size:.88rem;vertical-align:top}
+.pc-docs .pc-annexe{border-style:dashed}
+.pc-paillasse .num{display:none}
+/* sur un telephone, la paillasse perd une epaisseur de marge, et un afficheur trop long passe a la ligne au lieu de deborder */
+@media (max-width:620px){
+  .pc-avec-paillasse > .pc-scene{padding:10px}
+  .pc-paillasse > .carte,.pc-paillasse .plan > .carte{padding:12px}
+  .afficheur .val{white-space:normal;overflow-wrap:anywhere}
+}
+/* la calculatrice des sites : son bouton dans la tete du parcours ; le bouton flottant s'efface pendant un parcours */
+.pc-calc{font:inherit;font-size:.85rem;font-weight:650;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-calc[aria-pressed="true"]{border-color:var(--encre);font-weight:750}
+.pc-en-cours .outils-flottants,.pc-visible .outils-flottants{display:none}
+.calc-titre{font-weight:700}
+/* le classement compact des epreuves : l'element a gauche, sa liste a droite */
+.pc-classer-ligne.pc-compact{flex-wrap:nowrap}
+.pc-classer-choix{font:inherit;font-size:.95rem;min-height:44px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--trait);
+  background:var(--carte);color:var(--encre);max-width:60%;flex:0 1 auto}
+@media (max-width:480px){.pc-classer-ligne.pc-compact{flex-wrap:wrap}.pc-classer-choix{max-width:100%;width:100%}}
+/* le dossier, a gauche ; la calculatrice reste a droite */
+.pc-dossier-panneau{position:fixed;top:0;left:0;bottom:0;width:min(100%,460px);z-index:22;display:flex;flex-direction:column;
+  background:var(--fond);border-right:1px solid var(--trait);box-shadow:var(--ombre)}
+/* « display:flex » l'emportait sur l'attribut hidden : « Fermer » ne fermait rien (essai de l'utilisateur, 14 octobre 2026) */
+.pc-dossier-panneau[hidden]{display:none}
+.pc-dossier-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--trait2);background:var(--carte)}
+.pc-dossier-corps{flex:1;overflow:auto;padding:12px;overscroll-behavior:contain}
+.pc-dossier-corps .pc-docs{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1400px){body.dossier-ouvert{padding-left:460px}}
+@media print{.pc-dossier-panneau{display:none!important}body.dossier-ouvert{padding-left:0!important}}
+.pc-lu{display:block;font-weight:400;color:var(--encre2);margin-top:4px}
+.pc-corriger{display:block;margin-top:6px;font-weight:400;color:var(--encre)}
+.pc-corriger b{display:block;font-weight:700}
+.pc-corriger span{display:list-item;list-style:disc;margin-left:1.2em}
+
+/* La calculatrice · le panneau et le pave.
+   Une seule feuille pour le jeu d'entrainement et pour les sites de classe (option
+   « calculatrice: oui » de SITE.md, qui la recopie dans assets/). Les couleurs sont les
+   jetons du kit ; l'accent, l'erreur et la chasse fixe ont un repli, parce que les chartes
+   les nomment --froid, --chaud et .mono. Sortie de jeu.css le 6 octobre 2026. */
+/* le panneau : a droite, par-dessus sur telephone */
+.calculatrice{position:fixed;top:0;right:0;bottom:0;width:min(100%,380px);z-index:20;display:flex;flex-direction:column;
+  background:var(--carte);border-left:1px solid var(--trait);box-shadow:var(--ombre)}
+.calculatrice[hidden]{display:none}
+.calc-tete{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;min-height:48px;
+  border-bottom:1px solid var(--trait2)}
+.calc-corps{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px}
+.calc-angle{display:flex;gap:0;align-self:flex-start;border:1px solid var(--trait);border-radius:999px;overflow:hidden}
+.calc-angle button{font:600 .78rem/1 system-ui,sans-serif;padding:7px 12px;border:0;background:none;color:var(--encre2);cursor:pointer}
+.calc-angle button[aria-pressed="true"]{background:var(--encre);color:var(--carte)}
+.calc-ecran{flex:1;min-height:96px;overflow-y:auto;background:var(--carte2);border:1px solid var(--trait2);border-radius:var(--r,6px);
+  padding:6px 10px;display:flex;flex-direction:column}
+.calc-historique{list-style:none;margin:auto 0 0;padding:0}
+.calc-historique li{padding:5px 0;border-bottom:1px dashed var(--trait2)}
+.calc-historique li:last-child{border-bottom:0}
+.calc-expr,.calc-res{display:block;width:100%;border:0;background:none;padding:0;cursor:pointer;color:var(--encre);
+  font-family:var(--mono,ui-monospace,Consolas,monospace);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.calc-expr{text-align:left;font-size:.86rem;color:var(--encre2)}
+.calc-res{text-align:right;font-size:1.25rem;font-weight:650}
+.calc-res.erreur{font-family:system-ui,sans-serif;font-size:.9rem;color:var(--faux,var(--chaud,#ab432a));cursor:default}
+.calc-expr:hover,.calc-res:not(.erreur):hover{color:var(--accent,var(--froid,#2c6da6))}
+.calc-saisie{width:100%;font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.2rem;padding:8px 10px;border:1.5px solid var(--trait);
+  border-radius:var(--r,6px);background:var(--carte);color:var(--encre)}
+.calc-saisie:focus{outline:none;border-color:var(--accent,var(--froid,#2c6da6))}
+.calc-touches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.calc-touches button{min-height:42px;padding:0 2px;border-radius:var(--r,6px);border:1px solid var(--trait2);background:var(--carte2);
+  color:var(--encre);font:600 .9rem/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.calc-touches button:hover{border-color:var(--encre2)}
+.calc-touches button:active{transform:scale(.97)}
+.calc-touches .chiffre{background:var(--carte);border-color:var(--trait);font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.1rem}
+.calc-touches .fonction{font-size:.82rem;color:var(--encre2)}
+.calc-touches .op{font-size:1.15rem}
+.calc-touches .efface{color:var(--faux,var(--chaud,#ab432a))}
+.calc-touches .egal{background:var(--encre);border-color:var(--encre);color:var(--carte);font-size:1.15rem}
+/* tablette en portrait : a cote, plus etroite ; la question prend la mise en page du telephone */
+@media (min-width:640px) and (max-width:899px){
+  .calculatrice{width:300px}
+  body.calc-ouverte{padding-right:300px}
+}
+@media (min-width:900px){
+  body.calc-ouverte{padding-right:380px}
+}
+.calc-fermer{font:inherit;font-size:.8rem;font-weight:600;color:var(--encre2);background:none;border:1px solid var(--trait);
+  border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
+.calc-fermer:hover{color:var(--encre);border-color:var(--encre2)}
+.calc-titre{font-weight:700;font-size:.95rem}
+@media print{ .calculatrice{display:none!important} body.calc-ouverte{padding-right:0!important} }
+/* sur un site de classe : au-dessus de la coquille de documentation, et les boutons qui
+   l'ouvrent (la barre haute les met en forme ; hors coquille, ils flottent en bas a droite).
+   Sur telephone, un seul bouton « Outils » remplace les deux. */
+.doc-shell .calculatrice{z-index:60}
+.bouton-outil[aria-pressed="true"]{font-weight:700;border-color:var(--encre)}
+.bouton-outil.etroit{display:none}
+@media (max-width:639px){ .bouton-outil.large{display:none} .bouton-outil.etroit{display:inline-flex} }
+.outils-flottants{position:fixed;right:16px;bottom:16px;z-index:40;display:flex;gap:8px}
+.outils-flottants .bouton-outil{font:inherit;font-size:.9rem;font-weight:600;padding:10px 16px;border-radius:999px;
+  border:1px solid var(--encre);background:var(--carte);color:var(--encre);box-shadow:var(--ombre);cursor:pointer}
+body.calc-ouverte .outils-flottants{display:none}
+/* Dans la coquille de documentation, le panneau prend la place du sommaire de droite ; entre
+   1 000 et 1 279 px, celle du plan aussi, qui revient a la fermeture. Sans cela, le texte de la
+   page tombait a 416 px de large sur un ecran de 1 280. */
+@media (min-width:1000px){
+  body.calc-ouverte .doc-corps{--col-som:0px}
+  body.calc-ouverte .doc-som{display:none}
+}
+@media (min-width:1000px) and (max-width:1279px){
+  body.calc-ouverte .doc-corps{--col-plan:0px}
+  body.calc-ouverte .doc-plan{display:none}
+}
+
+/* habillage du site : charte « fluides » */
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  /* le fond de plan */
+  --fond:#e8eae6;
+  --carte:#f7f8f5;
+  --carte2:#eceee9;
+  --encre:#16181a;
+  --encre2:#535a5e;
+  --trait:#a9b0af;
+  --trait2:#ccd2cf;
+
+  /* Le repérage des réseaux. Cinq séquences, cinq fluides : ce n'est pas
+     une palette de série, c'est un code de tuyauterie. */
+  --r1:#c1392b;   /* chauffage, départ */
+  --r2:#2a6497;   /* chauffage, retour */
+  --r3:#1f8f97;   /* eau glacée */
+  --r4:#5a8a35;   /* air soufflé */
+  --r5:#7a4fa3;   /* fluide frigorigène */
+
+  --froid:#2a6497;
+  --tiede:#8a6414;
+  --chaud:#c1392b;
+  --vert:#2f7448;
+  --violet:#7a4fa3;
+  --ombre:0 1px 0 rgba(22,24,26,.12);
+  --r:0px;
+  --teinte:var(--r1);
+}
+/* Les simulations du BTS FED a la charte de leur site, « fluides » (14 octobre 2026) : Barlow et
+   Chivo Mono, le papier vert-de-gris, les angles droits, et le bleu du retour de chauffage pour
+   accent. Les jetons propres aux simulations (juste, faux, scene) s'accordent a ceux de la charte. */
+:root{
+  --accent:var(--froid); --accent-doux:#dce6ef;
+  --juste:var(--vert); --juste-doux:#e0ece4; --faux:var(--chaud); --faux-doux:#f3dfdb;
+  --scene:var(--carte);
+}
+body{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+.tete h1{font-family:"Barlow Semi Condensed",Barlow,sans-serif;font-weight:700;letter-spacing:-.01em}
+.tete .surtitre,.mono,.afficheur .val,.curseur .val,table.releve td,.pc-comp,.pc-surtitre{font-family:"Chivo Mono",ui-monospace,monospace}
+.carte{border-radius:0}
+.tete{border-bottom:3px solid var(--r1)}
+
 </style>
 <script>
+/* Entrainement · les nombres a la francaise, dans les deux sens.
+   Ecrire : virgule decimale, espace fine insecable entre les milliers, ecriture
+   scientifique au-dela de dix millions ou en deca d'un millieme.
+   Lire : ce qu'un eleve tape vraiment — virgule ou point, espaces, 2,5e3,
+   2,5 x 10^3, 2,5×10³. */
+"use strict";
+var Nombres = (function () {
+  var FINE = " ", MOINS = "−";
+  var VERS_EXPOSANT = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³",
+    "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  var DEPUIS_EXPOSANT = {};
+  Object.keys(VERS_EXPOSANT).forEach(function (k) { DEPUIS_EXPOSANT[VERS_EXPOSANT[k]] = k; });
+
+  function exposant(n) {
+    return String(n).split("").map(function (c) { return VERS_EXPOSANT[c]; }).join("");
+  }
+  function grouper(entier) { return entier.replace(/\B(?=(\d{3})+(?!\d))/g, FINE); }
+
+  /* x avec au plus `chiffres` chiffres significatifs, zeros de queue retires. */
+  function ecrire(x, chiffres) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (chiffres === undefined) chiffres = 3;
+    if (x === 0) return "0";
+    var signe = x < 0 ? MOINS : "";
+    var a = Number(Math.abs(x).toPrecision(chiffres));
+    if (a >= 1e-3 && a < 1e7) {
+      var dec = Math.max(0, chiffres - 1 - Math.floor(Math.log10(a)));
+      var s = a.toFixed(dec);
+      if (s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+      var p = s.split(".");
+      return signe + grouper(p[0]) + (p[1] ? "," + p[1] : "");
+    }
+    var e = Math.floor(Math.log10(a));
+    var m = Number((a / Math.pow(10, e)).toPrecision(chiffres));
+    if (m >= 10) { m = Number((m / 10).toPrecision(chiffres)); e += 1; }
+    return signe + String(m).replace(".", ",") + " × 10" + exposant(e);
+  }
+
+  /* Toujours en ecriture decimale, sans notation scientifique : 0,000 047 et non
+     4,7 × 10⁻⁵. Pour le CAP et la seconde, ou la virgule est l'exercice. */
+  function ecrireDecimal(x) {
+    if (x === null || x === undefined || !isFinite(x)) return "\u2014";
+    var s = Math.abs(Number(x.toPrecision(12))).toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
+    var p = s.split(".");
+    return (x < 0 ? MOINS : "") + grouper(p[0]) + (p[1] ? "," + p[1] : "");
+  }
+
+  /* NaN si la saisie n'est pas un nombre. */
+  function lire(texte) {
+    if (texte === null || texte === undefined) return NaN;
+    var t = String(texte)
+      .replace(/[\s  ]/g, "")
+      .replace(/,/g, ".")
+      .replace(/[−–]/g, "-")
+      .replace(/[⁻⁰¹²³⁴-⁹]+/g, function (s) {
+        return "^" + s.split("").map(function (c) { return DEPUIS_EXPOSANT[c]; }).join("");
+      })
+      .replace(/[×xX*·]/g, "*");
+    if (t === "") return NaN;
+    if (/^[+-]?(\d+\.?\d*|\.\d+)e[+-]?\d+$/i.test(t)) return Number(t);
+    var m = t.match(/^([+-]?(?:\d+\.?\d*|\.\d+))?(?:(?:\*10\^?|10\^)\(?([+-]?\d+)\)?)?$/);
+    if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
+    var mantisse = m[1] !== undefined ? Number(m[1]) : 1;
+    return m[2] !== undefined ? Number(mantisse + "e" + m[2]) : mantisse;
+  }
+
+  /* a vaut b a `tolerance` pres, en relatif. */
+  function proche(a, b, tolerance) {
+    if (b === 0) return Math.abs(a) < 1e-12;
+    return Math.abs(a - b) <= (tolerance || 1e-9) * Math.abs(b);
+  }
+
+  return { ecrire: ecrire, ecrireDecimal: ecrireDecimal, lire: lire, proche: proche };
+})();
+
+/* Entrainement · la calculatrice.
+   Ecrite pour le depot : aucun droit a demander, aucune requete, rien d'enregistre.
+   Elle reprend l'application Calculs d'une calculatrice de lycee : une ligne de
+   saisie, l'historique au-dessus, Ans, les degres ou les radians, la virgule.
+
+   On tape au clavier ou sur le pave. Priorites usuelles ; ^ associe a droite ;
+   -2^2 vaut -4 ; 2π et 3(4+5) sont des produits ; sin(30)² vaut (sin 30)².
+   Les parentheses oubliees en fin de ligne sont fermees.
+   Apres un resultat, une ligne qui commence par un operateur part de Ans, au clavier
+   comme au pave ; Entree sur une ligne vide refait le dernier calcul (Ans×1,05, puis
+   Entree, Entree… pour iterer). Demande le 6 octobre 2026.
+   Aucun eval : l'expression est lue par un petit analyseur recursif.
+
+   monter(conteneur, { memoire: "cle" }) garde l'historique, Ans et l'unite d'angle dans le
+   sessionStorage, le temps de l'onglet : c'est ce qui suit l'eleve d'une page du site a
+   l'autre. Sans l'option, rien n'est garde. */
+"use strict";
+var Calculette = (function () {
+  var N = Nombres;
+  var RAD = Math.PI / 180;
+  var FONCTIONS = {
+    sin: function (x, deg) { return Math.sin(deg ? x * RAD : x); },
+    cos: function (x, deg) { return Math.cos(deg ? x * RAD : x); },
+    tan: function (x, deg) { return Math.tan(deg ? x * RAD : x); },
+    asin: function (x, deg) { var r = Math.asin(x); return deg ? r / RAD : r; },
+    acos: function (x, deg) { var r = Math.acos(x); return deg ? r / RAD : r; },
+    atan: function (x, deg) { var r = Math.atan(x); return deg ? r / RAD : r; },
+    ln: Math.log, log: Math.log10, exp: Math.exp, abs: Math.abs, sqrt: Math.sqrt
+  };
+  var ALIAS = { "sin⁻¹": "asin", "cos⁻¹": "acos", "tan⁻¹": "atan", arcsin: "asin", arccos: "acos", arctan: "atan" };
+  var OPERATEURS = { "+": "+", "-": "-", "−": "-", "–": "-", "×": "*", "*": "*", "·": "*", "÷": "/", "/": "/",
+                     "^": "^", "²": "²", "³": "³", "(": "(", ")": ")", "√": "√" };
+
+  /* ─────────── lire une expression ─────────── */
+  function jetons(texte) {
+    var t = String(texte).replace(/[\s  ]/g, ""), sortie = [], i = 0, m;
+    while (i < t.length) {
+      var reste = t.slice(i);
+      /* 2,5E3 ou 2,5e3 : l'exposant colle au nombre ; un e seul est la constante */
+      if ((m = reste.match(/^(\d+(?:[.,]\d*)?|[.,]\d+)([Ee][+\-−]?\d+)?/))) {
+        var e = m[2] ? "e" + m[2].slice(1).replace("−", "-") : "";
+        sortie.push({ type: "nombre", valeur: Number(m[1].replace(",", ".") + e) });
+      } else if ((m = reste.match(/^(sin⁻¹|cos⁻¹|tan⁻¹|arcsin|arccos|arctan|asin|acos|atan|sin|cos|tan|ln|log|exp|abs|sqrt)/i))) {
+        var nom = m[1].toLowerCase();
+        sortie.push({ type: "fonction", nom: ALIAS[nom] || nom });
+      } else if ((m = reste.match(/^(ans|pi|π|e)/i))) {
+        var c = m[1].toLowerCase();
+        sortie.push({ type: "constante", nom: c === "π" ? "pi" : c });
+      } else if (OPERATEURS[reste[0]]) {
+        m = [reste[0]];
+        sortie.push({ type: "op", op: OPERATEURS[reste[0]] });
+      } else throw new Error("syntaxe");
+      i += m[0].length;
+    }
+    return sortie;
+  }
+
+  function evaluer(texte, degres, ans) {
+    var j = jetons(texte), k = 0;
+    if (!j.length) throw new Error("vide");
+    var ouvertes = 0;
+    j.forEach(function (t) { if (t.op === "(") ouvertes++; else if (t.op === ")") ouvertes--; });
+    for (; ouvertes > 0; ouvertes--) j.push({ type: "op", op: ")" });
+
+    function prendre(op) { var t = j[k]; if (t && t.type === "op" && t.op === op) { k++; return true; } return false; }
+    function debutFacteur(t) {
+      return t && (t.type !== "op" || t.op === "(" || t.op === "√");
+    }
+    function expression() {
+      var v = terme();
+      for (;;) {
+        if (prendre("+")) v += terme();
+        else if (prendre("-")) v -= terme();
+        else return v;
+      }
+    }
+    function terme() {
+      var v = unaire();
+      for (;;) {
+        if (prendre("*")) v *= unaire();
+        else if (prendre("/")) { var d = unaire(); if (d === 0) throw new Error("division"); v /= d; }
+        else if (debutFacteur(j[k])) v *= puissance();          /* 2π, 3(4+5) */
+        else return v;
+      }
+    }
+    function unaire() {
+      if (prendre("-")) return -unaire();
+      if (prendre("+")) return unaire();
+      return puissance();
+    }
+    function puissance() {
+      var b = postfixe();
+      return prendre("^") ? Math.pow(b, unaire()) : b;
+    }
+    function postfixe() {
+      var v = primaire();
+      for (;;) {
+        if (prendre("²")) v = v * v;
+        else if (prendre("³")) v = v * v * v;
+        else return v;
+      }
+    }
+    function primaire() {
+      var t = j[k];
+      if (!t) throw new Error("syntaxe");
+      if (t.type === "nombre") { k++; return t.valeur; }
+      if (t.type === "constante") { k++; return t.nom === "pi" ? Math.PI : t.nom === "e" ? Math.E : ans; }
+      if (t.type === "fonction") { k++; return FONCTIONS[t.nom](primaire(), degres); }
+      if (prendre("√")) return Math.sqrt(postfixe());
+      if (prendre("(")) {
+        var v = expression();
+        if (!prendre(")")) throw new Error("syntaxe");
+        return v;
+      }
+      throw new Error("syntaxe");
+    }
+
+    var v = expression();
+    if (k < j.length) throw new Error("syntaxe");
+    if (isNaN(v)) throw new Error("domaine");
+    if (!isFinite(v)) throw new Error("infini");
+    return Number(v.toPrecision(12));
+  }
+  var MESSAGES = {
+    syntaxe: "Erreur de syntaxe", vide: "Rien à calculer", division: "Division par zéro",
+    domaine: "Hors du domaine de définition", infini: "Résultat trop grand"
+  };
+
+  /* ─────────── le pave ─────────── */
+  var EFFACER = "⌫", TOUT = "AC", EGAL = "=";
+  var TOUCHES = [
+    ["sin⁻¹", "sin⁻¹(", "fonction"], ["cos⁻¹", "cos⁻¹(", "fonction"], ["tan⁻¹", "tan⁻¹(", "fonction"], ["π", "π", "fonction"], ["e", "e", "fonction"],
+    ["sin", "sin(", "fonction"], ["cos", "cos(", "fonction"], ["tan", "tan(", "fonction"], ["ln", "ln(", "fonction"], ["log", "log(", "fonction"],
+    ["√", "√(", "op"], ["x²", "²", "op"], ["xʸ", "^", "op"], ["(", "(", "op"], [")", ")", "op"],
+    ["7", "7", "chiffre"], ["8", "8", "chiffre"], ["9", "9", "chiffre"], [EFFACER, EFFACER, "efface"], [TOUT, TOUT, "efface"],
+    ["4", "4", "chiffre"], ["5", "5", "chiffre"], ["6", "6", "chiffre"], ["×", "×", "op"], ["÷", "÷", "op"],
+    ["1", "1", "chiffre"], ["2", "2", "chiffre"], ["3", "3", "chiffre"], ["+", "+", "op"], ["−", "−", "op"],
+    ["0", "0", "chiffre"], [",", ",", "chiffre"], ["×10ⁿ", "×10^", "op"], ["Ans", "Ans", "fonction"], [EGAL, EGAL, "egal"]
+  ];
+  /* Ce que ⌫ efface d'un coup, plutot que lettre par lettre */
+  var BLOCS = ["sin⁻¹(", "cos⁻¹(", "tan⁻¹(", "sin(", "cos(", "tan(", "ln(", "log(", "√(", "×10^", "Ans"];
+  /* Apres un resultat, ces touches partent de Ans, comme sur une calculatrice */
+  var APRES_ANS = ["+", "−", "×", "÷", "^", "²", "×10^"];
+  /* ... et une ligne tapee au clavier qui commence par l'un de ces signes */
+  var DEBUT_ANS = /^[+\-−–×*·÷\/^²³]/;
+
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) {
+      if (k === "classe") n.className = attrs[k];
+      else if (k === "texte") n.textContent = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function joli(texte) {
+    return texte.replace(/\*/g, "×").replace(/\//g, "÷").replace(/-/g, "−").replace(/\./g, ",");
+  }
+  /* Ce qu'on recopie dans la saisie : la valeur, ecrite comme on la taperait */
+  function brut(x) {
+    return String(Number(x.toPrecision(10))).replace("e+", "E").replace("e-", "E−").replace(".", ",");
+  }
+
+  function monter(conteneur, options) {
+    options = options || {};
+    var degres = true, ans = 0, aUnResultat = false, derniere = "", lignes = [];
+    var tactile = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    var bDeg = el("button", { type: "button", "aria-pressed": "true", texte: "Degrés" });
+    var bRad = el("button", { type: "button", "aria-pressed": "false", texte: "Radians" });
+    var historique = el("ol", { classe: "calc-historique" });
+    var ecran = el("div", { classe: "calc-ecran", "aria-live": "polite" }, [historique]);
+    var saisie = el("input", { type: "text", classe: "calc-saisie", autocomplete: "off", spellcheck: "false",
+      "aria-label": "Calcul à effectuer", placeholder: "2,5×10^3 ÷ (1163×20)" });
+    if (tactile) saisie.setAttribute("inputmode", "none");   /* le pave suffit, pas de clavier par-dessus */
+    var pave = el("div", { classe: "calc-touches" });
+
+    function angle(deg) {
+      degres = deg;
+      bDeg.setAttribute("aria-pressed", deg ? "true" : "false");
+      bRad.setAttribute("aria-pressed", deg ? "false" : "true");
+    }
+    bDeg.addEventListener("click", function () { angle(true); });
+    bRad.addEventListener("click", function () { angle(false); });
+
+    function inserer(txt) {
+      var a = saisie.selectionStart === null ? saisie.value.length : saisie.selectionStart;
+      var b = saisie.selectionEnd === null ? a : saisie.selectionEnd;
+      if (saisie.value === "" && aUnResultat && APRES_ANS.indexOf(txt) >= 0) { txt = "Ans" + txt; }
+      saisie.value = saisie.value.slice(0, a) + txt + saisie.value.slice(b);
+      var p = a + txt.length;
+      saisie.setSelectionRange(p, p);
+    }
+    function effacer() {
+      var a = saisie.selectionStart, b = saisie.selectionEnd, v = saisie.value;
+      if (a !== b) { saisie.value = v.slice(0, a) + v.slice(b); saisie.setSelectionRange(a, a); return; }
+      if (a === 0) return;
+      var avant = v.slice(0, a), n = 1;
+      for (var i = 0; i < BLOCS.length; i++) if (avant.slice(-BLOCS[i].length) === BLOCS[i]) { n = BLOCS[i].length; break; }
+      saisie.value = v.slice(0, a - n) + v.slice(a);
+      saisie.setSelectionRange(a - n, a - n);
+    }
+    function garder() {
+      if (!options.memoire) return;
+      try { sessionStorage.setItem(options.memoire, JSON.stringify({ ans: ans, a: aUnResultat, deg: degres, der: derniere, l: lignes.slice(-40) })); } catch (e) {}
+    }
+    /* rejoue : une ligne relue dans la memoire de l'onglet, avec la valeur qu'elle avait */
+    function ligne(expr, contenu, erreur, rejoue) {
+      if (!rejoue) { lignes.push([expr, contenu, erreur ? 1 : 0, ans]); garder(); }
+      var bExpr = el("button", { type: "button", classe: "calc-expr", title: "Reprendre ce calcul", texte: joli(expr) });
+      bExpr.addEventListener("click", function () { saisie.value = expr; saisie.focus(); });
+      var bRes = el("button", { type: "button", classe: "calc-res" + (erreur ? " erreur" : ""), texte: contenu });
+      if (!erreur) {
+        var valeur = rejoue ? rejoue[3] : ans;
+        bRes.title = "Insérer cette valeur";
+        bRes.addEventListener("click", function () { inserer(brut(valeur)); saisie.focus(); });
+      }
+      historique.appendChild(el("li", {}, [bExpr, bRes]));
+      while (historique.children.length > 40) historique.removeChild(historique.firstChild);
+      ecran.scrollTop = ecran.scrollHeight;
+    }
+    function calculer() {
+      var expr = saisie.value.trim();
+      if (!expr) { if (!derniere) return; expr = derniere; }   /* Entree a vide : le dernier calcul, encore */
+      if (aUnResultat && DEBUT_ANS.test(expr)) expr = "Ans" + expr;
+      derniere = expr;
+      var ouvertes = (expr.match(/\(/g) || []).length - (expr.match(/\)/g) || []).length;
+      for (; ouvertes > 0; ouvertes--) expr += ")";   /* l'historique montre ce qui a ete calcule */
+      try {
+        ans = evaluer(expr, degres, ans);
+        aUnResultat = true;
+        ligne(expr, N.ecrire(ans, 10), false);
+        saisie.value = "";
+      } catch (err) {
+        ligne(expr, MESSAGES[err.message] || MESSAGES.syntaxe, true);
+      }
+    }
+
+    TOUCHES.forEach(function (t) {
+      var b = el("button", { type: "button", classe: t[2], tabindex: "-1", texte: t[0] });
+      if (t[0] === EFFACER) b.setAttribute("aria-label", "Effacer");
+      if (t[0] === TOUT) b.setAttribute("aria-label", "Tout effacer");
+      /* garder le curseur dans la saisie : la touche ne prend pas le focus */
+      b.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+      b.addEventListener("click", function () {
+        if (t[1] === EGAL) calculer();
+        else if (t[1] === EFFACER) effacer();
+        else if (t[1] === TOUT) saisie.value = "";
+        else inserer(t[1]);
+        if (!tactile) saisie.focus();
+      });
+      pave.appendChild(b);
+    });
+    /* au clavier, un operateur tape sur une ligne vide apres un resultat devient Ans + operateur */
+    saisie.addEventListener("input", function () {
+      if (aUnResultat && saisie.value.length === 1 && DEBUT_ANS.test(saisie.value)) {
+        saisie.value = "Ans" + saisie.value;
+        saisie.setSelectionRange(saisie.value.length, saisie.value.length);
+      }
+    });
+    saisie.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); calculer(); }
+      else if (ev.key === "Escape") { saisie.value = ""; }
+    });
+
+    /* la memoire de l'onglet, relue a l'ouverture */
+    if (options.memoire) {
+      try {
+        var m = JSON.parse(sessionStorage.getItem(options.memoire) || "null");
+        if (m) {
+          ans = m.ans || 0; aUnResultat = !!m.a; derniere = m.der || ""; angle(m.deg !== false); lignes = m.l || [];
+          lignes.forEach(function (x) { ligne(x[0], x[1], x[2], x); });
+        }
+      } catch (e) {}
+      bDeg.addEventListener("click", garder); bRad.addEventListener("click", garder);
+    }
+    conteneur.appendChild(el("div", { classe: "calc-angle", role: "group", "aria-label": "Unité d'angle" }, [bDeg, bRad]));
+    conteneur.appendChild(ecran);
+    conteneur.appendChild(saisie);
+    conteneur.appendChild(pave);
+    return { focus: function () { if (!tactile) saisie.focus(); } };
+  }
+
+  return { monter: monter, evaluer: evaluer };
+})();
+
 /* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
    Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
    Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
@@ -172,8 +844,13 @@ var Sim = (function () {
   /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
   function lire(txt) {
     if (txt === null || txt === undefined) return NaN;
-    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
-    return t === "" ? NaN : Number(t);
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-").replace(/^[≈~]/, "");
+    if (t === "") return NaN;
+    /* une unite tapee apres le nombre (« 12 kWh », « 90 % ») ne rend pas la reponse illisible ;
+       ce qui suit doit commencer par une lettre, %, ° ou µ : « 12/5 » reste refuse (14 oct. 2026) */
+    var m = t.match(/^([-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)([a-zA-Zµ%°Ω].*)?$/);
+    if (!m || /^(h|min|s|mn)\d/i.test(m[2] || "")) return NaN;            // « 2 h 16 min » : une duree, pas un nombre
+    return Number(m[1]);
   }
   function el(tag, attrs, enfants) {
     var n = document.createElement(tag);
@@ -470,9 +1147,11 @@ var Sim = (function () {
      enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
      tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
      Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
-     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite), jours}, voies: [{cle, titre, unite, dec, cache}],
            lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
-           nomFichier, surChange } */
+           nomFichier, surChange }
+     « jours: true » sur un temps en heures : le tableau et l'axe ecrivent « J8 · 10 h 25 » au lieu de
+     « 178,42 h », illisible passe le premier jour (14 octobre 2026) ; la copie et le CSV gardent les heures. */
   var COULEURS_VOIES = ["--accent", "--faux"];
   function centrale(parent, o) {
     var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
@@ -545,11 +1224,24 @@ var Sim = (function () {
 
     function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
     var corps = null;
-    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
-    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function ligneTable(l, cs) {
+      var r = el("tr");
+      cs.forEach(function (c) { var td = el("td", { texte: texteVal(l, c) }); if (c === TP && TP.jours) td.className = "jour-heure"; r.appendChild(td); });
+      return r;
+    }
+    function jourHeure(h) {
+      var m = Math.round(h * 60), r = ((m % 1440) + 1440) % 1440;
+      return "J" + (Math.floor(m / 1440) + 1) + " · " + Math.floor(r / 60) + " h " + (r % 60 < 10 ? "0" : "") + (r % 60);
+    }
+    function titreCol(c) { return c === TP && TP.jours ? "Jour et heure" : c.titre + (c.unite ? " (" + c.unite + ")" : ""); }
+    function texteVal(l, c) {
+      var x = l[c.cle];
+      if (c === TP && TP.jours && typeof x === "number") return jourHeure(x);
+      return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x));
+    }
     function dessinerTable() {
       var cs = colonnes(); table.innerHTML = "";
-      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: titreCol(c) })); });
       table.appendChild(el("thead", null, [tr]));
       corps = el("tbody");
       if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
@@ -579,12 +1271,24 @@ var Sim = (function () {
       var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
       var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
       if (x1 - x0 < 1e-9) x1 = x0 + 1;
-      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var nMax = larg < 480 ? 5 : 8, px = pasJoli(x1 - x0, nMax);
+      /* en jours : des pas d'heures rondes (1, 2, 3, 6, 12 h, puis des jours entiers), minuit ecrit « J6 » */
+      if (TP.jours) px = [1, 2, 3, 6, 12, 24, 48, 72, 168, 336].filter(function (p) { return (x1 - x0) / p <= nMax; })[0] || 336;
+      x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
       var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      var marque = function (x) {
+        if (!TP.jours) return fr(x, decimales(px));
+        var hh = Math.round(((x % 24) + 24) % 24);
+        return hh === 0 ? "J" + (Math.round(x / 24) + 1) : hh + " h";
+      };
       ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
-      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      for (var x = x0; x <= x1 + 1e-9; x += px) {
+        var minuit = TP.jours && Math.round(((x % 24) + 24) % 24) === 0;
+        ctx.strokeStyle = css(minuit ? "--encre2" : "--trait2");
+        ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(marque(x), X(x), mh + h + 5);
+      }
       ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
-      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      ctx.fillText(titreCol(TP), larg - md, haut - 3);
       trace.forEach(function (cle, i) {
         if (!cle) return;
         var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
@@ -785,6 +1489,999 @@ var Sim = (function () {
     return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
   }
 
+  /* ═══════════ PARCOURS · une simulation menee comme un projet ═══════════
+     Demande du 13 octobre 2026, pour le CAP et la seconde : un parcours ludique d'une heure sur
+     tablette plutot qu'un amas de donnees, et qui finit par un fichier texte corrige tout seul.
+     Cinq phases, une par competence de la grille nationale (APP, ANA, REA, VAL, COM), comme les
+     phases d'un projet : la commande, le plan, la realisation, le controle, le livrable.
+     LE FICHIER : le format des bilans du kit web (« BILAN DE SEQUENCE », un bloc SERIE par phase,
+     chaque question une case juste ou faux), que _commun/notation/NOTER-LES-BILANS.html note tout
+     seul. Le titre de chaque bloc porte sa competence entre crochets, [APP]... : l'outil l'y lit et
+     rattache le bloc sans reglage.
+     LA NOTE D'UNE QUESTION : juste si elle l'est au premier essai, ou au deuxieme pour un nombre, un
+     tri ou une manipulation (« essais » pour en decider autrement). On peut toujours reessayer pour avancer ; au troisieme echec,
+     « Continuer » la laisse fausse. La page dit juste ou pas encore, puis la methode : jamais la
+     valeur attendue.
+     PERSONNE NE RESTE BLOQUE (14 octobre 2026, remarque du professeur a l'essai) : « Continuer »
+     apparait aussi au troisieme appui sur « Verifier » quand la manipulation n'est pas faite, et
+     le livrable s'ouvre a tout moment, depuis le chemin ou le bouton de chaque phase. Le fichier se
+     produit inacheve : ce qui reste y compte comme non reussi.
+     Rien n'est enregistre ni envoye : le fichier se fabrique dans le navigateur (Blob).
+     UNE MANIPULATION (« action ») : verifier(ctx) rend null tant que rien n'est fait, ou
+       { ok, reponse, corriger: ["...", ...], controles: [[condition, "..."], ...], attente: "..." }.
+       « reponse » dit ce que la page lit, et va au fichier ; « lu », s'il est donne, remplace « reponse » a
+       l'ecran, quand elle porte ce qu'une autre question demande ; « corriger » nomme chaque erreur a reprendre, et
+       « controles » le fait tout seul (une condition fausse ajoute son texte et rend la question
+       fausse) ; sans « ok », la manipulation est juste si aucune erreur n'est nommee. UNE MANIPULATION REFUSEE NOMME TOUJOURS SES ERREURS (14 octobre 2026, « tu dois
+       preciser les erreurs a corriger ») : le reglage, le geste, l'oubli, jamais la valeur qu'il
+       fallait trouver ; une valeur que la consigne donne elle-meme peut se redire. « attente » :
+       tout est juste mais pas fini (journee en cours, courbe pas encore plate) ; la page le dit et
+       ne compte pas d'essai.
+     CROCHETS DE LA SCENE : q.apres(ctx, true, reponse) quand une question devient juste ;
+     q.fini(ctx, juste, reponse) quand elle se ferme, juste ou passee ; pour un nombre, la valeur lue
+     suit en quatrieme argument. recit et consigne d'une phase peuvent etre des fonctions de ctx, pour
+     varier avec ctx.niveau(). « large: true » sur une phase donne plus de place a la scene.
+
+     L'ENTRAINEMENT AU CCF (14 octobre 2026, pour les simulations de premiere et de terminale) :
+     « ccf: { problematique } » donne le cadrage de l'epreuve, releve sur un vrai CCF du lycee (le
+     vigneron, M. Meunier) : quatre parties cotees separement, APP, ANA, REA, VAL ; COM sur l'appel 1
+     et la conclusion ; deux appels professeur ; bonus d'autonomie de +0,25 ; note sur 10. Les phases
+     s'appellent « Partie n », la derniere, si elle est COM, « Conclusion ».
+     - type « appel » : { type: "appel", numero: 1, competence: "COM", lib, attendus: [...] }. L'eleve
+       appelle et CONTINUE ; le professeur valide quand il passe, par son code, sur la tablette meme
+       (le bandeau du haut l'y mene depuis n'importe quelle partie) : NA, ECA ou A. Dans le fichier,
+       un bloc EXERCICE : 0, 1 ou 2 points sur 2. Un appel lance mais non evalue ne compte pas ; un
+       appel jamais lance compte 0. Les appels se posent dans un tableau de questions, pas une fonction.
+     - L'aide : apres un premier echec, « Demander de l'aide » montre la methode. Elle ne retire rien a
+       la question, mais le bonus d'autonomie s'en va, comme en epreuve. Le fichier le dit.
+     - « competence » sur une question la sort du bloc de sa partie : une conclusion cotee COM dans la
+       partie 4, par exemple.
+     LE MODE LIBRE ET LA PAILLASSE : « libre: "#libre" » garde la simulation telle qu'elle etait, et
+     pose au-dessus deux boutons, explorer ou s'entrainer (#ccf dans l'adresse ouvre l'entrainement).
+     « paillasse: [selecteurs] » liste les morceaux de la simulation qu'une partie emprunte : la partie
+     qui porte « paillasse: true » (ou une liste) les recoit dans sa scene, et ils retournent a leur
+     place ensuite. Une seule scene, deplacee, jamais recopiee : son etat et ses releves la suivent.
+     « surOuvrir(ctx) » sur une partie s'appelle a chaque fois qu'on l'affiche.
+     LE TD SUR SIMULATION DU BTS, AU FORMAT DE L'U41 (14 octobre 2026 ; « TD sur simulation » et non
+     « entrainement », a la demande de l'utilisateur) : « u41: { problematique,
+     duree } » au lieu de « ccf: ». Meme mecanique — parties, appels, aide demandee, copie —, mais la
+     grille est celle des sept competences que l'epreuve U41 evalue (C12-1, C12-2, C4-3, C2-1, C2-2,
+     C2-3, C1-2 ; BTS FED C/01-referentiel/bts-fed-c-u41.yml), et il n'y a pas de bonus d'autonomie :
+     le fichier compte les aides. Une phase porte une competence, chaque question peut porter la sienne ;
+     « conclusion: true » sur la derniere partie la nomme « Conclusion ». Le fichier porte la ligne
+     « Grille : BTS FED · U41 », que NOTER-LES-BILANS lit pour noter sur la bonne grille.
+     LA NAVIGATION LIBRE (14 octobre 2026, « comme sur un controle ») : une fois commence, toutes les parties
+     sont ouvertes, dans l'ordre qu'on veut ; « Partie suivante » ne bloque plus. Une partie dont les questions
+     sont une fonction de ctx (des phrases ecrites avec les nombres de l'eleve) se recalcule a chaque visite tant
+     qu'on n'y a rien repondu : ouverte trop tot, elle se refait quand on revient. Un nombre manquant s'affiche
+     « … », jamais « NaN » ; une question dont la valeur attendue depend d'une mesure pas encore faite le dit,
+     sans compter d'essai.
+     LE DOSSIER : « dossier: true » remet les documents de la partie 1 (sa scene) dans un panneau qu'un
+     bouton « Le dossier » de la tete ouvre a gauche, dans toutes les parties ; une fonction (zone, ctx) a
+     la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
+     LA CALCULATRICE : Sim.calculatrice() pose celle des sites de classe (_commun/entrainement/moteur/
+     calculette.js, que l'assembleur embarque dans chaque page), un bouton flottant hors parcours, un
+     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire. */
+  var COMPETENCES = {
+    APP: "S'approprier", ANA: "Analyser", REA: "Réaliser", VAL: "Valider", COM: "Communiquer"
+  };
+  /* les capacites de la grille de l'epreuve, telles que les sujets du lycee les impriment */
+  var CAPACITES = {
+    APP: "Rechercher, extraire et organiser l'information.",
+    ANA: "Émettre une conjecture, une hypothèse. Proposer une méthode de résolution, un protocole expérimental.",
+    REA: "Choisir une méthode de résolution, un protocole expérimental. Exécuter une méthode de résolution, expérimenter, simuler, calculer.",
+    VAL: "Contrôler la vraisemblance d'une conjecture, d'une hypothèse. Interpréter, critiquer, argumenter.",
+    COM: "Rendre compte d'une démarche, d'un résultat, à l'oral ou à l'écrit."
+  };
+  var ORDRE_COMP = ["APP", "ANA", "REA", "VAL", "COM"];
+  /* les sept competences que l'epreuve U41 du BTS FED evalue, dans l'ordre du travail sur un dossier */
+  var U41 = {
+    "C12-1": "Identifier les documents d'un dossier", "C12-2": "Extraire les informations", "C4-3": "Décoder les plans",
+    "C2-1": "Identifier les composants et l'architecture", "C2-2": "Identifier les chaînes d'énergie et d'information",
+    "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
+  };
+  var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
+  var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
+  var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
+  /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
+     changer : node -e "..." avec la fonction empreinte ci-dessous sur « labo|<code> », et remplacer
+     le nombre. Il ne protege rien de serieux : il evite qu'un eleve se valide en un geste. */
+  var CODE_PROF = 2147056977;
+  function empreinte(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h; }
+  /* un nombre que l'eleve n'a pas encore mesure ne s'ecrit pas « NaN » : on met des points de suspension */
+  function propre(html) { return String(html === undefined ? "" : html).replace(/\bNaN\b|\bundefined\b/g, "…"); }
+  /* les retours ecrits par les scenes : la ponctuation haute et les guillemets ne commencent jamais une ligne */
+  function insecables(t) { return String(t).replace(/ ([:;?!»])/g, " $1").replace(/« /g, "« "); }
+  function texteSeul(html) {
+    var d = document.createElement("div"); d.innerHTML = html || "";
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function deux(n) { return (n < 10 ? "0" : "") + n; }
+  function heure(d) { return deux(d.getHours()) + "h" + deux(d.getMinutes()); }
+  function parcours(parent, o) {
+    var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
+    var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
+    function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
+    var niveaux = o.niveaux || ["CAP", "Seconde"];
+    var etat = { niveau: niveaux.length === 1 ? niveaux[0] : null, debut: null, courante: -1, ouverte: -1,
+      fiches: [], construites: [], colonnes: [], exporte: false, aides: 0 };
+    var donnees = {};                                    // partage entre les phases d'un parcours
+    var appels = [];                                     // les fiches des appels lances ou a lancer
+    var nPh = o.phases.length;
+    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
+    var P = $(parent);
+
+    /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
+    var libre = o.libre ? $(o.libre) : null, barreModes = null, bLibre = null, bParcours = null;
+    if (libre) {
+      bLibre = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "true" },
+        [el("b", { texte: "Explorer la simulation" }), el("span", { texte: o.libreTexte || "librement, sans note ni fichier" })]);
+      bParcours = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "false" },
+        [el("b", { texte: ccf ? "Entraînement au CCF" : u41 ? "TD sur simulation" : "Le parcours" }),
+         el("span", { texte: o.modeTexte || ((u41 ? (o.u41.duree || "deux heures") : "une heure") + ", et un fichier pour le professeur") })]);
+      barreModes = el("div", { classe: "pc-modes", role: "group", "aria-label": "Deux façons d'utiliser la page" }, [bLibre, bParcours]);
+      P.appendChild(barreModes);
+      bLibre.addEventListener("click", function () { mode(false); });
+      bParcours.addEventListener("click", function () { mode(true); });
+    }
+    P.appendChild(racine);
+    if (!libre) document.body.classList.add("pc-visible");
+    function mode(p) {
+      if (!libre) return;
+      bLibre.setAttribute("aria-pressed", p ? "false" : "true");
+      bParcours.setAttribute("aria-pressed", p ? "true" : "false");
+      libre.hidden = p; racine.hidden = !p;
+      document.body.classList.toggle("pc-visible", p);    // le parcours a son bouton de calculatrice : le flottant s'efface
+      if (!p) poserPaillasse(null, null);
+    }
+
+    /* ---- la paillasse : les morceaux de la simulation qu'une partie emprunte ---- */
+    var pail = (o.paillasse || []).map(function (s) {
+      var n = $(s);
+      if (!n) throw new Error("paillasse : " + s + " introuvable");
+      var m = document.createComment(" paillasse " + s + " ");
+      n.parentNode.insertBefore(m, n);
+      return { sel: s, n: n, m: m };
+    });
+    function poserPaillasse(cible, liste) {
+      pail.forEach(function (p) {
+        var veut = cible && (liste === true || (liste && liste.indexOf(p.sel) >= 0));
+        if (veut) cible.appendChild(p.n);
+        else if (p.n.previousSibling !== p.m) p.m.parentNode.insertBefore(p.n, p.m.nextSibling);
+      });
+    }
+
+    function nomPhase(i) {
+      if (!epreuve) return "Phase " + (i + 1);
+      if (o.phases[i].nom) return o.phases[i].nom;
+      return i === nPh - 1 && (o.phases[i].conclusion || (ccf && o.phases[i].competence === "COM")) ? "Conclusion" : "Partie " + (i + 1);
+    }
+
+    /* ---- la tete : chemin des phases, etoiles, temps ---- */
+    var tete = el("div", { classe: "pc-tete" });
+    var chemin = el("ol", { classe: "pc-chemin", "aria-label": epreuve ? "Les parties du sujet" : "Les phases du projet" });
+    var noeuds = o.phases.map(function (ph, i) {
+      var b = el("button", { type: "button", classe: "pc-noeud", disabled: "disabled",
+        "aria-label": nomPhase(i) + " · " + nomComp(ph.competence) },
+        [el("span", { classe: "pc-rond", texte: epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
+         el("span", { classe: "pc-comp", texte: ph.competence }),
+         el("span", { classe: "pc-etoiles", "aria-hidden": "true" })]);
+      b.addEventListener("click", function () { montrer(i); });
+      chemin.appendChild(el("li", null, [b]));
+      return b;
+    });
+    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": epreuve ? "La copie" : "Le livrable" },
+      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: epreuve ? "Copie" : "Livrable" }), el("span", { classe: "pc-etoiles" })]);
+    drapeau.addEventListener("click", function () { montrer(nPh); });
+    chemin.appendChild(el("li", null, [drapeau]));
+    var info = el("div", { classe: "pc-info" });
+    var score = el("span", { classe: "pc-score" });
+    var temps = el("span", { classe: "pc-temps" });
+    var niv = el("span", { classe: "pc-niveau" });
+    var badge = el("button", { type: "button", classe: "pc-badge-appel", hidden: "hidden" });
+    badge.addEventListener("click", function () { ouvrirProf(null); });
+    info.appendChild(badge); info.appendChild(niv); info.appendChild(score); info.appendChild(temps);
+    /* le dossier : les documents de la partie 1, a relire depuis n'importe quelle partie, dans un panneau a gauche ;
+       la calculatrice peut rester ouverte a droite en meme temps */
+    var dossierFn = o.dossier === true ? o.phases[0].scene : (typeof o.dossier === "function" ? o.dossier : null), bDos = null, panDos = null;
+    function fermerDossier() { if (!panDos) return; panDos.hidden = true; document.body.classList.remove("dossier-ouvert"); bDos.setAttribute("aria-pressed", "false"); }
+    function basculerDossier() {
+      if (!panDos) {
+        panDos = el("aside", { classe: "pc-dossier-panneau", "aria-label": "Le dossier", hidden: "hidden" });
+        var fermer = el("button", { type: "button", classe: "calc-fermer", texte: "Fermer" });
+        fermer.addEventListener("click", fermerDossier);
+        var corpsDos = el("div", { classe: "pc-dossier-corps" });
+        panDos.appendChild(el("div", { classe: "pc-dossier-tete" }, [el("span", { classe: "calc-titre", texte: "Le dossier" }), fermer]));
+        panDos.appendChild(corpsDos);
+        document.body.appendChild(panDos);
+        dossierFn(corpsDos, ctx);
+        panDos.addEventListener("keydown", function (ev) { if (ev.key === "Escape") fermerDossier(); });
+      }
+      if (panDos.hidden) { panDos.hidden = false; document.body.classList.add("dossier-ouvert"); bDos.setAttribute("aria-pressed", "true"); }
+      else fermerDossier();
+    }
+    if (dossierFn) {
+      bDos = el("button", { type: "button", classe: "pc-calc pc-dos", "aria-pressed": "false", hidden: "hidden", texte: "Le dossier" });
+      bDos.addEventListener("click", basculerDossier);
+      info.appendChild(bDos);
+    }
+    if (window.Calculette) {                               // la calculatrice des sites, dans la tete du parcours
+      var bCalc = el("button", { type: "button", classe: "pc-calc", "aria-pressed": "false", texte: "Calculatrice" });
+      bCalc.addEventListener("click", function () { var c = calculatrice(); if (c) bCalc.setAttribute("aria-pressed", c.basculer() ? "true" : "false"); });
+      info.appendChild(bCalc);
+    }
+    tete.appendChild(chemin); tete.appendChild(info);
+    racine.appendChild(tete);
+    /* la hauteur reelle de la tete, que la colonne de la scene garde au-dessus d'elle (elle passe sur deux lignes en tablette etroite) */
+    function majHaut() { if (tete.offsetHeight) racine.style.setProperty("--pc-haut", tete.offsetHeight + "px"); }
+    window.addEventListener("resize", majHaut);
+
+    /* ---- l'ecran de la commande, ou du sujet ---- */
+    var accueil = el("section", { classe: "pc-ecran pc-accueil" });
+    var c = o.commande || {};
+    var illus = el("div", { classe: "scene pc-illus" });
+    if (c.illustration) c.illustration(illus);
+    var choixNiv = el("div", { classe: "pc-choix-niveau" });
+    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    if (niveaux.length > 1) {
+      choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
+      var rang = el("div", { classe: "rangee" });
+      niveaux.forEach(function (n) {
+        var b = el("button", { type: "button", classe: "bouton", "aria-pressed": "false", texte: n });
+        b.addEventListener("click", function () {
+          etat.niveau = n;
+          [].forEach.call(rang.children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+          partir.disabled = false;
+        });
+        rang.appendChild(b);
+      });
+      choixNiv.appendChild(rang);
+      partir.disabled = true;
+    }
+    partir.addEventListener("click", function () {
+      if (!etat.niveau) return;
+      etat.debut = Date.now();
+      niv.textContent = etat.niveau;
+      document.body.classList.add("pc-en-cours");
+      ouvrir(0);
+    });
+    if (epreuve) {
+      var cc = o.ccf || o.u41;
+      var sujet = el("div", { classe: "carte pc-commande" }, [
+        el("div", { classe: "pc-surtitre", texte: cc.surtitre || "Le sujet" }),
+        c.client ? el("p", { classe: "pc-client", html: c.client }) : null,
+        el("div", { classe: "pc-texte", html: c.texte || "" }),
+        el("p", { classe: "pc-problematique", html: "<b>Problématique</b> « " + cc.problematique + " »" })
+      ]);
+      var grille = el("ul", { classe: "pc-grille", "aria-label": "La grille de l'épreuve" });
+      ORDRE.forEach(function (k) {
+        var ou = [];
+        o.phases.forEach(function (ph, i) {
+          if (ph.competence === k) ou.push(nomPhase(i));
+          if (typeof ph.questions === "function") return;
+          (ph.questions || []).forEach(function (q) {
+            var kk = q.competence || ph.competence;
+            if (kk !== k) return;
+            var nom = q.type === "appel" ? "Appel " + q.numero : nomPhase(i);
+            if (ou.indexOf(nom) < 0) ou.push(nom);
+          });
+        });
+        if (u41 && !ou.length) return;                 // une competence que le sujet n'evalue pas ne s'affiche pas
+        grille.appendChild(el("li", null, [el("div", { classe: "pc-grille-ligne" }, [el("span", { html: "<b>" + k + "</b> " + nomComp(k) }),
+          el("span", { classe: "pc-grille-ou", texte: ou.join(" · ") || "—" })]), u41 ? null : el("div", { classe: "pc-grille-cap", texte: CAPACITES[k] })]));
+      });
+      var nAppels = 0;
+      o.phases.forEach(function (ph) { if (typeof ph.questions !== "function") (ph.questions || []).forEach(function (q) { if (q.type === "appel") nAppels++; }); });
+      var carteFormat = el("div", { classe: "carte" }, ccf ? [
+        el("h2", { texte: "Le format de l'épreuve" }),
+        el("p", { html: cc.format || "Au CCF, <b>45 minutes</b> sur une seule situation, notées <b>sur 10</b>. Ici, <b>une heure</b> : le temps de prendre la simulation en main." }),
+        grille,
+        el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
+        el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
+        el("p", { classe: "consigne", html: "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+        choixNiv, partir] : [
+        el("h2", { texte: "L'U41 et ce TD" }),
+        /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
+        el("p", { html: cc.format || "À l'examen, l'U41 dure <b>4 heures</b> : cinq parties indépendantes autour d'un dossier technique. " +
+          "On y <b>extrait</b> des informations (40 % des consignes), on <b>justifie</b> (23 %), on <b>trace et complète</b> (18 %), on <b>calcule</b> (17 %). " +
+          "Ici, <b>" + (cc.duree || "deux heures") + "</b> sur la simulation, et chaque question se rattache à une compétence de l'épreuve." }),
+        el("p", { classe: "pc-surtitre", texte: "Les compétences évaluées" }),
+        grille,
+        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur la tablette.</span>" }) : null,
+        el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
+        choixNiv, partir]);
+      accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
+    } else {
+      var carteCmd = el("div", { classe: "carte pc-commande" }, [
+        el("div", { classe: "pc-surtitre", texte: "La commande" }),
+        c.client ? el("p", { classe: "pc-client", html: c.client }) : null,
+        el("div", { classe: "pc-texte", html: c.texte || "" }),
+        c.livrable ? el("p", { classe: "pc-livrable", html: "<b>Le livrable :</b> " + c.livrable }) : null
+      ]);
+      var etapes = el("ol", { classe: "pc-plan" });
+      o.phases.forEach(function (ph, i) {
+        etapes.appendChild(el("li", null, [el("b", { texte: nomPhase(i) + " · " + nomComp(ph.competence) + " — " }),
+          el("span", { html: ph.titre })]));
+      });
+      accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [
+        el("div", null, [carteCmd, illus]),
+        el("div", { classe: "carte" }, [el("h2", { texte: "Le projet en cinq phases" }), etapes,
+          el("p", { classe: "consigne", html: "Une heure en tout. On passe d'une phase à l'autre comme on veut, par le chemin en haut ; " +
+            "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." }),
+          choixNiv, partir])
+      ]));
+    }
+    racine.appendChild(accueil);
+
+    /* ---- une phase ---- */
+    var ecrans = o.phases.map(function () {
+      var s = el("section", { classe: "pc-ecran", hidden: "hidden" });
+      racine.appendChild(s);
+      return s;
+    });
+    var final = el("section", { classe: "pc-ecran", hidden: "hidden" });
+    racine.appendChild(final);
+    var postes = [];                                       // l'emplacement de la paillasse, partie par partie
+
+    function questionsDe(i) {
+      var ph = o.phases[i];
+      var qs = typeof ph.questions === "function" ? ph.questions(ctx) : (ph.questions || []);
+      return qs.filter(function (q) { return !q.niveau || q.niveau === etat.niveau; });
+    }
+
+    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41,
+      fr: fr, lire: lire, mesure: mesure, gauss: gauss, svg: svg, el: el, borne: borne, animer: animer };
+
+    /* un recit ou une consigne peut dependre du niveau : une fonction de ctx */
+    function selon(x) { return typeof x === "function" ? x(ctx) : x; }
+
+    function construire(i) {
+      if (etat.construites[i]) return;
+      etat.construites[i] = true;
+      var ph = o.phases[i], s = ecrans[i];
+      s.appendChild(el("div", { classe: "pc-phase-tete" }, [
+        el("div", { classe: "pc-surtitre", texte: nomPhase(i) + " · " + nomComp(ph.competence) }),
+        el("h2", { html: ph.titre }),
+        ph.recit ? el("p", { classe: "pc-bulle", html: selon(ph.recit) }) : null
+      ]));
+      var zone = el("div", { classe: "carte pc-scene" });
+      if (ph.consigne) zone.appendChild(el("p", { classe: "consigne", html: selon(ph.consigne) }));
+      var colQ = el("div", { classe: "carte pc-questions" }, [el("h2", { texte: epreuve ? "Les questions" : "À trouver" })]);
+      s.appendChild(el("div", { classe: "plan" + (ph.large ? " pc-large" : "") + (ph.paillasse ? " pc-avec-paillasse" : "") }, [zone, colQ]));
+      if (ph.scene) ph.scene(zone, ctx);
+      if (ph.paillasse) { postes[i] = el("div", { classe: "pc-paillasse" }); zone.appendChild(postes[i]); }
+      var qs = questionsDe(i);
+      etat.colonnes[i] = colQ;
+      etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
+      var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
+      var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
+        texte: i + 1 < nPh ? (epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+      suite.addEventListener("click", function () { ouvrir(i + 1); });
+      var versFin = null;
+      if (i + 1 < nPh) {
+        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: epreuve ? "Aller à la copie" : "Aller au livrable" });
+        versFin.addEventListener("click", function () { montrer(nPh); });
+      }
+      s.appendChild(el("div", { classe: "pc-pied" }, [versFin, bravo, suite]));
+      etat.fiches[i].pied = { bravo: bravo, suite: suite };
+      majPhase(i);
+    }
+
+    /* une question : son interface, ses essais, sa note */
+    function poserQuestion(parentQ, q, i, j) {
+      var f = { q: q, essais: 0, juste: false, fini: false, passe: false, reponse: "", note: false, aide: false };
+      var maxNote = q.essais || ((q.type === "nombre" || q.type === "action" || q.type === "classer") ? 2 : 1);
+      var bloc = el("div", { classe: "pc-q", "data-etat": "a-faire" });
+      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-q-num\">" + (j + 1) + "</span>" + propre(q.lib) }));
+      var champ = el("div", { classe: "pc-q-champ" });
+      var lireReponse, verifierOk, controles = [];
+      if (q.type === "nombre") {
+        var inp = el("input", { type: "text", inputmode: "decimal", autocomplete: "off", "aria-label": texteSeul(q.lib) });
+        champ.appendChild(inp); if (q.unite) champ.appendChild(el("span", { classe: "pc-unite", html: q.unite }));
+        controles.push(inp);
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+        lireReponse = function () { var v = lire(inp.value); return isFinite(v) ? fr(v, q.dec === undefined ? decimalesDe(inp.value) : q.dec) + (q.unite ? " " + texteSeul(q.unite) : "") : ""; };
+        verifierOk = function () {
+          var v = lire(inp.value); if (!isFinite(v)) return null;
+          f.valeur = v;
+          var a = typeof q.attendu === "function" ? q.attendu(ctx) : q.attendu;
+          if (!isFinite(a)) return "attente";               // elle repose sur une mesure, ou une reponse, d'une autre partie
+          var tol = q.tolerance === undefined ? 0.05 : q.tolerance;
+          return Math.abs(v - a) <= Math.abs(a) * tol + (q.toleranceAbsolue || 0);
+        };
+      } else if (q.type === "choix" || q.type === "multi") {
+        var multi = q.type === "multi", choisis = [];
+        var rang = el("div", { classe: "pc-options" });
+        var options = typeof q.options === "function" ? q.options(ctx) : q.options;
+        options.forEach(function (op, k) {
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: propre(op) });
+          b.addEventListener("click", function () {
+            if (f.fini) return;
+            if (multi) { var p = choisis.indexOf(k); if (p < 0) choisis.push(k); else choisis.splice(p, 1); }
+            else choisis = [k];
+            [].forEach.call(rang.children, function (x, m) { x.setAttribute("aria-pressed", choisis.indexOf(m) >= 0 ? "true" : "false"); });
+          });
+          rang.appendChild(b); controles.push(b);
+        });
+        champ.appendChild(rang);
+        lireReponse = function () { return choisis.slice().sort().map(function (k) { return texteSeul(options[k]); }).join(" + "); };
+        verifierOk = function () {
+          if (!choisis.length) return null;
+          var bon = typeof q.bonne === "function" ? q.bonne(ctx) : q.bonne;
+          bon = [].concat(bon).slice().sort().join(",");
+          return choisis.slice().sort().join(",") === bon;
+        };
+      } else if (q.type === "classer") {
+        var places = q.items.map(function () { return -1; });
+        var grille = el("div", { classe: "pc-classer" });
+        /* compact : une liste par ligne au lieu d'une rangee de boutons, d'office en epreuve des cinq categories
+           (cinq lignes de cinq boutons faisaient une partie de plus de 5 000 px de haut sur tablette) */
+        var compact = q.compact !== undefined ? !!q.compact : (epreuve && q.categories.length >= 5);
+        q.items.forEach(function (it, k) {
+          var ligne = el("div", { classe: "pc-classer-ligne" + (compact ? " pc-compact" : "") }, [el("span", { classe: "pc-classer-item", html: propre(it) })]);
+          if (compact) {
+            var choix = el("select", { classe: "pc-classer-choix", "aria-label": texteSeul(it) });
+            choix.appendChild(el("option", { value: "-1", texte: "— choisir —" }));
+            q.categories.forEach(function (cat, m) { choix.appendChild(el("option", { value: String(m), texte: texteSeul(cat) })); });
+            choix.addEventListener("change", function () { if (!f.fini) places[k] = Number(choix.value); });
+            ligne.appendChild(choix); grille.appendChild(ligne); controles.push(choix);
+            return;
+          }
+          var cats = el("div", { classe: "pc-options" });
+          q.categories.forEach(function (cat, m) {
+            var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: cat });
+            b.addEventListener("click", function () {
+              if (f.fini) return;
+              places[k] = m;
+              [].forEach.call(cats.children, function (x, n) { x.setAttribute("aria-pressed", n === m ? "true" : "false"); });
+            });
+            cats.appendChild(b); controles.push(b);
+          });
+          ligne.appendChild(cats); grille.appendChild(ligne);
+        });
+        champ.appendChild(grille);
+        lireReponse = function () { return q.items.map(function (it, k) { return texteSeul(it) + " → " + (places[k] < 0 ? "?" : texteSeul(q.categories[places[k]])); }).join(" ; "); };
+        verifierOk = function () {
+          if (places.indexOf(-1) >= 0) return null;
+          var bonnes = typeof q.bonnes === "function" ? q.bonnes(ctx) : q.bonnes;   // selon le tirage, au besoin
+          var n = 0; places.forEach(function (p, k) { if (p === bonnes[k]) n++; });
+          f.bienPlaces = n;
+          return n === q.items.length;
+        };
+      } else {                                              // « action » : la scene est la reponse
+        if (q.aide) champ.appendChild(el("p", { classe: "pc-aide", html: q.aide }));
+        lireReponse = function () { var r = q.verifier(ctx); return r && r.reponse ? r.reponse : ""; };
+        verifierOk = function () {
+          var r = q.verifier(ctx); f.attente = ""; f.corriger = []; f.lu = undefined;
+          if (!r) return null;
+          if (r.lu !== undefined) f.lu = r.lu;           // ce que l'ecran montre, si le fichier doit en garder davantage
+          if (r.attente) { f.attente = r.attente; return "attente"; }
+          var ok = r.ok === undefined ? true : !!r.ok;
+          (r.controles || []).forEach(function (c) { if (!c[0]) { ok = false; f.corriger.push(c[1]); } });
+          (r.corriger || []).forEach(function (t) { if (t && f.corriger.indexOf(t) < 0) f.corriger.push(t); });
+          if (r.ok === undefined && f.corriger.length) ok = false;   // une erreur nommee suffit a refuser
+          if (ok) f.corriger = [];
+          else if (!f.corriger.length && window.console) console.warn("manipulation refusee sans erreur nommee :", texteSeul(q.lib));
+          return ok;
+        };
+      }
+      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: "Vérifier" });
+      var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
+      /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
+      var bAide = epreuve && q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
+      var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
+      bloc.appendChild(champ);
+      bloc.appendChild(el("div", { classe: "rangee" }, [bVerif, bAide, bPasser]));
+      bloc.appendChild(retour);
+      bloc.appendChild(methodeVue);
+      parentQ.appendChild(bloc);
+
+      function clore() {
+        f.fini = true; bVerif.disabled = true; bPasser.hidden = true;
+        if (bAide) bAide.hidden = true;
+        controles.forEach(function (x) { x.disabled = true; });
+        majPhase(i); majTete();
+        /* « fini » previent la scene a la cloture, juste ou passee ; « apres », seulement si juste */
+        if (q.fini) q.fini(ctx, f.juste, f.reponse, f.valeur);
+      }
+      function verifier() {
+        if (f.fini) return;
+        var ok = verifierOk();
+        f.appuis = (f.appuis || 0) + 1;
+        if (ok === "attente") {
+          retour.className = "pc-retour";
+          if (bloc.getAttribute("data-etat") === "faux") bloc.setAttribute("data-etat", "a-faire");
+          retour.innerHTML = q.type === "action" && f.attente ? insecables(f.attente) + " <span class=\"pc-lu\">Aucun essai n'est compté.</span>" :
+            "Cette question s'appuie sur une mesure ou un résultat qui n'existe pas encore : faites d'abord la manipulation ou la partie qui le donne.";
+          if (f.appuis >= 3) bPasser.hidden = false;
+          return;
+        }
+        if (ok === null) {
+          retour.className = "pc-retour";
+          if (bloc.getAttribute("data-etat") === "faux") bloc.setAttribute("data-etat", "a-faire");
+          retour.innerHTML = (q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.")) +
+            (!epreuve && f.appuis >= 3 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : "");
+          if (bAide && !f.aide) bAide.hidden = false;
+          if (f.appuis >= 3) bPasser.hidden = false;          // personne ne reste bloque : on peut continuer
+          return;
+        }
+        f.essais++;
+        f.reponse = lireReponse();
+        if (ok) {
+          f.juste = true; f.note = f.essais <= maxNote;
+          bloc.setAttribute("data-etat", "juste");
+          retour.className = "pc-retour juste";
+          retour.innerHTML = "Juste." + (q.bravo ? " <span class=\"pc-q-bravo\">" + q.bravo + "</span>" : "");
+          if (q.apres) q.apres(ctx, true, f.reponse, f.valeur);
+          clore();
+          return;
+        }
+        bloc.setAttribute("data-etat", "faux");
+        retour.className = "pc-retour faux";
+        var compte = q.type === "classer" && f.bienPlaces !== undefined ? " " + f.bienPlaces + " sur " + q.items.length + " bien placés." : "";
+        /* une manipulation refusee dit ce que la page lit (les reglages de l'eleve, jamais la valeur attendue) : sans cela,
+           « Pas encore » repete vingt fois ne dit rien (essai de l'utilisateur, 14 octobre 2026) */
+        var vu = q.type === "action" ? (f.lu !== undefined ? f.lu : f.reponse) : "";
+        if (vu) compte += " <span class=\"pc-lu\">La page lit : " + insecables(vu) + ".</span>";
+        if (q.type === "action" && f.corriger && f.corriger.length)
+          compte += " <span class=\"pc-corriger\"><b>À corriger :</b>" + f.corriger.map(function (t) { return "<span>" + insecables(t) + "</span>"; }).join("") + "</span>";
+        if (epreuve) {
+          retour.innerHTML = "Pas encore." + compte + " Encore un essai.";
+          if (bAide && !f.aide) bAide.hidden = false;
+        } else {
+          retour.innerHTML = "Pas encore." + compte + (f.essais >= 2 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : " Encore un essai.");
+        }
+        if (f.essais >= 3 || f.appuis >= 3) bPasser.hidden = false;
+      }
+      bVerif.addEventListener("click", verifier);
+      if (bAide) bAide.addEventListener("click", function () {
+        if (f.aide) return;
+        f.aide = true; etat.aides++;
+        bAide.hidden = true; methodeVue.hidden = false;
+      });
+      bPasser.addEventListener("click", function () {
+        f.passe = true; f.note = false;
+        if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
+        bloc.setAttribute("data-etat", "passe");
+        retour.className = "pc-retour"; retour.innerHTML = "On continue." + (epreuve ? "" : " <span class=\"methode\">" + (q.methode || "") + "</span>");
+        if (epreuve && q.methode) methodeVue.hidden = false;
+        clore();
+      });
+      return f;
+    }
+    function decimalesDe(txt) { var m = String(txt).replace(",", ".").match(/\.(\d+)/); return m ? Math.min(m[1].length, 4) : 0; }
+
+    /* un appel professeur : l'eleve appelle et continue ; le professeur valide quand il passe */
+    function poserAppel(parentQ, q, i) {
+      var f = { q: q, appel: true, essais: 0, juste: false, fini: false, passe: false, reponse: "", note: false,
+        appele: null, cote: null, heureCote: null, phase: i };
+      var bloc = el("div", { classe: "pc-q pc-appel", "data-etat": "a-faire" });
+      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><b>Appel n° " + q.numero + "</b> · " + q.lib }));
+      var bAppel = el("button", { type: "button", classe: "bouton principal", texte: "J'appelle le professeur" });
+      var bProf = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Le professeur valide" });
+      var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
+      bloc.appendChild(el("div", { classe: "rangee" }, [bAppel, bProf]));
+      bloc.appendChild(retour);
+      parentQ.appendChild(bloc);
+      bAppel.addEventListener("click", function () {
+        if (f.appele) return;
+        f.appele = new Date(); f.fini = true; f.reponse = "appel lancé à " + heure(f.appele);
+        bAppel.disabled = true; bProf.hidden = false;
+        bloc.setAttribute("data-etat", "attente");
+        retour.className = "pc-retour";
+        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur cette tablette. <b>En attendant, continuez.</b>";
+        majPhase(i); majTete(); majAppels();
+      });
+      bProf.addEventListener("click", function () { ouvrirProf(f); });
+      f.afficher = function () {
+        if (!f.cote) return;
+        bloc.setAttribute("data-etat", f.cote === "NA" ? "faux" : "juste");
+        retour.className = "pc-retour " + (f.cote === "NA" ? "faux" : "juste");
+        retour.innerHTML = "Évalué par le professeur à " + heure(f.heureCote) + " : <b>" + COTES[f.cote] + "</b>.";
+        bProf.textContent = "Le professeur revient sur sa cote";
+      };
+      appels.push(f);
+      return f;
+    }
+    function attente() { return appels.filter(function (f) { return f.appele && !f.cote; }); }
+    function majAppels() {
+      var n = attente().length;
+      badge.hidden = !n;
+      badge.innerHTML = "<span aria-hidden=\"true\">✋</span> " + (n > 1 ? n + " appels en attente" : "Appel en attente");
+    }
+
+    /* la fenetre du professeur : son code, puis NA, ECA ou A pour chaque appel lance */
+    var voile = null, codeProf, codeDit, zoneCode, listeProf, cibleProf = null;
+    function ouvrirProf(cible) {
+      if (!voile) construireVoile();
+      cibleProf = cible;
+      voile.hidden = false; zoneCode.hidden = false; listeProf.hidden = true; listeProf.innerHTML = "";
+      codeProf.value = ""; codeDit.textContent = "";
+      setTimeout(function () { codeProf.focus(); }, 30);
+    }
+    function fermerProf() { if (voile) voile.hidden = true; }
+    function construireVoile() {
+      voile = el("div", { classe: "pc-voile", role: "dialog", "aria-modal": "true", "aria-label": "Réservé au professeur", hidden: "hidden" });
+      var boite = el("div", { classe: "carte pc-prof" });
+      var fermer = el("button", { type: "button", classe: "bouton", texte: "Fermer" });
+      fermer.addEventListener("click", fermerProf);
+      codeProf = el("input", { type: "password", inputmode: "numeric", autocomplete: "off", "aria-label": "Code du professeur" });
+      var bOuvrir = el("button", { type: "button", classe: "bouton principal", texte: "Ouvrir" });
+      codeDit = el("p", { classe: "pc-retour faux", "aria-live": "polite" });
+      zoneCode = el("div", null, [el("p", { classe: "consigne", texte: "Code du professeur :" }),
+        el("div", { classe: "pc-q-champ" }, [codeProf, bOuvrir]), codeDit]);
+      listeProf = el("div", { classe: "pc-prof-liste" });
+      boite.appendChild(el("div", { classe: "pc-surtitre", texte: "Réservé au professeur" }));
+      boite.appendChild(el("h2", { texte: "Évaluer un appel" }));
+      boite.appendChild(zoneCode); boite.appendChild(listeProf);
+      boite.appendChild(el("div", { classe: "rangee pc-prof-pied" }, [fermer]));
+      voile.appendChild(boite);
+      document.body.appendChild(voile);
+      function essayer() {
+        if (empreinte("labo|" + codeProf.value.trim()) !== CODE_PROF) { codeDit.textContent = "Ce n'est pas le code."; codeProf.select(); return; }
+        zoneCode.hidden = true; listeProf.hidden = false; remplirProf();
+      }
+      bOuvrir.addEventListener("click", essayer);
+      codeProf.addEventListener("keydown", function (e) { if (e.key === "Enter") essayer(); });
+      voile.addEventListener("click", function (e) { if (e.target === voile) fermerProf(); });
+    }
+    function remplirProf() {
+      listeProf.innerHTML = "";
+      var lances = appels.filter(function (f) { return f.appele; });
+      if (cibleProf) lances.sort(function (a, b) { return (a === cibleProf ? 0 : 1) - (b === cibleProf ? 0 : 1); });
+      if (!lances.length) { listeProf.appendChild(el("p", { texte: "Aucun appel lancé pour l'instant." })); return; }
+      lances.forEach(function (f) {
+        var q = f.q, k = q.competence || o.phases[f.phase].competence;
+        var carte = el("div", { classe: "pc-q pc-appel" });
+        carte.appendChild(el("p", { classe: "pc-q-lib", html: "<b>Appel n° " + q.numero + "</b> · " + k + " " + nomComp(k) + " — " + q.lib }));
+        if (q.attendus && q.attendus.length) {
+          carte.appendChild(el("p", { classe: "pc-surtitre", texte: "Ce qu'on attend" }));
+          carte.appendChild(el("ul", { classe: "pc-attendus" }, q.attendus.map(function (a) { return el("li", { html: a }); })));
+        }
+        var rangee = el("div", { classe: "pc-options pc-cotes" });
+        ["NA", "ECA", "A"].forEach(function (x) {
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": f.cote === x ? "true" : "false", html: "<b>" + x + "</b> · " + COTES[x] });
+          b.addEventListener("click", function () {
+            f.cote = x; f.heureCote = new Date(); f.note = x === "A";
+            [].forEach.call(rangee.children, function (y) { y.setAttribute("aria-pressed", y === b ? "true" : "false"); });
+            f.afficher(); majPhase(f.phase); majTete(); majAppels();
+            if (finalFait && etat.courante === nPh) construireFinal();
+          });
+          rangee.appendChild(b);
+        });
+        carte.appendChild(rangee);
+        listeProf.appendChild(carte);
+      });
+    }
+
+    function etoilesDe(i) {
+      var fs = etat.fiches[i]; if (!fs || !fs.length) return 0;
+      if (fs.some(function (f) { return !f.fini; })) return 0;
+      var n = fs.filter(function (f) { return f.note; }).length;
+      return n === fs.length ? 3 : n >= fs.length * 0.6 ? 2 : 1;
+    }
+    function majPhase(i) {
+      var fs = etat.fiches[i]; if (!fs || !fs.pied) return;
+      var finie = fs.every(function (f) { return f.fini; });
+      fs.pied.suite.disabled = false;
+      fs.pied.bravo.hidden = !finie || !o.phases[i].bravo;
+      if (finie && etat.ouverte === i) etat.ouverte = i + 1;
+      majChemin();
+    }
+    function majChemin() {
+      noeuds.forEach(function (b, i) {
+        var dispo = !!etat.debut;                         // comme dans un controle : toutes les parties, dans l'ordre qu'on veut
+        if (dispo) b.removeAttribute("disabled"); else b.setAttribute("disabled", "disabled");
+        var e = etoilesDe(i);
+        b.querySelector(".pc-etoiles").textContent = e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
+        b.classList.toggle("pc-fait", e > 0);
+        b.classList.toggle("pc-ici", etat.courante === i);
+      });
+      if (etat.debut) drapeau.removeAttribute("disabled");   // le livrable s'ouvre a tout moment
+      drapeau.classList.toggle("pc-ici", etat.courante === nPh);
+      drapeau.classList.toggle("pc-fait", etat.exporte);
+    }
+    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { s += etoilesDe(i); }); return s; }
+    function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
+    function majTete() {
+      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nPh);
+      temps.textContent = etat.debut ? minutes() + " min" : "";
+      if (bDos) bDos.hidden = !etat.debut;
+    }
+    setInterval(majTete, 15000);
+
+    function ouvrir(i) {
+      if (i > etat.ouverte) etat.ouverte = i;
+      montrer(i);
+    }
+    /* une partie ouverte trop tot : ses phrases portaient « … » ; on la refait tant qu'on n'y a rien touche */
+    function intacte(i) {
+      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide; });
+    }
+    function rafraichir(i) {
+      var ph = o.phases[i], colQ = etat.colonnes[i];
+      if (!etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
+      var pied = etat.fiches[i].pied;
+      while (colQ.children.length > 1) colQ.removeChild(colQ.lastChild);
+      etat.fiches[i] = questionsDe(i).map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
+      etat.fiches[i].pied = pied;
+      majPhase(i);
+    }
+    function montrer(i) {
+      if (i < nPh) rafraichir(i);
+      etat.courante = i;
+      accueil.hidden = true;
+      ecrans.forEach(function (s, k) { s.hidden = k !== i; });
+      final.hidden = i !== nPh;
+      if (i < nPh) construire(i); else construireFinal();
+      if (pail.length) poserPaillasse(i < nPh ? postes[i] : null, i < nPh ? o.phases[i].paillasse : null);
+      majChemin(); majTete(); majHaut();
+      if (i < nPh && o.phases[i].surOuvrir) o.phases[i].surOuvrir(ctx);
+      if (o.surPhase) o.surPhase(i, ctx);
+      racine.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
+    function autonomie() {
+      var passees = 0, restent = 0;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.appel) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      o.phases.forEach(function (ph, i) { if (!etat.fiches[i]) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
+      var merite = !etat.aides && !passees && !restent;
+      if (u41) {
+        var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
+          passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "rien de passé"];
+        if (restent) u.push(restent + " question" + (restent > 1 ? "s" : "") + " sans réponse");
+        return { merite: merite, texte: u.join(", ") };
+      }
+      var t = merite ? "bonus +0,25 mérité — aucune aide demandée, rien de passé"
+        : "pas de bonus — " + [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "",
+          passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "",
+          restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : ""].filter(Boolean).join(", ");
+      return { merite: merite, texte: t };
+    }
+
+    /* ---- le livrable : recapitulatif et fichier ---- */
+    var finalFait = false, recap, apercu, titreFin, bulleFin;
+    function construireFinal() {
+      if (!finalFait) {
+        finalFait = true;
+        titreFin = el("h2"); bulleFin = el("p", { classe: "pc-bulle" });
+        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: epreuve ? "La copie" : "Le livrable" }), titreFin, bulleFin]));
+        recap = el("div", { classe: "carte" });
+        var remise = el("div", { classe: "carte pc-remise" });
+        remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
+        remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
+          "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
+        var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
+        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Produire mon fichier" });
+        var bVoir = el("button", { type: "button", classe: "bouton", texte: "Afficher le texte" });
+        var dit = el("p", { classe: "pc-retour", "aria-live": "polite" });
+        apercu = el("textarea", { classe: "pc-apercu", readonly: "readonly", rows: "10", hidden: "hidden", "aria-label": "Le texte du fichier" });
+        remise.appendChild(el("div", { classe: "pc-q-champ" }, [ident]));
+        remise.appendChild(el("div", { classe: "rangee" }, [bProd, bVoir]));
+        remise.appendChild(dit); remise.appendChild(apercu);
+        bProd.addEventListener("click", function () {
+          var id = ident.value.trim();
+          if (!id) { dit.className = "pc-retour faux"; dit.textContent = "Tapez d’abord l’identifiant donné en classe."; return; }
+          var txt = fabriquer(id);
+          var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
+          try {
+            var url = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
+            var a = el("a", { href: url, download: nom }); document.body.appendChild(a); a.click();
+            setTimeout(function () { URL.revokeObjectURL(url); a.parentNode.removeChild(a); }, 1500);
+            etat.exporte = true; majChemin();
+            dit.className = "pc-retour juste";
+            dit.textContent = "Fichier produit : " + nom + ". S’il n’apparaît pas, « Afficher le texte » permet de le copier.";
+          } catch (e) {
+            dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
+          }
+        });
+        bVoir.addEventListener("click", function () {
+          var id = ident.value.trim() || "(identifiant à taper)";
+          apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
+        });
+        var simpl = null;
+        if (o.simplifie && o.simplifie.length) {
+          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
+            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
+        }
+        final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
+      }
+      /* le livrable se produit meme inacheve : ce qui reste compte comme non reussi */
+      var restent = 0, appelsAFaire = 0;                     // les appels se comptent a part : ce ne sont pas des questions
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        (fs ? fs.filter(function (f) { return !f.fini; }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+          if (q.type === "appel") appelsAFaire++; else restent++;
+        });
+      });
+      var enAttente = attente().length;
+      titreFin.innerHTML = restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
+      var mots = [];
+      if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut, " +
+        "ou produire votre fichier tel quel : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + ".");
+      if (appelsAFaire) mots.push("<b>" + (appelsAFaire > 1 ? appelsAFaire + " appels n'ont pas été lancés" : "Un appel n'a pas été lancé") + "</b> : " + (appelsAFaire > 1 ? "ils comptent" : "il compte") + " zéro.");
+      if (enAttente) mots.push("<b>" + (enAttente > 1 ? enAttente + " appels attendent" : "Un appel attend") + " encore le professeur</b> : faites-le valider avant de produire le fichier, sinon il ne comptera pas.");
+      if (!restent && !appelsAFaire && !enAttente && o.fin) mots.push(o.fin);
+      bulleFin.innerHTML = mots.join(" ");
+      bulleFin.hidden = !bulleFin.innerHTML;
+      recap.innerHTML = "";
+      recap.appendChild(el("h2", { texte: ccf ? "Le bilan de l'épreuve" : u41 ? "Le bilan, compétence par compétence" : "Le bilan du projet" }));
+      var t = el("table", { classe: "releve pc-recap" });
+      if (epreuve) {
+        t.appendChild(el("tr", null, [el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Appel" })]));
+        ORDRE.forEach(function (k) {
+          var n = 0, m = 0, ap = [];
+          o.phases.forEach(function (ph, i) {
+            var fs = etat.fiches[i], qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
+            qs.forEach(function (q, j) {
+              if ((q.competence || ph.competence) !== k) return;
+              var f = fs && fs[j];
+              if (q.type === "appel") ap.push("n° " + q.numero + " : " + (!f || !f.appele ? "pas fait" : !f.cote ? "en attente" : f.cote));
+              else { m++; if (f && f.note) n++; }
+            });
+          });
+          if (u41 && !m && !ap.length) return;
+          t.appendChild(el("tr", null, [el("td", { html: "<b>" + k + "</b> " + nomComp(k) }), el("td", { texte: m ? n + " sur " + m : "—" }), el("td", { texte: ap.join(" · ") || "—" })]));
+        });
+      } else {
+        t.appendChild(el("tr", null, [el("th", { texte: "Phase" }), el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Étoiles" })]));
+        o.phases.forEach(function (ph, i) {
+          var fs = etat.fiches[i] || [];
+          var n = fs.filter(function (f) { return f.note; }).length, e = etoilesDe(i);
+          t.appendChild(el("tr", null, [el("td", { texte: String(i + 1) }), el("td", { texte: nomComp(ph.competence) }),
+            el("td", { texte: n + " sur " + fs.length }), el("td", { texte: e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "—" })]));
+        });
+      }
+      recap.appendChild(t);
+      if (epreuve) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>" + (u41 ? "Aides" : "Autonomie") + "</b> : " + autonomie().texte + "." }));
+      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nPh + "</b> · " + minutes() + " min" }));
+      if (o.grades) {
+        var g = o.grades.filter(function (x) { return totalEtoiles() >= x[0]; }).pop();
+        if (g) recap.appendChild(el("p", { classe: "pc-grade", html: g[1] }));
+      }
+    }
+    function nettoie(s) {
+      return (s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s)
+        .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "sans-identifiant";
+    }
+    function fabriquer(id) {
+      var d = new Date();
+      var out = ["BILAN DE SÉQUENCE",
+        "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
+        "Identifiant: " + id,
+        "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
+        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nPh + ", en " + minutes() + " min"];
+      if (ccf) out.push("Autonomie  : " + autonomie().texte);
+      if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
+      out.push(new Array(64).join("="), "");
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        var qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
+        /* un bloc par competence : celle de la partie d'abord, puis celles que des questions portent */
+        var groupes = [], index = {};
+        qs.forEach(function (q, j) {
+          if (q.type === "appel") return;
+          var k = q.competence || ph.competence;
+          if (!(k in index)) { index[k] = groupes.length; groupes.push({ k: k, items: [] }); }
+          groupes[index[k]].items.push(j);
+        });
+        groupes.sort(function (a, b) { return (a.k === ph.competence ? 0 : 1) - (b.k === ph.competence ? 0 : 1); });
+        groupes.forEach(function (g) {
+          out.push("SÉRIE — [" + g.k + "] " + nomPhase(i) + " · " + nomComp(g.k) + " : " + texteSeul(ph.titre), "");
+          g.items.forEach(function (j, n) {
+            var q = qs[j], f = fs && fs[j];
+            var etatCase, rep;
+            if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
+            else {
+              etatCase = f.note ? "juste" : "faux";
+              var det = f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
+                : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
+              if (f.aide) det += ", avec aide";
+              rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
+            }
+            out.push("  " + (n + 1) + ". " + texteSeul(q.lib));
+            out.push("     réponse : " + rep + "   [" + etatCase + "]");
+          });
+          out.push("");
+        });
+        /* les appels : un bloc EXERCICE chacun, 0, 1 ou 2 points sur 2 */
+        qs.forEach(function (q, j) {
+          if (q.type !== "appel") return;
+          var f = fs && fs[j], k = q.competence || ph.competence;
+          out.push("EXERCICE — [" + k + "] Appel n° " + q.numero + " · " + nomComp(k) + " : " + texteSeul(q.lib));
+          if (!f || !f.appele) out.push("  réponse : appel non fait", "  verdict : appel non fait", "  points retrouvés : 0 sur 2");
+          else if (!f.cote) out.push("  réponse : appel lancé à " + heure(f.appele), "  verdict : non évalué par le professeur, ne compte pas");
+          else out.push("  réponse : appel lancé à " + heure(f.appele) + ", évalué à " + heure(f.heureCote),
+            "  verdict : " + f.cote + " — " + COTES[f.cote], "  points retrouvés : " + POINTS_COTE[f.cote] + " sur 2");
+          out.push("");
+        });
+      });
+      out.push(new Array(64).join("-"));
+      out.push("Fichier produit dans le navigateur de l'élève.");
+      out.push("Rien n'a été envoyé, rien n'a été enregistré ailleurs.");
+      return out.join("\r\n");
+    }
+
+    window.addEventListener("beforeunload", function (e) {
+      if (etat.debut && !etat.exporte) { e.preventDefault(); e.returnValue = ""; }
+    });
+    majTete();
+    if (libre) mode(/^#(ccf|u41|parcours)$/.test(location.hash));
+    /* la porte d'essai : etat interne et fichier, pour les controles */
+    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, fiches: function () { return etat.fiches; },
+      appels: appels, mode: mode, dossier: function () { if (dossierFn) basculerDossier(); return panDos; }, coter: function (f, x) { f.cote = x; f.heureCote = new Date(); f.note = x === "A"; f.afficher(); majPhase(f.phase); majAppels(); },
+      choisirNiveau: function (n) { etat.niveau = n; niv.textContent = n; }, demarrer: function (n) {
+        if (libre) mode(true);
+        etat.niveau = n || etat.niveau || niveaux[0]; niv.textContent = etat.niveau; etat.debut = Date.now();
+        document.body.classList.add("pc-en-cours"); ouvrir(0); } };
+  }
+
+  /* La calculatrice des sites de classe, dans une page de simulation (14 octobre 2026, « tu dois
+     ajouter l'onglet calculatrice au labo ») : le meme panneau et les memes classes que outils-page.js
+     du kit, sans aucun stockage. Un bouton flottant hors parcours ; pendant un parcours, le bouton de
+     sa tete. L'assembleur embarque nombres.js et calculette.js, et appelle Sim.calculatrice(). */
+  var calc = null;
+  function calculatrice() {
+    if (calc) return calc;
+    if (!window.Calculette) return null;
+    var panneau = el("aside", { classe: "calculatrice", "aria-label": "Calculatrice", hidden: "hidden" });
+    var fermer = el("button", { type: "button", classe: "calc-fermer", texte: "Fermer" });
+    var corps = el("div", { classe: "calc-corps" });
+    panneau.appendChild(el("div", { classe: "calc-tete" }, [el("span", { classe: "calc-titre", texte: "Calculatrice" }), fermer]));
+    panneau.appendChild(corps);
+    document.body.appendChild(panneau);
+    var sonde = el("span", { classe: "mono" }); sonde.style.display = "none"; document.body.appendChild(sonde);
+    panneau.style.setProperty("--mono", getComputedStyle(sonde).fontFamily); sonde.parentNode.removeChild(sonde);
+    var b = el("button", { type: "button", classe: "bouton-outil", "aria-pressed": "false", texte: "Calculatrice" });
+    document.body.appendChild(el("div", { classe: "outils-flottants" }, [b]));
+    var machine = null;
+    function ouvrir() {
+      if (!machine) machine = Calculette.monter(corps, {});
+      panneau.hidden = false; document.body.classList.add("calc-ouverte"); b.setAttribute("aria-pressed", "true");
+      if (machine && machine.focus) machine.focus();
+      return true;
+    }
+    function fermerP() {
+      panneau.hidden = true; document.body.classList.remove("calc-ouverte"); b.setAttribute("aria-pressed", "false");
+      [].forEach.call(document.querySelectorAll(".pc-calc"), function (x) { x.setAttribute("aria-pressed", "false"); });
+      return false;
+    }
+    b.addEventListener("click", function () { if (panneau.hidden) ouvrir(); else fermerP(); });
+    fermer.addEventListener("click", fermerP);
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && !panneau.hidden && panneau.contains(document.activeElement)) fermerP(); });
+    calc = { ouvrir: ouvrir, fermer: fermerP, basculer: function () { return panneau.hidden ? ouvrir() : fermerP(); } };
+    return calc;
+  }
+
+  /* LE TOUCHER QUI RATAIT (14 octobre 2026, la fenetre et le soleil de la regulation « ne marchent pas ») :
+     une scene se redessine vingt fois par seconde, et l'element touche est remplace entre l'appui et le
+     relachement ; le navigateur ne donne alors aucun clic. Si cela arrive pour un appui bref, sans glisser,
+     on rejoue le clic sur le premier ancetre encore en place qui contient le point de relachement — et
+     jamais en double : si le navigateur a donne son clic, on ne fait rien. */
+  (function () {
+    var bas = null;
+    document.addEventListener("pointerdown", function (e) {
+      var ch = []; for (var n = e.target; n && n !== document; n = n.parentNode) ch.push(n);
+      bas = { cible: e.target, chaine: ch, x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId };
+    }, true);
+    document.addEventListener("pointerup", function (e) {
+      var b = bas; bas = null;
+      if (!b || b.id !== e.pointerId || document.contains(b.cible)) return;           // la cible est la : le navigateur fait son clic
+      if (Math.abs(e.clientX - b.x) > 10 || Math.abs(e.clientY - b.y) > 10 || Date.now() - b.t > 800) return;   // un glisser, pas un appui
+      var cible = null;
+      for (var i = 1; i < b.chaine.length; i++) if (document.contains(b.chaine[i])) { cible = b.chaine[i]; break; }
+      if (!cible || cible === document.body || cible === document.documentElement || !cible.contains(e.target)) return;
+      var natif = false, vu = function () { natif = true; };
+      document.addEventListener("click", vu, true);
+      setTimeout(function () {
+        document.removeEventListener("click", vu, true);
+        if (!natif) cible.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window, clientX: e.clientX, clientY: e.clientY }));
+      }, 0);
+    }, true);
+  })();
+
   /* Petit utilitaire SVG. */
   var NS = "http://www.w3.org/2000/svg";
   function svg(tag, attrs, parent) {
@@ -796,7 +2493,7 @@ var Sim = (function () {
 
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
-    defi: defi, animer: animer, avancer: avancer, svg: svg };
+    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice };
 })();
 
 </script>
@@ -871,8 +2568,29 @@ table.points th{background:var(--carte2);font-size:.82rem}
 .verdict .faux{color:var(--faux);font-weight:650}
 .verdict .methode{color:var(--encre2);font-weight:400}
 select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px solid var(--trait);background:var(--carte);color:var(--encre);max-width:100%}
+/* l'entrainement a l'U41 : la paillasse prete le banc, jamais ce qui dit juste ou faux, ni le cycle du banc */
+.pc-paillasse #bVerifTrace,.pc-paillasse #caseCycle,.pc-paillasse #verdict,.pc-paillasse #manos{display:none!important}
+.pc-paillasse > #releve{background:var(--carte2);border-radius:var(--r);padding:12px;margin-bottom:12px}
+/* le diagramme tient presque entier a cote des questions, sur une tablette : questions plus etroites, diagramme moins large */
+@media (min-width:821px){.pc-u41 .plan.pc-large.pc-avec-paillasse{grid-template-columns:minmax(0,1fr) minmax(250px,270px)}}
+.pc-paillasse .mollier svg{min-width:640px}
+.pc-docs .doc-large{grid-column:1/-1}
+.pc-docs table.fiche-tech{border-collapse:collapse;width:100%}
+.pc-docs table.fiche-tech td{border-top:1px solid var(--trait2);padding:5px 6px;text-align:left;vertical-align:top;font-size:.88rem}
+.pc-docs table.fiche-tech td:first-child{font-weight:650;width:42%}
+.pc-docs .schema{display:block;width:100%;max-width:560px;height:auto;margin:0 auto;background:var(--carte);border-radius:6px}
+.schema .s-lig{fill:none;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
+.schema .s-org{fill:var(--carte);stroke:var(--encre);stroke-width:1.6}
+.schema .s-zone{fill:none;stroke:var(--encre2);stroke-width:1;stroke-dasharray:5 4}
+.schema text{font-size:10px;fill:var(--encre2)}
+.schema .s-nom{font-size:10.5px;font-weight:700;fill:var(--encre)}
+.schema .s-pt{fill:var(--carte);stroke:var(--encre);stroke-width:1.4}
+.schema .s-num{font-size:10px;font-weight:700;fill:var(--encre)}
 </style>
 
+<div id="u41"></div>
+
+<div id="libre">
 <nav class="onglets" id="temps" aria-label="Deux temps">
   <button type="button" data-vue="vueTracer">Relever et tracer le cycle</button>
   <button type="button" data-vue="vueDiag">Diagnostiquer une panne</button>
@@ -886,14 +2604,14 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
 </div>
 
 <div class="plan">
-  <div class="carte">
+  <div class="carte" id="carteCircuit">
     <h2><span class="num">2</span>Le circuit</h2>
     <div class="scene">
       <svg id="scene" viewBox="0 0 680 440" role="img" aria-label="Le circuit frigorifique : compresseur, condenseur, détendeur, évaporateur, quatre sondes de température, deux manomètres, un débitmètre et un wattmètre"></svg>
     </div>
     <p class="legende">Touche le compresseur pour le mettre en marche. Tourne les molettes du doigt : l'air qui entre dans chaque échangeur, la vis du détendeur, le variateur. Rouge : vapeur à haute pression ; orange : liquide à haute pression ; bleu : mélange puis vapeur à basse pression. Les pastilles 1 à 4 sont les sondes de température. Les trois flèches montrent ce qu'aucun instrument ne lit : la chaleur prise, la chaleur cédée et le travail, d'autant plus larges qu'ils sont grands.</p>
   </div>
-  <div class="carte">
+  <div class="carte" id="carteMesure">
     <h2><span class="num">3</span>Mettre en marche et mesurer</h2>
     <div class="commandes">
       <div class="rangee">
@@ -909,7 +2627,7 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
   </div>
 </div>
 
-<div class="carte">
+<div class="carte" id="carteDiagramme">
   <h2><span class="num">4</span>Le diagramme enthalpique</h2>
   <p class="consigne" id="consigneDiag">Pression absolue en ordonnée, sur une échelle logarithmique ; enthalpie massique en abscisse. Promène le pointeur pour lire un point. Pour tracer : choisis un point du cycle, puis touche le diagramme à l'endroit où tu le places.</p>
   <div class="couches" id="couches"></div>
@@ -919,7 +2637,7 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
   <div class="rangee" style="margin-top:8px">
     <button type="button" class="bouton" id="bVerifTrace">Vérifier mon tracé</button>
     <button type="button" class="bouton" id="bEffacer">Effacer mes points</button>
-    <label class="case"><input type="checkbox" id="voirCycle"> Montrer le cycle du banc (découverte : le tracé n'est plus vérifié)</label>
+    <label class="case" id="caseCycle"><input type="checkbox" id="voirCycle"> Montrer le cycle du banc (découverte : le tracé n'est plus vérifié)</label>
   </div>
   <table class="points" id="tablePoints" aria-label="Mes points"></table>
   <ul class="verdict" id="verdict" aria-live="polite"></ul>
@@ -960,6 +2678,7 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
       <li>Une seule sécurité : le pressostat haute pression, à réarmement manuel.</li>
     </ul>
   </details>
+</div>
 </div>
 
 <script>
@@ -1159,7 +2878,7 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
     tac: Sim.afficheur(I, { nom: "Air, sortie condenseur", unite: "°C", dec: 1 })
   };
   Sim.choix("#vitesse", { label: "Vitesse du temps", valeur: R.vitesse, options: [{ val: 0, texte: "pause" }, { val: 1, texte: "× 1" }, { val: 10, texte: "× 10" }], surChange: function (v) { R.vitesse = v; } });
-  Sim.choix("#manos", { label: "Les manomètres lisent", valeur: R.manos, options: [{ val: "rel", texte: "des bars relatifs" }, { val: "abs", texte: "des bars absolus" }],
+  var cManos = Sim.choix("#manos", { label: "Les manomètres lisent", valeur: R.manos, options: [{ val: "rel", texte: "des bars relatifs" }, { val: "abs", texte: "des bars absolus" }],
     surChange: function (v) { R.manos = v; lire(); afficher(); } });
   function afficher() {
     var u = R.manos === "rel" ? "relatif : 0 à l'air libre" : "absolu";
@@ -1635,6 +3354,21 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
     regler: function (k, v) { R[k] = v; if (M[k]) M[k].set(v, true); majCible(); }, panne: poserPanne, stabiliser: function () { A = clone(cible); lire(); afficher(); majScene(0); dessinerVrai(); },
     garder: mesureMaintenant, centrale: function () { return CEN; }, placer: function (i, p, h) { ELEVE[i] = { p: p, h: h }; dessinerEleve(); }, verifierTrace: verifierTrace, points: function () { return pointsDe(A); },
     regime: function () { return regime(F, R); },
+    /* l'entrainement a l'U41 (14 octobre 2026) impose le banc du sujet, puis lit la saturation et les
+       points places par l'etudiant : le banc repart au repos, centrale videe, points effaces */
+    imposer: function (o) {
+      if (o.fluide) { R.fluide = o.fluide; F = FL[o.fluide]; R.cyl = cylindree(F); }
+      if (o.usage) R.usage = o.usage;
+      ["ta", "tk", "sh", "freq"].forEach(function (k) { if (o[k] !== undefined) { R[k] = o[k]; if (M[k]) M[k].set(o[k], true); } });
+      if (o.manos) { R.manos = o.manos; cManos.set(o.manos, true); }
+      R.panne = "aucune"; marche = false; secu = false; SNAP = null; ELEVE = [null, null, null, null]; aPlacer = 0; cPlacer.set(0, true);
+      document.getElementById("voirCycle").checked = false;
+      majCible(); A = clone(cible); if (CEN) { CEN.arreter(); CEN.vider(); }
+      poserReglages(); plaque(); etiquettes(); dessinerDiagramme(); dessinerEleve(); echellesManos(); majBoutons(); effacerVerdict(); poserDefis();
+      lire(); afficher(); majScene(0); message("");
+    },
+    tsat: function (p) { return tsat(F, p); },
+    eleve: function () { return ELEVE.map(function (a) { return a ? { p: a.p, h: a.h } : null; }); },
     /* l'interpolation de la page contre le cycle de reference calcule par CoolProp */
     eprouver: function () {
       var G = FL[REF_COOLPROP.fluide], e = satT(G, REF_COOLPROP.te), c = satT(G, REF_COOLPROP.tc), a1 = vap(G, e.p, REF_COOLPROP.sc);
@@ -1645,7 +3379,444 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
   };
 })();
 </script>
+
+<script>
+/* ═══════════ ENTRAINEMENT A L'U41 · U41-03 (14 octobre 2026) ═══════════
+   Le banc de froid lu en pompe a chaleur (B1-1, niveau 3) et en machine thermodynamique (A5-1, A5-2,
+   niveau 2) : la technologie du froid, B5, est hors perimetre de l'option C. Un sujet de reception :
+   la PAC air-air du bureau d'accueil d'un stade, son dossier (CCTP, fiche, schema, notice), le releve
+   a +7 °C, le cycle trace, les bilans, l'essai a la temperature de base du CCTP, puis deux mois plus
+   tard une panne. Le fluide, la temperature de base, le besoin et la panne sont tires au sort : deux
+   voisins n'ont pas les memes nombres. La paillasse est celle du mode libre, empruntee, sans ce qui
+   dit juste ou faux (« Verifier mon trace ») ni le cycle du banc.
+   La partie qui retourne une evidence : a +7 °C, la PAC rend 1,9 kW, plus que le besoin du CCTP ; a
+   la temperature de base, 1,36 a 1,44 kW. Deux tirages sur trois ne couvrent plus le besoin. */
+(function () {
+  var B = window.bancfroid, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
+  var PATM = 1.013, QV = 1300, TK = 20, SH = 6;
+  var CONFIGS = [
+    { fluide: "R32", Tb: -7, besoin: 1.6, cop: 4.6, classe: 1, hp: [16.4, 18.6] },
+    { fluide: "R410A", Tb: -5, besoin: 1.6, cop: 4.5, classe: 0, hp: [16.0, 18.2] },
+    { fluide: "R290", Tb: -7, besoin: 1.25, cop: 4.8, classe: 2, hp: [8.6, 10.2] }
+  ];
+  var FLUIDES = { R32: { classe: "A2L", prg: 675 }, R410A: { classe: "A1", prg: 2088 }, R290: { classe: "A3", prg: 3 } };
+  /* les pannes tirees : chacune a sa signature sur la BP, la HP, la surchauffe, le sous-refroidissement
+     et le wattmetre. Les incondensables n'y sont pas : sans la pression a l'arret, ils se confondent
+     avec l'exces de fluide. */
+  var PANNES = [["souscharge", "manque de fluide (sous-charge)"], ["surcharge", "excès de fluide (surcharge)"], ["condenseur", "condenseur encrassé"],
+    ["evaporateur", "évaporateur givré ou mal ventilé"], ["detendeur", "détendeur trop fermé ou filtre colmaté"], ["compresseur", "compresseur usé : clapets non étanches"]];
+
+  function cfg(ctx) {
+    var d = ctx.donnees;
+    if (!d.cfg) {
+      var c = CONFIGS[Math.floor(Math.random() * CONFIGS.length)];
+      d.cfg = { fluide: c.fluide, Tb: c.Tb, besoin: c.besoin, cop: c.cop, classe: c.classe, prg: FLUIDES[c.fluide].prg, nomClasse: FLUIDES[c.fluide].classe,
+        panne: Math.floor(Math.random() * PANNES.length), hpRel: Math.round((c.hp[0] + Math.random() * (c.hp[1] - c.hp[0])) * 20) / 20 };
+    }
+    return d.cfg;
+  }
+  /* l'etat d'un regime, tel que les verifications le lisent : celui d'une mesure, ou celui du modele */
+  function etatDe(r) {
+    return { pe: r.pe, pc: r.pc, t1: r.t1, t3: r.t3, m: r.m, pel: r.pel, tac: r.tac,
+      pts: r.pts ? r.pts.map(function (q) { return { p: q.p, h: q.h }; }) : [{ p: r.pe, h: r.h1 }, { p: r.pc, h: r.h2 }, { p: r.pc, h: r.h3 }, { p: r.pe, h: r.h3 }] };
+  }
+  /* le banc du sujet, et les regimes du modele : ils servent quand une manipulation a ete passee */
+  function preparer(ctx) {
+    var d = ctx.donnees, c = cfg(ctx);
+    if (d.mod) return;
+    var base = { fluide: c.fluide, usage: "pac", ta: 7, tk: TK, sh: SH, freq: 50, manos: "rel" };
+    B.imposer(base);
+    var r7 = B.regime();
+    B.regler("ta", c.Tb); var rTb = B.regime();
+    B.regler("ta", 7); B.panne(PANNES[c.panne][0], true); var rP = B.regime(); B.panne("aucune", true);
+    d.mod = { s7: etatDe(r7), sTb: etatDe(rTb), sP: etatDe(rP) };
+    base.ta = 12; B.imposer(base);
+  }
+  function etat(ctx, cle) { preparer(ctx); return ctx.donnees[cle] || ctx.donnees.mod[cle]; }
+  function s7(ctx) { return etat(ctx, "s7"); }
+  function sTb(ctx) { return etat(ctx, "sTb"); }
+  function sP(ctx) { return etat(ctx, "sP"); }
+  /* une mesure acceptee devient la reference de la suite : on garde la ligne et l'etat vrai du banc */
+  function prendre(cle) {
+    return function (ctx) { var s = B.snap(); if (s && s.pts) { ctx.donnees[cle] = etatDe(s); ctx.donnees["ref" + cle] = s; } };
+  }
+  /* la mesure de la derniere ligne du tableau : en regime etabli, aux conditions demandees, et rien
+     change depuis ; null tant qu'aucune mesure neuve n'a ete prise.
+     Une manipulation refusee nomme ses erreurs (14 octobre 2026) : le reglage ou le geste a reprendre, avec le
+     document qui le donne, jamais la valeur a trouver. Les conditions d'acceptation n'ont pas change ; une mesure
+     juste prise trop tot, tous les reglages bons, attend sans compter d'essai. */
+  function airExt(ta) { return ta === 7 ? "à +7 °C" : "à la température de base du CCTP (document 1)"; }
+  function erreursBanc(r, ta, panne) {
+    var x = [];
+    if (r.sh !== SH) x.push("la vis du détendeur n'est plus à la surchauffe réglée en usine (document 2)");
+    if (r.freq !== 50) x.push("le variateur du compresseur n'est plus à 50 Hz");
+    if (r.panne !== panne) x.push("le banc n'est pas dans l'état de cette partie : quittez-la et revenez-y, elle le remet en place");
+    return x;
+  }
+  function controle(ctx, ta, panne, anciennes) {
+    var s = B.snap(), r = B.reglage, d = ctx.donnees, dit;
+    if (!s || anciennes.some(function (k) { return d["ref" + k] === s; })) {
+      /* pas de mesure neuve : ce qui manque avant de mesurer, sans compter d'essai */
+      dit = [];
+      if (r.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'est pas " + airExt(ta));
+      if (r.tk !== TK) dit.push("l'air du condenseur, le bureau, n'est pas à la température intérieure du CCTP (document 1)");
+      dit = dit.concat(erreursBanc(r, ta, panne));
+      if (dit.length) return { attente: "Avant de mesurer, à corriger : " + dit.join(" ; ") + "." };
+      return s ? { attente: "La dernière ligne du tableau est la mesure d'une question précédente : régime établi, prenez une mesure neuve, « Une mesure maintenant »." } : null;
+    }
+    var c = B.regime();
+    dit = [];
+    if (!s.pts) dit.push("le banc ne tournait pas pendant la mesure, compresseur à l'arrêt ou pressostat déclenché : mettez-le en marche, puis mesurez de nouveau");
+    if (s.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'était pas " + airExt(ta) + " pendant la mesure");
+    if (s.tk !== TK) dit.push("l'air du condenseur, le bureau, n'était pas à la température intérieure du CCTP (document 1) pendant la mesure");
+    dit = dit.concat(erreursBanc(r, ta, panne));
+    if (s.pts && s.etabli && !dit.length && (Math.abs(s.pe / c.pe - 1) > 0.015 || Math.abs(s.pc / c.pc - 1) > 0.015))
+      dit.push("un réglage a changé depuis la mesure : la dernière ligne du tableau ne correspond plus au banc, reprenez une mesure");
+    if (s.pts && !s.etabli) {
+      /* la mesure est a refaire : ce sont les reglages d'aujourd'hui qui comptent pour la suivante */
+      if (!dit.length && r.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'est plus " + airExt(ta));
+      if (!dit.length && r.tk !== TK) dit.push("l'air du condenseur, le bureau, n'est plus à la température intérieure du CCTP (document 1)");
+      if (!dit.length) return { attente: "Réglages justes. La dernière mesure a été prise avant le régime établi : attendez « Régime établi » sous les instruments, puis « Une mesure maintenant »." };
+      dit.push("la mesure a été prise avant le régime établi");
+    }
+    var lu = "dernière mesure : air extérieur à " + fr(s.ta, 0) + " °C, bureau à " + fr(s.tk, 0) + " °C, surchauffe réglée " + r.sh + " K, variateur " + r.freq + " Hz" +
+      (!s.pts ? ", compresseur à l'arrêt" : s.etabli ? ", régime établi" : ", régime pas encore établi");
+    return { ok: !dit.length, corriger: dit, reponse: dit.length ? lu : "mesure en régime établi, air extérieur à " + fr(ta, 0) + " °C, bureau à 20 °C" };
+  }
+  /* les quatre points de l'etudiant contre ceux de son releve de reception ; un point faux est nomme, avec
+     l'axe sur lequel il s'ecarte, jamais sa place */
+  function trace(ctx) {
+    var E = B.eleve();
+    if (E.some(function (a) { return !a; })) return null;
+    var v = s7(ctx).pts, dit = [];
+    E.forEach(function (a, i) {
+      if (Math.abs(a.p / v[i].p - 1) > 0.07) dit.push("le point " + (i + 1) + " n'est pas sur la bonne pression");
+      else if (Math.abs(a.h - v[i].h) > 5) dit.push("le point " + (i + 1) + " n'est pas à la bonne enthalpie");
+    });
+    return { ok: !dit.length, corriger: dit, reponse: E.map(function (a, i) { return "point " + (i + 1) + " à " + fr(a.p, 2) + " bar et " + fr(a.h, 0) + " kJ/kg"; }).join(" ; ") };
+  }
+  /* ce que l'etudiant a trouve, ou a defaut ce que le banc dit : la suite se calcule sur SES nombres */
+  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees[cle] = juste && isFinite(v) ? v : mesure(ctx); }; }
+  function val(ctx, cle, mesure) { var x = ctx.donnees[cle]; return isFinite(x) ? x : mesure(ctx); }
+  var M = {
+    bp: function (ctx) { return s7(ctx).pe - PATM; },
+    hp: function (ctx) { return s7(ctx).pc - PATM; },
+    sh: function (ctx) { var s = s7(ctx); return s.t1 - B.tsat(s.pe); },
+    qm: function (ctx) { return s7(ctx).m; },
+    qk: function (ctx) { var E = B.eleve(), p = E.every(Boolean) ? E : s7(ctx).pts; return p[1].h - p[2].h; },
+    phi7: function (ctx) { return val(ctx, "qm", M.qm) * val(ctx, "qk", M.qk) * 1000; },
+    cop7: function (ctx) { return val(ctx, "phi7", M.phi7) / s7(ctx).pel; },
+    dT: function (ctx) { return sTb(ctx).tac - TK; },
+    phiTb: function (ctx) { return 0.34 * QV * val(ctx, "dT", M.dT); }
+  };
+  function kW(x) { return fr(x, Math.round(x * 100) % 10 ? 2 : 1); }
+  /* chaque partie remet le banc dans son etat : sans cela, les parties 3 et 4 ouvertes apres la partie 5 gardaient
+     la panne, et leur mesure ne pouvait plus etre acceptee (navigation libre, 14 octobre 2026) */
+  function poserPanne(ctx) {
+    var k = PANNES[cfg(ctx).panne][0];
+    if (B.reglage.panne !== k) B.panne(k, true);
+  }
+  function sansPanne() { if (B.reglage.panne !== "aucune") B.panne("aucune", true); }
+
+  /* ---------- le dossier ---------- */
+  function ligne(a, b) { return el("tr", null, [el("td", { texte: a }), el("td", { html: b })]); }
+  function schema() {
+    var s = svg("svg", { viewBox: "0 0 340 240", "class": "schema", role: "img",
+      "aria-label": "Schéma de principe : compresseur, condenseur dans le bureau, détendeur, évaporateur dehors, manomètres HP et BP, débitmètre, wattmètre, points de mesure 1 à 4" });
+    svg("rect", { x: 92, y: 6, width: 150, height: 74, rx: 6, "class": "s-zone" }, s);
+    svg("text", { x: 98, y: 74, texte: "bureau, 20 °C" }, s);
+    svg("rect", { x: 132, y: 150, width: 160, height: 84, rx: 6, "class": "s-zone" }, s);
+    svg("text", { x: 138, y: 228, texte: "air extérieur" }, s);
+    svg("path", { d: "M60 164 L60 40 L112 40", "class": "s-lig", stroke: "var(--hpv)" }, s);
+    svg("path", { d: "M232 40 L300 40 L300 100", "class": "s-lig", stroke: "var(--hpl)" }, s);
+    svg("path", { d: "M300 126 L300 186 L272 186", "class": "s-lig", stroke: "var(--bpm)" }, s);
+    svg("path", { d: "M152 186 L82 186", "class": "s-lig", stroke: "var(--bpv)" }, s);
+    // les organes
+    svg("rect", { x: 112, y: 28, width: 120, height: 24, rx: 3, "class": "s-org" }, s);
+    svg("text", { x: 172, y: 44, "text-anchor": "middle", "class": "s-nom", texte: "condenseur" }, s);
+    svg("rect", { x: 152, y: 174, width: 120, height: 24, rx: 3, "class": "s-org" }, s);
+    svg("text", { x: 212, y: 190, "text-anchor": "middle", "class": "s-nom", texte: "évaporateur" }, s);
+    svg("circle", { cx: 60, cy: 186, r: 22, "class": "s-org" }, s);
+    svg("path", { d: "M46 200 L60 170 L74 200", fill: "none", stroke: "var(--encre)", "stroke-width": 1.6 }, s);
+    svg("text", { x: 60, y: 224, "text-anchor": "middle", "class": "s-nom", texte: "compresseur" }, s);
+    svg("path", { d: "M290 100 L310 100 L300 113 Z M290 126 L310 126 L300 113 Z", "class": "s-org" }, s);
+    svg("text", { x: 286, y: 117, "text-anchor": "end", "class": "s-nom", texte: "détendeur" }, s);
+    // les instruments
+    svg("line", { x1: 60, y1: 74, x2: 36, y2: 74, stroke: "var(--encre)", "stroke-width": 1.4 }, s);
+    svg("circle", { cx: 24, cy: 74, r: 12, "class": "s-org" }, s);
+    svg("text", { x: 24, y: 78, "text-anchor": "middle", "class": "s-num", texte: "HP" }, s);
+    svg("line", { x1: 112, y1: 186, x2: 112, y2: 206, stroke: "var(--encre)", "stroke-width": 1.4 }, s);
+    svg("circle", { cx: 112, cy: 218, r: 12, "class": "s-org" }, s);
+    svg("text", { x: 112, y: 222, "text-anchor": "middle", "class": "s-num", texte: "BP" }, s);
+    svg("rect", { x: 262, y: 33, width: 24, height: 14, rx: 2, "class": "s-org" }, s);
+    svg("text", { x: 274, y: 24, "text-anchor": "middle", texte: "débitmètre" }, s);
+    svg("rect", { x: 6, y: 124, width: 26, height: 18, rx: 3, "class": "s-org" }, s);
+    svg("text", { x: 19, y: 137, "text-anchor": "middle", "class": "s-num", texte: "W" }, s);
+    svg("line", { x1: 32, y1: 136, x2: 44, y2: 168, stroke: "var(--encre)", "stroke-width": 1.2, "stroke-dasharray": "3 2" }, s);
+    svg("text", { x: 4, y: 118, texte: "wattmètre" }, s);
+    // les points de mesure
+    [[126, 186, "1"], [60, 118, "2"], [246, 40, "3"], [300, 156, "4"]].forEach(function (p) {
+      svg("circle", { cx: p[0], cy: p[1], r: 8.5, "class": "s-pt" }, s);
+      svg("text", { x: p[0], y: p[1] + 3.6, "text-anchor": "middle", "class": "s-num", texte: p[2] }, s);
+    });
+    return s;
+  }
+  function documents(zone, ctx) {
+    preparer(ctx);
+    var c = cfg(ctx);
+    zone.appendChild(el("div", { classe: "pc-docs" }, [
+      el("section", null, [el("h3", { texte: "Document 1 · Extrait du CCTP, lot chauffage" }),
+        el("p", { html: "<b>Art. 4.2 · Production de chaleur.</b> Le bureau d'accueil est chauffé par une pompe à chaleur air-air, unité extérieure en façade nord. " +
+          "Température intérieure : <b>20 °C</b>. Température extérieure de base : <b>" + fr(c.Tb, 0) + " °C</b>." }),
+        el("p", { html: "La pompe à chaleur couvre <b>seule</b>, sans appoint, les déperditions du bureau à la température de base : <b>" + kW(c.besoin) + " kW</b>." }),
+        el("p", { html: "<b>Art. 4.7 · Réception.</b> Relevé contradictoire en régime établi, air extérieur à <b>+7 °C</b>. Le procès-verbal donne les pressions, les températures, le débit de fluide et la puissance absorbée." })]),
+      el("section", null, [el("h3", { texte: "Document 2 · Fiche technique du fabricant" }),
+        el("table", { classe: "fiche-tech" }, [
+          ligne("Fluide frigorigène", "<b>" + c.fluide + "</b>, classe de sécurité <b>" + c.nomClasse + "</b>, PRG <b>" + fr(c.prg, 0) + "</b>"),
+          ligne("Puissance calorifique nominale", "<b>1,9 kW</b>, air extérieur à +7 °C, intérieur à 20 °C"),
+          ligne("COP nominal", "<b>" + fr(c.cop, 1) + "</b>, mêmes conditions, ventilateurs compris"),
+          ligne("Fonctionnement en chauffage", "air extérieur de <b>−15 à +24 °C</b>"),
+          ligne("Surchauffe réglée en usine", "<b>6 K</b>"),
+          ligne("Ventilateur intérieur", "<b>1 300 m³/h</b>")])]),
+      el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 3 · Schéma de principe" }), schema(),
+        el("p", { html: "Points <b>1 à 4</b> : les sondes de température du banc." })]),
+      el("section", null, [el("h3", { texte: "Document 4 · Notice de mise en service, extrait" }),
+        el("p", { html: "Les manomètres HP et BP indiquent des pressions <b>relatives</b> : zéro à l'air libre." }),
+        el("p", { html: "Le débitmètre de la ligne liquide indique des <b>kg/h</b>. Le wattmètre mesure le <b>compresseur seul</b>." }),
+        el("p", { html: "Classes de sécurité : <b>A</b> faible toxicité, <b>B</b> toxicité élevée ; <b>1</b> ininflammable, <b>2L</b> faiblement inflammable, <b>3</b> très inflammable." })]),
+      el("section", { classe: "pc-annexe" }, [el("h3", { texte: "Annexe · formulaire" }),
+        el("p", { html: "p<sub>absolue</sub> = p<sub>relative</sub> + 1,013 bar<br>surchauffe = θ<sub>1</sub> − θ<sub>évaporation</sub><br>sous-refroidissement = θ<sub>condensation</sub> − θ<sub>3</sub><br>" +
+          "Φ = q<sub>m</sub> × (h<sub>2</sub> − h<sub>3</sub>) : q<sub>m</sub> en kg/s, h en kJ/kg, Φ en kW<br>Φ = 0,34 × q<sub>v</sub> × Δθ : q<sub>v</sub> en m³/h, Φ en W<br>COP = Φ ÷ P<sub>absorbée</sub>" })])
+    ]));
+  }
+
+  var simplifie = [].map.call(document.querySelectorAll("#libre details.modele li"), function (li) { return li.innerHTML; });
+  var RELEVE = "Molettes du circuit, compresseur, vitesse du temps, centrale d'acquisition et diagramme sont à vous. Le relevé se lit sur la dernière ligne du tableau.";
+
+  window.u4103 = Sim.parcours("#u41", {
+    dossier: true,                 // le bouton « Le dossier » : les documents de la partie 1, dans toutes les parties
+    code: "U41-03",
+    titre: "La pompe à chaleur du bureau d'accueil",
+    niveaux: ["BTS 2e année"],
+    libre: "#libre",
+    paillasse: ["#carteCircuit", "#carteMesure", "#releve", "#carteDiagramme"],
+    u41: { problematique: "La pompe à chaleur posée chauffe-t-elle seule le bureau à la température extérieure de base, comme l'exige le CCTP ?", duree: "deux heures" },
+    commande: {
+      client: "Réception du lot chauffage · le bureau d'accueil du stade",
+      texte: "<p>La commune a fait poser une <b>pompe à chaleur air-air</b> dans le bureau d'accueil du stade. Avant de signer le procès-verbal de réception, le maître d'œuvre vous confie la mise en service : un banc instrumenté reproduit la machine, avec ses manomètres, ses sondes, son débitmètre et son wattmètre.</p>" +
+        "<p>Le banc se lit <b>en pompe à chaleur</b> : l'évaporateur prend sa chaleur à l'air extérieur, le condenseur la rend au bureau.</p>"
+    },
+    simplifie: simplifie,
+    phases: [
+      {
+        competence: "C12-1", titre: "Le dossier de la pompe à chaleur",
+        recit: "Avant de toucher au banc, on lit le dossier. Quatre documents et une annexe : chaque information a sa place, et un seul document fait foi.",
+        scene: documents,
+        questions: [
+          { type: "classer", lib: "Dans quel document trouver chaque information ?",
+            items: ["l'unité du débitmètre", "la puissance exigée à la température de base", "l'emplacement des sondes de température", "le fluide frigorigène de la machine"],
+            categories: ["document 1, CCTP", "document 2, fiche technique", "document 3, schéma", "document 4, notice"], bonnes: [3, 0, 2, 1],
+            methode: "Le CCTP dit ce qui est exigé, la fiche ce que le fabricant annonce, le schéma où sont les organes et les mesures, la notice comment mesurer." },
+          { type: "choix", lib: "La fiche du fabricant et le CCTP ne disent pas la même chose. Lequel fait foi pour la réception ?",
+            options: ["le CCTP : il fixe ce que le maître d'ouvrage a commandé", "la fiche technique : le fabricant connaît sa machine", "la notice : elle décrit la mise en service", "le plus récent des documents"], bonne: 0,
+            methode: "Une réception vérifie le marché : ce qui a été commandé, pas ce qui a été annoncé." },
+          { type: "nombre", lib: "Quelle puissance la pompe à chaleur doit-elle fournir seule à la température de base ?", unite: "kW", competence: "C12-2",
+            attendu: function (ctx) { return cfg(ctx).besoin; }, tolerance: 0, toleranceAbsolue: 0.001,
+            methode: "Le document qui fixe les exigences du marché, à l'article de la production de chaleur." },
+          { type: "choix", lib: "Que dit la classe de sécurité du fluide de cette machine ?", competence: "C12-2",
+            options: ["A1 : faible toxicité, ininflammable", "A2L : faible toxicité, faiblement inflammable", "A3 : faible toxicité, très inflammable", "B2L : toxicité élevée, faiblement inflammable"],
+            bonne: function (ctx) { return cfg(ctx).classe; },
+            methode: "La classe est sur la fiche technique ; la notice dit ce que veulent dire la lettre et le chiffre." },
+          { type: "classer", lib: "Sur le schéma de principe, quel est l'état du fluide en chaque point de mesure ?", competence: "C4-3",
+            items: ["Point 2", "Point 4", "Point 1", "Point 3"],
+            categories: ["vapeur, basse pression", "vapeur, haute pression", "liquide, haute pression", "mélange liquide et vapeur, basse pression"], bonnes: [1, 3, 0, 2],
+            methode: "Suivez le fluide : le compresseur aspire de la vapeur et la refoule ; le condenseur rend un liquide ; le détendeur fait chuter la pression, et une part du liquide se vaporise." },
+          { type: "classer", lib: "Quel est le rôle de chaque organe ?", competence: "C2-1",
+            items: ["le compresseur", "le condenseur", "le détendeur", "l'évaporateur"],
+            categories: ["prend la chaleur de l'air extérieur : le fluide s'y vaporise", "élève la pression de la vapeur : il reçoit le travail électrique", "cède la chaleur au bureau : le fluide s'y condense", "abaisse la pression du liquide"],
+            bonnes: [1, 2, 3, 0],
+            methode: "Une pompe à chaleur prend la chaleur dehors, à basse pression, et la rend dans le bureau, à haute pression." }
+        ],
+        bravo: "Le dossier est lu : une exigence, une machine, un schéma, une façon de mesurer."
+      },
+      {
+        competence: "C2-2", titre: "Le principe et le protocole de réception",
+        recit: "Le banc reproduit la machine posée, avec ses instruments. Avant de le mettre en marche, vous dites d'où vient la chaleur du bureau et ce qu'il faudra relever.",
+        consigne: function (ctx) { return "Le circuit du banc, tel qu'il est branché : le compresseur et les molettes attendront la partie 3. Sur une autre PAC du chantier, le manomètre HP indiquait <b>" + fr(cfg(ctx).hpRel, 2) + " bar</b>."; },
+        paillasse: ["#carteCircuit"],
+        questions: [
+          { type: "choix", lib: "La chaleur rendue au bureau, comparée à l'électricité absorbée par le compresseur, est :",
+            options: ["plus grande : elle réunit la chaleur prise à l'air extérieur et le travail du compresseur", "égale : l'énergie se conserve, rien ne se crée",
+              "plus petite : aucune machine ne rend plus qu'elle ne reçoit", "plus grande : le compresseur fabrique de la chaleur en comprimant"], bonne: 0,
+            methode: "Faites le compte de ce que le fluide reçoit sur un tour de circuit, et de ce qu'il cède." },
+          { type: "classer", lib: "Sur un tour du circuit, que fait le fluide de chaque énergie ?",
+            items: ["le travail du compresseur", "la chaleur échangée dans le détendeur", "la chaleur cédée à l'air du bureau", "la chaleur prise à l'air extérieur"],
+            categories: ["il la reçoit", "il la cède", "aucun échange"], bonnes: [0, 2, 1, 0],
+            methode: "Le détendeur est court et isolé : la pression y chute sans chaleur ni travail échangés." },
+          { type: "multi", lib: "Pour placer les quatre points du cycle sur le diagramme, quelles lectures du banc faut-il ?", competence: "C4-3",
+            options: ["la basse pression", "la haute pression", "θ<sub>1</sub>, à l'aspiration", "θ<sub>2</sub>, au refoulement", "θ<sub>3</sub>, en sortie du condenseur",
+              "θ<sub>4</sub>, en sortie du détendeur", "le débit du fluide", "la puissance du wattmètre"],
+            bonne: [0, 1, 2, 3, 4],
+            methode: "Un point se place avec sa pression et une seconde grandeur. Dans le mélange, la température est celle du palier : elle ne dit pas où est le point." },
+          { type: "nombre", lib: "Cette haute pression de l'autre PAC, notée sous le circuit : quelle pression porter sur le diagramme ?", unite: "bar", competence: "C12-2",
+            attendu: function (ctx) { return cfg(ctx).hpRel + PATM; }, tolerance: 0, toleranceAbsolue: 0.02,
+            methode: "Le diagramme demande des pressions absolues ; la notice dit ce qu'indiquent les manomètres." },
+          { type: "appel", numero: 1, competence: "C2-3",
+            lib: "Expliquez au professeur, à l'oral, comment la pompe à chaleur chauffe le bureau, puis votre protocole de relevé.",
+            attendus: ["le trajet du fluide : il se vaporise dehors, il est comprimé, il se condense dans le bureau, il se détend",
+              "d'où vient la chaleur rendue : l'air extérieur et le travail du compresseur",
+              "le relevé en régime établi, à +7 °C dehors et 20 °C dans le bureau, comme le demande le CCTP",
+              "les lectures du diagramme, et la conversion des pressions relatives en absolues",
+              "un vocabulaire juste : évaporation, condensation, surchauffe, sous-refroidissement"] }
+        ],
+        bravo: "Le principe est dit, le protocole est prêt."
+      },
+      {
+        competence: "C4-3", titre: "Le relevé de réception et le cycle",
+        recit: "Le banc est réglé comme le jour de la pose : 12 °C dehors. Le CCTP demande le relevé à +7 °C. Vous menez l'essai, vous relevez, puis vous tracez le cycle.",
+        consigne: RELEVE,
+        paillasse: true, large: true, surOuvrir: sansPanne,
+        questions: [
+          { type: "appel", numero: 2, competence: "C4-3",
+            lib: "Appelez quand votre mesure est prise : vous placez devant le professeur les points 1, 3 et 4 du cycle, en disant ce que vous lisez.",
+            attendus: ["les pressions converties en absolu avant d'être portées", "le point 1 sur l'isobare de la basse pression, à la température θ<sub>1</sub>, à droite de la cloche",
+              "le point 3 sur l'isobare de la haute pression, à θ<sub>3</sub>, dans le liquide", "le point 4 à la verticale du point 3, dans la cloche : la détente garde l'enthalpie",
+              "le diagramme lu sans hésiter : axes, unités, isothermes"] },
+          { type: "action", lib: "Faites le relevé de réception : air extérieur à +7 °C, régime établi, puis « Une mesure maintenant ».", competence: "C12-2",
+            aide: "La molette « air de l'évaporateur » règle l'air extérieur ; le compresseur se touche pour démarrer. « Régime établi » s'affiche sous les instruments.",
+            verifier: function (ctx) { return controle(ctx, 7, "aucune", []); }, apres: prendre("s7"),
+            methode: "L'air extérieur à 7 °C sur sa molette, le bureau à 20 °C, la surchauffe et le variateur à leur réglage ; le compresseur en marche ; le régime établi ; puis une mesure." },
+          { type: "nombre", lib: "Relevez la basse pression, telle que l'indique le manomètre BP.", unite: "bar", competence: "C12-2",
+            attendu: function (ctx) { return s7(ctx).pe - PATM; }, tolerance: 0, toleranceAbsolue: 0.1, fini: garde("bp", M.bp),
+            methode: "La colonne BP de la dernière ligne du tableau : la pression que le manomètre indique." },
+          { type: "nombre", lib: "Relevez la haute pression, telle que l'indique le manomètre HP.", unite: "bar", competence: "C12-2",
+            attendu: function (ctx) { return s7(ctx).pc - PATM; }, tolerance: 0, toleranceAbsolue: 0.1, fini: garde("hp", M.hp),
+            methode: "La colonne HP de la dernière ligne du tableau." },
+          { type: "nombre", lib: "Calculez la surchauffe à l'aspiration.", unite: "K", competence: "C2-3",
+            attendu: function (ctx) { return s7(ctx).t1 - B.tsat(val(ctx, "bp", M.bp) + PATM); }, tolerance: 0, toleranceAbsolue: 1, fini: garde("sh", M.sh),
+            methode: "La température d'évaporation se lit sur le diagramme, au palier de la basse pression absolue ; on la retranche de θ<sub>1</sub>." },
+          { type: "nombre", lib: "Calculez le sous-refroidissement en sortie du condenseur.", unite: "K", competence: "C2-3",
+            attendu: function (ctx) { return B.tsat(val(ctx, "hp", M.hp) + PATM) - s7(ctx).t3; }, tolerance: 0, toleranceAbsolue: 1,
+            methode: "La température de condensation se lit au palier de la haute pression absolue ; on en retranche θ<sub>3</sub>." },
+          { type: "action", lib: "Placez les quatre points du cycle sur le diagramme.",
+            aide: "Choisissez le point sous le diagramme, puis touchez le diagramme à sa place. Le pointeur lit la pression, l'enthalpie et la température.",
+            verifier: trace,
+            methode: "Pressions absolues. Point 1 : basse pression, à θ<sub>1</sub>. Point 2 : haute pression, à θ<sub>2</sub>. Point 3 : haute pression, à θ<sub>3</sub>, dans le liquide. Point 4 : à la verticale du point 3, sur la basse pression." },
+          { type: "nombre", lib: "Convertissez le débit du débitmètre en kilogrammes par seconde.", unite: "kg/s", competence: "C12-2",
+            attendu: function (ctx) { return s7(ctx).m; }, tolerance: 0.05, fini: garde("qm", M.qm),
+            methode: "Le débitmètre lit des kilogrammes par heure ; une heure fait 3 600 secondes." }
+        ],
+        bravo: "Le relevé est fait et le cycle tracé. Reste à savoir ce qu'il vaut."
+      },
+      {
+        competence: "C1-2", titre: "Le bilan à +7 °C, puis à la température de base",
+        recit: "À +7 °C, la machine fait ce que dit sa fiche. Le CCTP, lui, parle du jour le plus froid de l'hiver.",
+        consigne: "Vos points sont sous le diagramme, avec leur enthalpie. Pour l'essai à la température de base, l'air extérieur se règle sur sa molette ; l'air à la sortie du condenseur est une colonne du tableau, à montrer.",
+        paillasse: true, large: true, surOuvrir: sansPanne,
+        questions: [
+          { type: "nombre", lib: "Calculez la chaleur cédée au condenseur par kilogramme de fluide, q<sub>k</sub> = h<sub>2</sub> − h<sub>3</sub>.", unite: "kJ/kg", competence: "C2-3",
+            attendu: M.qk, tolerance: 0.02, toleranceAbsolue: 2, fini: garde("qk", M.qk),
+            methode: "Les enthalpies de vos points 2 et 3, lues sur l'axe du bas du diagramme." },
+          { type: "nombre", lib: "Calculez la puissance rendue au bureau, Φ = q<sub>m</sub> × q<sub>k</sub>.", unite: "W", competence: "C2-3",
+            attendu: M.phi7, tolerance: 0.02, fini: garde("phi7", M.phi7),
+            methode: "Des kg/s multipliés par des kJ/kg donnent des kW ; × 1 000 pour des watts." },
+          { type: "nombre", lib: "Calculez le COP de la pompe à chaleur, avec la puissance lue au wattmètre.", competence: "C2-3",
+            attendu: M.cop7, tolerance: 0.04, fini: garde("cop7", M.cop7),
+            methode: "Ce qui est utile, la chaleur rendue, divisé par ce qui est payé, l'électricité : les deux dans la même unité." },
+          { type: "choix", lib: "Le COP mesuré au banc dépasse celui de la fiche technique. D'où vient l'écart ?", competence: "C2-3",
+            options: ["le wattmètre du banc ne mesure que le compresseur ; la fiche compte aussi les ventilateurs", "la fiche se trompe : un fabricant annonce toujours trop peu",
+              "le banc chauffe mieux que la machine posée", "un COP plus grand que 1 signale une erreur de mesure"], bonne: 0,
+            methode: "Comparez ce que chacun compte dans la puissance absorbée : la notice et la fiche le disent." },
+          { type: "choix", lib: "À +7 °C, la puissance mesurée dépasse le besoin du CCTP. Peut-on signer la réception ?",
+            options: ["pas encore : le besoin du CCTP est fixé à la température de base, et une PAC rend moins quand il fait plus froid", "oui : à +7 °C, la PAC dépasse déjà le besoin",
+              "oui : la fiche technique annonce 1,9 kW", "non : un COP aussi élevé est suspect"], bonne: 0,
+            methode: "Relisez l'exigence du CCTP : à quelle température extérieure est-elle fixée ?" },
+          { type: "action", lib: "Faites l'essai à la température de base du CCTP : air extérieur réglé, régime établi, une mesure.", competence: "C12-2",
+            aide: "Seul l'air extérieur change ; le bureau reste à 20 °C.",
+            verifier: function (ctx) { return controle(ctx, cfg(ctx).Tb, "aucune", ["s7"]); }, apres: prendre("sTb"),
+            methode: "La température de base est dans le CCTP. Molette de l'air extérieur, régime établi, puis une mesure." },
+          { type: "nombre", lib: "Relevez l'échauffement de l'air au condenseur, Δθ = θ<sub>sortie</sub> − θ<sub>entrée</sub>.", unite: "K", competence: "C12-2",
+            attendu: M.dT, tolerance: 0, toleranceAbsolue: 0.2, fini: garde("dT", M.dT),
+            methode: "L'air entre au condenseur à la température du bureau ; il en sort à celle de l'afficheur « Air, sortie condenseur », qui est aussi une colonne du tableau." },
+          { type: "nombre", lib: "Calculez la puissance rendue au bureau à la température de base, par le bilan côté air : Φ = 0,34 × q<sub>v</sub> × Δθ.", unite: "W", competence: "C2-3",
+            attendu: M.phiTb, tolerance: 0.02, fini: garde("phiTb", M.phiTb),
+            methode: "q<sub>v</sub> : le ventilateur intérieur, sur la fiche, en m³/h. Le résultat sort en watts." },
+          { type: "choix", lib: "La pompe à chaleur couvre-t-elle seule le besoin du bureau à la température de base ?", options: ["oui", "non"],
+            bonne: function (ctx) { return val(ctx, "phiTb", M.phiTb) >= cfg(ctx).besoin * 1000 ? 0 : 1; },
+            methode: "Comparez la puissance trouvée au besoin du CCTP, dans la même unité." }
+        ],
+        bravo: "La fiche disait vrai à +7 °C. Le CCTP parlait d'un autre jour."
+      },
+      {
+        competence: "C2-3", titre: "Deux mois plus tard : le bureau chauffe mal",
+        recit: "Le gardien appelle : le bureau chauffe mal. Le technicien rebranche le banc dans les conditions de la réception, +7 °C dehors et 20 °C dans le bureau. Votre relevé de réception est la référence.",
+        consigne: "Le banc porte la panne. Remettez l'air extérieur à +7 °C, attendez le régime établi, puis mesurez. Le diagramme donne les températures de saturation.",
+        paillasse: true, large: true, surOuvrir: poserPanne,
+        questions: [
+          { type: "action", lib: "Relevez le banc en panne : air extérieur à +7 °C, régime établi, une mesure.", competence: "C12-2",
+            aide: "La mesure de la réception est votre point de comparaison : mêmes conditions, même méthode.",
+            verifier: function (ctx) { return controle(ctx, 7, PANNES[cfg(ctx).panne][0], ["s7", "sTb"]); }, apres: prendre("sP"),
+            methode: "L'air extérieur à 7 °C, le bureau à 20 °C, le compresseur en marche, le régime établi, puis une mesure." },
+          { type: "nombre", lib: "Calculez la surchauffe du banc en panne.", unite: "K",
+            attendu: function (ctx) { var s = sP(ctx); return s.t1 - B.tsat(s.pe); }, tolerance: 0, toleranceAbsolue: 1.5,
+            methode: "Comme à la réception : la pression absolue, le palier lu au diagramme, puis θ<sub>1</sub>." },
+          { type: "nombre", lib: "Calculez le sous-refroidissement du banc en panne.", unite: "K",
+            attendu: function (ctx) { var s = sP(ctx); return B.tsat(s.pc) - s.t3; }, tolerance: 0, toleranceAbsolue: 1.5,
+            methode: "Comme à la réception : le palier de la haute pression absolue, moins θ<sub>3</sub>." },
+          { type: "choix", lib: "Quelle est la panne ?", competence: "C2-1",
+            options: PANNES.map(function (p) { return p[1]; }), bonne: function (ctx) { return cfg(ctx).panne; },
+            methode: "Comparez au relevé de réception la basse et la haute pression, la surchauffe, le sous-refroidissement et le wattmètre : chaque panne a sa signature." },
+          { type: "choix", lib: "Le manque de fluide et le détendeur trop fermé donnent tous deux une forte surchauffe. Quelle mesure les sépare ?",
+            options: ["le sous-refroidissement : presque nul s'il manque du fluide, fort si le détendeur retient le liquide", "la haute pression : elle monte quand il manque du fluide",
+              "le wattmètre : il s'annule quand il manque du fluide", "la basse pression : elle ne baisse qu'avec le détendeur"], bonne: 0,
+            methode: "Où est le liquide dans chaque cas : il manque partout, ou il s'accumule avant le détendeur ?" }
+        ],
+        bravo: "La panne est nommée, et vous savez sur quelles mesures."
+      },
+      {
+        competence: "C1-2", conclusion: true, titre: "Le procès-verbal de réception",
+        recit: "Le maître d'ouvrage lira le procès-verbal, pas vos calculs. Chaque phrase doit être juste, avec ses nombres et ses unités.",
+        scene: function (zone) {
+          zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", null, [el("h3", { texte: "Document 5 · Ce que dit un procès-verbal de réception" }),
+            el("p", { html: "L'installation reçue ; <b>les conditions de l'essai</b> ; les mesures, <b>avec leurs unités</b> ; la conformité au CCTP, exigence par exigence ; " +
+              "<b>les réserves</b>, s'il y en a, et ce qui les lèvera ; les limites de l'essai." })])]));
+        },
+        questions: [
+          { type: "multi", essais: 2, lib: "Gardez les phrases justes du procès-verbal.",
+            options: function (ctx) {
+              var c = cfg(ctx), p7 = val(ctx, "phi7", M.phi7) / 1000, cop = val(ctx, "cop7", M.cop7), pT = val(ctx, "phiTb", M.phiTb) / 1000, oui = pT >= c.besoin;
+              var tb = fr(c.Tb, 0) + " °C", b = kW(c.besoin) + " kW", rend = "environ " + fr(pT, 2) + " kW";
+              return [
+                "À +7 °C dehors, la pompe à chaleur rend environ " + fr(p7, 2) + " kW au bureau, avec un COP de " + fr(cop, 1) + " au wattmètre du compresseur.",
+                "Le COP dépasse 1 : la machine a un rendement supérieur à 100 %, signe d'une erreur de mesure.",
+                oui ? "À " + tb + ", elle rend encore " + rend + " : elle couvre seule le besoin de " + b + " fixé par le CCTP."
+                  : "À " + tb + ", elle ne rend plus qu'" + rend + " : elle ne couvre pas seule le besoin de " + b + " fixé par le CCTP ; il faut un appoint.",
+                oui ? "À " + tb + ", elle ne rend plus qu'" + rend + " : elle ne couvre pas seule le besoin de " + b + " ; il faut un appoint."
+                  : "À " + tb + ", elle rend encore " + rend + " : elle couvre seule le besoin de " + b + ".",
+                "À la réception, la surchauffe valait environ " + fr(val(ctx, "sh", M.sh), 0) + " K : le détendeur tenait son réglage d'usine.",
+                "La fiche annonce 1,9 kW : la pompe à chaleur couvre donc le besoin du CCTP par tous les temps."
+              ];
+            },
+            bonne: [0, 2, 4],
+            methode: "Une phrase de procès-verbal dit ce qui a été mesuré, dans quelles conditions, avec son unité. Un COP n'est pas un rendement." },
+          { type: "choix", lib: "Pourquoi la pompe à chaleur rend-elle moins de chaleur à la température de base ?", competence: "C2-3",
+            options: ["la basse pression baisse : la vapeur aspirée est moins dense, et le compresseur en aspire moins de kilogrammes à chaque tour", "le fluide gèle dans l'évaporateur",
+              "le compresseur tourne moins vite quand il fait froid", "le bureau, plus froid, prend moins de chaleur au condenseur"], bonne: 0,
+            methode: "Le compresseur aspire le même volume à chaque tour : que devient la masse de ce volume quand la basse pression baisse ?" },
+          { type: "choix", lib: "Une limite de l'essai, à écrire au procès-verbal :",
+            options: ["le banc ne givre pas : par temps froid et humide, une vraie PAC dégivre, et rend moins encore", "le banc mesure trop précisément pour être cru",
+              "l'essai à +7 °C vaut pour tout l'hiver", "le fluide du banc n'est pas celui de la machine"], bonne: 0,
+            methode: "Un vrai hiver est humide : que devient l'eau de l'air sur un évaporateur plus froid que 0 °C ?" }
+        ],
+        bravo: "Le procès-verbal dit ce qui a été mesuré, et ce que l'essai ne dit pas."
+      }
+    ],
+    fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."
+  });
+})();
+</script>
 <footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
 </div>
+<script>if (window.Sim && Sim.calculatrice) Sim.calculatrice();</script>
 </body>
 </html>

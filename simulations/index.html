@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light" style="color-scheme:light">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Les simulations du BTS</title>
-<meta name="description" content="Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chaque simulation s&#x27;ouvre sans réseau.">
+<meta name="description" content="Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chacune a aussi son TD sur simulation, au format de l&#x27;U41 : un dossier, des essais, un fichier noté sur les compétences de l&#x27;épreuve. Chaque simulation s&#x27;ouvre sans réseau.">
 <meta name="etiquette" content="Par thème">
 <meta name="porte-compte" content="5 simulations">
 <style>
@@ -96,6 +96,7 @@ table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
 table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
 table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
 table.releve tr.vide td{color:var(--encre2);font-style:italic}
+table.releve td.jour-heure{white-space:nowrap}
 .graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
 .graphe canvas{display:block;width:100%;height:auto}
 
@@ -154,6 +155,316 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
 .molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
 
+/* Parcours : une simulation menee comme un projet, cinq phases et un livrable (CAP, seconde) */
+.pc-tete{position:sticky;top:0;z-index:5;background:var(--fond);padding:8px 0 10px;margin:-6px 0 12px;
+  border-bottom:1px solid var(--trait2);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.pc-chemin{list-style:none;margin:0;padding:0;display:flex;align-items:flex-start;gap:0;flex:1 1 420px;min-width:0}
+.pc-chemin li{flex:1 1 0;display:flex;justify-content:center;position:relative}
+.pc-chemin li+li::before{content:"";position:absolute;top:21px;right:calc(50% + 22px);left:calc(-50% + 22px);height:2px;background:var(--trait)}
+.pc-noeud{font:inherit;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--encre2);cursor:pointer;min-width:44px;min-height:44px}
+.pc-noeud:disabled{cursor:default;opacity:.55}
+.pc-rond{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:1.05rem;
+  border:2px solid var(--trait);background:var(--carte);color:var(--encre2);transition:transform .2s,background .2s}
+.pc-comp{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.pc-etoiles{font-size:.78rem;color:var(--tiede);min-height:1.1em;letter-spacing:1px}
+.pc-noeud.pc-fait .pc-rond{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-noeud.pc-ici .pc-rond{border-color:var(--encre);box-shadow:0 0 0 4px var(--accent-doux);transform:scale(1.06);color:var(--encre)}
+.pc-noeud.pc-fait.pc-ici .pc-rond{color:#fff}
+.pc-noeud.pc-ici .pc-comp{color:var(--encre)}
+.pc-drapeau .pc-rond{font-size:1.15rem}
+.pc-info{display:flex;gap:12px;align-items:center;font-size:.9rem;font-weight:650;color:var(--encre2)}
+.pc-score{color:var(--tiede);font-variant-numeric:tabular-nums}
+.pc-niveau:empty,.pc-temps:empty{display:none}
+.pc-niveau{border:1px solid var(--trait);border-radius:999px;padding:2px 10px;font-size:.8rem}
+.pc-ecran[hidden]{display:none}
+.pc-surtitre{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.pc-phase-tete{margin:4px 0 14px}
+.pc-phase-tete h2{font-size:clamp(1.25rem,3.4vw,1.6rem);font-weight:750}
+.pc-bulle{position:relative;margin:10px 0 0;padding:10px 14px;background:var(--carte);border:1px solid var(--trait2);
+  border-radius:var(--r);border-left:4px solid var(--accent);max-width:70ch;color:var(--encre)}
+.pc-commande .pc-client{font-weight:700;margin:0 0 6px}
+.pc-texte p{margin:0 0 8px}
+.pc-livrable{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--trait)}
+.pc-illus:empty{display:none}
+.pc-plan{margin:0 0 12px;padding-left:1.2em}
+.pc-plan li{margin:4px 0}
+.pc-choix-niveau{margin:6px 0 14px}
+.pc-partir{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-questions h2{font-size:1rem}
+.pc-q{border:1px solid var(--trait);border-radius:var(--r);padding:12px;margin-bottom:12px;background:var(--carte2);transition:border-color .2s,background .2s}
+.pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
+.pc-q[data-etat="faux"]{border-color:var(--faux)}
+.pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+.pc-q-lib{margin:0 0 8px;font-weight:600}
+.pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
+  font-size:.8rem;margin-right:.5em;vertical-align:.1em}
+.pc-q[data-etat="juste"] .pc-q-num{background:var(--juste)}
+.pc-q-champ{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.pc-q-champ input,.pc-remise input{font:inherit;font-size:1.05rem;width:9em;min-height:44px;padding:7px 10px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-remise input{width:min(100%,18em)}
+.pc-unite{font-weight:600;color:var(--encre2)}
+.pc-options{display:flex;flex-wrap:wrap;gap:6px}
+.pc-option{font:inherit;font-size:.92rem;font-weight:600;min-height:44px;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;text-align:left}
+.pc-option[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-option:disabled{cursor:default}
+.pc-classer{display:flex;flex-direction:column;gap:8px;width:100%}
+.pc-classer-ligne{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--trait2);padding-bottom:6px}
+.pc-classer-item{font-weight:600}
+.pc-aide{margin:0;font-size:.9rem;color:var(--encre2)}
+.pc-retour{margin-top:8px;font-weight:650;min-height:1.4em}
+.pc-retour.juste{color:var(--juste)}
+.pc-retour.faux{color:var(--faux)}
+.pc-retour .methode{font-weight:400;color:var(--encre2)}
+.pc-q-bravo{font-weight:400;color:var(--encre)}
+.pc-q .bouton{min-height:44px}
+.pc-pied{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:flex-end;margin:4px 0 20px}
+.pc-bravo{margin:0;flex:1 1 280px;color:var(--juste);font-weight:650}
+.pc-suite{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-vers-fin{min-height:44px;margin-right:auto;color:var(--encre2)}
+.pc-apercu{width:100%;margin-top:10px;font-family:ui-monospace,Consolas,monospace;font-size:.8rem;border:1px solid var(--trait);
+  border-radius:var(--r);background:var(--carte2);color:var(--encre);padding:8px}
+.pc-recap td,.pc-recap th{text-align:left}
+.pc-score-final{font-size:1.2rem;margin:12px 0 4px;color:var(--tiede)}
+.pc-grade{margin:0;font-weight:650}
+.pc-objet{cursor:grab;touch-action:none}
+.pc-objet:active{cursor:grabbing}
+.pc-cible{fill:var(--accent);fill-opacity:.07;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+@media (max-width:620px){
+  .pc-rond{width:36px;height:36px;font-size:.95rem}
+  .pc-chemin li+li::before{top:18px;right:calc(50% + 19px);left:calc(-50% + 19px)}
+  .pc-comp{font-size:.62rem;letter-spacing:.04em}
+}
+.plan.pc-large{grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr)}
+@media (max-width:820px){.plan.pc-large{grid-template-columns:1fr}}
+/* Pendant le parcours, la page laisse la place a la scene : le chapeau se replie */
+.pc-en-cours .tete{padding-bottom:6px;margin-bottom:6px}
+.pc-en-cours .tete .chapeau{display:none}
+.pc-en-cours .tete h1{font-size:1.3rem;margin:2px 0 0}
+@media print{.pc-tete,.pc-remise,.pc-q .rangee{display:none}}
+/* Entrainement au CCF (premiere, terminale) : deux modes, la paillasse empruntee, les appels professeur */
+.pc [hidden],.pc-voile[hidden],.pc-modes [hidden]{display:none!important}
+.pc-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.pc-mode{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:12px 14px;min-height:56px;cursor:pointer;
+  border-radius:var(--r);border:1.5px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-mode b{font-size:1rem}
+.pc-mode span{font-size:.85rem;color:var(--encre2)}
+.pc-mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.pc-en-cours .pc-modes{display:none}
+@media (max-width:480px){.pc-modes{grid-template-columns:1fr}}
+.pc-problematique{margin:12px 0 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--carte2);border-radius:0 var(--r) var(--r) 0}
+.pc-grille{list-style:none;margin:10px 0;padding:0;border-top:1px solid var(--trait2)}
+.pc-grille li{padding:7px 0;border-bottom:1px solid var(--trait2)}
+.pc-grille-ligne{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.pc-grille-ou{font-size:.85rem;font-weight:650;color:var(--accent);text-align:right}
+.pc-grille-cap{font-size:.84rem;color:var(--encre2);margin-top:2px}
+.pc-appel-annonce{display:flex;gap:8px;align-items:flex-start}
+.pc-main{font-size:1.25rem;line-height:1;margin-right:.35em}
+.pc-q.pc-appel{border-style:dashed;border-color:var(--accent);background:var(--carte)}
+.pc-q[data-etat="attente"]{border-color:var(--tiede);border-style:solid}
+.pc-badge-appel{font:inherit;font-weight:700;font-size:.85rem;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:2px solid var(--tiede);background:var(--carte);color:var(--encre);animation:pc-pulse 1.6s ease-in-out infinite}
+@keyframes pc-pulse{50%{box-shadow:0 0 0 5px var(--accent-doux)}}
+.pc-methode{margin:6px 0 0;font-size:.92rem;color:var(--encre2);border-left:3px solid var(--trait);padding-left:8px}
+.pc-aide-btn{color:var(--encre2)}
+.pc-autonomie{margin:10px 0 0}
+.pc-voile{position:fixed;inset:0;z-index:30;background:rgba(20,20,22,.5);display:grid;place-items:center;padding:16px}
+.pc-prof{width:min(100%,600px);max-height:90vh;overflow:auto;margin:0}
+.pc-prof-liste .pc-q{margin-top:10px}
+.pc-attendus{margin:0 0 10px;padding-left:1.2em;font-size:.92rem}
+.pc-cotes .pc-option{flex:1 1 9em}
+.pc-prof-pied{justify-content:flex-end;margin-top:10px}
+/* une partie qui emprunte la paillasse : la simulation a gauche, les questions a droite, qui restent en vue */
+.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr)}
+.pc-paillasse .plan{grid-template-columns:1fr}
+.pc-paillasse > .carte,.pc-paillasse .plan > .carte{background:var(--carte2);box-shadow:none;margin-bottom:12px}
+/* la scene reste a l'ecran pendant qu'on fait defiler les questions (demande de l'utilisateur, 14 octobre 2026) :
+   sur tablette et ordinateur, la colonne de gauche se fixe sous la tete du parcours et defile seule si elle est plus haute */
+@media (min-width:821px){.pc-ecran > .plan > .pc-scene{position:sticky;top:calc(var(--pc-haut,88px) + 4px);max-height:calc(100vh - var(--pc-haut,88px) - 16px);overflow:auto;overscroll-behavior:contain}}
+@media (max-width:820px){.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1fr)}.pc-avec-paillasse > .pc-questions{position:static;max-height:none}}
+/* une colonne bornee ne grandit pas a la taille de son contenu : ce qui est large defile dans son cadre */
+.pc-avec-paillasse > *,.pc-paillasse,.pc-paillasse > *{min-width:0}
+.pc-paillasse .releve-zone{grid-template-columns:minmax(0,1fr)}
+.pc-paillasse .releve-zone > div,.pc-paillasse table.releve{overflow-x:auto}
+/* les documents d'un sujet : fiches, consignes, annexe */
+.pc-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.pc-docs section{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.pc-docs h3{font-size:.95rem;margin:0 0 6px}
+.pc-docs p{margin:0 0 6px;font-size:.93rem}
+.pc-docs table{width:100%}
+.pc-docs td{font-size:.88rem;vertical-align:top}
+.pc-docs .pc-annexe{border-style:dashed}
+.pc-paillasse .num{display:none}
+/* sur un telephone, la paillasse perd une epaisseur de marge, et un afficheur trop long passe a la ligne au lieu de deborder */
+@media (max-width:620px){
+  .pc-avec-paillasse > .pc-scene{padding:10px}
+  .pc-paillasse > .carte,.pc-paillasse .plan > .carte{padding:12px}
+  .afficheur .val{white-space:normal;overflow-wrap:anywhere}
+}
+/* la calculatrice des sites : son bouton dans la tete du parcours ; le bouton flottant s'efface pendant un parcours */
+.pc-calc{font:inherit;font-size:.85rem;font-weight:650;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-calc[aria-pressed="true"]{border-color:var(--encre);font-weight:750}
+.pc-en-cours .outils-flottants,.pc-visible .outils-flottants{display:none}
+.calc-titre{font-weight:700}
+/* le classement compact des epreuves : l'element a gauche, sa liste a droite */
+.pc-classer-ligne.pc-compact{flex-wrap:nowrap}
+.pc-classer-choix{font:inherit;font-size:.95rem;min-height:44px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--trait);
+  background:var(--carte);color:var(--encre);max-width:60%;flex:0 1 auto}
+@media (max-width:480px){.pc-classer-ligne.pc-compact{flex-wrap:wrap}.pc-classer-choix{max-width:100%;width:100%}}
+/* le dossier, a gauche ; la calculatrice reste a droite */
+.pc-dossier-panneau{position:fixed;top:0;left:0;bottom:0;width:min(100%,460px);z-index:22;display:flex;flex-direction:column;
+  background:var(--fond);border-right:1px solid var(--trait);box-shadow:var(--ombre)}
+/* « display:flex » l'emportait sur l'attribut hidden : « Fermer » ne fermait rien (essai de l'utilisateur, 14 octobre 2026) */
+.pc-dossier-panneau[hidden]{display:none}
+.pc-dossier-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--trait2);background:var(--carte)}
+.pc-dossier-corps{flex:1;overflow:auto;padding:12px;overscroll-behavior:contain}
+.pc-dossier-corps .pc-docs{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1400px){body.dossier-ouvert{padding-left:460px}}
+@media print{.pc-dossier-panneau{display:none!important}body.dossier-ouvert{padding-left:0!important}}
+.pc-lu{display:block;font-weight:400;color:var(--encre2);margin-top:4px}
+.pc-corriger{display:block;margin-top:6px;font-weight:400;color:var(--encre)}
+.pc-corriger b{display:block;font-weight:700}
+.pc-corriger span{display:list-item;list-style:disc;margin-left:1.2em}
+
+/* La calculatrice · le panneau et le pave.
+   Une seule feuille pour le jeu d'entrainement et pour les sites de classe (option
+   « calculatrice: oui » de SITE.md, qui la recopie dans assets/). Les couleurs sont les
+   jetons du kit ; l'accent, l'erreur et la chasse fixe ont un repli, parce que les chartes
+   les nomment --froid, --chaud et .mono. Sortie de jeu.css le 6 octobre 2026. */
+/* le panneau : a droite, par-dessus sur telephone */
+.calculatrice{position:fixed;top:0;right:0;bottom:0;width:min(100%,380px);z-index:20;display:flex;flex-direction:column;
+  background:var(--carte);border-left:1px solid var(--trait);box-shadow:var(--ombre)}
+.calculatrice[hidden]{display:none}
+.calc-tete{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;min-height:48px;
+  border-bottom:1px solid var(--trait2)}
+.calc-corps{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px}
+.calc-angle{display:flex;gap:0;align-self:flex-start;border:1px solid var(--trait);border-radius:999px;overflow:hidden}
+.calc-angle button{font:600 .78rem/1 system-ui,sans-serif;padding:7px 12px;border:0;background:none;color:var(--encre2);cursor:pointer}
+.calc-angle button[aria-pressed="true"]{background:var(--encre);color:var(--carte)}
+.calc-ecran{flex:1;min-height:96px;overflow-y:auto;background:var(--carte2);border:1px solid var(--trait2);border-radius:var(--r,6px);
+  padding:6px 10px;display:flex;flex-direction:column}
+.calc-historique{list-style:none;margin:auto 0 0;padding:0}
+.calc-historique li{padding:5px 0;border-bottom:1px dashed var(--trait2)}
+.calc-historique li:last-child{border-bottom:0}
+.calc-expr,.calc-res{display:block;width:100%;border:0;background:none;padding:0;cursor:pointer;color:var(--encre);
+  font-family:var(--mono,ui-monospace,Consolas,monospace);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.calc-expr{text-align:left;font-size:.86rem;color:var(--encre2)}
+.calc-res{text-align:right;font-size:1.25rem;font-weight:650}
+.calc-res.erreur{font-family:system-ui,sans-serif;font-size:.9rem;color:var(--faux,var(--chaud,#ab432a));cursor:default}
+.calc-expr:hover,.calc-res:not(.erreur):hover{color:var(--accent,var(--froid,#2c6da6))}
+.calc-saisie{width:100%;font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.2rem;padding:8px 10px;border:1.5px solid var(--trait);
+  border-radius:var(--r,6px);background:var(--carte);color:var(--encre)}
+.calc-saisie:focus{outline:none;border-color:var(--accent,var(--froid,#2c6da6))}
+.calc-touches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.calc-touches button{min-height:42px;padding:0 2px;border-radius:var(--r,6px);border:1px solid var(--trait2);background:var(--carte2);
+  color:var(--encre);font:600 .9rem/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.calc-touches button:hover{border-color:var(--encre2)}
+.calc-touches button:active{transform:scale(.97)}
+.calc-touches .chiffre{background:var(--carte);border-color:var(--trait);font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.1rem}
+.calc-touches .fonction{font-size:.82rem;color:var(--encre2)}
+.calc-touches .op{font-size:1.15rem}
+.calc-touches .efface{color:var(--faux,var(--chaud,#ab432a))}
+.calc-touches .egal{background:var(--encre);border-color:var(--encre);color:var(--carte);font-size:1.15rem}
+/* tablette en portrait : a cote, plus etroite ; la question prend la mise en page du telephone */
+@media (min-width:640px) and (max-width:899px){
+  .calculatrice{width:300px}
+  body.calc-ouverte{padding-right:300px}
+}
+@media (min-width:900px){
+  body.calc-ouverte{padding-right:380px}
+}
+.calc-fermer{font:inherit;font-size:.8rem;font-weight:600;color:var(--encre2);background:none;border:1px solid var(--trait);
+  border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
+.calc-fermer:hover{color:var(--encre);border-color:var(--encre2)}
+.calc-titre{font-weight:700;font-size:.95rem}
+@media print{ .calculatrice{display:none!important} body.calc-ouverte{padding-right:0!important} }
+/* sur un site de classe : au-dessus de la coquille de documentation, et les boutons qui
+   l'ouvrent (la barre haute les met en forme ; hors coquille, ils flottent en bas a droite).
+   Sur telephone, un seul bouton « Outils » remplace les deux. */
+.doc-shell .calculatrice{z-index:60}
+.bouton-outil[aria-pressed="true"]{font-weight:700;border-color:var(--encre)}
+.bouton-outil.etroit{display:none}
+@media (max-width:639px){ .bouton-outil.large{display:none} .bouton-outil.etroit{display:inline-flex} }
+.outils-flottants{position:fixed;right:16px;bottom:16px;z-index:40;display:flex;gap:8px}
+.outils-flottants .bouton-outil{font:inherit;font-size:.9rem;font-weight:600;padding:10px 16px;border-radius:999px;
+  border:1px solid var(--encre);background:var(--carte);color:var(--encre);box-shadow:var(--ombre);cursor:pointer}
+body.calc-ouverte .outils-flottants{display:none}
+/* Dans la coquille de documentation, le panneau prend la place du sommaire de droite ; entre
+   1 000 et 1 279 px, celle du plan aussi, qui revient a la fermeture. Sans cela, le texte de la
+   page tombait a 416 px de large sur un ecran de 1 280. */
+@media (min-width:1000px){
+  body.calc-ouverte .doc-corps{--col-som:0px}
+  body.calc-ouverte .doc-som{display:none}
+}
+@media (min-width:1000px) and (max-width:1279px){
+  body.calc-ouverte .doc-corps{--col-plan:0px}
+  body.calc-ouverte .doc-plan{display:none}
+}
+
+/* habillage du site : charte « fluides » */
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  /* le fond de plan */
+  --fond:#e8eae6;
+  --carte:#f7f8f5;
+  --carte2:#eceee9;
+  --encre:#16181a;
+  --encre2:#535a5e;
+  --trait:#a9b0af;
+  --trait2:#ccd2cf;
+
+  /* Le repérage des réseaux. Cinq séquences, cinq fluides : ce n'est pas
+     une palette de série, c'est un code de tuyauterie. */
+  --r1:#c1392b;   /* chauffage, départ */
+  --r2:#2a6497;   /* chauffage, retour */
+  --r3:#1f8f97;   /* eau glacée */
+  --r4:#5a8a35;   /* air soufflé */
+  --r5:#7a4fa3;   /* fluide frigorigène */
+
+  --froid:#2a6497;
+  --tiede:#8a6414;
+  --chaud:#c1392b;
+  --vert:#2f7448;
+  --violet:#7a4fa3;
+  --ombre:0 1px 0 rgba(22,24,26,.12);
+  --r:0px;
+  --teinte:var(--r1);
+}
+/* Les simulations du BTS FED a la charte de leur site, « fluides » (14 octobre 2026) : Barlow et
+   Chivo Mono, le papier vert-de-gris, les angles droits, et le bleu du retour de chauffage pour
+   accent. Les jetons propres aux simulations (juste, faux, scene) s'accordent a ceux de la charte. */
+:root{
+  --accent:var(--froid); --accent-doux:#dce6ef;
+  --juste:var(--vert); --juste-doux:#e0ece4; --faux:var(--chaud); --faux-doux:#f3dfdb;
+  --scene:var(--carte);
+}
+body{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+.tete h1{font-family:"Barlow Semi Condensed",Barlow,sans-serif;font-weight:700;letter-spacing:-.01em}
+.tete .surtitre,.mono,.afficheur .val,.curseur .val,table.releve td,.pc-comp,.pc-surtitre{font-family:"Chivo Mono",ui-monospace,monospace}
+.carte{border-radius:0}
+.tete{border-bottom:3px solid var(--r1)}
+
 .grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin:10px 0 22px}
 section h2{font-size:1.1rem;margin-top:8px}
 .carte-sim{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border:1px solid var(--trait2);border-radius:var(--r);
@@ -174,13 +485,15 @@ section h2{font-size:1.1rem;margin-top:8px}
 <header class="tete">
 <div class="surtitre">BTS FED option C · génie climatique</div>
 <h1>Les simulations du BTS</h1>
-<p class="chapeau">Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chaque simulation s'ouvre sans réseau.</p>
+<p class="chapeau">Des installations à manipuler comme sur le chantier : on règle, on mesure avec les vrais instruments, on calcule, et la page dit juste ou pas encore. Chacune a aussi son TD sur simulation, au format de l'U41 : un dossier, des essais, un fichier noté sur les compétences de l'épreuve. Chaque simulation s'ouvre sans réseau.</p>
 </header>
+<section><h2>Les TD sur simulation, au format de l'U41 · deux heures sur tablette</h2><div class="grille"><a class="carte-sim" href="chaudiere-condensation.html#u41"><span class="code">U41-01</span><span class="nom">La chaudière et les radiateurs conservés</span><span class="quoi">CCTP et mise en service, réglage de la combustion, condenser avec des radiateurs 70/50 : la journée froide contre la journée moyenne</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="pac-cop.html#u41"><span class="code">U41-02</span><span class="nom">La pompe à chaleur et le grand froid</span><span class="quoi">la plaque à +7 °C contre le besoin à −7 °C, le givre, l'appoint et le COP de l'installation</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="banc-froid.html#u41"><span class="code">U41-03</span><span class="nom">La pompe à chaleur du bureau d'accueil</span><span class="quoi">le cycle sur le diagramme enthalpique, la puissance à la température de base, une panne à diagnostiquer</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="cta-air-humide.html#u41"><span class="code">U41-04</span><span class="nom">L'air du centre culturel</span><span class="quoi">le débit mesuré selon le CCTP, l'air neuf par personne, l'humidité, la chaleur latente de la batterie froide</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="regulation-loi-d-eau.html#u41"><span class="code">U41-05</span><span class="nom">La réception de la régulation</span><span class="quoi">le régulateur livré en P contre le CCTP, le PI, la loi d'eau calculée qu'il faut régler à l'usage</span><span class="origine">TD sur simulation · hors ligne</span></a></div></section>
 <section><h2>Production de chaleur</h2><div class="grille"><a class="carte-sim" href="chaudiere-condensation.html"><span class="code">Séance 11</span><span class="nom">La chaudière à condensation</span><span class="quoi">PCI et PCS, analyse des fumées, condensation selon le retour, rendement d'une journée</span><span class="origine">hors ligne</span></a><a class="carte-sim" href="pac-cop.html"><span class="code">Séance 13</span><span class="nom">La pompe à chaleur air-eau</span><span class="quoi">manomètres HP et BP du R32, COP mesuré et limite de Carnot, givre et dégivrage, journée de grand froid avec appoint</span><span class="origine">hors ligne</span></a></div></section>
 <section><h2>Froid et pompe à chaleur</h2><div class="grille"><a class="carte-sim" href="banc-froid.html"><span class="code">Séance 13 · habilitation fluides</span><span class="nom">Le banc de froid</span><span class="quoi">circuit complet, manomètres et sondes, diagramme enthalpique détaillé de cinq fluides, tracé du cycle point par point, sept pannes à diagnostiquer</span><span class="origine">hors ligne</span></a></div></section>
 <section><h2>Traitement de l'air</h2><div class="grille"><a class="carte-sim" href="cta-air-humide.html"><span class="code">Séances 14 à 17</span><span class="nom">La CTA et l'air humide</span><span class="quoi">banc double flux, débit à l'anémomètre, efficacité, diagramme de l'air humide, réglage d'une CTA en hiver et en été</span><span class="origine">hors ligne</span></a></div></section>
 <section><h2>Régulation</h2><div class="grille"><a class="carte-sim" href="regulation-loi-d-eau.html"><span class="code">Séances 18 et 19</span><span class="nom">La régulation et la loi d'eau</span><span class="quoi">tout ou rien et différentiel, bande proportionnelle et erreur statique, action intégrale, courbe de chauffe, sonde au soleil, réduit de nuit</span><span class="origine">hors ligne</span></a></div></section>
 <footer class="pied">Simulations hors ligne, sans compte et sans enregistrement. Chaque page dit sous la simulation ce que son modèle simplifie.</footer>
 </div>
+<script>if (window.Sim && Sim.calculatrice) Sim.calculatrice();</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light" style="color-scheme:light">
+<html lang="fr" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -95,6 +95,7 @@ table.releve{border-collapse:collapse;width:100%;font-size:.92rem}
 table.releve th,table.releve td{border:1px solid var(--trait);padding:5px 8px;text-align:center}
 table.releve th{background:var(--carte2);font-weight:650;font-size:.82rem}
 table.releve tr.vide td{color:var(--encre2);font-style:italic}
+table.releve td.jour-heure{white-space:nowrap}
 .graphe{background:var(--carte);border:1px solid var(--trait2);border-radius:var(--r)}
 .graphe canvas{display:block;width:100%;height:auto}
 
@@ -153,8 +154,679 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .molette-titre{font-size:11px;font-weight:650;fill:var(--encre)}
 .molette-val{font-size:11.5px;font-weight:650;fill:var(--accent);font-family:ui-monospace,Consolas,monospace}
 
+/* Parcours : une simulation menee comme un projet, cinq phases et un livrable (CAP, seconde) */
+.pc-tete{position:sticky;top:0;z-index:5;background:var(--fond);padding:8px 0 10px;margin:-6px 0 12px;
+  border-bottom:1px solid var(--trait2);display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.pc-chemin{list-style:none;margin:0;padding:0;display:flex;align-items:flex-start;gap:0;flex:1 1 420px;min-width:0}
+.pc-chemin li{flex:1 1 0;display:flex;justify-content:center;position:relative}
+.pc-chemin li+li::before{content:"";position:absolute;top:21px;right:calc(50% + 22px);left:calc(-50% + 22px);height:2px;background:var(--trait)}
+.pc-noeud{font:inherit;background:none;border:0;padding:0;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:var(--encre2);cursor:pointer;min-width:44px;min-height:44px}
+.pc-noeud:disabled{cursor:default;opacity:.55}
+.pc-rond{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:750;font-size:1.05rem;
+  border:2px solid var(--trait);background:var(--carte);color:var(--encre2);transition:transform .2s,background .2s}
+.pc-comp{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.pc-etoiles{font-size:.78rem;color:var(--tiede);min-height:1.1em;letter-spacing:1px}
+.pc-noeud.pc-fait .pc-rond{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-noeud.pc-ici .pc-rond{border-color:var(--encre);box-shadow:0 0 0 4px var(--accent-doux);transform:scale(1.06);color:var(--encre)}
+.pc-noeud.pc-fait.pc-ici .pc-rond{color:#fff}
+.pc-noeud.pc-ici .pc-comp{color:var(--encre)}
+.pc-drapeau .pc-rond{font-size:1.15rem}
+.pc-info{display:flex;gap:12px;align-items:center;font-size:.9rem;font-weight:650;color:var(--encre2)}
+.pc-score{color:var(--tiede);font-variant-numeric:tabular-nums}
+.pc-niveau:empty,.pc-temps:empty{display:none}
+.pc-niveau{border:1px solid var(--trait);border-radius:999px;padding:2px 10px;font-size:.8rem}
+.pc-ecran[hidden]{display:none}
+.pc-surtitre{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.pc-phase-tete{margin:4px 0 14px}
+.pc-phase-tete h2{font-size:clamp(1.25rem,3.4vw,1.6rem);font-weight:750}
+.pc-bulle{position:relative;margin:10px 0 0;padding:10px 14px;background:var(--carte);border:1px solid var(--trait2);
+  border-radius:var(--r);border-left:4px solid var(--accent);max-width:70ch;color:var(--encre)}
+.pc-commande .pc-client{font-weight:700;margin:0 0 6px}
+.pc-texte p{margin:0 0 8px}
+.pc-livrable{margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--trait)}
+.pc-illus:empty{display:none}
+.pc-plan{margin:0 0 12px;padding-left:1.2em}
+.pc-plan li{margin:4px 0}
+.pc-choix-niveau{margin:6px 0 14px}
+.pc-partir{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-questions h2{font-size:1rem}
+.pc-q{border:1px solid var(--trait);border-radius:var(--r);padding:12px;margin-bottom:12px;background:var(--carte2);transition:border-color .2s,background .2s}
+.pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
+.pc-q[data-etat="faux"]{border-color:var(--faux)}
+.pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+.pc-q-lib{margin:0 0 8px;font-weight:600}
+.pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
+  font-size:.8rem;margin-right:.5em;vertical-align:.1em}
+.pc-q[data-etat="juste"] .pc-q-num{background:var(--juste)}
+.pc-q-champ{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.pc-q-champ input,.pc-remise input{font:inherit;font-size:1.05rem;width:9em;min-height:44px;padding:7px 10px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-remise input{width:min(100%,18em)}
+.pc-unite{font-weight:600;color:var(--encre2)}
+.pc-options{display:flex;flex-wrap:wrap;gap:6px}
+.pc-option{font:inherit;font-size:.92rem;font-weight:600;min-height:44px;padding:8px 12px;border-radius:var(--r);
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre);cursor:pointer;text-align:left}
+.pc-option[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.pc-option:disabled{cursor:default}
+.pc-classer{display:flex;flex-direction:column;gap:8px;width:100%}
+.pc-classer-ligne{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--trait2);padding-bottom:6px}
+.pc-classer-item{font-weight:600}
+.pc-aide{margin:0;font-size:.9rem;color:var(--encre2)}
+.pc-retour{margin-top:8px;font-weight:650;min-height:1.4em}
+.pc-retour.juste{color:var(--juste)}
+.pc-retour.faux{color:var(--faux)}
+.pc-retour .methode{font-weight:400;color:var(--encre2)}
+.pc-q-bravo{font-weight:400;color:var(--encre)}
+.pc-q .bouton{min-height:44px}
+.pc-pied{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:flex-end;margin:4px 0 20px}
+.pc-bravo{margin:0;flex:1 1 280px;color:var(--juste);font-weight:650}
+.pc-suite{min-height:48px;font-size:1rem;padding:10px 18px}
+.pc-vers-fin{min-height:44px;margin-right:auto;color:var(--encre2)}
+.pc-apercu{width:100%;margin-top:10px;font-family:ui-monospace,Consolas,monospace;font-size:.8rem;border:1px solid var(--trait);
+  border-radius:var(--r);background:var(--carte2);color:var(--encre);padding:8px}
+.pc-recap td,.pc-recap th{text-align:left}
+.pc-score-final{font-size:1.2rem;margin:12px 0 4px;color:var(--tiede)}
+.pc-grade{margin:0;font-weight:650}
+.pc-objet{cursor:grab;touch-action:none}
+.pc-objet:active{cursor:grabbing}
+.pc-cible{fill:var(--accent);fill-opacity:.07;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 4}
+@media (max-width:620px){
+  .pc-rond{width:36px;height:36px;font-size:.95rem}
+  .pc-chemin li+li::before{top:18px;right:calc(50% + 19px);left:calc(-50% + 19px)}
+  .pc-comp{font-size:.62rem;letter-spacing:.04em}
+}
+.plan.pc-large{grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr)}
+@media (max-width:820px){.plan.pc-large{grid-template-columns:1fr}}
+/* Pendant le parcours, la page laisse la place a la scene : le chapeau se replie */
+.pc-en-cours .tete{padding-bottom:6px;margin-bottom:6px}
+.pc-en-cours .tete .chapeau{display:none}
+.pc-en-cours .tete h1{font-size:1.3rem;margin:2px 0 0}
+@media print{.pc-tete,.pc-remise,.pc-q .rangee{display:none}}
+/* Entrainement au CCF (premiere, terminale) : deux modes, la paillasse empruntee, les appels professeur */
+.pc [hidden],.pc-voile[hidden],.pc-modes [hidden]{display:none!important}
+.pc-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.pc-mode{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:12px 14px;min-height:56px;cursor:pointer;
+  border-radius:var(--r);border:1.5px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-mode b{font-size:1rem}
+.pc-mode span{font-size:.85rem;color:var(--encre2)}
+.pc-mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
+.pc-en-cours .pc-modes{display:none}
+@media (max-width:480px){.pc-modes{grid-template-columns:1fr}}
+.pc-problematique{margin:12px 0 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--carte2);border-radius:0 var(--r) var(--r) 0}
+.pc-grille{list-style:none;margin:10px 0;padding:0;border-top:1px solid var(--trait2)}
+.pc-grille li{padding:7px 0;border-bottom:1px solid var(--trait2)}
+.pc-grille-ligne{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.pc-grille-ou{font-size:.85rem;font-weight:650;color:var(--accent);text-align:right}
+.pc-grille-cap{font-size:.84rem;color:var(--encre2);margin-top:2px}
+.pc-appel-annonce{display:flex;gap:8px;align-items:flex-start}
+.pc-main{font-size:1.25rem;line-height:1;margin-right:.35em}
+.pc-q.pc-appel{border-style:dashed;border-color:var(--accent);background:var(--carte)}
+.pc-q[data-etat="attente"]{border-color:var(--tiede);border-style:solid}
+.pc-badge-appel{font:inherit;font-weight:700;font-size:.85rem;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:2px solid var(--tiede);background:var(--carte);color:var(--encre);animation:pc-pulse 1.6s ease-in-out infinite}
+@keyframes pc-pulse{50%{box-shadow:0 0 0 5px var(--accent-doux)}}
+.pc-methode{margin:6px 0 0;font-size:.92rem;color:var(--encre2);border-left:3px solid var(--trait);padding-left:8px}
+.pc-aide-btn{color:var(--encre2)}
+.pc-autonomie{margin:10px 0 0}
+.pc-voile{position:fixed;inset:0;z-index:30;background:rgba(20,20,22,.5);display:grid;place-items:center;padding:16px}
+.pc-prof{width:min(100%,600px);max-height:90vh;overflow:auto;margin:0}
+.pc-prof-liste .pc-q{margin-top:10px}
+.pc-attendus{margin:0 0 10px;padding-left:1.2em;font-size:.92rem}
+.pc-cotes .pc-option{flex:1 1 9em}
+.pc-prof-pied{justify-content:flex-end;margin-top:10px}
+/* une partie qui emprunte la paillasse : la simulation a gauche, les questions a droite, qui restent en vue */
+.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr)}
+.pc-paillasse .plan{grid-template-columns:1fr}
+.pc-paillasse > .carte,.pc-paillasse .plan > .carte{background:var(--carte2);box-shadow:none;margin-bottom:12px}
+/* la scene reste a l'ecran pendant qu'on fait defiler les questions (demande de l'utilisateur, 14 octobre 2026) :
+   sur tablette et ordinateur, la colonne de gauche se fixe sous la tete du parcours et defile seule si elle est plus haute */
+@media (min-width:821px){.pc-ecran > .plan > .pc-scene{position:sticky;top:calc(var(--pc-haut,88px) + 4px);max-height:calc(100vh - var(--pc-haut,88px) - 16px);overflow:auto;overscroll-behavior:contain}}
+@media (max-width:820px){.plan.pc-avec-paillasse{grid-template-columns:minmax(0,1fr)}.pc-avec-paillasse > .pc-questions{position:static;max-height:none}}
+/* une colonne bornee ne grandit pas a la taille de son contenu : ce qui est large defile dans son cadre */
+.pc-avec-paillasse > *,.pc-paillasse,.pc-paillasse > *{min-width:0}
+.pc-paillasse .releve-zone{grid-template-columns:minmax(0,1fr)}
+.pc-paillasse .releve-zone > div,.pc-paillasse table.releve{overflow-x:auto}
+/* les documents d'un sujet : fiches, consignes, annexe */
+.pc-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.pc-docs section{border:1px solid var(--trait);border-radius:var(--r);background:var(--carte2);padding:10px 12px}
+.pc-docs h3{font-size:.95rem;margin:0 0 6px}
+.pc-docs p{margin:0 0 6px;font-size:.93rem}
+.pc-docs table{width:100%}
+.pc-docs td{font-size:.88rem;vertical-align:top}
+.pc-docs .pc-annexe{border-style:dashed}
+.pc-paillasse .num{display:none}
+/* sur un telephone, la paillasse perd une epaisseur de marge, et un afficheur trop long passe a la ligne au lieu de deborder */
+@media (max-width:620px){
+  .pc-avec-paillasse > .pc-scene{padding:10px}
+  .pc-paillasse > .carte,.pc-paillasse .plan > .carte{padding:12px}
+  .afficheur .val{white-space:normal;overflow-wrap:anywhere}
+}
+/* la calculatrice des sites : son bouton dans la tete du parcours ; le bouton flottant s'efface pendant un parcours */
+.pc-calc{font:inherit;font-size:.85rem;font-weight:650;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
+  border:1px solid var(--trait);background:var(--carte);color:var(--encre)}
+.pc-calc[aria-pressed="true"]{border-color:var(--encre);font-weight:750}
+.pc-en-cours .outils-flottants,.pc-visible .outils-flottants{display:none}
+.calc-titre{font-weight:700}
+/* le classement compact des epreuves : l'element a gauche, sa liste a droite */
+.pc-classer-ligne.pc-compact{flex-wrap:nowrap}
+.pc-classer-choix{font:inherit;font-size:.95rem;min-height:44px;padding:6px 10px;border-radius:var(--r);border:1px solid var(--trait);
+  background:var(--carte);color:var(--encre);max-width:60%;flex:0 1 auto}
+@media (max-width:480px){.pc-classer-ligne.pc-compact{flex-wrap:wrap}.pc-classer-choix{max-width:100%;width:100%}}
+/* le dossier, a gauche ; la calculatrice reste a droite */
+.pc-dossier-panneau{position:fixed;top:0;left:0;bottom:0;width:min(100%,460px);z-index:22;display:flex;flex-direction:column;
+  background:var(--fond);border-right:1px solid var(--trait);box-shadow:var(--ombre)}
+/* « display:flex » l'emportait sur l'attribut hidden : « Fermer » ne fermait rien (essai de l'utilisateur, 14 octobre 2026) */
+.pc-dossier-panneau[hidden]{display:none}
+.pc-dossier-tete{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--trait2);background:var(--carte)}
+.pc-dossier-corps{flex:1;overflow:auto;padding:12px;overscroll-behavior:contain}
+.pc-dossier-corps .pc-docs{grid-template-columns:minmax(0,1fr)}
+@media (min-width:1400px){body.dossier-ouvert{padding-left:460px}}
+@media print{.pc-dossier-panneau{display:none!important}body.dossier-ouvert{padding-left:0!important}}
+.pc-lu{display:block;font-weight:400;color:var(--encre2);margin-top:4px}
+.pc-corriger{display:block;margin-top:6px;font-weight:400;color:var(--encre)}
+.pc-corriger b{display:block;font-weight:700}
+.pc-corriger span{display:list-item;list-style:disc;margin-left:1.2em}
+
+/* La calculatrice · le panneau et le pave.
+   Une seule feuille pour le jeu d'entrainement et pour les sites de classe (option
+   « calculatrice: oui » de SITE.md, qui la recopie dans assets/). Les couleurs sont les
+   jetons du kit ; l'accent, l'erreur et la chasse fixe ont un repli, parce que les chartes
+   les nomment --froid, --chaud et .mono. Sortie de jeu.css le 6 octobre 2026. */
+/* le panneau : a droite, par-dessus sur telephone */
+.calculatrice{position:fixed;top:0;right:0;bottom:0;width:min(100%,380px);z-index:20;display:flex;flex-direction:column;
+  background:var(--carte);border-left:1px solid var(--trait);box-shadow:var(--ombre)}
+.calculatrice[hidden]{display:none}
+.calc-tete{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 12px;min-height:48px;
+  border-bottom:1px solid var(--trait2)}
+.calc-corps{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px 12px}
+.calc-angle{display:flex;gap:0;align-self:flex-start;border:1px solid var(--trait);border-radius:999px;overflow:hidden}
+.calc-angle button{font:600 .78rem/1 system-ui,sans-serif;padding:7px 12px;border:0;background:none;color:var(--encre2);cursor:pointer}
+.calc-angle button[aria-pressed="true"]{background:var(--encre);color:var(--carte)}
+.calc-ecran{flex:1;min-height:96px;overflow-y:auto;background:var(--carte2);border:1px solid var(--trait2);border-radius:var(--r,6px);
+  padding:6px 10px;display:flex;flex-direction:column}
+.calc-historique{list-style:none;margin:auto 0 0;padding:0}
+.calc-historique li{padding:5px 0;border-bottom:1px dashed var(--trait2)}
+.calc-historique li:last-child{border-bottom:0}
+.calc-expr,.calc-res{display:block;width:100%;border:0;background:none;padding:0;cursor:pointer;color:var(--encre);
+  font-family:var(--mono,ui-monospace,Consolas,monospace);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.calc-expr{text-align:left;font-size:.86rem;color:var(--encre2)}
+.calc-res{text-align:right;font-size:1.25rem;font-weight:650}
+.calc-res.erreur{font-family:system-ui,sans-serif;font-size:.9rem;color:var(--faux,var(--chaud,#ab432a));cursor:default}
+.calc-expr:hover,.calc-res:not(.erreur):hover{color:var(--accent,var(--froid,#2c6da6))}
+.calc-saisie{width:100%;font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.2rem;padding:8px 10px;border:1.5px solid var(--trait);
+  border-radius:var(--r,6px);background:var(--carte);color:var(--encre)}
+.calc-saisie:focus{outline:none;border-color:var(--accent,var(--froid,#2c6da6))}
+.calc-touches{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.calc-touches button{min-height:42px;padding:0 2px;border-radius:var(--r,6px);border:1px solid var(--trait2);background:var(--carte2);
+  color:var(--encre);font:600 .9rem/1 system-ui,sans-serif;cursor:pointer;touch-action:manipulation}
+.calc-touches button:hover{border-color:var(--encre2)}
+.calc-touches button:active{transform:scale(.97)}
+.calc-touches .chiffre{background:var(--carte);border-color:var(--trait);font-family:var(--mono,ui-monospace,Consolas,monospace);font-size:1.1rem}
+.calc-touches .fonction{font-size:.82rem;color:var(--encre2)}
+.calc-touches .op{font-size:1.15rem}
+.calc-touches .efface{color:var(--faux,var(--chaud,#ab432a))}
+.calc-touches .egal{background:var(--encre);border-color:var(--encre);color:var(--carte);font-size:1.15rem}
+/* tablette en portrait : a cote, plus etroite ; la question prend la mise en page du telephone */
+@media (min-width:640px) and (max-width:899px){
+  .calculatrice{width:300px}
+  body.calc-ouverte{padding-right:300px}
+}
+@media (min-width:900px){
+  body.calc-ouverte{padding-right:380px}
+}
+.calc-fermer{font:inherit;font-size:.8rem;font-weight:600;color:var(--encre2);background:none;border:1px solid var(--trait);
+  border-radius:999px;padding:6px 12px;cursor:pointer;min-height:36px}
+.calc-fermer:hover{color:var(--encre);border-color:var(--encre2)}
+.calc-titre{font-weight:700;font-size:.95rem}
+@media print{ .calculatrice{display:none!important} body.calc-ouverte{padding-right:0!important} }
+/* sur un site de classe : au-dessus de la coquille de documentation, et les boutons qui
+   l'ouvrent (la barre haute les met en forme ; hors coquille, ils flottent en bas a droite).
+   Sur telephone, un seul bouton « Outils » remplace les deux. */
+.doc-shell .calculatrice{z-index:60}
+.bouton-outil[aria-pressed="true"]{font-weight:700;border-color:var(--encre)}
+.bouton-outil.etroit{display:none}
+@media (max-width:639px){ .bouton-outil.large{display:none} .bouton-outil.etroit{display:inline-flex} }
+.outils-flottants{position:fixed;right:16px;bottom:16px;z-index:40;display:flex;gap:8px}
+.outils-flottants .bouton-outil{font:inherit;font-size:.9rem;font-weight:600;padding:10px 16px;border-radius:999px;
+  border:1px solid var(--encre);background:var(--carte);color:var(--encre);box-shadow:var(--ombre);cursor:pointer}
+body.calc-ouverte .outils-flottants{display:none}
+/* Dans la coquille de documentation, le panneau prend la place du sommaire de droite ; entre
+   1 000 et 1 279 px, celle du plan aussi, qui revient a la fermeture. Sans cela, le texte de la
+   page tombait a 416 px de large sur un ecran de 1 280. */
+@media (min-width:1000px){
+  body.calc-ouverte .doc-corps{--col-som:0px}
+  body.calc-ouverte .doc-som{display:none}
+}
+@media (min-width:1000px) and (max-width:1279px){
+  body.calc-ouverte .doc-corps{--col-plan:0px}
+  body.calc-ouverte .doc-plan{display:none}
+}
+
+/* habillage du site : charte « fluides » */
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:400;font-display:swap;src:url(../assets/polices/barlow-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:500;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:600;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-600-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Barlow Semi Condensed';font-style:normal;font-weight:700;font-display:swap;src:url(../assets/polices/barlow-semi-condensed-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Chivo Mono';font-style:normal;font-weight:400 600;font-display:swap;src:url(../assets/polices/chivo-mono-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+:root{
+  /* le fond de plan */
+  --fond:#e8eae6;
+  --carte:#f7f8f5;
+  --carte2:#eceee9;
+  --encre:#16181a;
+  --encre2:#535a5e;
+  --trait:#a9b0af;
+  --trait2:#ccd2cf;
+
+  /* Le repérage des réseaux. Cinq séquences, cinq fluides : ce n'est pas
+     une palette de série, c'est un code de tuyauterie. */
+  --r1:#c1392b;   /* chauffage, départ */
+  --r2:#2a6497;   /* chauffage, retour */
+  --r3:#1f8f97;   /* eau glacée */
+  --r4:#5a8a35;   /* air soufflé */
+  --r5:#7a4fa3;   /* fluide frigorigène */
+
+  --froid:#2a6497;
+  --tiede:#8a6414;
+  --chaud:#c1392b;
+  --vert:#2f7448;
+  --violet:#7a4fa3;
+  --ombre:0 1px 0 rgba(22,24,26,.12);
+  --r:0px;
+  --teinte:var(--r1);
+}
+/* Les simulations du BTS FED a la charte de leur site, « fluides » (14 octobre 2026) : Barlow et
+   Chivo Mono, le papier vert-de-gris, les angles droits, et le bleu du retour de chauffage pour
+   accent. Les jetons propres aux simulations (juste, faux, scene) s'accordent a ceux de la charte. */
+:root{
+  --accent:var(--froid); --accent-doux:#dce6ef;
+  --juste:var(--vert); --juste-doux:#e0ece4; --faux:var(--chaud); --faux-doux:#f3dfdb;
+  --scene:var(--carte);
+}
+body{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
+.tete h1{font-family:"Barlow Semi Condensed",Barlow,sans-serif;font-weight:700;letter-spacing:-.01em}
+.tete .surtitre,.mono,.afficheur .val,.curseur .val,table.releve td,.pc-comp,.pc-surtitre{font-family:"Chivo Mono",ui-monospace,monospace}
+.carte{border-radius:0}
+.tete{border-bottom:3px solid var(--r1)}
+
 </style>
 <script>
+/* Entrainement · les nombres a la francaise, dans les deux sens.
+   Ecrire : virgule decimale, espace fine insecable entre les milliers, ecriture
+   scientifique au-dela de dix millions ou en deca d'un millieme.
+   Lire : ce qu'un eleve tape vraiment — virgule ou point, espaces, 2,5e3,
+   2,5 x 10^3, 2,5×10³. */
+"use strict";
+var Nombres = (function () {
+  var FINE = " ", MOINS = "−";
+  var VERS_EXPOSANT = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³",
+    "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  var DEPUIS_EXPOSANT = {};
+  Object.keys(VERS_EXPOSANT).forEach(function (k) { DEPUIS_EXPOSANT[VERS_EXPOSANT[k]] = k; });
+
+  function exposant(n) {
+    return String(n).split("").map(function (c) { return VERS_EXPOSANT[c]; }).join("");
+  }
+  function grouper(entier) { return entier.replace(/\B(?=(\d{3})+(?!\d))/g, FINE); }
+
+  /* x avec au plus `chiffres` chiffres significatifs, zeros de queue retires. */
+  function ecrire(x, chiffres) {
+    if (x === null || x === undefined || !isFinite(x)) return "—";
+    if (chiffres === undefined) chiffres = 3;
+    if (x === 0) return "0";
+    var signe = x < 0 ? MOINS : "";
+    var a = Number(Math.abs(x).toPrecision(chiffres));
+    if (a >= 1e-3 && a < 1e7) {
+      var dec = Math.max(0, chiffres - 1 - Math.floor(Math.log10(a)));
+      var s = a.toFixed(dec);
+      if (s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+      var p = s.split(".");
+      return signe + grouper(p[0]) + (p[1] ? "," + p[1] : "");
+    }
+    var e = Math.floor(Math.log10(a));
+    var m = Number((a / Math.pow(10, e)).toPrecision(chiffres));
+    if (m >= 10) { m = Number((m / 10).toPrecision(chiffres)); e += 1; }
+    return signe + String(m).replace(".", ",") + " × 10" + exposant(e);
+  }
+
+  /* Toujours en ecriture decimale, sans notation scientifique : 0,000 047 et non
+     4,7 × 10⁻⁵. Pour le CAP et la seconde, ou la virgule est l'exercice. */
+  function ecrireDecimal(x) {
+    if (x === null || x === undefined || !isFinite(x)) return "\u2014";
+    var s = Math.abs(Number(x.toPrecision(12))).toFixed(10).replace(/0+$/, "").replace(/\.$/, "");
+    var p = s.split(".");
+    return (x < 0 ? MOINS : "") + grouper(p[0]) + (p[1] ? "," + p[1] : "");
+  }
+
+  /* NaN si la saisie n'est pas un nombre. */
+  function lire(texte) {
+    if (texte === null || texte === undefined) return NaN;
+    var t = String(texte)
+      .replace(/[\s  ]/g, "")
+      .replace(/,/g, ".")
+      .replace(/[−–]/g, "-")
+      .replace(/[⁻⁰¹²³⁴-⁹]+/g, function (s) {
+        return "^" + s.split("").map(function (c) { return DEPUIS_EXPOSANT[c]; }).join("");
+      })
+      .replace(/[×xX*·]/g, "*");
+    if (t === "") return NaN;
+    if (/^[+-]?(\d+\.?\d*|\.\d+)e[+-]?\d+$/i.test(t)) return Number(t);
+    var m = t.match(/^([+-]?(?:\d+\.?\d*|\.\d+))?(?:(?:\*10\^?|10\^)\(?([+-]?\d+)\)?)?$/);
+    if (!m || (m[1] === undefined && m[2] === undefined)) return NaN;
+    var mantisse = m[1] !== undefined ? Number(m[1]) : 1;
+    return m[2] !== undefined ? Number(mantisse + "e" + m[2]) : mantisse;
+  }
+
+  /* a vaut b a `tolerance` pres, en relatif. */
+  function proche(a, b, tolerance) {
+    if (b === 0) return Math.abs(a) < 1e-12;
+    return Math.abs(a - b) <= (tolerance || 1e-9) * Math.abs(b);
+  }
+
+  return { ecrire: ecrire, ecrireDecimal: ecrireDecimal, lire: lire, proche: proche };
+})();
+
+/* Entrainement · la calculatrice.
+   Ecrite pour le depot : aucun droit a demander, aucune requete, rien d'enregistre.
+   Elle reprend l'application Calculs d'une calculatrice de lycee : une ligne de
+   saisie, l'historique au-dessus, Ans, les degres ou les radians, la virgule.
+
+   On tape au clavier ou sur le pave. Priorites usuelles ; ^ associe a droite ;
+   -2^2 vaut -4 ; 2π et 3(4+5) sont des produits ; sin(30)² vaut (sin 30)².
+   Les parentheses oubliees en fin de ligne sont fermees.
+   Apres un resultat, une ligne qui commence par un operateur part de Ans, au clavier
+   comme au pave ; Entree sur une ligne vide refait le dernier calcul (Ans×1,05, puis
+   Entree, Entree… pour iterer). Demande le 6 octobre 2026.
+   Aucun eval : l'expression est lue par un petit analyseur recursif.
+
+   monter(conteneur, { memoire: "cle" }) garde l'historique, Ans et l'unite d'angle dans le
+   sessionStorage, le temps de l'onglet : c'est ce qui suit l'eleve d'une page du site a
+   l'autre. Sans l'option, rien n'est garde. */
+"use strict";
+var Calculette = (function () {
+  var N = Nombres;
+  var RAD = Math.PI / 180;
+  var FONCTIONS = {
+    sin: function (x, deg) { return Math.sin(deg ? x * RAD : x); },
+    cos: function (x, deg) { return Math.cos(deg ? x * RAD : x); },
+    tan: function (x, deg) { return Math.tan(deg ? x * RAD : x); },
+    asin: function (x, deg) { var r = Math.asin(x); return deg ? r / RAD : r; },
+    acos: function (x, deg) { var r = Math.acos(x); return deg ? r / RAD : r; },
+    atan: function (x, deg) { var r = Math.atan(x); return deg ? r / RAD : r; },
+    ln: Math.log, log: Math.log10, exp: Math.exp, abs: Math.abs, sqrt: Math.sqrt
+  };
+  var ALIAS = { "sin⁻¹": "asin", "cos⁻¹": "acos", "tan⁻¹": "atan", arcsin: "asin", arccos: "acos", arctan: "atan" };
+  var OPERATEURS = { "+": "+", "-": "-", "−": "-", "–": "-", "×": "*", "*": "*", "·": "*", "÷": "/", "/": "/",
+                     "^": "^", "²": "²", "³": "³", "(": "(", ")": ")", "√": "√" };
+
+  /* ─────────── lire une expression ─────────── */
+  function jetons(texte) {
+    var t = String(texte).replace(/[\s  ]/g, ""), sortie = [], i = 0, m;
+    while (i < t.length) {
+      var reste = t.slice(i);
+      /* 2,5E3 ou 2,5e3 : l'exposant colle au nombre ; un e seul est la constante */
+      if ((m = reste.match(/^(\d+(?:[.,]\d*)?|[.,]\d+)([Ee][+\-−]?\d+)?/))) {
+        var e = m[2] ? "e" + m[2].slice(1).replace("−", "-") : "";
+        sortie.push({ type: "nombre", valeur: Number(m[1].replace(",", ".") + e) });
+      } else if ((m = reste.match(/^(sin⁻¹|cos⁻¹|tan⁻¹|arcsin|arccos|arctan|asin|acos|atan|sin|cos|tan|ln|log|exp|abs|sqrt)/i))) {
+        var nom = m[1].toLowerCase();
+        sortie.push({ type: "fonction", nom: ALIAS[nom] || nom });
+      } else if ((m = reste.match(/^(ans|pi|π|e)/i))) {
+        var c = m[1].toLowerCase();
+        sortie.push({ type: "constante", nom: c === "π" ? "pi" : c });
+      } else if (OPERATEURS[reste[0]]) {
+        m = [reste[0]];
+        sortie.push({ type: "op", op: OPERATEURS[reste[0]] });
+      } else throw new Error("syntaxe");
+      i += m[0].length;
+    }
+    return sortie;
+  }
+
+  function evaluer(texte, degres, ans) {
+    var j = jetons(texte), k = 0;
+    if (!j.length) throw new Error("vide");
+    var ouvertes = 0;
+    j.forEach(function (t) { if (t.op === "(") ouvertes++; else if (t.op === ")") ouvertes--; });
+    for (; ouvertes > 0; ouvertes--) j.push({ type: "op", op: ")" });
+
+    function prendre(op) { var t = j[k]; if (t && t.type === "op" && t.op === op) { k++; return true; } return false; }
+    function debutFacteur(t) {
+      return t && (t.type !== "op" || t.op === "(" || t.op === "√");
+    }
+    function expression() {
+      var v = terme();
+      for (;;) {
+        if (prendre("+")) v += terme();
+        else if (prendre("-")) v -= terme();
+        else return v;
+      }
+    }
+    function terme() {
+      var v = unaire();
+      for (;;) {
+        if (prendre("*")) v *= unaire();
+        else if (prendre("/")) { var d = unaire(); if (d === 0) throw new Error("division"); v /= d; }
+        else if (debutFacteur(j[k])) v *= puissance();          /* 2π, 3(4+5) */
+        else return v;
+      }
+    }
+    function unaire() {
+      if (prendre("-")) return -unaire();
+      if (prendre("+")) return unaire();
+      return puissance();
+    }
+    function puissance() {
+      var b = postfixe();
+      return prendre("^") ? Math.pow(b, unaire()) : b;
+    }
+    function postfixe() {
+      var v = primaire();
+      for (;;) {
+        if (prendre("²")) v = v * v;
+        else if (prendre("³")) v = v * v * v;
+        else return v;
+      }
+    }
+    function primaire() {
+      var t = j[k];
+      if (!t) throw new Error("syntaxe");
+      if (t.type === "nombre") { k++; return t.valeur; }
+      if (t.type === "constante") { k++; return t.nom === "pi" ? Math.PI : t.nom === "e" ? Math.E : ans; }
+      if (t.type === "fonction") { k++; return FONCTIONS[t.nom](primaire(), degres); }
+      if (prendre("√")) return Math.sqrt(postfixe());
+      if (prendre("(")) {
+        var v = expression();
+        if (!prendre(")")) throw new Error("syntaxe");
+        return v;
+      }
+      throw new Error("syntaxe");
+    }
+
+    var v = expression();
+    if (k < j.length) throw new Error("syntaxe");
+    if (isNaN(v)) throw new Error("domaine");
+    if (!isFinite(v)) throw new Error("infini");
+    return Number(v.toPrecision(12));
+  }
+  var MESSAGES = {
+    syntaxe: "Erreur de syntaxe", vide: "Rien à calculer", division: "Division par zéro",
+    domaine: "Hors du domaine de définition", infini: "Résultat trop grand"
+  };
+
+  /* ─────────── le pave ─────────── */
+  var EFFACER = "⌫", TOUT = "AC", EGAL = "=";
+  var TOUCHES = [
+    ["sin⁻¹", "sin⁻¹(", "fonction"], ["cos⁻¹", "cos⁻¹(", "fonction"], ["tan⁻¹", "tan⁻¹(", "fonction"], ["π", "π", "fonction"], ["e", "e", "fonction"],
+    ["sin", "sin(", "fonction"], ["cos", "cos(", "fonction"], ["tan", "tan(", "fonction"], ["ln", "ln(", "fonction"], ["log", "log(", "fonction"],
+    ["√", "√(", "op"], ["x²", "²", "op"], ["xʸ", "^", "op"], ["(", "(", "op"], [")", ")", "op"],
+    ["7", "7", "chiffre"], ["8", "8", "chiffre"], ["9", "9", "chiffre"], [EFFACER, EFFACER, "efface"], [TOUT, TOUT, "efface"],
+    ["4", "4", "chiffre"], ["5", "5", "chiffre"], ["6", "6", "chiffre"], ["×", "×", "op"], ["÷", "÷", "op"],
+    ["1", "1", "chiffre"], ["2", "2", "chiffre"], ["3", "3", "chiffre"], ["+", "+", "op"], ["−", "−", "op"],
+    ["0", "0", "chiffre"], [",", ",", "chiffre"], ["×10ⁿ", "×10^", "op"], ["Ans", "Ans", "fonction"], [EGAL, EGAL, "egal"]
+  ];
+  /* Ce que ⌫ efface d'un coup, plutot que lettre par lettre */
+  var BLOCS = ["sin⁻¹(", "cos⁻¹(", "tan⁻¹(", "sin(", "cos(", "tan(", "ln(", "log(", "√(", "×10^", "Ans"];
+  /* Apres un resultat, ces touches partent de Ans, comme sur une calculatrice */
+  var APRES_ANS = ["+", "−", "×", "÷", "^", "²", "×10^"];
+  /* ... et une ligne tapee au clavier qui commence par l'un de ces signes */
+  var DEBUT_ANS = /^[+\-−–×*·÷\/^²³]/;
+
+  function el(tag, attrs, enfants) {
+    var n = document.createElement(tag);
+    for (var k in attrs || {}) {
+      if (k === "classe") n.className = attrs[k];
+      else if (k === "texte") n.textContent = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    }
+    (enfants || []).forEach(function (e) { if (e) n.appendChild(e); });
+    return n;
+  }
+  function joli(texte) {
+    return texte.replace(/\*/g, "×").replace(/\//g, "÷").replace(/-/g, "−").replace(/\./g, ",");
+  }
+  /* Ce qu'on recopie dans la saisie : la valeur, ecrite comme on la taperait */
+  function brut(x) {
+    return String(Number(x.toPrecision(10))).replace("e+", "E").replace("e-", "E−").replace(".", ",");
+  }
+
+  function monter(conteneur, options) {
+    options = options || {};
+    var degres = true, ans = 0, aUnResultat = false, derniere = "", lignes = [];
+    var tactile = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    var bDeg = el("button", { type: "button", "aria-pressed": "true", texte: "Degrés" });
+    var bRad = el("button", { type: "button", "aria-pressed": "false", texte: "Radians" });
+    var historique = el("ol", { classe: "calc-historique" });
+    var ecran = el("div", { classe: "calc-ecran", "aria-live": "polite" }, [historique]);
+    var saisie = el("input", { type: "text", classe: "calc-saisie", autocomplete: "off", spellcheck: "false",
+      "aria-label": "Calcul à effectuer", placeholder: "2,5×10^3 ÷ (1163×20)" });
+    if (tactile) saisie.setAttribute("inputmode", "none");   /* le pave suffit, pas de clavier par-dessus */
+    var pave = el("div", { classe: "calc-touches" });
+
+    function angle(deg) {
+      degres = deg;
+      bDeg.setAttribute("aria-pressed", deg ? "true" : "false");
+      bRad.setAttribute("aria-pressed", deg ? "false" : "true");
+    }
+    bDeg.addEventListener("click", function () { angle(true); });
+    bRad.addEventListener("click", function () { angle(false); });
+
+    function inserer(txt) {
+      var a = saisie.selectionStart === null ? saisie.value.length : saisie.selectionStart;
+      var b = saisie.selectionEnd === null ? a : saisie.selectionEnd;
+      if (saisie.value === "" && aUnResultat && APRES_ANS.indexOf(txt) >= 0) { txt = "Ans" + txt; }
+      saisie.value = saisie.value.slice(0, a) + txt + saisie.value.slice(b);
+      var p = a + txt.length;
+      saisie.setSelectionRange(p, p);
+    }
+    function effacer() {
+      var a = saisie.selectionStart, b = saisie.selectionEnd, v = saisie.value;
+      if (a !== b) { saisie.value = v.slice(0, a) + v.slice(b); saisie.setSelectionRange(a, a); return; }
+      if (a === 0) return;
+      var avant = v.slice(0, a), n = 1;
+      for (var i = 0; i < BLOCS.length; i++) if (avant.slice(-BLOCS[i].length) === BLOCS[i]) { n = BLOCS[i].length; break; }
+      saisie.value = v.slice(0, a - n) + v.slice(a);
+      saisie.setSelectionRange(a - n, a - n);
+    }
+    function garder() {
+      if (!options.memoire) return;
+      try { sessionStorage.setItem(options.memoire, JSON.stringify({ ans: ans, a: aUnResultat, deg: degres, der: derniere, l: lignes.slice(-40) })); } catch (e) {}
+    }
+    /* rejoue : une ligne relue dans la memoire de l'onglet, avec la valeur qu'elle avait */
+    function ligne(expr, contenu, erreur, rejoue) {
+      if (!rejoue) { lignes.push([expr, contenu, erreur ? 1 : 0, ans]); garder(); }
+      var bExpr = el("button", { type: "button", classe: "calc-expr", title: "Reprendre ce calcul", texte: joli(expr) });
+      bExpr.addEventListener("click", function () { saisie.value = expr; saisie.focus(); });
+      var bRes = el("button", { type: "button", classe: "calc-res" + (erreur ? " erreur" : ""), texte: contenu });
+      if (!erreur) {
+        var valeur = rejoue ? rejoue[3] : ans;
+        bRes.title = "Insérer cette valeur";
+        bRes.addEventListener("click", function () { inserer(brut(valeur)); saisie.focus(); });
+      }
+      historique.appendChild(el("li", {}, [bExpr, bRes]));
+      while (historique.children.length > 40) historique.removeChild(historique.firstChild);
+      ecran.scrollTop = ecran.scrollHeight;
+    }
+    function calculer() {
+      var expr = saisie.value.trim();
+      if (!expr) { if (!derniere) return; expr = derniere; }   /* Entree a vide : le dernier calcul, encore */
+      if (aUnResultat && DEBUT_ANS.test(expr)) expr = "Ans" + expr;
+      derniere = expr;
+      var ouvertes = (expr.match(/\(/g) || []).length - (expr.match(/\)/g) || []).length;
+      for (; ouvertes > 0; ouvertes--) expr += ")";   /* l'historique montre ce qui a ete calcule */
+      try {
+        ans = evaluer(expr, degres, ans);
+        aUnResultat = true;
+        ligne(expr, N.ecrire(ans, 10), false);
+        saisie.value = "";
+      } catch (err) {
+        ligne(expr, MESSAGES[err.message] || MESSAGES.syntaxe, true);
+      }
+    }
+
+    TOUCHES.forEach(function (t) {
+      var b = el("button", { type: "button", classe: t[2], tabindex: "-1", texte: t[0] });
+      if (t[0] === EFFACER) b.setAttribute("aria-label", "Effacer");
+      if (t[0] === TOUT) b.setAttribute("aria-label", "Tout effacer");
+      /* garder le curseur dans la saisie : la touche ne prend pas le focus */
+      b.addEventListener("mousedown", function (ev) { ev.preventDefault(); });
+      b.addEventListener("click", function () {
+        if (t[1] === EGAL) calculer();
+        else if (t[1] === EFFACER) effacer();
+        else if (t[1] === TOUT) saisie.value = "";
+        else inserer(t[1]);
+        if (!tactile) saisie.focus();
+      });
+      pave.appendChild(b);
+    });
+    /* au clavier, un operateur tape sur une ligne vide apres un resultat devient Ans + operateur */
+    saisie.addEventListener("input", function () {
+      if (aUnResultat && saisie.value.length === 1 && DEBUT_ANS.test(saisie.value)) {
+        saisie.value = "Ans" + saisie.value;
+        saisie.setSelectionRange(saisie.value.length, saisie.value.length);
+      }
+    });
+    saisie.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter") { ev.preventDefault(); calculer(); }
+      else if (ev.key === "Escape") { saisie.value = ""; }
+    });
+
+    /* la memoire de l'onglet, relue a l'ouverture */
+    if (options.memoire) {
+      try {
+        var m = JSON.parse(sessionStorage.getItem(options.memoire) || "null");
+        if (m) {
+          ans = m.ans || 0; aUnResultat = !!m.a; derniere = m.der || ""; angle(m.deg !== false); lignes = m.l || [];
+          lignes.forEach(function (x) { ligne(x[0], x[1], x[2], x); });
+        }
+      } catch (e) {}
+      bDeg.addEventListener("click", garder); bRad.addEventListener("click", garder);
+    }
+    conteneur.appendChild(el("div", { classe: "calc-angle", role: "group", "aria-label": "Unité d'angle" }, [bDeg, bRad]));
+    conteneur.appendChild(ecran);
+    conteneur.appendChild(saisie);
+    conteneur.appendChild(pave);
+    return { focus: function () { if (!tactile) saisie.focus(); } };
+  }
+
+  return { monter: monter, evaluer: evaluer };
+})();
+
 /* Simulations des TP · briques communes, inlinees dans l'en-tete de chaque page.
    Rien ici ne touche au DOM au chargement : une simulation appelle ce dont elle a besoin.
    Aucune requete, aucun stockage : la page fonctionne hors ligne et n'enregistre rien. */
@@ -172,8 +844,13 @@ var Sim = (function () {
   /* Lecture d'une saisie d'eleve : virgule ou point, espaces ignores. */
   function lire(txt) {
     if (txt === null || txt === undefined) return NaN;
-    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-");
-    return t === "" ? NaN : Number(t);
+    var t = String(txt).replace(/\s| | /g, "").replace(",", ".").replace("−", "-").replace(/^[≈~]/, "");
+    if (t === "") return NaN;
+    /* une unite tapee apres le nombre (« 12 kWh », « 90 % ») ne rend pas la reponse illisible ;
+       ce qui suit doit commencer par une lettre, %, ° ou µ : « 12/5 » reste refuse (14 oct. 2026) */
+    var m = t.match(/^([-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)([a-zA-Zµ%°Ω].*)?$/);
+    if (!m || /^(h|min|s|mn)\d/i.test(m[2] || "")) return NaN;            // « 2 h 16 min » : une duree, pas un nombre
+    return Number(m[1]);
   }
   function el(tag, attrs, enfants) {
     var n = document.createElement(tag);
@@ -470,9 +1147,11 @@ var Sim = (function () {
      enregistreur de donnees. On choisit la periode, la duree, les voies du tableau, et deux voies
      tracees en direct sur deux axes ; le tableau se copie vers un tableur ou s'enregistre en CSV.
      Toutes les voies sont toujours enregistrees : masquer une colonne ne perd rien.
-     o : { temps: {cle, titre, unite, dec, echelle (s par unite)}, voies: [{cle, titre, unite, dec, cache}],
+     o : { temps: {cle, titre, unite, dec, echelle (s par unite), jours}, voies: [{cle, titre, unite, dec, cache}],
            lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
-           nomFichier, surChange } */
+           nomFichier, surChange }
+     « jours: true » sur un temps en heures : le tableau et l'axe ecrivent « J8 · 10 h 25 » au lieu de
+     « 178,42 h », illisible passe le premier jour (14 octobre 2026) ; la copie et le CSV gardent les heures. */
   var COULEURS_VOIES = ["--accent", "--faux"];
   function centrale(parent, o) {
     var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
@@ -545,11 +1224,24 @@ var Sim = (function () {
 
     function colonnes() { return [TP].concat(voies.filter(function (v) { return montree[v.cle]; })); }
     var corps = null;
-    function ligneTable(l, cs) { var r = el("tr"); cs.forEach(function (c) { r.appendChild(el("td", { texte: texteVal(l, c) })); }); return r; }
-    function texteVal(l, c) { var x = l[c.cle]; return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x)); }
+    function ligneTable(l, cs) {
+      var r = el("tr");
+      cs.forEach(function (c) { var td = el("td", { texte: texteVal(l, c) }); if (c === TP && TP.jours) td.className = "jour-heure"; r.appendChild(td); });
+      return r;
+    }
+    function jourHeure(h) {
+      var m = Math.round(h * 60), r = ((m % 1440) + 1440) % 1440;
+      return "J" + (Math.floor(m / 1440) + 1) + " · " + Math.floor(r / 60) + " h " + (r % 60 < 10 ? "0" : "") + (r % 60);
+    }
+    function titreCol(c) { return c === TP && TP.jours ? "Jour et heure" : c.titre + (c.unite ? " (" + c.unite + ")" : ""); }
+    function texteVal(l, c) {
+      var x = l[c.cle];
+      if (c === TP && TP.jours && typeof x === "number") return jourHeure(x);
+      return typeof x === "number" ? fr(x, c.dec === undefined ? 2 : c.dec) : (x === undefined || x === null ? "" : String(x));
+    }
     function dessinerTable() {
       var cs = colonnes(); table.innerHTML = "";
-      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: c.titre + (c.unite ? " (" + c.unite + ")" : "") })); });
+      var tr = el("tr"); cs.forEach(function (c) { tr.appendChild(el("th", { texte: titreCol(c) })); });
       table.appendChild(el("thead", null, [tr]));
       corps = el("tbody");
       if (!lignes.length) corps.appendChild(el("tr", { classe: "vide" }, [el("td", { colspan: cs.length, texte: "Aucune mesure pour l'instant : lance l'acquisition." })]));
@@ -579,12 +1271,24 @@ var Sim = (function () {
       var xs = lignes.map(function (l) { return l[TP.cle]; }).filter(function (x) { return typeof x === "number"; });
       var x0 = xs.length ? Math.min.apply(null, xs) : 0, x1 = xs.length ? Math.max.apply(null, xs) : 1;
       if (x1 - x0 < 1e-9) x1 = x0 + 1;
-      var px = pasJoli(x1 - x0, larg < 480 ? 5 : 8); x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
+      var nMax = larg < 480 ? 5 : 8, px = pasJoli(x1 - x0, nMax);
+      /* en jours : des pas d'heures rondes (1, 2, 3, 6, 12 h, puis des jours entiers), minuit ecrit « J6 » */
+      if (TP.jours) px = [1, 2, 3, 6, 12, 24, 48, 72, 168, 336].filter(function (p) { return (x1 - x0) / p <= nMax; })[0] || 336;
+      x0 = Math.floor(x0 / px) * px; x1 = Math.ceil(x1 / px) * px;
       var X = function (x) { return mg + (x - x0) / (x1 - x0) * w; };
+      var marque = function (x) {
+        if (!TP.jours) return fr(x, decimales(px));
+        var hh = Math.round(((x % 24) + 24) % 24);
+        return hh === 0 ? "J" + (Math.round(x / 24) + 1) : hh + " h";
+      };
       ctx.strokeStyle = css("--trait2"); ctx.lineWidth = 1; ctx.fillStyle = css("--encre2"); ctx.textAlign = "center"; ctx.textBaseline = "top";
-      for (var x = x0; x <= x1 + 1e-9; x += px) { ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(fr(x, decimales(px)), X(x), mh + h + 5); }
+      for (var x = x0; x <= x1 + 1e-9; x += px) {
+        var minuit = TP.jours && Math.round(((x % 24) + 24) % 24) === 0;
+        ctx.strokeStyle = css(minuit ? "--encre2" : "--trait2");
+        ctx.beginPath(); ctx.moveTo(X(x), mh); ctx.lineTo(X(x), mh + h); ctx.stroke(); ctx.fillText(marque(x), X(x), mh + h + 5);
+      }
       ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
-      ctx.fillText(TP.titre + (TP.unite ? " (" + TP.unite + ")" : ""), larg - md, haut - 3);
+      ctx.fillText(titreCol(TP), larg - md, haut - 3);
       trace.forEach(function (cle, i) {
         if (!cle) return;
         var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
@@ -785,6 +1489,999 @@ var Sim = (function () {
     return { pause: function () { actif = false; }, reprise: function () { actif = true; avant = null; }, actif: function () { return actif; } };
   }
 
+  /* ═══════════ PARCOURS · une simulation menee comme un projet ═══════════
+     Demande du 13 octobre 2026, pour le CAP et la seconde : un parcours ludique d'une heure sur
+     tablette plutot qu'un amas de donnees, et qui finit par un fichier texte corrige tout seul.
+     Cinq phases, une par competence de la grille nationale (APP, ANA, REA, VAL, COM), comme les
+     phases d'un projet : la commande, le plan, la realisation, le controle, le livrable.
+     LE FICHIER : le format des bilans du kit web (« BILAN DE SEQUENCE », un bloc SERIE par phase,
+     chaque question une case juste ou faux), que _commun/notation/NOTER-LES-BILANS.html note tout
+     seul. Le titre de chaque bloc porte sa competence entre crochets, [APP]... : l'outil l'y lit et
+     rattache le bloc sans reglage.
+     LA NOTE D'UNE QUESTION : juste si elle l'est au premier essai, ou au deuxieme pour un nombre, un
+     tri ou une manipulation (« essais » pour en decider autrement). On peut toujours reessayer pour avancer ; au troisieme echec,
+     « Continuer » la laisse fausse. La page dit juste ou pas encore, puis la methode : jamais la
+     valeur attendue.
+     PERSONNE NE RESTE BLOQUE (14 octobre 2026, remarque du professeur a l'essai) : « Continuer »
+     apparait aussi au troisieme appui sur « Verifier » quand la manipulation n'est pas faite, et
+     le livrable s'ouvre a tout moment, depuis le chemin ou le bouton de chaque phase. Le fichier se
+     produit inacheve : ce qui reste y compte comme non reussi.
+     Rien n'est enregistre ni envoye : le fichier se fabrique dans le navigateur (Blob).
+     UNE MANIPULATION (« action ») : verifier(ctx) rend null tant que rien n'est fait, ou
+       { ok, reponse, corriger: ["...", ...], controles: [[condition, "..."], ...], attente: "..." }.
+       « reponse » dit ce que la page lit, et va au fichier ; « lu », s'il est donne, remplace « reponse » a
+       l'ecran, quand elle porte ce qu'une autre question demande ; « corriger » nomme chaque erreur a reprendre, et
+       « controles » le fait tout seul (une condition fausse ajoute son texte et rend la question
+       fausse) ; sans « ok », la manipulation est juste si aucune erreur n'est nommee. UNE MANIPULATION REFUSEE NOMME TOUJOURS SES ERREURS (14 octobre 2026, « tu dois
+       preciser les erreurs a corriger ») : le reglage, le geste, l'oubli, jamais la valeur qu'il
+       fallait trouver ; une valeur que la consigne donne elle-meme peut se redire. « attente » :
+       tout est juste mais pas fini (journee en cours, courbe pas encore plate) ; la page le dit et
+       ne compte pas d'essai.
+     CROCHETS DE LA SCENE : q.apres(ctx, true, reponse) quand une question devient juste ;
+     q.fini(ctx, juste, reponse) quand elle se ferme, juste ou passee ; pour un nombre, la valeur lue
+     suit en quatrieme argument. recit et consigne d'une phase peuvent etre des fonctions de ctx, pour
+     varier avec ctx.niveau(). « large: true » sur une phase donne plus de place a la scene.
+
+     L'ENTRAINEMENT AU CCF (14 octobre 2026, pour les simulations de premiere et de terminale) :
+     « ccf: { problematique } » donne le cadrage de l'epreuve, releve sur un vrai CCF du lycee (le
+     vigneron, M. Meunier) : quatre parties cotees separement, APP, ANA, REA, VAL ; COM sur l'appel 1
+     et la conclusion ; deux appels professeur ; bonus d'autonomie de +0,25 ; note sur 10. Les phases
+     s'appellent « Partie n », la derniere, si elle est COM, « Conclusion ».
+     - type « appel » : { type: "appel", numero: 1, competence: "COM", lib, attendus: [...] }. L'eleve
+       appelle et CONTINUE ; le professeur valide quand il passe, par son code, sur la tablette meme
+       (le bandeau du haut l'y mene depuis n'importe quelle partie) : NA, ECA ou A. Dans le fichier,
+       un bloc EXERCICE : 0, 1 ou 2 points sur 2. Un appel lance mais non evalue ne compte pas ; un
+       appel jamais lance compte 0. Les appels se posent dans un tableau de questions, pas une fonction.
+     - L'aide : apres un premier echec, « Demander de l'aide » montre la methode. Elle ne retire rien a
+       la question, mais le bonus d'autonomie s'en va, comme en epreuve. Le fichier le dit.
+     - « competence » sur une question la sort du bloc de sa partie : une conclusion cotee COM dans la
+       partie 4, par exemple.
+     LE MODE LIBRE ET LA PAILLASSE : « libre: "#libre" » garde la simulation telle qu'elle etait, et
+     pose au-dessus deux boutons, explorer ou s'entrainer (#ccf dans l'adresse ouvre l'entrainement).
+     « paillasse: [selecteurs] » liste les morceaux de la simulation qu'une partie emprunte : la partie
+     qui porte « paillasse: true » (ou une liste) les recoit dans sa scene, et ils retournent a leur
+     place ensuite. Une seule scene, deplacee, jamais recopiee : son etat et ses releves la suivent.
+     « surOuvrir(ctx) » sur une partie s'appelle a chaque fois qu'on l'affiche.
+     LE TD SUR SIMULATION DU BTS, AU FORMAT DE L'U41 (14 octobre 2026 ; « TD sur simulation » et non
+     « entrainement », a la demande de l'utilisateur) : « u41: { problematique,
+     duree } » au lieu de « ccf: ». Meme mecanique — parties, appels, aide demandee, copie —, mais la
+     grille est celle des sept competences que l'epreuve U41 evalue (C12-1, C12-2, C4-3, C2-1, C2-2,
+     C2-3, C1-2 ; BTS FED C/01-referentiel/bts-fed-c-u41.yml), et il n'y a pas de bonus d'autonomie :
+     le fichier compte les aides. Une phase porte une competence, chaque question peut porter la sienne ;
+     « conclusion: true » sur la derniere partie la nomme « Conclusion ». Le fichier porte la ligne
+     « Grille : BTS FED · U41 », que NOTER-LES-BILANS lit pour noter sur la bonne grille.
+     LA NAVIGATION LIBRE (14 octobre 2026, « comme sur un controle ») : une fois commence, toutes les parties
+     sont ouvertes, dans l'ordre qu'on veut ; « Partie suivante » ne bloque plus. Une partie dont les questions
+     sont une fonction de ctx (des phrases ecrites avec les nombres de l'eleve) se recalcule a chaque visite tant
+     qu'on n'y a rien repondu : ouverte trop tot, elle se refait quand on revient. Un nombre manquant s'affiche
+     « … », jamais « NaN » ; une question dont la valeur attendue depend d'une mesure pas encore faite le dit,
+     sans compter d'essai.
+     LE DOSSIER : « dossier: true » remet les documents de la partie 1 (sa scene) dans un panneau qu'un
+     bouton « Le dossier » de la tete ouvre a gauche, dans toutes les parties ; une fonction (zone, ctx) a
+     la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
+     LA CALCULATRICE : Sim.calculatrice() pose celle des sites de classe (_commun/entrainement/moteur/
+     calculette.js, que l'assembleur embarque dans chaque page), un bouton flottant hors parcours, un
+     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire. */
+  var COMPETENCES = {
+    APP: "S'approprier", ANA: "Analyser", REA: "Réaliser", VAL: "Valider", COM: "Communiquer"
+  };
+  /* les capacites de la grille de l'epreuve, telles que les sujets du lycee les impriment */
+  var CAPACITES = {
+    APP: "Rechercher, extraire et organiser l'information.",
+    ANA: "Émettre une conjecture, une hypothèse. Proposer une méthode de résolution, un protocole expérimental.",
+    REA: "Choisir une méthode de résolution, un protocole expérimental. Exécuter une méthode de résolution, expérimenter, simuler, calculer.",
+    VAL: "Contrôler la vraisemblance d'une conjecture, d'une hypothèse. Interpréter, critiquer, argumenter.",
+    COM: "Rendre compte d'une démarche, d'un résultat, à l'oral ou à l'écrit."
+  };
+  var ORDRE_COMP = ["APP", "ANA", "REA", "VAL", "COM"];
+  /* les sept competences que l'epreuve U41 du BTS FED evalue, dans l'ordre du travail sur un dossier */
+  var U41 = {
+    "C12-1": "Identifier les documents d'un dossier", "C12-2": "Extraire les informations", "C4-3": "Décoder les plans",
+    "C2-1": "Identifier les composants et l'architecture", "C2-2": "Identifier les chaînes d'énergie et d'information",
+    "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
+  };
+  var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
+  var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
+  var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
+  /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
+     changer : node -e "..." avec la fonction empreinte ci-dessous sur « labo|<code> », et remplacer
+     le nombre. Il ne protege rien de serieux : il evite qu'un eleve se valide en un geste. */
+  var CODE_PROF = 2147056977;
+  function empreinte(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h; }
+  /* un nombre que l'eleve n'a pas encore mesure ne s'ecrit pas « NaN » : on met des points de suspension */
+  function propre(html) { return String(html === undefined ? "" : html).replace(/\bNaN\b|\bundefined\b/g, "…"); }
+  /* les retours ecrits par les scenes : la ponctuation haute et les guillemets ne commencent jamais une ligne */
+  function insecables(t) { return String(t).replace(/ ([:;?!»])/g, " $1").replace(/« /g, "« "); }
+  function texteSeul(html) {
+    var d = document.createElement("div"); d.innerHTML = html || "";
+    return (d.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  function deux(n) { return (n < 10 ? "0" : "") + n; }
+  function heure(d) { return deux(d.getHours()) + "h" + deux(d.getMinutes()); }
+  function parcours(parent, o) {
+    var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
+    var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
+    function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
+    var niveaux = o.niveaux || ["CAP", "Seconde"];
+    var etat = { niveau: niveaux.length === 1 ? niveaux[0] : null, debut: null, courante: -1, ouverte: -1,
+      fiches: [], construites: [], colonnes: [], exporte: false, aides: 0 };
+    var donnees = {};                                    // partage entre les phases d'un parcours
+    var appels = [];                                     // les fiches des appels lances ou a lancer
+    var nPh = o.phases.length;
+    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
+    var P = $(parent);
+
+    /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
+    var libre = o.libre ? $(o.libre) : null, barreModes = null, bLibre = null, bParcours = null;
+    if (libre) {
+      bLibre = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "true" },
+        [el("b", { texte: "Explorer la simulation" }), el("span", { texte: o.libreTexte || "librement, sans note ni fichier" })]);
+      bParcours = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "false" },
+        [el("b", { texte: ccf ? "Entraînement au CCF" : u41 ? "TD sur simulation" : "Le parcours" }),
+         el("span", { texte: o.modeTexte || ((u41 ? (o.u41.duree || "deux heures") : "une heure") + ", et un fichier pour le professeur") })]);
+      barreModes = el("div", { classe: "pc-modes", role: "group", "aria-label": "Deux façons d'utiliser la page" }, [bLibre, bParcours]);
+      P.appendChild(barreModes);
+      bLibre.addEventListener("click", function () { mode(false); });
+      bParcours.addEventListener("click", function () { mode(true); });
+    }
+    P.appendChild(racine);
+    if (!libre) document.body.classList.add("pc-visible");
+    function mode(p) {
+      if (!libre) return;
+      bLibre.setAttribute("aria-pressed", p ? "false" : "true");
+      bParcours.setAttribute("aria-pressed", p ? "true" : "false");
+      libre.hidden = p; racine.hidden = !p;
+      document.body.classList.toggle("pc-visible", p);    // le parcours a son bouton de calculatrice : le flottant s'efface
+      if (!p) poserPaillasse(null, null);
+    }
+
+    /* ---- la paillasse : les morceaux de la simulation qu'une partie emprunte ---- */
+    var pail = (o.paillasse || []).map(function (s) {
+      var n = $(s);
+      if (!n) throw new Error("paillasse : " + s + " introuvable");
+      var m = document.createComment(" paillasse " + s + " ");
+      n.parentNode.insertBefore(m, n);
+      return { sel: s, n: n, m: m };
+    });
+    function poserPaillasse(cible, liste) {
+      pail.forEach(function (p) {
+        var veut = cible && (liste === true || (liste && liste.indexOf(p.sel) >= 0));
+        if (veut) cible.appendChild(p.n);
+        else if (p.n.previousSibling !== p.m) p.m.parentNode.insertBefore(p.n, p.m.nextSibling);
+      });
+    }
+
+    function nomPhase(i) {
+      if (!epreuve) return "Phase " + (i + 1);
+      if (o.phases[i].nom) return o.phases[i].nom;
+      return i === nPh - 1 && (o.phases[i].conclusion || (ccf && o.phases[i].competence === "COM")) ? "Conclusion" : "Partie " + (i + 1);
+    }
+
+    /* ---- la tete : chemin des phases, etoiles, temps ---- */
+    var tete = el("div", { classe: "pc-tete" });
+    var chemin = el("ol", { classe: "pc-chemin", "aria-label": epreuve ? "Les parties du sujet" : "Les phases du projet" });
+    var noeuds = o.phases.map(function (ph, i) {
+      var b = el("button", { type: "button", classe: "pc-noeud", disabled: "disabled",
+        "aria-label": nomPhase(i) + " · " + nomComp(ph.competence) },
+        [el("span", { classe: "pc-rond", texte: epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
+         el("span", { classe: "pc-comp", texte: ph.competence }),
+         el("span", { classe: "pc-etoiles", "aria-hidden": "true" })]);
+      b.addEventListener("click", function () { montrer(i); });
+      chemin.appendChild(el("li", null, [b]));
+      return b;
+    });
+    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": epreuve ? "La copie" : "Le livrable" },
+      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: epreuve ? "Copie" : "Livrable" }), el("span", { classe: "pc-etoiles" })]);
+    drapeau.addEventListener("click", function () { montrer(nPh); });
+    chemin.appendChild(el("li", null, [drapeau]));
+    var info = el("div", { classe: "pc-info" });
+    var score = el("span", { classe: "pc-score" });
+    var temps = el("span", { classe: "pc-temps" });
+    var niv = el("span", { classe: "pc-niveau" });
+    var badge = el("button", { type: "button", classe: "pc-badge-appel", hidden: "hidden" });
+    badge.addEventListener("click", function () { ouvrirProf(null); });
+    info.appendChild(badge); info.appendChild(niv); info.appendChild(score); info.appendChild(temps);
+    /* le dossier : les documents de la partie 1, a relire depuis n'importe quelle partie, dans un panneau a gauche ;
+       la calculatrice peut rester ouverte a droite en meme temps */
+    var dossierFn = o.dossier === true ? o.phases[0].scene : (typeof o.dossier === "function" ? o.dossier : null), bDos = null, panDos = null;
+    function fermerDossier() { if (!panDos) return; panDos.hidden = true; document.body.classList.remove("dossier-ouvert"); bDos.setAttribute("aria-pressed", "false"); }
+    function basculerDossier() {
+      if (!panDos) {
+        panDos = el("aside", { classe: "pc-dossier-panneau", "aria-label": "Le dossier", hidden: "hidden" });
+        var fermer = el("button", { type: "button", classe: "calc-fermer", texte: "Fermer" });
+        fermer.addEventListener("click", fermerDossier);
+        var corpsDos = el("div", { classe: "pc-dossier-corps" });
+        panDos.appendChild(el("div", { classe: "pc-dossier-tete" }, [el("span", { classe: "calc-titre", texte: "Le dossier" }), fermer]));
+        panDos.appendChild(corpsDos);
+        document.body.appendChild(panDos);
+        dossierFn(corpsDos, ctx);
+        panDos.addEventListener("keydown", function (ev) { if (ev.key === "Escape") fermerDossier(); });
+      }
+      if (panDos.hidden) { panDos.hidden = false; document.body.classList.add("dossier-ouvert"); bDos.setAttribute("aria-pressed", "true"); }
+      else fermerDossier();
+    }
+    if (dossierFn) {
+      bDos = el("button", { type: "button", classe: "pc-calc pc-dos", "aria-pressed": "false", hidden: "hidden", texte: "Le dossier" });
+      bDos.addEventListener("click", basculerDossier);
+      info.appendChild(bDos);
+    }
+    if (window.Calculette) {                               // la calculatrice des sites, dans la tete du parcours
+      var bCalc = el("button", { type: "button", classe: "pc-calc", "aria-pressed": "false", texte: "Calculatrice" });
+      bCalc.addEventListener("click", function () { var c = calculatrice(); if (c) bCalc.setAttribute("aria-pressed", c.basculer() ? "true" : "false"); });
+      info.appendChild(bCalc);
+    }
+    tete.appendChild(chemin); tete.appendChild(info);
+    racine.appendChild(tete);
+    /* la hauteur reelle de la tete, que la colonne de la scene garde au-dessus d'elle (elle passe sur deux lignes en tablette etroite) */
+    function majHaut() { if (tete.offsetHeight) racine.style.setProperty("--pc-haut", tete.offsetHeight + "px"); }
+    window.addEventListener("resize", majHaut);
+
+    /* ---- l'ecran de la commande, ou du sujet ---- */
+    var accueil = el("section", { classe: "pc-ecran pc-accueil" });
+    var c = o.commande || {};
+    var illus = el("div", { classe: "scene pc-illus" });
+    if (c.illustration) c.illustration(illus);
+    var choixNiv = el("div", { classe: "pc-choix-niveau" });
+    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    if (niveaux.length > 1) {
+      choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
+      var rang = el("div", { classe: "rangee" });
+      niveaux.forEach(function (n) {
+        var b = el("button", { type: "button", classe: "bouton", "aria-pressed": "false", texte: n });
+        b.addEventListener("click", function () {
+          etat.niveau = n;
+          [].forEach.call(rang.children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+          partir.disabled = false;
+        });
+        rang.appendChild(b);
+      });
+      choixNiv.appendChild(rang);
+      partir.disabled = true;
+    }
+    partir.addEventListener("click", function () {
+      if (!etat.niveau) return;
+      etat.debut = Date.now();
+      niv.textContent = etat.niveau;
+      document.body.classList.add("pc-en-cours");
+      ouvrir(0);
+    });
+    if (epreuve) {
+      var cc = o.ccf || o.u41;
+      var sujet = el("div", { classe: "carte pc-commande" }, [
+        el("div", { classe: "pc-surtitre", texte: cc.surtitre || "Le sujet" }),
+        c.client ? el("p", { classe: "pc-client", html: c.client }) : null,
+        el("div", { classe: "pc-texte", html: c.texte || "" }),
+        el("p", { classe: "pc-problematique", html: "<b>Problématique</b> « " + cc.problematique + " »" })
+      ]);
+      var grille = el("ul", { classe: "pc-grille", "aria-label": "La grille de l'épreuve" });
+      ORDRE.forEach(function (k) {
+        var ou = [];
+        o.phases.forEach(function (ph, i) {
+          if (ph.competence === k) ou.push(nomPhase(i));
+          if (typeof ph.questions === "function") return;
+          (ph.questions || []).forEach(function (q) {
+            var kk = q.competence || ph.competence;
+            if (kk !== k) return;
+            var nom = q.type === "appel" ? "Appel " + q.numero : nomPhase(i);
+            if (ou.indexOf(nom) < 0) ou.push(nom);
+          });
+        });
+        if (u41 && !ou.length) return;                 // une competence que le sujet n'evalue pas ne s'affiche pas
+        grille.appendChild(el("li", null, [el("div", { classe: "pc-grille-ligne" }, [el("span", { html: "<b>" + k + "</b> " + nomComp(k) }),
+          el("span", { classe: "pc-grille-ou", texte: ou.join(" · ") || "—" })]), u41 ? null : el("div", { classe: "pc-grille-cap", texte: CAPACITES[k] })]));
+      });
+      var nAppels = 0;
+      o.phases.forEach(function (ph) { if (typeof ph.questions !== "function") (ph.questions || []).forEach(function (q) { if (q.type === "appel") nAppels++; }); });
+      var carteFormat = el("div", { classe: "carte" }, ccf ? [
+        el("h2", { texte: "Le format de l'épreuve" }),
+        el("p", { html: cc.format || "Au CCF, <b>45 minutes</b> sur une seule situation, notées <b>sur 10</b>. Ici, <b>une heure</b> : le temps de prendre la simulation en main." }),
+        grille,
+        el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
+        el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
+        el("p", { classe: "consigne", html: "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+        choixNiv, partir] : [
+        el("h2", { texte: "L'U41 et ce TD" }),
+        /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
+        el("p", { html: cc.format || "À l'examen, l'U41 dure <b>4 heures</b> : cinq parties indépendantes autour d'un dossier technique. " +
+          "On y <b>extrait</b> des informations (40 % des consignes), on <b>justifie</b> (23 %), on <b>trace et complète</b> (18 %), on <b>calcule</b> (17 %). " +
+          "Ici, <b>" + (cc.duree || "deux heures") + "</b> sur la simulation, et chaque question se rattache à une compétence de l'épreuve." }),
+        el("p", { classe: "pc-surtitre", texte: "Les compétences évaluées" }),
+        grille,
+        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur la tablette.</span>" }) : null,
+        el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
+        choixNiv, partir]);
+      accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
+    } else {
+      var carteCmd = el("div", { classe: "carte pc-commande" }, [
+        el("div", { classe: "pc-surtitre", texte: "La commande" }),
+        c.client ? el("p", { classe: "pc-client", html: c.client }) : null,
+        el("div", { classe: "pc-texte", html: c.texte || "" }),
+        c.livrable ? el("p", { classe: "pc-livrable", html: "<b>Le livrable :</b> " + c.livrable }) : null
+      ]);
+      var etapes = el("ol", { classe: "pc-plan" });
+      o.phases.forEach(function (ph, i) {
+        etapes.appendChild(el("li", null, [el("b", { texte: nomPhase(i) + " · " + nomComp(ph.competence) + " — " }),
+          el("span", { html: ph.titre })]));
+      });
+      accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [
+        el("div", null, [carteCmd, illus]),
+        el("div", { classe: "carte" }, [el("h2", { texte: "Le projet en cinq phases" }), etapes,
+          el("p", { classe: "consigne", html: "Une heure en tout. On passe d'une phase à l'autre comme on veut, par le chemin en haut ; " +
+            "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." }),
+          choixNiv, partir])
+      ]));
+    }
+    racine.appendChild(accueil);
+
+    /* ---- une phase ---- */
+    var ecrans = o.phases.map(function () {
+      var s = el("section", { classe: "pc-ecran", hidden: "hidden" });
+      racine.appendChild(s);
+      return s;
+    });
+    var final = el("section", { classe: "pc-ecran", hidden: "hidden" });
+    racine.appendChild(final);
+    var postes = [];                                       // l'emplacement de la paillasse, partie par partie
+
+    function questionsDe(i) {
+      var ph = o.phases[i];
+      var qs = typeof ph.questions === "function" ? ph.questions(ctx) : (ph.questions || []);
+      return qs.filter(function (q) { return !q.niveau || q.niveau === etat.niveau; });
+    }
+
+    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41,
+      fr: fr, lire: lire, mesure: mesure, gauss: gauss, svg: svg, el: el, borne: borne, animer: animer };
+
+    /* un recit ou une consigne peut dependre du niveau : une fonction de ctx */
+    function selon(x) { return typeof x === "function" ? x(ctx) : x; }
+
+    function construire(i) {
+      if (etat.construites[i]) return;
+      etat.construites[i] = true;
+      var ph = o.phases[i], s = ecrans[i];
+      s.appendChild(el("div", { classe: "pc-phase-tete" }, [
+        el("div", { classe: "pc-surtitre", texte: nomPhase(i) + " · " + nomComp(ph.competence) }),
+        el("h2", { html: ph.titre }),
+        ph.recit ? el("p", { classe: "pc-bulle", html: selon(ph.recit) }) : null
+      ]));
+      var zone = el("div", { classe: "carte pc-scene" });
+      if (ph.consigne) zone.appendChild(el("p", { classe: "consigne", html: selon(ph.consigne) }));
+      var colQ = el("div", { classe: "carte pc-questions" }, [el("h2", { texte: epreuve ? "Les questions" : "À trouver" })]);
+      s.appendChild(el("div", { classe: "plan" + (ph.large ? " pc-large" : "") + (ph.paillasse ? " pc-avec-paillasse" : "") }, [zone, colQ]));
+      if (ph.scene) ph.scene(zone, ctx);
+      if (ph.paillasse) { postes[i] = el("div", { classe: "pc-paillasse" }); zone.appendChild(postes[i]); }
+      var qs = questionsDe(i);
+      etat.colonnes[i] = colQ;
+      etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
+      var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
+      var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
+        texte: i + 1 < nPh ? (epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+      suite.addEventListener("click", function () { ouvrir(i + 1); });
+      var versFin = null;
+      if (i + 1 < nPh) {
+        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: epreuve ? "Aller à la copie" : "Aller au livrable" });
+        versFin.addEventListener("click", function () { montrer(nPh); });
+      }
+      s.appendChild(el("div", { classe: "pc-pied" }, [versFin, bravo, suite]));
+      etat.fiches[i].pied = { bravo: bravo, suite: suite };
+      majPhase(i);
+    }
+
+    /* une question : son interface, ses essais, sa note */
+    function poserQuestion(parentQ, q, i, j) {
+      var f = { q: q, essais: 0, juste: false, fini: false, passe: false, reponse: "", note: false, aide: false };
+      var maxNote = q.essais || ((q.type === "nombre" || q.type === "action" || q.type === "classer") ? 2 : 1);
+      var bloc = el("div", { classe: "pc-q", "data-etat": "a-faire" });
+      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-q-num\">" + (j + 1) + "</span>" + propre(q.lib) }));
+      var champ = el("div", { classe: "pc-q-champ" });
+      var lireReponse, verifierOk, controles = [];
+      if (q.type === "nombre") {
+        var inp = el("input", { type: "text", inputmode: "decimal", autocomplete: "off", "aria-label": texteSeul(q.lib) });
+        champ.appendChild(inp); if (q.unite) champ.appendChild(el("span", { classe: "pc-unite", html: q.unite }));
+        controles.push(inp);
+        inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+        lireReponse = function () { var v = lire(inp.value); return isFinite(v) ? fr(v, q.dec === undefined ? decimalesDe(inp.value) : q.dec) + (q.unite ? " " + texteSeul(q.unite) : "") : ""; };
+        verifierOk = function () {
+          var v = lire(inp.value); if (!isFinite(v)) return null;
+          f.valeur = v;
+          var a = typeof q.attendu === "function" ? q.attendu(ctx) : q.attendu;
+          if (!isFinite(a)) return "attente";               // elle repose sur une mesure, ou une reponse, d'une autre partie
+          var tol = q.tolerance === undefined ? 0.05 : q.tolerance;
+          return Math.abs(v - a) <= Math.abs(a) * tol + (q.toleranceAbsolue || 0);
+        };
+      } else if (q.type === "choix" || q.type === "multi") {
+        var multi = q.type === "multi", choisis = [];
+        var rang = el("div", { classe: "pc-options" });
+        var options = typeof q.options === "function" ? q.options(ctx) : q.options;
+        options.forEach(function (op, k) {
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: propre(op) });
+          b.addEventListener("click", function () {
+            if (f.fini) return;
+            if (multi) { var p = choisis.indexOf(k); if (p < 0) choisis.push(k); else choisis.splice(p, 1); }
+            else choisis = [k];
+            [].forEach.call(rang.children, function (x, m) { x.setAttribute("aria-pressed", choisis.indexOf(m) >= 0 ? "true" : "false"); });
+          });
+          rang.appendChild(b); controles.push(b);
+        });
+        champ.appendChild(rang);
+        lireReponse = function () { return choisis.slice().sort().map(function (k) { return texteSeul(options[k]); }).join(" + "); };
+        verifierOk = function () {
+          if (!choisis.length) return null;
+          var bon = typeof q.bonne === "function" ? q.bonne(ctx) : q.bonne;
+          bon = [].concat(bon).slice().sort().join(",");
+          return choisis.slice().sort().join(",") === bon;
+        };
+      } else if (q.type === "classer") {
+        var places = q.items.map(function () { return -1; });
+        var grille = el("div", { classe: "pc-classer" });
+        /* compact : une liste par ligne au lieu d'une rangee de boutons, d'office en epreuve des cinq categories
+           (cinq lignes de cinq boutons faisaient une partie de plus de 5 000 px de haut sur tablette) */
+        var compact = q.compact !== undefined ? !!q.compact : (epreuve && q.categories.length >= 5);
+        q.items.forEach(function (it, k) {
+          var ligne = el("div", { classe: "pc-classer-ligne" + (compact ? " pc-compact" : "") }, [el("span", { classe: "pc-classer-item", html: propre(it) })]);
+          if (compact) {
+            var choix = el("select", { classe: "pc-classer-choix", "aria-label": texteSeul(it) });
+            choix.appendChild(el("option", { value: "-1", texte: "— choisir —" }));
+            q.categories.forEach(function (cat, m) { choix.appendChild(el("option", { value: String(m), texte: texteSeul(cat) })); });
+            choix.addEventListener("change", function () { if (!f.fini) places[k] = Number(choix.value); });
+            ligne.appendChild(choix); grille.appendChild(ligne); controles.push(choix);
+            return;
+          }
+          var cats = el("div", { classe: "pc-options" });
+          q.categories.forEach(function (cat, m) {
+            var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: cat });
+            b.addEventListener("click", function () {
+              if (f.fini) return;
+              places[k] = m;
+              [].forEach.call(cats.children, function (x, n) { x.setAttribute("aria-pressed", n === m ? "true" : "false"); });
+            });
+            cats.appendChild(b); controles.push(b);
+          });
+          ligne.appendChild(cats); grille.appendChild(ligne);
+        });
+        champ.appendChild(grille);
+        lireReponse = function () { return q.items.map(function (it, k) { return texteSeul(it) + " → " + (places[k] < 0 ? "?" : texteSeul(q.categories[places[k]])); }).join(" ; "); };
+        verifierOk = function () {
+          if (places.indexOf(-1) >= 0) return null;
+          var bonnes = typeof q.bonnes === "function" ? q.bonnes(ctx) : q.bonnes;   // selon le tirage, au besoin
+          var n = 0; places.forEach(function (p, k) { if (p === bonnes[k]) n++; });
+          f.bienPlaces = n;
+          return n === q.items.length;
+        };
+      } else {                                              // « action » : la scene est la reponse
+        if (q.aide) champ.appendChild(el("p", { classe: "pc-aide", html: q.aide }));
+        lireReponse = function () { var r = q.verifier(ctx); return r && r.reponse ? r.reponse : ""; };
+        verifierOk = function () {
+          var r = q.verifier(ctx); f.attente = ""; f.corriger = []; f.lu = undefined;
+          if (!r) return null;
+          if (r.lu !== undefined) f.lu = r.lu;           // ce que l'ecran montre, si le fichier doit en garder davantage
+          if (r.attente) { f.attente = r.attente; return "attente"; }
+          var ok = r.ok === undefined ? true : !!r.ok;
+          (r.controles || []).forEach(function (c) { if (!c[0]) { ok = false; f.corriger.push(c[1]); } });
+          (r.corriger || []).forEach(function (t) { if (t && f.corriger.indexOf(t) < 0) f.corriger.push(t); });
+          if (r.ok === undefined && f.corriger.length) ok = false;   // une erreur nommee suffit a refuser
+          if (ok) f.corriger = [];
+          else if (!f.corriger.length && window.console) console.warn("manipulation refusee sans erreur nommee :", texteSeul(q.lib));
+          return ok;
+        };
+      }
+      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: "Vérifier" });
+      var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
+      /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
+      var bAide = epreuve && q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
+      var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
+      bloc.appendChild(champ);
+      bloc.appendChild(el("div", { classe: "rangee" }, [bVerif, bAide, bPasser]));
+      bloc.appendChild(retour);
+      bloc.appendChild(methodeVue);
+      parentQ.appendChild(bloc);
+
+      function clore() {
+        f.fini = true; bVerif.disabled = true; bPasser.hidden = true;
+        if (bAide) bAide.hidden = true;
+        controles.forEach(function (x) { x.disabled = true; });
+        majPhase(i); majTete();
+        /* « fini » previent la scene a la cloture, juste ou passee ; « apres », seulement si juste */
+        if (q.fini) q.fini(ctx, f.juste, f.reponse, f.valeur);
+      }
+      function verifier() {
+        if (f.fini) return;
+        var ok = verifierOk();
+        f.appuis = (f.appuis || 0) + 1;
+        if (ok === "attente") {
+          retour.className = "pc-retour";
+          if (bloc.getAttribute("data-etat") === "faux") bloc.setAttribute("data-etat", "a-faire");
+          retour.innerHTML = q.type === "action" && f.attente ? insecables(f.attente) + " <span class=\"pc-lu\">Aucun essai n'est compté.</span>" :
+            "Cette question s'appuie sur une mesure ou un résultat qui n'existe pas encore : faites d'abord la manipulation ou la partie qui le donne.";
+          if (f.appuis >= 3) bPasser.hidden = false;
+          return;
+        }
+        if (ok === null) {
+          retour.className = "pc-retour";
+          if (bloc.getAttribute("data-etat") === "faux") bloc.setAttribute("data-etat", "a-faire");
+          retour.innerHTML = (q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.")) +
+            (!epreuve && f.appuis >= 3 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : "");
+          if (bAide && !f.aide) bAide.hidden = false;
+          if (f.appuis >= 3) bPasser.hidden = false;          // personne ne reste bloque : on peut continuer
+          return;
+        }
+        f.essais++;
+        f.reponse = lireReponse();
+        if (ok) {
+          f.juste = true; f.note = f.essais <= maxNote;
+          bloc.setAttribute("data-etat", "juste");
+          retour.className = "pc-retour juste";
+          retour.innerHTML = "Juste." + (q.bravo ? " <span class=\"pc-q-bravo\">" + q.bravo + "</span>" : "");
+          if (q.apres) q.apres(ctx, true, f.reponse, f.valeur);
+          clore();
+          return;
+        }
+        bloc.setAttribute("data-etat", "faux");
+        retour.className = "pc-retour faux";
+        var compte = q.type === "classer" && f.bienPlaces !== undefined ? " " + f.bienPlaces + " sur " + q.items.length + " bien placés." : "";
+        /* une manipulation refusee dit ce que la page lit (les reglages de l'eleve, jamais la valeur attendue) : sans cela,
+           « Pas encore » repete vingt fois ne dit rien (essai de l'utilisateur, 14 octobre 2026) */
+        var vu = q.type === "action" ? (f.lu !== undefined ? f.lu : f.reponse) : "";
+        if (vu) compte += " <span class=\"pc-lu\">La page lit : " + insecables(vu) + ".</span>";
+        if (q.type === "action" && f.corriger && f.corriger.length)
+          compte += " <span class=\"pc-corriger\"><b>À corriger :</b>" + f.corriger.map(function (t) { return "<span>" + insecables(t) + "</span>"; }).join("") + "</span>";
+        if (epreuve) {
+          retour.innerHTML = "Pas encore." + compte + " Encore un essai.";
+          if (bAide && !f.aide) bAide.hidden = false;
+        } else {
+          retour.innerHTML = "Pas encore." + compte + (f.essais >= 2 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : " Encore un essai.");
+        }
+        if (f.essais >= 3 || f.appuis >= 3) bPasser.hidden = false;
+      }
+      bVerif.addEventListener("click", verifier);
+      if (bAide) bAide.addEventListener("click", function () {
+        if (f.aide) return;
+        f.aide = true; etat.aides++;
+        bAide.hidden = true; methodeVue.hidden = false;
+      });
+      bPasser.addEventListener("click", function () {
+        f.passe = true; f.note = false;
+        if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
+        bloc.setAttribute("data-etat", "passe");
+        retour.className = "pc-retour"; retour.innerHTML = "On continue." + (epreuve ? "" : " <span class=\"methode\">" + (q.methode || "") + "</span>");
+        if (epreuve && q.methode) methodeVue.hidden = false;
+        clore();
+      });
+      return f;
+    }
+    function decimalesDe(txt) { var m = String(txt).replace(",", ".").match(/\.(\d+)/); return m ? Math.min(m[1].length, 4) : 0; }
+
+    /* un appel professeur : l'eleve appelle et continue ; le professeur valide quand il passe */
+    function poserAppel(parentQ, q, i) {
+      var f = { q: q, appel: true, essais: 0, juste: false, fini: false, passe: false, reponse: "", note: false,
+        appele: null, cote: null, heureCote: null, phase: i };
+      var bloc = el("div", { classe: "pc-q pc-appel", "data-etat": "a-faire" });
+      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><b>Appel n° " + q.numero + "</b> · " + q.lib }));
+      var bAppel = el("button", { type: "button", classe: "bouton principal", texte: "J'appelle le professeur" });
+      var bProf = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Le professeur valide" });
+      var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
+      bloc.appendChild(el("div", { classe: "rangee" }, [bAppel, bProf]));
+      bloc.appendChild(retour);
+      parentQ.appendChild(bloc);
+      bAppel.addEventListener("click", function () {
+        if (f.appele) return;
+        f.appele = new Date(); f.fini = true; f.reponse = "appel lancé à " + heure(f.appele);
+        bAppel.disabled = true; bProf.hidden = false;
+        bloc.setAttribute("data-etat", "attente");
+        retour.className = "pc-retour";
+        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur cette tablette. <b>En attendant, continuez.</b>";
+        majPhase(i); majTete(); majAppels();
+      });
+      bProf.addEventListener("click", function () { ouvrirProf(f); });
+      f.afficher = function () {
+        if (!f.cote) return;
+        bloc.setAttribute("data-etat", f.cote === "NA" ? "faux" : "juste");
+        retour.className = "pc-retour " + (f.cote === "NA" ? "faux" : "juste");
+        retour.innerHTML = "Évalué par le professeur à " + heure(f.heureCote) + " : <b>" + COTES[f.cote] + "</b>.";
+        bProf.textContent = "Le professeur revient sur sa cote";
+      };
+      appels.push(f);
+      return f;
+    }
+    function attente() { return appels.filter(function (f) { return f.appele && !f.cote; }); }
+    function majAppels() {
+      var n = attente().length;
+      badge.hidden = !n;
+      badge.innerHTML = "<span aria-hidden=\"true\">✋</span> " + (n > 1 ? n + " appels en attente" : "Appel en attente");
+    }
+
+    /* la fenetre du professeur : son code, puis NA, ECA ou A pour chaque appel lance */
+    var voile = null, codeProf, codeDit, zoneCode, listeProf, cibleProf = null;
+    function ouvrirProf(cible) {
+      if (!voile) construireVoile();
+      cibleProf = cible;
+      voile.hidden = false; zoneCode.hidden = false; listeProf.hidden = true; listeProf.innerHTML = "";
+      codeProf.value = ""; codeDit.textContent = "";
+      setTimeout(function () { codeProf.focus(); }, 30);
+    }
+    function fermerProf() { if (voile) voile.hidden = true; }
+    function construireVoile() {
+      voile = el("div", { classe: "pc-voile", role: "dialog", "aria-modal": "true", "aria-label": "Réservé au professeur", hidden: "hidden" });
+      var boite = el("div", { classe: "carte pc-prof" });
+      var fermer = el("button", { type: "button", classe: "bouton", texte: "Fermer" });
+      fermer.addEventListener("click", fermerProf);
+      codeProf = el("input", { type: "password", inputmode: "numeric", autocomplete: "off", "aria-label": "Code du professeur" });
+      var bOuvrir = el("button", { type: "button", classe: "bouton principal", texte: "Ouvrir" });
+      codeDit = el("p", { classe: "pc-retour faux", "aria-live": "polite" });
+      zoneCode = el("div", null, [el("p", { classe: "consigne", texte: "Code du professeur :" }),
+        el("div", { classe: "pc-q-champ" }, [codeProf, bOuvrir]), codeDit]);
+      listeProf = el("div", { classe: "pc-prof-liste" });
+      boite.appendChild(el("div", { classe: "pc-surtitre", texte: "Réservé au professeur" }));
+      boite.appendChild(el("h2", { texte: "Évaluer un appel" }));
+      boite.appendChild(zoneCode); boite.appendChild(listeProf);
+      boite.appendChild(el("div", { classe: "rangee pc-prof-pied" }, [fermer]));
+      voile.appendChild(boite);
+      document.body.appendChild(voile);
+      function essayer() {
+        if (empreinte("labo|" + codeProf.value.trim()) !== CODE_PROF) { codeDit.textContent = "Ce n'est pas le code."; codeProf.select(); return; }
+        zoneCode.hidden = true; listeProf.hidden = false; remplirProf();
+      }
+      bOuvrir.addEventListener("click", essayer);
+      codeProf.addEventListener("keydown", function (e) { if (e.key === "Enter") essayer(); });
+      voile.addEventListener("click", function (e) { if (e.target === voile) fermerProf(); });
+    }
+    function remplirProf() {
+      listeProf.innerHTML = "";
+      var lances = appels.filter(function (f) { return f.appele; });
+      if (cibleProf) lances.sort(function (a, b) { return (a === cibleProf ? 0 : 1) - (b === cibleProf ? 0 : 1); });
+      if (!lances.length) { listeProf.appendChild(el("p", { texte: "Aucun appel lancé pour l'instant." })); return; }
+      lances.forEach(function (f) {
+        var q = f.q, k = q.competence || o.phases[f.phase].competence;
+        var carte = el("div", { classe: "pc-q pc-appel" });
+        carte.appendChild(el("p", { classe: "pc-q-lib", html: "<b>Appel n° " + q.numero + "</b> · " + k + " " + nomComp(k) + " — " + q.lib }));
+        if (q.attendus && q.attendus.length) {
+          carte.appendChild(el("p", { classe: "pc-surtitre", texte: "Ce qu'on attend" }));
+          carte.appendChild(el("ul", { classe: "pc-attendus" }, q.attendus.map(function (a) { return el("li", { html: a }); })));
+        }
+        var rangee = el("div", { classe: "pc-options pc-cotes" });
+        ["NA", "ECA", "A"].forEach(function (x) {
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": f.cote === x ? "true" : "false", html: "<b>" + x + "</b> · " + COTES[x] });
+          b.addEventListener("click", function () {
+            f.cote = x; f.heureCote = new Date(); f.note = x === "A";
+            [].forEach.call(rangee.children, function (y) { y.setAttribute("aria-pressed", y === b ? "true" : "false"); });
+            f.afficher(); majPhase(f.phase); majTete(); majAppels();
+            if (finalFait && etat.courante === nPh) construireFinal();
+          });
+          rangee.appendChild(b);
+        });
+        carte.appendChild(rangee);
+        listeProf.appendChild(carte);
+      });
+    }
+
+    function etoilesDe(i) {
+      var fs = etat.fiches[i]; if (!fs || !fs.length) return 0;
+      if (fs.some(function (f) { return !f.fini; })) return 0;
+      var n = fs.filter(function (f) { return f.note; }).length;
+      return n === fs.length ? 3 : n >= fs.length * 0.6 ? 2 : 1;
+    }
+    function majPhase(i) {
+      var fs = etat.fiches[i]; if (!fs || !fs.pied) return;
+      var finie = fs.every(function (f) { return f.fini; });
+      fs.pied.suite.disabled = false;
+      fs.pied.bravo.hidden = !finie || !o.phases[i].bravo;
+      if (finie && etat.ouverte === i) etat.ouverte = i + 1;
+      majChemin();
+    }
+    function majChemin() {
+      noeuds.forEach(function (b, i) {
+        var dispo = !!etat.debut;                         // comme dans un controle : toutes les parties, dans l'ordre qu'on veut
+        if (dispo) b.removeAttribute("disabled"); else b.setAttribute("disabled", "disabled");
+        var e = etoilesDe(i);
+        b.querySelector(".pc-etoiles").textContent = e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
+        b.classList.toggle("pc-fait", e > 0);
+        b.classList.toggle("pc-ici", etat.courante === i);
+      });
+      if (etat.debut) drapeau.removeAttribute("disabled");   // le livrable s'ouvre a tout moment
+      drapeau.classList.toggle("pc-ici", etat.courante === nPh);
+      drapeau.classList.toggle("pc-fait", etat.exporte);
+    }
+    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { s += etoilesDe(i); }); return s; }
+    function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
+    function majTete() {
+      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nPh);
+      temps.textContent = etat.debut ? minutes() + " min" : "";
+      if (bDos) bDos.hidden = !etat.debut;
+    }
+    setInterval(majTete, 15000);
+
+    function ouvrir(i) {
+      if (i > etat.ouverte) etat.ouverte = i;
+      montrer(i);
+    }
+    /* une partie ouverte trop tot : ses phrases portaient « … » ; on la refait tant qu'on n'y a rien touche */
+    function intacte(i) {
+      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide; });
+    }
+    function rafraichir(i) {
+      var ph = o.phases[i], colQ = etat.colonnes[i];
+      if (!etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
+      var pied = etat.fiches[i].pied;
+      while (colQ.children.length > 1) colQ.removeChild(colQ.lastChild);
+      etat.fiches[i] = questionsDe(i).map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
+      etat.fiches[i].pied = pied;
+      majPhase(i);
+    }
+    function montrer(i) {
+      if (i < nPh) rafraichir(i);
+      etat.courante = i;
+      accueil.hidden = true;
+      ecrans.forEach(function (s, k) { s.hidden = k !== i; });
+      final.hidden = i !== nPh;
+      if (i < nPh) construire(i); else construireFinal();
+      if (pail.length) poserPaillasse(i < nPh ? postes[i] : null, i < nPh ? o.phases[i].paillasse : null);
+      majChemin(); majTete(); majHaut();
+      if (i < nPh && o.phases[i].surOuvrir) o.phases[i].surOuvrir(ctx);
+      if (o.surPhase) o.surPhase(i, ctx);
+      racine.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
+    function autonomie() {
+      var passees = 0, restent = 0;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.appel) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      o.phases.forEach(function (ph, i) { if (!etat.fiches[i]) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
+      var merite = !etat.aides && !passees && !restent;
+      if (u41) {
+        var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
+          passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "rien de passé"];
+        if (restent) u.push(restent + " question" + (restent > 1 ? "s" : "") + " sans réponse");
+        return { merite: merite, texte: u.join(", ") };
+      }
+      var t = merite ? "bonus +0,25 mérité — aucune aide demandée, rien de passé"
+        : "pas de bonus — " + [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "",
+          passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "",
+          restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : ""].filter(Boolean).join(", ");
+      return { merite: merite, texte: t };
+    }
+
+    /* ---- le livrable : recapitulatif et fichier ---- */
+    var finalFait = false, recap, apercu, titreFin, bulleFin;
+    function construireFinal() {
+      if (!finalFait) {
+        finalFait = true;
+        titreFin = el("h2"); bulleFin = el("p", { classe: "pc-bulle" });
+        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: epreuve ? "La copie" : "Le livrable" }), titreFin, bulleFin]));
+        recap = el("div", { classe: "carte" });
+        var remise = el("div", { classe: "carte pc-remise" });
+        remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
+        remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
+          "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
+        var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
+        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Produire mon fichier" });
+        var bVoir = el("button", { type: "button", classe: "bouton", texte: "Afficher le texte" });
+        var dit = el("p", { classe: "pc-retour", "aria-live": "polite" });
+        apercu = el("textarea", { classe: "pc-apercu", readonly: "readonly", rows: "10", hidden: "hidden", "aria-label": "Le texte du fichier" });
+        remise.appendChild(el("div", { classe: "pc-q-champ" }, [ident]));
+        remise.appendChild(el("div", { classe: "rangee" }, [bProd, bVoir]));
+        remise.appendChild(dit); remise.appendChild(apercu);
+        bProd.addEventListener("click", function () {
+          var id = ident.value.trim();
+          if (!id) { dit.className = "pc-retour faux"; dit.textContent = "Tapez d’abord l’identifiant donné en classe."; return; }
+          var txt = fabriquer(id);
+          var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
+          try {
+            var url = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
+            var a = el("a", { href: url, download: nom }); document.body.appendChild(a); a.click();
+            setTimeout(function () { URL.revokeObjectURL(url); a.parentNode.removeChild(a); }, 1500);
+            etat.exporte = true; majChemin();
+            dit.className = "pc-retour juste";
+            dit.textContent = "Fichier produit : " + nom + ". S’il n’apparaît pas, « Afficher le texte » permet de le copier.";
+          } catch (e) {
+            dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
+          }
+        });
+        bVoir.addEventListener("click", function () {
+          var id = ident.value.trim() || "(identifiant à taper)";
+          apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
+        });
+        var simpl = null;
+        if (o.simplifie && o.simplifie.length) {
+          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
+            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
+        }
+        final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
+      }
+      /* le livrable se produit meme inacheve : ce qui reste compte comme non reussi */
+      var restent = 0, appelsAFaire = 0;                     // les appels se comptent a part : ce ne sont pas des questions
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        (fs ? fs.filter(function (f) { return !f.fini; }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+          if (q.type === "appel") appelsAFaire++; else restent++;
+        });
+      });
+      var enAttente = attente().length;
+      titreFin.innerHTML = restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
+      var mots = [];
+      if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut, " +
+        "ou produire votre fichier tel quel : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + ".");
+      if (appelsAFaire) mots.push("<b>" + (appelsAFaire > 1 ? appelsAFaire + " appels n'ont pas été lancés" : "Un appel n'a pas été lancé") + "</b> : " + (appelsAFaire > 1 ? "ils comptent" : "il compte") + " zéro.");
+      if (enAttente) mots.push("<b>" + (enAttente > 1 ? enAttente + " appels attendent" : "Un appel attend") + " encore le professeur</b> : faites-le valider avant de produire le fichier, sinon il ne comptera pas.");
+      if (!restent && !appelsAFaire && !enAttente && o.fin) mots.push(o.fin);
+      bulleFin.innerHTML = mots.join(" ");
+      bulleFin.hidden = !bulleFin.innerHTML;
+      recap.innerHTML = "";
+      recap.appendChild(el("h2", { texte: ccf ? "Le bilan de l'épreuve" : u41 ? "Le bilan, compétence par compétence" : "Le bilan du projet" }));
+      var t = el("table", { classe: "releve pc-recap" });
+      if (epreuve) {
+        t.appendChild(el("tr", null, [el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Appel" })]));
+        ORDRE.forEach(function (k) {
+          var n = 0, m = 0, ap = [];
+          o.phases.forEach(function (ph, i) {
+            var fs = etat.fiches[i], qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
+            qs.forEach(function (q, j) {
+              if ((q.competence || ph.competence) !== k) return;
+              var f = fs && fs[j];
+              if (q.type === "appel") ap.push("n° " + q.numero + " : " + (!f || !f.appele ? "pas fait" : !f.cote ? "en attente" : f.cote));
+              else { m++; if (f && f.note) n++; }
+            });
+          });
+          if (u41 && !m && !ap.length) return;
+          t.appendChild(el("tr", null, [el("td", { html: "<b>" + k + "</b> " + nomComp(k) }), el("td", { texte: m ? n + " sur " + m : "—" }), el("td", { texte: ap.join(" · ") || "—" })]));
+        });
+      } else {
+        t.appendChild(el("tr", null, [el("th", { texte: "Phase" }), el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Étoiles" })]));
+        o.phases.forEach(function (ph, i) {
+          var fs = etat.fiches[i] || [];
+          var n = fs.filter(function (f) { return f.note; }).length, e = etoilesDe(i);
+          t.appendChild(el("tr", null, [el("td", { texte: String(i + 1) }), el("td", { texte: nomComp(ph.competence) }),
+            el("td", { texte: n + " sur " + fs.length }), el("td", { texte: e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "—" })]));
+        });
+      }
+      recap.appendChild(t);
+      if (epreuve) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>" + (u41 ? "Aides" : "Autonomie") + "</b> : " + autonomie().texte + "." }));
+      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nPh + "</b> · " + minutes() + " min" }));
+      if (o.grades) {
+        var g = o.grades.filter(function (x) { return totalEtoiles() >= x[0]; }).pop();
+        if (g) recap.appendChild(el("p", { classe: "pc-grade", html: g[1] }));
+      }
+    }
+    function nettoie(s) {
+      return (s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s)
+        .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "sans-identifiant";
+    }
+    function fabriquer(id) {
+      var d = new Date();
+      var out = ["BILAN DE SÉQUENCE",
+        "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
+        "Identifiant: " + id,
+        "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
+        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nPh + ", en " + minutes() + " min"];
+      if (ccf) out.push("Autonomie  : " + autonomie().texte);
+      if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
+      out.push(new Array(64).join("="), "");
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        var qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
+        /* un bloc par competence : celle de la partie d'abord, puis celles que des questions portent */
+        var groupes = [], index = {};
+        qs.forEach(function (q, j) {
+          if (q.type === "appel") return;
+          var k = q.competence || ph.competence;
+          if (!(k in index)) { index[k] = groupes.length; groupes.push({ k: k, items: [] }); }
+          groupes[index[k]].items.push(j);
+        });
+        groupes.sort(function (a, b) { return (a.k === ph.competence ? 0 : 1) - (b.k === ph.competence ? 0 : 1); });
+        groupes.forEach(function (g) {
+          out.push("SÉRIE — [" + g.k + "] " + nomPhase(i) + " · " + nomComp(g.k) + " : " + texteSeul(ph.titre), "");
+          g.items.forEach(function (j, n) {
+            var q = qs[j], f = fs && fs[j];
+            var etatCase, rep;
+            if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
+            else {
+              etatCase = f.note ? "juste" : "faux";
+              var det = f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
+                : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
+              if (f.aide) det += ", avec aide";
+              rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
+            }
+            out.push("  " + (n + 1) + ". " + texteSeul(q.lib));
+            out.push("     réponse : " + rep + "   [" + etatCase + "]");
+          });
+          out.push("");
+        });
+        /* les appels : un bloc EXERCICE chacun, 0, 1 ou 2 points sur 2 */
+        qs.forEach(function (q, j) {
+          if (q.type !== "appel") return;
+          var f = fs && fs[j], k = q.competence || ph.competence;
+          out.push("EXERCICE — [" + k + "] Appel n° " + q.numero + " · " + nomComp(k) + " : " + texteSeul(q.lib));
+          if (!f || !f.appele) out.push("  réponse : appel non fait", "  verdict : appel non fait", "  points retrouvés : 0 sur 2");
+          else if (!f.cote) out.push("  réponse : appel lancé à " + heure(f.appele), "  verdict : non évalué par le professeur, ne compte pas");
+          else out.push("  réponse : appel lancé à " + heure(f.appele) + ", évalué à " + heure(f.heureCote),
+            "  verdict : " + f.cote + " — " + COTES[f.cote], "  points retrouvés : " + POINTS_COTE[f.cote] + " sur 2");
+          out.push("");
+        });
+      });
+      out.push(new Array(64).join("-"));
+      out.push("Fichier produit dans le navigateur de l'élève.");
+      out.push("Rien n'a été envoyé, rien n'a été enregistré ailleurs.");
+      return out.join("\r\n");
+    }
+
+    window.addEventListener("beforeunload", function (e) {
+      if (etat.debut && !etat.exporte) { e.preventDefault(); e.returnValue = ""; }
+    });
+    majTete();
+    if (libre) mode(/^#(ccf|u41|parcours)$/.test(location.hash));
+    /* la porte d'essai : etat interne et fichier, pour les controles */
+    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, fiches: function () { return etat.fiches; },
+      appels: appels, mode: mode, dossier: function () { if (dossierFn) basculerDossier(); return panDos; }, coter: function (f, x) { f.cote = x; f.heureCote = new Date(); f.note = x === "A"; f.afficher(); majPhase(f.phase); majAppels(); },
+      choisirNiveau: function (n) { etat.niveau = n; niv.textContent = n; }, demarrer: function (n) {
+        if (libre) mode(true);
+        etat.niveau = n || etat.niveau || niveaux[0]; niv.textContent = etat.niveau; etat.debut = Date.now();
+        document.body.classList.add("pc-en-cours"); ouvrir(0); } };
+  }
+
+  /* La calculatrice des sites de classe, dans une page de simulation (14 octobre 2026, « tu dois
+     ajouter l'onglet calculatrice au labo ») : le meme panneau et les memes classes que outils-page.js
+     du kit, sans aucun stockage. Un bouton flottant hors parcours ; pendant un parcours, le bouton de
+     sa tete. L'assembleur embarque nombres.js et calculette.js, et appelle Sim.calculatrice(). */
+  var calc = null;
+  function calculatrice() {
+    if (calc) return calc;
+    if (!window.Calculette) return null;
+    var panneau = el("aside", { classe: "calculatrice", "aria-label": "Calculatrice", hidden: "hidden" });
+    var fermer = el("button", { type: "button", classe: "calc-fermer", texte: "Fermer" });
+    var corps = el("div", { classe: "calc-corps" });
+    panneau.appendChild(el("div", { classe: "calc-tete" }, [el("span", { classe: "calc-titre", texte: "Calculatrice" }), fermer]));
+    panneau.appendChild(corps);
+    document.body.appendChild(panneau);
+    var sonde = el("span", { classe: "mono" }); sonde.style.display = "none"; document.body.appendChild(sonde);
+    panneau.style.setProperty("--mono", getComputedStyle(sonde).fontFamily); sonde.parentNode.removeChild(sonde);
+    var b = el("button", { type: "button", classe: "bouton-outil", "aria-pressed": "false", texte: "Calculatrice" });
+    document.body.appendChild(el("div", { classe: "outils-flottants" }, [b]));
+    var machine = null;
+    function ouvrir() {
+      if (!machine) machine = Calculette.monter(corps, {});
+      panneau.hidden = false; document.body.classList.add("calc-ouverte"); b.setAttribute("aria-pressed", "true");
+      if (machine && machine.focus) machine.focus();
+      return true;
+    }
+    function fermerP() {
+      panneau.hidden = true; document.body.classList.remove("calc-ouverte"); b.setAttribute("aria-pressed", "false");
+      [].forEach.call(document.querySelectorAll(".pc-calc"), function (x) { x.setAttribute("aria-pressed", "false"); });
+      return false;
+    }
+    b.addEventListener("click", function () { if (panneau.hidden) ouvrir(); else fermerP(); });
+    fermer.addEventListener("click", fermerP);
+    document.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && !panneau.hidden && panneau.contains(document.activeElement)) fermerP(); });
+    calc = { ouvrir: ouvrir, fermer: fermerP, basculer: function () { return panneau.hidden ? ouvrir() : fermerP(); } };
+    return calc;
+  }
+
+  /* LE TOUCHER QUI RATAIT (14 octobre 2026, la fenetre et le soleil de la regulation « ne marchent pas ») :
+     une scene se redessine vingt fois par seconde, et l'element touche est remplace entre l'appui et le
+     relachement ; le navigateur ne donne alors aucun clic. Si cela arrive pour un appui bref, sans glisser,
+     on rejoue le clic sur le premier ancetre encore en place qui contient le point de relachement — et
+     jamais en double : si le navigateur a donne son clic, on ne fait rien. */
+  (function () {
+    var bas = null;
+    document.addEventListener("pointerdown", function (e) {
+      var ch = []; for (var n = e.target; n && n !== document; n = n.parentNode) ch.push(n);
+      bas = { cible: e.target, chaine: ch, x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId };
+    }, true);
+    document.addEventListener("pointerup", function (e) {
+      var b = bas; bas = null;
+      if (!b || b.id !== e.pointerId || document.contains(b.cible)) return;           // la cible est la : le navigateur fait son clic
+      if (Math.abs(e.clientX - b.x) > 10 || Math.abs(e.clientY - b.y) > 10 || Date.now() - b.t > 800) return;   // un glisser, pas un appui
+      var cible = null;
+      for (var i = 1; i < b.chaine.length; i++) if (document.contains(b.chaine[i])) { cible = b.chaine[i]; break; }
+      if (!cible || cible === document.body || cible === document.documentElement || !cible.contains(e.target)) return;
+      var natif = false, vu = function () { natif = true; };
+      document.addEventListener("click", vu, true);
+      setTimeout(function () {
+        document.removeEventListener("click", vu, true);
+        if (!natif) cible.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, view: window, clientX: e.clientX, clientY: e.clientY }));
+      }, 0);
+    }, true);
+  })();
+
   /* Petit utilitaire SVG. */
   var NS = "http://www.w3.org/2000/svg";
   function svg(tag, attrs, parent) {
@@ -796,7 +2493,7 @@ var Sim = (function () {
 
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
-    defi: defi, animer: animer, avancer: avancer, svg: svg };
+    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice };
 })();
 
 </script>
@@ -828,8 +2525,24 @@ var Sim = (function () {
 .fiche{font-size:.9rem;color:var(--encre2);margin:0}
 .fiche b{color:var(--encre)}
 #instruments .afficheur .val{font-size:1.1rem}
+/* l'entrainement a l'U41 : le dossier, ses plans */
+.pc-docs .doc-large{grid-column:1/-1}
+.pc-docs table.fiche-tech{border-collapse:collapse;width:100%}
+.pc-docs table.fiche-tech td{border-top:1px solid var(--trait2);padding:5px 6px;text-align:left;vertical-align:top;font-size:.88rem}
+.pc-docs table.fiche-tech td:first-child{font-weight:650;width:38%}
+.pc-docs .schema{display:block;width:100%;max-width:620px;height:auto;margin:0 auto;background:var(--carte);border-radius:6px}
+.schema .s-gaine{fill:var(--air);stroke:var(--encre);stroke-width:1.6}
+.schema .s-org{fill:var(--carte);stroke:var(--encre);stroke-width:1.4}
+.schema .s-cote{stroke:var(--encre2);stroke-width:1;fill:none}
+.schema .s-trou{fill:var(--encre)}
+.schema text{font-size:11.5px;fill:var(--encre2)}
+.schema .s-nom{font-size:11.5px;font-weight:700;fill:var(--encre)}
+.schema .s-sonde{fill:var(--carte);stroke:var(--accent);stroke-width:1.4}
 </style>
 
+<div id="u41"></div>
+
+<div id="libre">
 <nav class="onglets" id="experiences" aria-label="Expériences">
   <button type="button" data-vue="vueBanc">Le banc du lycée</button>
   <button type="button" data-vue="vueCta">La CTA en saison</button>
@@ -843,14 +2556,14 @@ var Sim = (function () {
 </div>
 
 <div class="plan">
-  <div class="carte">
+  <div class="carte" id="carteScene">
     <h2><span class="num">2</span><span id="titreScene">Le banc double flux</span></h2>
     <div class="scene">
       <svg id="scene" viewBox="0 0 640 476" role="img" aria-label="La centrale de traitement d'air, ses sondes et le diagramme de l'air humide"></svg>
     </div>
     <p class="legende" id="legende"></p>
   </div>
-  <div class="carte">
+  <div class="carte" id="carteMesure">
     <h2><span class="num">3</span>Règle et mesure</h2>
     <div class="commandes">
       <div id="cmd" class="commandes"></div>
@@ -861,7 +2574,7 @@ var Sim = (function () {
   </div>
 </div>
 
-<div class="carte">
+<div class="carte" id="carteReleve">
   <h2><span class="num">4</span>La centrale d'acquisition</h2>
   <p class="consigne" id="consigneReleve"></p>
   <div id="vueBanc" class="vue"></div>
@@ -883,6 +2596,7 @@ var Sim = (function () {
     </ul>
   </details>
 </div>
+</div>
 
 <script>
 (function () {
@@ -898,6 +2612,7 @@ var Sim = (function () {
 
   /* ---------- Les reglages ---------- */
   var reg = { vitesse: 1 };
+  var zoneCachee = false;          // l'entrainement a l'U41 cache la zone visee : l'etudiant compare au CCTP
   var SAISONS = {
     hiver: { texte: "Hiver · −7 °C, 90 %", te: -7, he: 90, ti: 20, hi: 50, zone: { t: [18, 21], phi: [40, 55] } },
     misaison: { texte: "Mi-saison · 10 °C, 70 %", te: 10, he: 70, ti: 21, hi: 50, zone: { t: [18, 21], phi: [40, 55] } },
@@ -976,7 +2691,7 @@ var Sim = (function () {
       e.pts[k].h = hDe(e.pts[k].t, e.pts[k].r); e.pts[k].phi = phiDe(e.pts[k].t, e.pts[k].r);
     });
     e.c = c;
-    if (c.dansZone && !e.dansZone && Math.abs(e.pts.I.t - c.I.t) < 0.2) { e.dansZone = true; message("Le soufflage est dans la zone voulue : la centrale est réglée. Relève les sondes, calcule les puissances."); }
+    if (c.dansZone && !e.dansZone && Math.abs(e.pts.I.t - c.I.t) < 0.2) { e.dansZone = true; if (!zoneCachee) message("Le soufflage est dans la zone voulue : la centrale est réglée. Relève les sondes, calcule les puissances."); }
     if (!c.dansZone) e.dansZone = false;
     e.t += dt;
   }
@@ -1208,7 +2923,8 @@ var Sim = (function () {
       if (a > tmin && a < tmax) texte(G, X(a) - 2, Y(0) - 4, hh + " kJ/kg", { ancre: "end" });
     });
     var s = SAISONS[e.saison], z = s.zone, rz1 = z.phi ? rDe(z.t[0], z.phi[0]) : 0, rz2 = z.phi ? rDe(z.t[1], z.phi[1]) : z.r[1];
-    if (z.phi) {
+    if (zoneCachee) { /* la zone n'est pas dessinee */ }
+    else if (z.phi) {
       var poly = [[z.t[0], rDe(z.t[0], z.phi[0])], [z.t[1], rDe(z.t[1], z.phi[0])], [z.t[1], rDe(z.t[1], z.phi[1])], [z.t[0], rDe(z.t[0], z.phi[1])]];
       svg("path", { d: "M" + poly.map(function (p) { return X(p[0]) + " " + Y(p[1]); }).join(" L") + " Z", fill: css("--juste"), opacity: 0.25, stroke: css("--juste") }, G);
     } else svg("rect", { x: X(z.t[0]), y: Y(z.r[1]), width: X(z.t[1]) - X(z.t[0]), height: Y(0) - Y(z.r[1]), fill: css("--juste"), opacity: 0.25, stroke: css("--juste") }, G);
@@ -1218,7 +2934,7 @@ var Sim = (function () {
     svg("path", { d: "M" + chemin.join(" L"), fill: "none", stroke: css("--accent"), "stroke-width": 2.2 }, G);
     ordre.forEach(function (k, i) {
       var memePoint = i > 0 && Math.abs(p[k].t - p[ordre[i - 1]].t) < 0.3 && Math.abs(p[k].r - p[ordre[i - 1]].r) < 0.15;
-      svg("circle", { cx: X(p[k].t), cy: Y(p[k].r), r: k === "I" ? 6 : 4, fill: k === "I" ? (e.c.dansZone ? css("--juste") : css("--faux")) : css("--accent") }, G);
+      svg("circle", { cx: X(p[k].t), cy: Y(p[k].r), r: k === "I" ? 6 : 4, fill: k === "I" ? (zoneCachee ? css("--encre") : e.c.dansZone ? css("--juste") : css("--faux")) : css("--accent") }, G);
       if (!memePoint) texte(G, X(p[k].t) + 7, Y(p[k].r) - 6, noms[k], {});
     });
     svg("circle", { cx: X(p.R ? p.R.t : s.ti), cy: Y(rDe(s.ti, s.hi)), r: 4, fill: "none", stroke: css("--encre"), "stroke-width": 1.5 }, G);
@@ -1344,10 +3060,486 @@ var Sim = (function () {
   /* Porte des essais. */
   window.cta = { etat: E, reglage: reg, air: { pvs: pvs, rDe: rDe, phiDe: phiDe, hDe: hDe, rosee: rosee }, calcCta: function () { return calcCta(E()); },
     lectures: function () { return exp === "banc" ? lecBanc(E()) : lecCta(E()); }, enr: function () { return CEN[exp]; }, releve: function () { return CEN[exp]; },
-    centrale: function () { return CEN[exp]; }, molettes: { banc: MB, cta: MC }, dessiner: function () { dessiner(); afficher(); } };
+    centrale: function () { return CEN[exp]; }, molettes: { banc: MB, cta: MC }, dessiner: function () { dessiner(); afficher(); },
+    /* l'entrainement a l'U41 (14 octobre 2026) : l'etat de chaque experience, le regime vise du banc, la
+       vitesse vraie sous la sonde, les reglages imposes par le sujet, la zone visee cachee */
+    etatDe: function (x) { if (!etats[x]) etats[x] = etatNeuf(x); return etats[x]; },
+    experience: function () { return exp; },
+    centraleDe: function (x) { return CEN[x]; },
+    cibleBanc: function () {
+      var e = etats.banc, Q = qBanc(e), qm = Q / 3600 / VS, c = cp(rDe(e.tLab, e.hLab));
+      if (!Q) return [e.tLab, e.tLab, e.tLab, e.tLab, e.tLab];
+      var t4 = e.tLab + e.Prep / (qm * c), eps = epsBanc(Q), t2 = e.tLab + eps * (t4 - e.tLab);
+      return [e.tLab, t2, t2 + e.Pbc / (qm * c), t4, t4 - eps * (t4 - e.tLab)];
+    },
+    vVraie: function () { var e = etats.banc; return qBanc(e) / 3600 / S_GAINE * profil(Math.abs(e.sonde - 0.5) * 2) * (e.port === 1 ? 1.09 : 1); },
+    calcDe: function () { return calcCta(etats.cta); },
+    imposer: function (x, o) {
+      var e = etats[x] || (etats[x] = etatNeuf(x));
+      Object.keys(o).forEach(function (k) { e[k] = o[k]; });
+      if (x === "banc" && o.tLab !== undefined) e.T = [e.tLab, e.tLab, e.tLab, e.tLab, e.tLab];
+      if (x === "cta" && o.saison) { e.pts = null; e.dansZone = false; pasCta(e, 0.01); }
+      majMolettes(); if (x === exp) { poserReglages(); poserCommandes(); } dessiner();
+    },
+    cacherZone: function (oui) {
+      zoneCachee = !!oui;
+      if (exp === "cta") {
+        document.getElementById("legende").textContent = oui ? "Une molette sous chaque caisson ; touche le récupérateur pour son by-pass, l'humidificateur pour son type. Le diagramme trace l'air à chaque étape : à toi de comparer le soufflage au CCTP." : TEXTES.cta.legende;
+        document.getElementById("consigneReleve").textContent = oui ? "L'acquisition suit les sondes pendant que tu règles : trace le soufflage et son humidité, et regarde quand ils se stabilisent. « Une mesure maintenant » garde un réglage trouvé." : TEXTES.cta.releve;
+      }
+      dessiner();
+    } };
+})();
+</script>
+
+<script>
+/* ═══════════ ENTRAINEMENT A L'U41 · U41-04 (14 octobre 2026) ═══════════
+   La CTA et l'air humide menees comme un sujet d'U41 : A4-2 « evolutions de l'air et bilans », le seul
+   savoir de la famille A au niveau 3 en option C, avec B2-1 (double flux) et B2-2 (traitement d'air).
+   Un sujet de reception : le centre culturel d'une commune, une VMC double flux pour la salle de
+   reunion (le banc du lycee la reproduit) et une CTA pour la salle polyvalente. Le dossier, le debit
+   mesure selon le CCTP, l'efficacite du recuperateur, puis la CTA reglee en hiver et en ete orageux.
+   Les personnes de chaque salle et l'air du laboratoire sont tires au sort : deux voisins n'ont pas
+   les memes nombres. La paillasse est celle du mode libre, empruntee ; la zone visee du diagramme y est
+   cachee, l'etudiant compare lui-meme le soufflage au CCTP.
+   Deux evidences retournees : la fiche de mise en service mesurait 226 m³/h au centre de la gaine, la
+   mesure du CCTP en trouve 195 (pour 9 personnes, il manque de l'air) ; et 0,34 × qv × Δθ ne donne
+   que 6 kW d'une batterie froide qui en retire 14, l'eau condensee comprise. */
+(function () {
+  var C = window.cta, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
+  var S = Math.PI * 0.125 * 0.125 / 4, LV = 2500, Q_CHANTIER = 1800;
+
+  function hasard(t) { return t[Math.floor(Math.random() * t.length)]; }
+  function cfg(ctx) {
+    var d = ctx.donnees;
+    if (!d.cfg) {
+      d.cfg = { pers: hasard([7, 9]), N: hasard([44, 50, 56]), tLab: hasard([19, 20, 21]), hLab: hasard([40, 45, 50]) };
+      d.cfg.qReunion = d.cfg.pers * 25; d.cfg.Q = d.cfg.N * 25;
+    }
+    return d.cfg;
+  }
+  function onglet(id) { var b = document.querySelector('#experiences [data-vue="' + id + '"]'); if (b.getAttribute("aria-selected") !== "true") b.click(); }
+  /* le banc et la CTA du sujet : ventilateurs arretes, batterie de reprise coupee, anemometre a 3 D au
+     centre ; la CTA au debit des essais de chantier, sans batterie ni humidificateur */
+  function preparer(ctx) {
+    var d = ctx.donnees, c = cfg(ctx);
+    if (d.pret) return;
+    d.pret = true;
+    onglet("vueBanc");
+    C.imposer("banc", { tLab: c.tLab, hLab: c.hLab, marche: false, vit: 2, Prep: 0, Pbc: 0.6, port: 3, sonde: 0.5, vu: {} });
+    C.imposer("cta", { saison: "hiver", Q: Q_CHANTIER, eps: 0.8, bypass: false, vanne: 0, Pbc: 0, humType: "vapeur", eau: 0, vu: {} });
+    C.centraleDe("banc").vider(); C.centraleDe("cta").vider();
+  }
+  function versBanc(ctx) { preparer(ctx); onglet("vueBanc"); }
+  function versCta(ctx) { preparer(ctx); onglet("vueCta"); C.cacherZone(true); }
+  /* chaque partie remet la CTA sur sa saison : sans cela, la partie 4 ouverte apres la partie 5 restait en ete, et
+     sa manipulation ne pouvait plus se faire (navigation libre, 14 octobre 2026). Les reglages de l'etudiant restent. */
+  function poserHiver(ctx) {
+    versCta(ctx);
+    if (C.etatDe("cta").saison !== "hiver") C.imposer("cta", { saison: "hiver" });
+  }
+  function poserEte(ctx) {
+    versCta(ctx);
+    if (C.etatDe("cta").saison !== "orage") C.imposer("cta", { saison: "orage" });
+  }
+
+  /* ---------- les manipulations : null tant que rien n'est fait ----------
+     Une manipulation refusee nomme ses erreurs (14 octobre 2026) : le reglage ou le geste a reprendre, avec le
+     document qui le donne, jamais la valeur a trouver. Les conditions d'acceptation n'ont pas change. */
+  function vitesseLue(e) { return e.marche ? "ventilateurs en " + VITESSES[e.vit] + " vitesse" : "ventilateurs arrêtés"; }
+  function anemometre(ctx) {
+    var e = C.etatDe("banc");
+    if (!e.marche && e.port === 3 && e.sonde === 0.5) return null;
+    var rho = Math.abs(e.sonde - 0.5) * 2, dit = [];
+    if (!e.marche) dit.push("les ventilateurs sont arrêtés : mettez le commutateur en vitesse moyenne");
+    else if (e.vit !== 2) dit.push("les ventilateurs ne sont pas en vitesse moyenne : reprenez le commutateur");
+    if (e.port !== 6) dit.push("l'anémomètre n'est pas dans un orifice à plus de 5 diamètres du coude (documents 1 et 3)");
+    if (rho < 0.22) dit.push("la sonde est trop près du centre de la gaine : le CCTP la veut au tiers du diamètre (document 1)");
+    else if (rho > 0.45) dit.push("la sonde est trop près de la paroi : le CCTP la veut au tiers du diamètre (document 1)");
+    return { ok: !dit.length, corriger: dit, reponse: dit.length ? "anémomètre à " + e.port + " diamètre" + (e.port > 1 ? "s" : "") + " du coude, sonde à " + fr(100 * rho, 0) + " % du rayon depuis le centre, " + vitesseLue(e) :
+      "anémomètre à 6 diamètres du coude, sonde à " + fr(100 * rho, 0) + " % du rayon depuis le centre, vitesse moyenne" };
+  }
+  function efficacite(ctx) {
+    var e = C.etatDe("banc");
+    if (!e.marche && !e.Prep) return null;
+    var cb = C.cibleBanc(), dit = [];
+    if (!e.marche) dit.push("les ventilateurs sont arrêtés : mettez le commutateur en vitesse moyenne");
+    else if (e.vit !== 2) dit.push("les ventilateurs ne sont plus en vitesse moyenne, celle de la mesure du débit");
+    if (e.Prep < 0.5) dit.push(e.Prep ? "la batterie de reprise est trop faible : mettez-la à 1 kW" : "la batterie de reprise est coupée : mettez-la à 1 kW");
+    var stable = ![0, 1, 3].some(function (i) { return Math.abs(e.T[i] - cb[i]) > 0.15; });
+    /* tout est juste, il ne manque que du temps : on attend, sans compter d'essai */
+    if (!dit.length && !stable) return { attente: "Réglages justes. Les sondes ne sont pas encore stables : laissez passer le temps (« × 20 »), puis vérifiez." };
+    return { ok: !dit.length, corriger: dit, reponse: dit.length ? vitesseLue(e) + ", batterie de reprise à " + fr(e.Prep, 1) + " kW" : "sondes stables, batterie de reprise à " + fr(e.Prep, 1) + " kW" };
+  }
+  /* les conditions de soufflage du CCTP (document 1), les memes que la zone visee de la simulation */
+  var ZONES = { hiver: { t: [18, 21], phi: [40, 55] }, orage: { t: [16, 19], r: 9.5 } };
+  function erreursCta(e, cf, saison) {
+    var r = [];
+    if (e.Q !== cf.Q) r.push("le débit du ventilateur n'est pas celui que le CCTP demande pour la salle polyvalente (document 1)");
+    if (Math.abs(e.eps - 0.8) > 1e-6) r.push("l'efficacité du récupérateur a été changée : elle reste à sa valeur de fiche (document 2)");
+    if (e.bypass) r.push("le by-pass du récupérateur est ouvert : touchez le récupérateur pour le fermer");
+    if (e.humType !== "vapeur") r.push("l'humidificateur est passé en adiabatique : touchez-le pour revenir à la vapeur (document 2)");
+    if (saison === "hiver" && e.vanne > 0) r.push("la batterie froide est ouverte : en hiver, sa vanne reste fermée");
+    if (saison === "orage" && e.eau > 0) r.push("l'humidificateur est en marche : en été, il reste fermé");
+    return r;
+  }
+  function reglage(ctx, saison) {
+    var e = C.etatDe("cta"), cf = cfg(ctx), avant;
+    if (C.experience() !== "cta" || e.saison !== saison)
+      return { attente: "La simulation n'est pas sur la CTA " + (saison === "hiver" ? "d'hiver" : "de l'été orageux") + " : quittez cette partie et revenez-y, elle se remet en place." };
+    if (saison === "hiver" ? (e.Q === Q_CHANTIER && !e.Pbc && !e.eau) : !e.vanne) {
+      avant = erreursCta(e, cf, saison);
+      return avant.length ? { attente: "À corriger : " + avant.join(" ; ") + "." } : null;
+    }
+    var c = C.calcDe(), p = e.pts, z = ZONES[saison], dit = erreursCta(e, cf, saison);
+    var stable = !(!p || Math.abs(p.I.t - c.I.t) > 0.2 || Math.abs(p.I.r - c.I.r) > 0.1);
+    if (!c.dansZone) {
+      var hors = [];
+      if (c.I.t < z.t[0] || c.I.t > z.t[1]) hors.push("la température du soufflage est hors de la plage du CCTP (document 1)");
+      if (z.phi && (c.I.phi < z.phi[0] || c.I.phi > z.phi[1])) hors.push("l'humidité relative du soufflage est hors de la plage du CCTP (document 1)");
+      if (z.r && c.I.r > z.r) hors.push("l'humidité absolue du soufflage dépasse celle que le CCTP admet (document 1)");
+      dit = dit.concat(hors.length ? hors : ["le soufflage n'est pas dans les conditions du CCTP (document 1)"]);
+    }
+    /* tous les reglages justes : il ne manque que du temps */
+    if (!dit.length && !stable) return { attente: "Réglages justes. Les sondes ne sont pas encore stables : laissez passer le temps, puis vérifiez." };
+    var lu = "soufflage à " + fr(c.I.t, 1) + " °C, " + fr(c.I.phi, 0) + " % et " + fr(c.I.r, 1) + " g/kg ; débit " + fr(e.Q, 0) + " m³/h, batterie chaude " + fr(e.Pbc, 1) + " kW" +
+      (saison === "hiver" ? ", humidificateur " + fr(e.eau, 1) + " kg/h" : ", vanne de la batterie froide " + fr(e.vanne, 0) + " %");
+    if (dit.length) lu += (saison === "hiver" && e.vanne > 0 ? ", vanne de la batterie froide " + fr(e.vanne, 0) + " %" : "") + (saison === "orage" && e.eau > 0 ? ", humidificateur " + fr(e.eau, 1) + " kg/h" : "") +
+      (Math.abs(e.eps - 0.8) > 1e-6 ? ", récupérateur à ε " + fr(e.eps, 2) : "") + (e.bypass ? ", by-pass ouvert" : "") + (e.humType !== "vapeur" ? ", humidificateur adiabatique" : "");
+    return { ok: !dit.length, corriger: dit, reponse: lu };
+  }
+  /* ce que la manipulation acceptee laisse : la suite se verifie la-dessus */
+  function photo(ctx, cle) {
+    var e = C.etatDe(cle === "banc" ? "banc" : "cta");
+    if (cle === "anemo") return { v: C.vVraie() };
+    if (cle === "eps") { var cb = C.cibleBanc(); return { t1: cb[0], t2: cb[1], t4: cb[3] }; }
+    var c = C.calcDe();
+    return { Q: e.Q, Pbc: e.Pbc, eau: e.eau, tE: c.E.t, tS: c.S.t, tF: c.F.t, eauBF: c.eauBF };
+  }
+  function prendre(cle) { return function (ctx) { ctx.donnees[cle] = photo(ctx, cle); }; }
+  function etat(ctx, cle) { return ctx.donnees[cle] || photo(ctx, cle); }
+  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees["v" + cle] = juste && isFinite(v) ? v : mesure(ctx); }; }
+  function val(ctx, cle, mesure) { var x = ctx.donnees["v" + cle]; return isFinite(x) ? x : mesure(ctx); }
+  var M = {
+    v: function (ctx) { return ctx.donnees.anemo ? ctx.donnees.anemo.v : 195 / 3600 / S; },
+    Q: function (ctx) { return val(ctx, "v", M.v) * S * 3600; },
+    eps: function (ctx) { var p = etat(ctx, "eps"); return p.t4 > p.t1 + 0.5 ? (p.t2 - p.t1) / (p.t4 - p.t1) : 0.88 - 0.08 * 195 / 200; },
+    tS: function (ctx) { return etat(ctx, "hiver").tS; },
+    Prec: function (ctx) { return 0.34 * cfg(ctx).Q * (val(ctx, "tS", M.tS) - etat(ctx, "hiver").tE) / 1000; },
+    m: function (ctx) { return etat(ctx, "ete").eauBF; },
+    dT: function (ctx) { var p = etat(ctx, "ete"); return p.tS - p.tF; },
+    Ps: function (ctx) { return 0.34 * cfg(ctx).Q * val(ctx, "dT", M.dT) / 1000; },
+    Pl: function (ctx) { return val(ctx, "m", M.m) * LV / 3600; }
+  };
+  function suffit(ctx) { return val(ctx, "Q", M.Q) >= cfg(ctx).qReunion; }
+
+  /* ---------- le dossier ---------- */
+  function ligne(a, b) { return el("tr", null, [el("td", { texte: a }), el("td", { html: b })]); }
+  function planGaine() {
+    var s = svg("svg", { viewBox: "0 0 560 208", "class": "schema", role: "img",
+      "aria-label": "Plan de la gaine de soufflage : diamètre 125 mm, un coude, trois orifices de mesure A, B et C à 125, 375 et 750 mm du début du coude" });
+    svg("rect", { x: 8, y: 58, width: 50, height: 52, rx: 4, "class": "s-org" }, s);
+    svg("text", { x: 33, y: 128, "text-anchor": "middle", texte: "caisson" }, s);
+    svg("rect", { x: 58, y: 64, width: 392, height: 40, "class": "s-gaine" }, s);
+    svg("path", { d: "M450 64 Q494 64 494 108 L494 186 L450 186 L450 104 Z", "class": "s-gaine" }, s);
+    svg("text", { x: 472, y: 202, "text-anchor": "middle", texte: "vers la salle" }, s);
+    svg("text", { x: 68, y: 89, "class": "s-nom", texte: "soufflage →" }, s);
+    svg("line", { x1: 172, y1: 64, x2: 172, y2: 104, "class": "s-cote" }, s);
+    svg("text", { x: 177, y: 98, texte: "Ø 125 mm" }, s);
+    // les orifices et leurs cotes, comptees depuis le debut du coude
+    [["A", 410, 125, 50], ["B", 330, 375, 34], ["C", 210, 750, 18]].forEach(function (o) {
+      svg("circle", { cx: o[1], cy: 64, r: 4.5, "class": "s-trou" }, s);
+      svg("text", { x: o[1], y: 84, "text-anchor": "middle", "class": "s-nom", texte: o[0] }, s);
+      svg("line", { x1: o[1], y1: o[3], x2: 450, y2: o[3], "class": "s-cote" }, s);
+      svg("line", { x1: o[1], y1: o[3] - 4, x2: o[1], y2: 59, "class": "s-cote", "stroke-dasharray": "2 2" }, s);
+      svg("text", { x: (o[1] + 450) / 2, y: o[3] - 3, "text-anchor": "middle", texte: o[2] + " mm" }, s);
+    });
+    svg("line", { x1: 450, y1: 6, x2: 450, y2: 62, "class": "s-cote", "stroke-dasharray": "2 2" }, s);
+    svg("text", { x: 455, y: 16, texte: "début du coude" }, s);
+    svg("circle", { cx: 108, cy: 166, r: 24, "class": "s-gaine" }, s);
+    svg("line", { x1: 84, y1: 166, x2: 132, y2: 166, "class": "s-cote" }, s);
+    svg("text", { x: 140, y: 170, texte: "section : Ø 125 mm" }, s);
+    return s;
+  }
+  function schemaCta() {
+    var s = svg("svg", { viewBox: "0 0 600 200", "class": "schema", role: "img",
+      "aria-label": "Schéma de principe de la CTA : air neuf, filtre, récupérateur, batterie froide, batterie chaude, humidificateur, ventilateur, soufflage ; la reprise traverse le récupérateur vers le rejet ; une sonde de température et d'humidité après chaque caisson" });
+    svg("rect", { x: 40, y: 130, width: 520, height: 36, "class": "s-gaine" }, s);
+    svg("rect", { x: 50, y: 30, width: 470, height: 54, "class": "s-gaine" }, s);
+    var cais = [[["filtre"], 58], [[], 136], [["batterie", "froide"], 214], [["batterie", "chaude"], 292], [["humidi-", "ficateur"], 370], [["ventilateur"], 448]];
+    cais.forEach(function (k) {
+      svg("rect", { x: k[1], y: 34, width: 72, height: k[1] === 136 ? 136 : 46, rx: 3, "class": "s-org" }, s);
+      k[0].forEach(function (m, i) { svg("text", { x: k[1] + 36, y: 61 + i * 13 - (k[0].length - 1) * 6.5, "text-anchor": "middle", "class": "s-nom", texte: m }, s); });
+    });
+    svg("text", { x: 172, y: 24, "text-anchor": "middle", "class": "s-nom", texte: "récupérateur" }, s);
+    svg("path", { d: "M172 42 L200 102 L172 162 L144 102 Z", fill: "none", stroke: "var(--encre2)", "stroke-width": 1.2 }, s);
+    svg("text", { x: 2, y: 54, texte: "air neuf" }, s); svg("text", { x: 14, y: 70, texte: "→" }, s);
+    svg("text", { x: 524, y: 54, texte: "soufflage" }, s); svg("text", { x: 540, y: 70, texte: "→" }, s);
+    svg("text", { x: 562, y: 146, texte: "reprise" }, s); svg("text", { x: 572, y: 162, texte: "←" }, s);
+    svg("text", { x: 2, y: 146, texte: "rejet" }, s); svg("text", { x: 10, y: 162, texte: "←" }, s);
+    [[52, "neuf"], [211, "récup."], [289, "BF"], [367, "BC"], [517, "soufflage"]].forEach(function (p) {
+      svg("line", { x1: p[0], y1: 84, x2: p[0], y2: 92, stroke: "var(--accent)", "stroke-width": 1.2 }, s);
+      svg("circle", { cx: p[0], cy: 97, r: 5, "class": "s-sonde" }, s);
+      svg("text", { x: p[0] + (p[1] === "récup." ? 4 : 0), y: 118, "text-anchor": p[1] === "récup." ? "start" : "middle", texte: p[1] }, s);
+    });
+    svg("text", { x: 300, y: 192, "text-anchor": "middle", texte: "○ sonde de température et d'humidité relative" }, s);
+    return s;
+  }
+  function documents(zone, ctx) {
+    preparer(ctx);
+    var c = cfg(ctx);
+    zone.appendChild(el("div", { classe: "pc-docs" }, [
+      el("section", null, [el("h3", { texte: "Document 1 · Extrait du CCTP, lot ventilation" }),
+        el("p", { html: "<b>Salle de réunion</b>, <b>" + c.pers + " personnes</b> : VMC double flux, gaines Ø 125 mm. Air neuf : <b>25 m³/h par personne</b>, au moins. " +
+          "Le débit se mesure à l'anémomètre dans une longueur droite, <b>à plus de 5 diamètres de tout coude</b>, sonde <b>au tiers du diamètre</b>. Récupérateur : efficacité d'au moins 0,75." }),
+        el("p", { html: "<b>Salle polyvalente</b>, <b>" + c.N + " personnes</b> : CTA, air neuf à 25 m³/h par personne." }),
+        el("p", { html: "<b>Hiver</b> : air neuf −7 °C, 90 % ; soufflage <b>18 à 21 °C, 40 à 55 %</b>. <b>Été orageux</b> : air neuf 28 °C, 70 % ; soufflage <b>16 à 19 °C</b>, humidité absolue <b>9,5 g/kg au plus</b>." })]),
+      el("section", null, [el("h3", { texte: "Document 2 · Fiches techniques" }),
+        el("table", { classe: "fiche-tech" }, [
+          ligne("VMC double flux", "débit en vitesse moyenne : <b>225 m³/h</b> ; efficacité du récupérateur : <b>0,84</b>, à 110 m³/h"),
+          ligne("CTA · récupérateur", "à plaques, efficacité <b>0,80</b>, by-pass d'été"),
+          ligne("CTA · batteries", "froide à eau glacée 6/12 °C, vanne trois voies ; chaude électrique, <b>20 kW</b>"),
+          ligne("CTA · humidificateur", "à vapeur, <b>15 kg/h</b> au plus"),
+          ligne("CTA · ventilateur", "<b>500 à 3 000 m³/h</b>, réglable")])]),
+      el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 3 · Plan de la gaine de soufflage de la VMC" }), planGaine()]),
+      el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 4 · Schéma de principe de la CTA" }), schemaCta()]),
+      el("section", null, [el("h3", { texte: "Document 5 · Fiche de mise en service de la VMC, par l'installateur" }),
+        el("p", { html: "« Débit mesuré au soufflage : <b>226 m³/h</b>, anémomètre au centre de la gaine, orifice B. <b>Conforme.</b> »" })]),
+      el("section", { classe: "pc-annexe" }, [el("h3", { texte: "Annexe · formulaire" }),
+        el("p", { html: "Q = v × S × 3 600 : v en m/s, S en m², Q en m³/h · S = π × D² ÷ 4<br>ε = (θ<sub>2</sub> − θ<sub>1</sub>) ÷ (θ<sub>4</sub> − θ<sub>1</sub>)<br>" +
+          "P = 0,34 × q<sub>v</sub> × Δθ : q<sub>v</sub> en m³/h, P en W, quand l'humidité absolue ne change pas<br>Condenser ou vaporiser 1 kg d'eau : environ <b>2 500 kJ</b>" })])
+    ]));
+  }
+
+  var simplifie = [].map.call(document.querySelectorAll("#libre details.modele li"), function (li) { return li.innerHTML; });
+  var VITESSES = ["", "petite", "moyenne", "grande"];
+
+  window.u4104 = Sim.parcours("#u41", {
+    dossier: true,                 // le bouton « Le dossier » : les documents de la partie 1, dans toutes les parties
+    code: "U41-04",
+    titre: "L'air du centre culturel",
+    niveaux: ["BTS 2e année"],
+    libre: "#libre",
+    paillasse: ["#carteScene", "#carteMesure", "#carteReleve"],
+    u41: { problematique: "Les deux installations soufflent-elles l'air que demande le CCTP, en débit, en température et en humidité ?", duree: "deux heures" },
+    commande: {
+      client: "Réception du lot ventilation · le centre culturel",
+      texte: "<p>La commune a rénové son centre culturel. La <b>salle de réunion</b> est ventilée par une VMC double flux, la <b>salle polyvalente</b> par une centrale de traitement d'air. Avant de signer la réception, le maître d'œuvre vous confie les essais.</p>" +
+        "<p>Le <b>banc double flux du lycée</b> reproduit la VMC : mêmes gaines, même récupérateur. La <b>simulation de CTA</b> reproduit la centrale, en hiver et en été.</p>"
+    },
+    simplifie: simplifie,
+    phases: [
+      {
+        competence: "C12-1", titre: "Le dossier du centre culturel",
+        recit: "Deux installations, un dossier : le CCTP, les fiches, deux plans, et la fiche que l'installateur a signée. Avant de mesurer, on sait qui dit quoi.",
+        scene: documents,
+        questions: [
+          { type: "classer", lib: "Dans quel document trouver chaque information ?",
+            items: ["le débit mesuré à la mise en service", "la méthode de mesure du débit", "l'ordre des caissons de la CTA", "le débit annoncé en vitesse moyenne", "les distances des orifices au coude"],
+            categories: ["document 1, CCTP", "document 2, fiches techniques", "document 3, plan de la gaine", "document 4, schéma de la CTA", "document 5, mise en service"], bonnes: [4, 0, 3, 1, 2],
+            methode: "Le CCTP dit ce qui est exigé, les fiches ce que les fabricants annoncent, les plans où sont les choses, la mise en service ce que l'installateur a mesuré." },
+          { type: "choix", lib: "La fiche de mise en service conclut « conforme ». Que vaut-elle pour la réception ?",
+            options: ["c'est la déclaration de l'installateur : la réception la vérifie, par une mesure faite selon le CCTP", "elle fait foi : l'installateur répond de son installation",
+              "elle remplace le CCTP pour la VMC", "rien : elle se jette"], bonne: 0,
+            methode: "Qui l'a écrite, et sur quoi la réception se fonde-t-elle ?" },
+          { type: "nombre", lib: "Quel débit d'air neuf le CCTP exige-t-il, au moins, pour la salle de réunion ?", unite: "m³/h", competence: "C12-2",
+            attendu: function (ctx) { return cfg(ctx).qReunion; }, tolerance: 0, toleranceAbsolue: 0.5,
+            methode: "Le nombre de personnes de la salle, et le débit par personne : les deux sont dans le CCTP." },
+          { type: "nombre", lib: "Quel débit d'air neuf la CTA doit-elle souffler dans la salle polyvalente ?", unite: "m³/h", competence: "C12-2",
+            attendu: function (ctx) { return cfg(ctx).Q; }, tolerance: 0, toleranceAbsolue: 0.5,
+            methode: "Même calcul, avec les personnes de la salle polyvalente." },
+          { type: "nombre", lib: "En été orageux, quelle humidité absolue le soufflage ne doit-il pas dépasser ?", unite: "g/kg", competence: "C12-2",
+            attendu: 9.5, tolerance: 0, toleranceAbsolue: 0.01,
+            methode: "Les conditions de soufflage d'été, dans le CCTP." },
+          { type: "classer", lib: "Quel est le rôle de chaque caisson de la CTA ?", competence: "C2-1",
+            items: ["la batterie chaude", "l'humidificateur à vapeur", "le récupérateur à plaques", "la batterie froide"],
+            categories: ["réchauffe l'air neuf avec la chaleur de l'air repris", "refroidit l'air et le sèche", "réchauffe l'air sans changer son eau", "ajoute de l'eau à l'air"], bonnes: [2, 3, 0, 1],
+            methode: "Suivez l'air sur le schéma de principe : seul le récupérateur voit aussi l'air repris." }
+        ],
+        bravo: "Le dossier est lu : deux exigences, deux machines, et une fiche à vérifier."
+      },
+      {
+        competence: "C2-2", titre: "Le principe et la méthode de mesure",
+        recit: "Le banc du lycée reproduit la VMC de la salle de réunion. Avant de le mettre en marche, vous dites d'où vient la chaleur, et où se mesure le débit.",
+        consigne: "Le banc double flux, tel qu'il est branché. Les molettes et l'anémomètre attendront la partie 3.",
+        paillasse: ["#carteScene"], surOuvrir: versBanc,
+        questions: [
+          { type: "choix", lib: "En hiver, la chaleur que le récupérateur donne à l'air neuf vient :",
+            options: ["de l'air repris aux locaux, qui part ensuite plus froid au rejet", "de la batterie chaude, placée après lui", "du ventilateur de soufflage", "de l'air neuf lui-même"], bonne: 0,
+            methode: "Un récupérateur ne produit rien : il fait passer la chaleur d'un air à l'autre, à travers des plaques." },
+          { type: "classer", lib: "Que fait chaque caisson de l'énergie de l'air qui le traverse ?",
+            items: ["le récupérateur, en hiver", "la batterie froide, en été", "l'humidificateur à vapeur", "le filtre"],
+            categories: ["il en apporte", "il en retire", "il n'en échange pas"], bonnes: [0, 1, 0, 2],
+            methode: "L'énergie de l'air humide compte sa température et son eau : la vapeur qu'on ajoute en apporte." },
+          { type: "choix", lib: "Sur le banc qui reproduit la VMC, quel organe joue la salle de réunion chauffée ?", competence: "C2-1",
+            options: ["la batterie de reprise, qui réchauffe l'air repris", "la batterie chaude du soufflage", "le récupérateur à plaques", "le commutateur des ventilateurs"], bonne: 0,
+            methode: "En hiver, l'air repris d'une salle chauffée est plus chaud que l'air neuf : sur le banc, qu'est-ce qui le réchauffe ?" },
+          { type: "choix", lib: "Sur le plan de la gaine, quel orifice respecte la méthode de mesure du CCTP ?", competence: "C4-3",
+            options: ["l'orifice A", "l'orifice B", "l'orifice C"], bonne: 2,
+            methode: "Le CCTP compte en diamètres, le plan en millimètres : divisez chaque distance par le diamètre de la gaine." },
+          { type: "appel", numero: 1, competence: "C2-3",
+            lib: "Expliquez au professeur, à l'oral, comment la CTA traite l'air en hiver puis en été, et comment vous mesurerez le débit de la VMC.",
+            attendus: ["l'hiver : récupérateur, batterie chaude, humidificateur, et ce que chacun change à l'air",
+              "l'été : la batterie froide sèche l'air en le refroidissant sous son point de rosée, la batterie chaude le réchauffe ensuite",
+              "la mesure : l'orifice à plus de 5 diamètres du coude, la sonde au tiers du diamètre, et pourquoi",
+              "Q = v × S, la section calculée avec le diamètre en mètres",
+              "un vocabulaire juste : humidité absolue et relative, chaleur sensible et latente"] }
+        ],
+        bravo: "Le principe est dit, la méthode est choisie."
+      },
+      {
+        competence: "C12-2", titre: "La VMC de la salle de réunion : le débit et le récupérateur",
+        recit: "La fiche de mise en service dit 226 m³/h. Vous mesurez selon le CCTP, puis vous mesurez l'efficacité du récupérateur.",
+        consigne: "Le commutateur des ventilateurs, les molettes des batteries, l'anémomètre à faire glisser d'un orifice à l'autre et sa sonde dans la section grossie, la vitesse du temps : tout est à vous.",
+        paillasse: true, large: true, surOuvrir: versBanc,
+        questions: [
+          { type: "appel", numero: 2, competence: "C4-3",
+            lib: "Appelez avant de relever : vous placez l'anémomètre devant le professeur, en disant pourquoi à cet endroit.",
+            attendus: ["l'orifice choisi d'après le plan : 750 mm, soit 6 diamètres du coude", "la sonde au tiers du diamètre, pas au centre",
+              "les ventilateurs en vitesse moyenne, celle du projet", "une lecture attendue stable avant d'être relevée", "des gestes sûrs, sans tâtonner"] },
+          { type: "action", lib: "Placez l'anémomètre comme le demande le CCTP, ventilateurs en vitesse moyenne.", competence: "C4-3",
+            aide: "L'anémomètre se fait glisser d'un orifice à l'autre ; sa sonde se fait glisser dans la section grossie.",
+            verifier: anemometre, apres: prendre("anemo"),
+            methode: "L'orifice à plus de 5 diamètres du coude ; la sonde au tiers du diamètre, à mi-chemin entre le centre et le premier quart de la section ; le commutateur sur « moyenne »." },
+          { type: "nombre", lib: "Relevez la vitesse de l'air à l'anémomètre.", unite: "m/s", competence: "C12-2",
+            attendu: M.v, tolerance: 0.05, fini: garde("v", M.v),
+            methode: "La lecture fluctue un peu : relevez une valeur moyenne, sans bouger la sonde." },
+          { type: "nombre", lib: "Calculez le débit soufflé dans la salle de réunion.", unite: "m³/h", competence: "C2-3",
+            attendu: M.Q, tolerance: 0.03, fini: garde("Q", M.Q),
+            methode: "Q = v × S × 3 600, avec la section en m² : le diamètre en mètres." },
+          { type: "choix", lib: "La fiche de mise en service annonçait 226 m³/h. D'où vient l'écart avec votre mesure ?", competence: "C2-3",
+            options: ["l'installateur a mesuré au centre de la gaine, où l'air va plus vite que la moyenne", "votre anémomètre lit trop bas",
+              "le ventilateur a ralenti depuis la mise en service", "l'installateur a mesuré sur la reprise"], bonne: 0,
+            methode: "Relisez où l'installateur a posé sa sonde, et ce que le CCTP demande." },
+          { type: "choix", lib: "Le débit de la salle de réunion est-il conforme au CCTP ?", competence: "C1-2", options: ["oui", "non"],
+            bonne: function (ctx) { return suffit(ctx) ? 0 : 1; },
+            methode: "Comparez votre débit à celui qu'exige le CCTP pour le nombre de personnes de la salle." },
+          { type: "action", lib: "Préparez la mesure de l'efficacité : batterie de reprise à 1 kW, sondes stables.", competence: "C12-2",
+            aide: "Sans batterie de reprise, l'air repris est à la température de l'air neuf : rien n'est mesurable.",
+            verifier: efficacite, apres: prendre("eps"),
+            methode: "La molette de la batterie de reprise ; la vitesse du temps « × 20 » ; la courbe de la centrale dit quand les sondes ne bougent plus." },
+          { type: "nombre", lib: "Calculez l'efficacité du récupérateur, ε = (θ<sub>2</sub> − θ<sub>1</sub>) ÷ (θ<sub>4</sub> − θ<sub>1</sub>).", competence: "C2-3",
+            attendu: M.eps, tolerance: 0.03, fini: garde("eps", M.eps),
+            methode: "θ<sub>1</sub> air neuf, θ<sub>2</sub> après le récupérateur, θ<sub>4</sub> reprise : les sondes S1, S2, S4, une fois stables." },
+          { type: "choix", lib: "La fiche du récupérateur annonce 0,84 ; vous mesurez moins. Pourquoi ?", competence: "C2-3",
+            options: ["la fiche la donne à 110 m³/h : à plus fort débit, l'air passe plus vite entre les plaques et l'efficacité baisse", "le récupérateur est encrassé",
+              "la batterie de reprise fausse la mesure", "l'efficacité se calcule avec le rejet, pas avec l'air soufflé"], bonne: 0,
+            methode: "Relisez les conditions de la fiche : à quel débit ?" }
+        ],
+        bravo: "Le débit est mesuré selon le CCTP, et le récupérateur à son vrai débit."
+      },
+      {
+        competence: "C4-3", titre: "La CTA de la salle polyvalente, en hiver",
+        recit: "Le ventilateur de la CTA est resté au débit des essais de chantier : 1 800 m³/h. Vous réglez la centrale pour le CCTP, puis vous faites les bilans.",
+        consigne: "Une molette sous chaque caisson, la vitesse du temps, la centrale d'acquisition. Le diagramme trace l'air à chaque étape ; à vous de comparer le soufflage au CCTP.",
+        paillasse: true, large: true, surOuvrir: poserHiver,
+        questions: [
+          { type: "action", lib: "Réglez la CTA pour l'hiver : le débit du CCTP, puis un soufflage dans ses conditions de température et d'humidité.",
+            aide: "Le récupérateur garde son efficacité de fiche, la batterie froide reste fermée.",
+            verifier: function (ctx) { return reglage(ctx, "hiver"); }, apres: prendre("hiver"),
+            methode: "Le débit d'abord, sur la molette du ventilateur ; puis la batterie chaude pour la température, l'humidificateur pour l'humidité ; et attendre que les sondes se stabilisent." },
+          { type: "classer", lib: "Sur le diagramme de l'air humide, comment se déplace le point de l'air dans chaque caisson ?",
+            items: ["le récupérateur, en hiver", "l'humidificateur à vapeur", "la batterie chaude", "la batterie froide, en été"],
+            categories: ["vers la droite : θ monte, r ne change pas", "vers le haut : r monte, θ ne change pas", "vers la gauche et vers le bas : l'air refroidit et perd de l'eau", "le long d'une droite d'enthalpie constante"],
+            bonnes: [0, 1, 0, 2],
+            methode: "Sur ce diagramme, θ est en abscisse et r en ordonnée. Qu'est-ce qui change, et qu'est-ce qui reste, dans chaque caisson ?" },
+          { type: "nombre", lib: "Relevez la température de l'air après le récupérateur.", unite: "°C", competence: "C12-2",
+            attendu: function (ctx) { return etat(ctx, "hiver").tS; }, tolerance: 0, toleranceAbsolue: 0.2, fini: garde("tS", M.tS),
+            methode: "La sonde « après récupérateur », sur l'afficheur ou dans le tableau de la centrale." },
+          { type: "nombre", lib: "Calculez la puissance que le récupérateur rend à l'air neuf.", unite: "kW", competence: "C2-3",
+            attendu: M.Prec, tolerance: 0.02, fini: garde("Prec", M.Prec),
+            methode: "0,34 × q<sub>v</sub> × Δθ convient : r ne change pas dans un récupérateur à plaques. Le résultat sort en watts." },
+          { type: "nombre", lib: "Sans récupérateur, quelle puissance la batterie chaude devrait-elle fournir pour le même soufflage ?", unite: "kW", competence: "C2-3",
+            attendu: function (ctx) { return val(ctx, "Prec", M.Prec) + etat(ctx, "hiver").Pbc; }, tolerance: 0.02,
+            methode: "Sans lui, la batterie chaude doit aussi fournir ce que le récupérateur rendait." },
+          { type: "nombre", lib: "Quelle puissance l'humidificateur apporte-t-il à l'air, avec l'eau que vous avez réglée ?", unite: "kW", competence: "C2-3",
+            attendu: function (ctx) { return etat(ctx, "hiver").eau * LV / 3600; }, tolerance: 0.03,
+            methode: "Chaque kilogramme d'eau vaporisée apporte environ 2 500 kJ ; une heure fait 3 600 secondes." }
+        ],
+        bravo: "L'hiver est réglé, et vous savez ce que rend le récupérateur."
+      },
+      {
+        competence: "C2-3", titre: "La même CTA, un été orageux",
+        recit: "28 °C et 70 % dehors. Le CCTP veut un air séché : 9,5 g d'eau par kilogramme d'air sec au plus. La batterie froide sèche l'air, la batterie chaude le réchauffe.",
+        consigne: "La saison a changé. Réglez la vanne de la batterie froide et la batterie chaude ; l'humidificateur reste fermé.",
+        paillasse: true, large: true, surOuvrir: poserEte,
+        questions: [
+          { type: "action", lib: "Réglez la CTA pour l'été orageux : un soufflage dans les conditions du CCTP.", competence: "C4-3",
+            aide: "La vanne de la batterie froide décide de l'eau qui reste dans l'air ; la batterie chaude, de la température.",
+            verifier: function (ctx) { return reglage(ctx, "orage"); }, apres: prendre("ete"),
+            methode: "La vanne de la batterie froide jusqu'à ce que r passe sous 9,5 g/kg ; la batterie chaude pour ramener la température entre 16 et 19 °C ; l'humidificateur à zéro ; puis attendre." },
+          { type: "nombre", lib: "Relevez le débit d'eau condensée par la batterie froide.", unite: "kg/h", competence: "C12-2",
+            attendu: function (ctx) { return etat(ctx, "ete").eauBF; }, tolerance: 0.06, toleranceAbsolue: 0.1, fini: garde("m", M.m),
+            methode: "L'afficheur des condensats de la batterie froide, ou sa colonne dans le tableau." },
+          { type: "nombre", lib: "Relevez de combien l'air se refroidit dans la batterie froide.", unite: "K", competence: "C12-2",
+            attendu: M.dT, tolerance: 0, toleranceAbsolue: 0.3, fini: garde("dT", M.dT),
+            methode: "La sonde après le récupérateur, moins la sonde après la batterie froide." },
+          { type: "nombre", lib: "Calculez la puissance retirée à l'air par la formule de l'épreuve, 0,34 × q<sub>v</sub> × Δθ.", unite: "kW",
+            attendu: M.Ps, tolerance: 0.02, fini: garde("Ps", M.Ps),
+            methode: "q<sub>v</sub> en m³/h, Δθ en kelvins : des watts, à diviser par 1 000." },
+          { type: "nombre", lib: "Calculez la puissance qu'il a fallu retirer pour condenser l'eau.", unite: "kW",
+            attendu: M.Pl, tolerance: 0.02, fini: garde("Pl", M.Pl),
+            methode: "Condenser 1 kg d'eau demande de lui retirer environ 2 500 kJ ; le débit d'eau est par heure." },
+          { type: "choix", lib: "Pour choisir la batterie froide, la formule 0,34 × q<sub>v</sub> × Δθ suffit-elle ?", competence: "C1-2",
+            options: ["non : elle oublie l'eau condensée, la chaleur latente, plus de la moitié de la puissance", "oui : c'est la formule de l'épreuve",
+              "oui : l'eau condensée ne coûte rien à la batterie", "non : il faut la diviser par deux en été"], bonne: 0,
+            methode: "Comparez vos deux puissances : laquelle la formule compte-t-elle ?" },
+          { type: "choix", lib: "Pourquoi réchauffer l'air après la batterie froide ?",
+            options: ["pour sécher, la batterie froide descend sous le point de rosée : l'air en sort saturé et trop froid pour être soufflé", "pour tuer les bactéries de la batterie froide",
+              "pour récupérer l'eau condensée", "parce que la batterie froide refroidit trop l'eau glacée"], bonne: 0,
+            methode: "Regardez sur le diagramme où sort l'air de la batterie froide, et où le CCTP veut le soufflage." }
+        ],
+        bravo: "L'air est séché, et vous savez ce que coûte l'eau qu'on lui retire."
+      },
+      {
+        competence: "C1-2", conclusion: true, titre: "Le procès-verbal de réception",
+        recit: "Le maître d'ouvrage lira le procès-verbal des deux installations, pas vos calculs. Chaque phrase doit être juste, avec ses nombres et ses unités.",
+        scene: function (zone) {
+          zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", null, [el("h3", { texte: "Document 6 · Ce que dit un procès-verbal de réception" }),
+            el("p", { html: "L'installation reçue ; <b>les conditions de l'essai</b> ; les mesures, <b>avec leurs unités</b> ; la conformité au CCTP, exigence par exigence ; " +
+              "<b>les réserves</b>, s'il y en a, et ce qui les lèvera ; les limites de l'essai." })])]));
+        },
+        questions: [
+          { type: "multi", essais: 2, lib: "Gardez les phrases justes du procès-verbal.",
+            options: function (ctx) {
+              var c = cfg(ctx), q = fr(val(ctx, "Q", M.Q), 0), ok = suffit(ctx), Ps = val(ctx, "Ps", M.Ps), Pl = val(ctx, "Pl", M.Pl);
+              var dit = function (oui) { return "Salle de réunion : mesuré selon le CCTP, le débit soufflé vaut environ " + q + " m³/h ; il " + (oui ? "suffit" : "ne suffit pas") + " pour " + c.pers + " personnes, " + c.qReunion + " m³/h au moins."; };
+              return [
+                dit(ok),
+                dit(!ok),
+                "Le récupérateur de la VMC a une efficacité d'environ " + fr(val(ctx, "eps", M.eps), 2) + " au débit de projet ; la fiche annonce 0,84 à petit débit.",
+                "La mise en service mesurait 226 m³/h : c'est cette mesure qui fait foi.",
+                "CTA, été orageux : la batterie froide retire environ " + fr(Ps + Pl, 1) + " kW à l'air, dont " + fr(Pl, 1) + " kW pour condenser l'eau.",
+                "CTA, été orageux : la batterie froide retire 0,34 × q<sub>v</sub> × Δθ, soit environ " + fr(Ps, 1) + " kW."
+              ];
+            },
+            bonne: [0, 2, 4],
+            methode: "Une phrase de procès-verbal dit ce qui a été mesuré, comment, avec son unité, et la compare au CCTP." },
+          { type: "choix", lib: "Que proposer au maître d'ouvrage pour la salle de réunion ?",
+            options: ["garder la vitesse moyenne : le débit mesuré suffit", "passer en grande vitesse et refaire la mesure : le débit manque, et l'efficacité du récupérateur baissera un peu",
+              "s'en tenir à la mise en service : elle dit conforme", "refaire la mesure au centre de la gaine"],
+            bonne: function (ctx) { return suffit(ctx) ? 0 : 1; },
+            methode: "Partez de votre verdict sur le débit ; et rappelez-vous ce que fait le débit à l'efficacité du récupérateur." },
+          { type: "choix", lib: "Une limite des essais, à écrire au procès-verbal :",
+            options: ["la vitesse a été lue en un seul point de la section : une vraie mesure en gaine en prend plusieurs, répartis sur la section", "l'anémomètre est trop précis pour un chantier",
+              "la CTA ne peut pas souffler en été", "le diagramme de l'air humide ne vaut qu'en hiver"], bonne: 0,
+            methode: "Le profil de vitesse d'une vraie gaine n'est pas celui d'un banc : que faudrait-il de plus pour une moyenne sûre ?" }
+        ],
+        bravo: "Le procès-verbal dit ce qui a été mesuré, ce qui manque, et ce que les essais ne disent pas."
+      }
+    ],
+    fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."
+  });
+  /* la zone visee revient en mode libre, et se cache de nouveau en revenant a la CTA de l'entrainement */
+  var modes = document.querySelectorAll("#u41 .pc-modes button");
+  if (modes.length === 2) {
+    modes[0].addEventListener("click", function () { C.cacherZone(false); });
+    modes[1].addEventListener("click", function () { var i = window.u4104.etat.courante; if (i === 3 || i === 4) C.cacherZone(true); });
+  }
 })();
 </script>
 <footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>
 </div>
+<script>if (window.Sim && Sim.calculatrice) Sim.calculatrice();</script>
 </body>
 </html>
