@@ -240,6 +240,10 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
   .pc-comp{font-size:.62rem;letter-spacing:.04em}
 }
 .plan.pc-large{grid-template-columns:minmax(0,2.2fr) minmax(260px,1fr)}
+/* une partie sans scene : les questions prennent la largeur, les propositions sur deux colonnes */
+.plan.pc-sans-scene{grid-template-columns:minmax(0,1fr)}
+.pc-sans-scene .pc-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22em),1fr));gap:8px}
+.pc-sans-scene .pc-option{text-align:left}
 @media (max-width:820px){.plan.pc-large{grid-template-columns:1fr}}
 /* Pendant le parcours, la page laisse la place a la scene : le chapeau se replie */
 .pc-en-cours .tete{padding-bottom:6px;margin-bottom:6px}
