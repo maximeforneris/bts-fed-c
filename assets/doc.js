@@ -141,8 +141,30 @@
     s.appendChild(c);
     d.appendChild(s);
 
+    /* Une sequence = un menu deroulant, demande le 15 octobre 2026 (« faire des
+       menus deroulants pour les grandes sous-parties ») : la rubrique ne deroule
+       plus vingt lignes d'un coup. Ouverte sur la page qu'on lit, fermee ailleurs.
+       Une rubrique d'un seul groupe reste a plat : un clic de plus n'apprend rien. */
+    var plusieurs = (esp.groupes || []).filter(function (g) { return g.titre; }).length > 1;
     (esp.groupes || []).forEach(function (g) {
-      if (g.titre) {
+      var cible = d;
+      if (g.titre && plusieurs) {
+        var gp = g.pages || [], gOuv = gp.filter(function (p) { return !p.tenue; });
+        var gd = document.createElement("details");
+        gd.className = "groupe-d" + (gOuv.length ? "" : " a-venir");
+        if (gp.some(function (p) { return p.id === ici; })) gd.open = true;
+        var gs = document.createElement("summary");
+        var gt = document.createElement("span");
+        gt.textContent = g.titre;
+        gs.appendChild(gt);
+        var gc = document.createElement("span");
+        gc.className = "compte";
+        gc.textContent = gOuv.length ? gOuv.filter(function (p) { return lues[p.id]; }).length + " / " + gOuv.length : "à venir";
+        gs.appendChild(gc);
+        gd.appendChild(gs);
+        d.appendChild(gd);
+        cible = gd;
+      } else if (g.titre) {
         var h = document.createElement("p");
         h.className = "groupe";
         h.textContent = g.titre;
@@ -167,7 +189,7 @@
         }
         ul.appendChild(li);
       });
-      d.appendChild(ul);
+      cible.appendChild(ul);
     });
     plan.appendChild(d);
   });

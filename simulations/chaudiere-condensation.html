@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>La chaudière à condensation</title>
-<meta name="description" content="Une chaudière gaz sur son banc d&#x27;essai, puis une journée d&#x27;hiver au service d&#x27;un bâtiment. On tourne la modulation, la vis d&#x27;air et le banc de charge au doigt, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d&#x27;acquisition enregistre tout dans le temps.">
+<meta name="description" content="Une chaudière gaz sur son banc d&#x27;essai, puis une journée d&#x27;hiver au service d&#x27;un bâtiment. On tourne la modulation, la vis d&#x27;air et le banc de charge au doigt ou à la souris, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d&#x27;acquisition enregistre tout dans le temps.">
 <meta name="etiquette" content="Simulation · J11">
 <style>
 /* Simulations des TP · feuille commune, inlinee dans chaque page par assembler-simulations.py.
@@ -146,7 +146,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 /* Molette posee sur la scene : on la tourne au doigt */
 .molette{cursor:grab;touch-action:none;outline:none}
 .molette.tourne{cursor:grabbing}
-.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette:focus-visible .molette-corps,.molette.prise .molette-corps{stroke:var(--accent);stroke-width:3}
 .molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
 .molette.tourne .molette-corps{fill:var(--accent-doux)}
 .molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
@@ -172,6 +172,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-noeud.pc-fait.pc-ici .pc-rond{color:#fff}
 .pc-noeud.pc-ici .pc-comp{color:var(--encre)}
 .pc-drapeau .pc-rond{font-size:1.15rem}
+.pc-facultatif .pc-rond{border-style:dashed;font-size:1.3rem}
 .pc-info{display:flex;gap:12px;align-items:center;font-size:.9rem;font-weight:650;color:var(--encre2)}
 .pc-score{color:var(--tiede);font-variant-numeric:tabular-nums}
 .pc-niveau:empty,.pc-temps:empty{display:none}
@@ -1382,6 +1383,9 @@ var Sim = (function () {
       tic: function (t) {
         tCourant = t;
         if (!actif) return;
+        /* le temps de la scene repart a zero (une journee neuve) : la serie reprend, au lieu d'attendre
+           l'heure de la mesure suivante de la journee d'avant (TD U41-01, 15 octobre 2026) */
+        if (prochain !== null && t + 1e-9 < dernier) { prochain = t; debut = t; depart = t; }
         if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
         if (t + 1e-9 < prochain) return;
         var l = o.lire(prochain, debut);
@@ -1401,6 +1405,10 @@ var Sim = (function () {
 
   /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
      pour monter), a la molette de la souris ou aux fleches du clavier.
+     LA MOLETTE DE LA SOURIS N'AGIT QUE SUR UN BOUTON PRIS (15 octobre 2026, essai sur poste) : avant,
+     elle tournait tout bouton survole, et un simple defilement de la page avait descendu la vanne
+     generale du reseau de 4 a 0,8 tour sans que l'eleve le voie. Un clic (ou la tabulation) prend
+     le bouton, son contour s'allume ; sinon la page defile normalement.
      o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
   function molette(parent, o) {
     var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
@@ -1415,6 +1423,9 @@ var Sim = (function () {
     var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
     var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
     var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    svg("title", { texte: (o.label ? o.label + " : " : "") + "glisser, ou cliquer puis tourner la molette de la souris, ou les flèches" }, g);
+    g.addEventListener("focus", function () { g.classList.add("prise"); });
+    g.addEventListener("blur", function () { g.classList.remove("prise"); });
     function maj() {
       var f = (v - o.min) / (o.max - o.min);
       index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
@@ -1429,13 +1440,18 @@ var Sim = (function () {
     g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
     g.addEventListener("pointerdown", function (e) {
       e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      try { g.focus({ preventScroll: true }); } catch (x) { g.focus(); }   // le preventDefault empechait la prise du bouton
+      g.classList.add("prise");
       var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
       g.classList.add("tourne");
       function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
       function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
       g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
     });
-    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("wheel", function (e) {
+      if (document.activeElement !== g) return;            // bouton pas pris : la page defile
+      e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1));
+    }, { passive: false });
     g.addEventListener("keydown", function (e) {
       var p = o.pas || 1;
       if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
@@ -1556,6 +1572,11 @@ var Sim = (function () {
      qu'on n'y a rien repondu : ouverte trop tot, elle se refait quand on revient. Un nombre manquant s'affiche
      « … », jamais « NaN » ; une question dont la valeur attendue depend d'une mesure pas encore faite le dit,
      sans compter d'essai.
+     LA PARTIE FACULTATIVE (15 octobre 2026, « une partie de plus, exigeante » pour les TD du BTS) : « facultative:
+     true » sur une partie la nomme « Pour aller plus loin », la marque d'un « + » sur le chemin et l'annonce a
+     l'accueil. Intouchee, elle ne compte nulle part : ni au fichier (une ligne dit qu'elle n'est pas abordee), ni
+     dans ce qui reste a faire, ni au total des etoiles. Entamee, seules ses questions travaillees vont au fichier :
+     l'eleve rapide y gagne des items, le lent n'y perd rien. Pas d'appel dans une partie facultative.
      LE DOSSIER : « dossier: true » remet les documents de la partie 1 (sa scene) dans un panneau qu'un
      bouton « Le dossier » de la tete ouvre a gauche, dans toutes les parties ; une fonction (zone, ctx) a
      la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
@@ -1608,6 +1629,11 @@ var Sim = (function () {
     var donnees = {};                                    // partage entre les phases d'un parcours
     var appels = [];                                     // les fiches des appels lances ou a lancer
     var nPh = o.phases.length;
+    /* une partie facultative intouchee ne compte nulle part ; entamee, seulement pour ce qui y est fait */
+    var nOblig = o.phases.filter(function (ph) { return !ph.facultative; }).length || nPh;
+    var aFacultative = nOblig < nPh;
+    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide); }
+    function compte(i, f) { return !o.phases[i].facultative || touchee(f); }
     var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
     var P = $(parent);
 
@@ -1654,6 +1680,7 @@ var Sim = (function () {
     function nomPhase(i) {
       if (!epreuve) return "Phase " + (i + 1);
       if (o.phases[i].nom) return o.phases[i].nom;
+      if (o.phases[i].facultative) return "Pour aller plus loin";
       return i === nPh - 1 && (o.phases[i].conclusion || (ccf && o.phases[i].competence === "COM")) ? "Conclusion" : "Partie " + (i + 1);
     }
 
@@ -1661,9 +1688,9 @@ var Sim = (function () {
     var tete = el("div", { classe: "pc-tete" });
     var chemin = el("ol", { classe: "pc-chemin", "aria-label": epreuve ? "Les parties du sujet" : "Les phases du projet" });
     var noeuds = o.phases.map(function (ph, i) {
-      var b = el("button", { type: "button", classe: "pc-noeud", disabled: "disabled",
-        "aria-label": nomPhase(i) + " · " + nomComp(ph.competence) },
-        [el("span", { classe: "pc-rond", texte: epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
+      var b = el("button", { type: "button", classe: "pc-noeud" + (ph.facultative ? " pc-facultatif" : ""), disabled: "disabled",
+        "aria-label": nomPhase(i) + (ph.facultative ? ", facultative" : "") + " · " + nomComp(ph.competence) },
+        [el("span", { classe: "pc-rond", texte: ph.facultative ? "+" : epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
          el("span", { classe: "pc-comp", texte: ph.competence }),
          el("span", { classe: "pc-etoiles", "aria-hidden": "true" })]);
       b.addEventListener("click", function () { montrer(i); });
@@ -1787,7 +1814,9 @@ var Sim = (function () {
           "Ici, <b>" + (cc.duree || "deux heures") + "</b> sur la simulation, et chaque question se rattache à une compétence de l'épreuve." }),
         el("p", { classe: "pc-surtitre", texte: "Les compétences évaluées" }),
         grille,
-        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur la tablette.</span>" }) : null,
+        aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
+          "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
+        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
         el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
         choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
@@ -1855,7 +1884,7 @@ var Sim = (function () {
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
       var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
       var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
-        texte: i + 1 < nPh ? (epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
       suite.addEventListener("click", function () { ouvrir(i + 1); });
       var versFin = null;
       if (i + 1 < nPh) {
@@ -2070,7 +2099,8 @@ var Sim = (function () {
         bAppel.disabled = true; bProf.hidden = false;
         bloc.setAttribute("data-etat", "attente");
         retour.className = "pc-retour";
-        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur cette tablette. <b>En attendant, continuez.</b>";
+        /* le TD du BTS se fait sur poste informatique, deux heures (15 octobre 2026) ; parcours et CCF, sur tablette */
+        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur " + (u41 ? "votre poste" : "cette tablette") + ". <b>En attendant, continuez.</b>";
         majPhase(i); majTete(); majAppels();
       });
       bProf.addEventListener("click", function () { ouvrirProf(f); });
@@ -2182,10 +2212,13 @@ var Sim = (function () {
       drapeau.classList.toggle("pc-ici", etat.courante === nPh);
       drapeau.classList.toggle("pc-fait", etat.exporte);
     }
-    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { s += etoilesDe(i); }); return s; }
+    /* les etoiles de la partie facultative ne gonflent pas le total : elles s'affichent a part, « +2 » (15 octobre 2026) */
+    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { if (!ph.facultative) s += etoilesDe(i); }); return s; }
+    function etoilesPlus() { var s = 0; o.phases.forEach(function (ph, i) { if (ph.facultative) s += etoilesDe(i); }); return s; }
+    function enPlus() { var p = etoilesPlus(); return p ? " · +" + p : ""; }
     function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
     function majTete() {
-      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nPh);
+      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
       temps.textContent = etat.debut ? minutes() + " min" : "";
       if (bDos) bDos.hidden = !etat.debut;
     }
@@ -2225,8 +2258,8 @@ var Sim = (function () {
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
-      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.appel) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
-      o.phases.forEach(function (ph, i) { if (!etat.fiches[i]) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
+      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      o.phases.forEach(function (ph, i) { if (!etat.fiches[i] && !ph.facultative) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
       var merite = !etat.aides && !passees && !restent;
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
@@ -2292,7 +2325,8 @@ var Sim = (function () {
       var restent = 0, appelsAFaire = 0;                     // les appels se comptent a part : ce ne sont pas des questions
       o.phases.forEach(function (ph, i) {
         var fs = etat.fiches[i];
-        (fs ? fs.filter(function (f) { return !f.fini; }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+        if (ph.facultative && !(fs || []).some(touchee)) return;   // pas abordee : elle ne manque pas
+        (fs ? fs.filter(function (f) { return !f.fini && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
           if (q.type === "appel") appelsAFaire++; else restent++;
         });
       });
@@ -2319,7 +2353,7 @@ var Sim = (function () {
               if ((q.competence || ph.competence) !== k) return;
               var f = fs && fs[j];
               if (q.type === "appel") ap.push("n° " + q.numero + " : " + (!f || !f.appele ? "pas fait" : !f.cote ? "en attente" : f.cote));
-              else { m++; if (f && f.note) n++; }
+              else if (compte(i, f)) { m++; if (f && f.note) n++; }
             });
           });
           if (u41 && !m && !ap.length) return;
@@ -2336,7 +2370,7 @@ var Sim = (function () {
       }
       recap.appendChild(t);
       if (epreuve) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>" + (u41 ? "Aides" : "Autonomie") + "</b> : " + autonomie().texte + "." }));
-      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nPh + "</b> · " + minutes() + " min" }));
+      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nOblig + enPlus() + "</b> · " + minutes() + " min" }));
       if (o.grades) {
         var g = o.grades.filter(function (x) { return totalEtoiles() >= x[0]; }).pop();
         if (g) recap.appendChild(el("p", { classe: "pc-grade", html: g[1] }));
@@ -2352,7 +2386,8 @@ var Sim = (function () {
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nPh + ", en " + minutes() + " min"];
+        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
+          (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
       out.push(new Array(64).join("="), "");
@@ -2361,8 +2396,12 @@ var Sim = (function () {
         var qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
         /* un bloc par competence : celle de la partie d'abord, puis celles que des questions portent */
         var groupes = [], index = {};
+        if (ph.facultative && !(fs || []).some(touchee)) {
+          out.push("Partie facultative, " + texteSeul(ph.titre) + " : non abordée, elle ne compte pas.", "");
+          return;
+        }
         qs.forEach(function (q, j) {
-          if (q.type === "appel") return;
+          if (q.type === "appel" || !compte(i, fs && fs[j])) return;
           var k = q.competence || ph.competence;
           if (!(k in index)) { index[k] = groupes.length; groupes.push({ k: k, items: [] }); }
           groupes[index[k]].items.push(j);
@@ -2503,7 +2542,7 @@ var Sim = (function () {
 <header class="tete">
 <div class="surtitre">BTS FED · séance 11, les générateurs</div>
 <h1>La chaudière à condensation</h1>
-<p class="chapeau">Une chaudière gaz sur son banc d'essai, puis une journée d'hiver au service d'un bâtiment. On tourne la modulation, la vis d'air et le banc de charge au doigt, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d'acquisition enregistre tout dans le temps.</p>
+<p class="chapeau">Une chaudière gaz sur son banc d'essai, puis une journée d'hiver au service d'un bâtiment. On tourne la modulation, la vis d'air et le banc de charge au doigt ou à la souris, on plonge la sonde dans le conduit, on chronomètre le compteur de gaz. Quand la chaudière condense-t-elle, et que vaut son rendement sur PCI et sur PCS ? La centrale d'acquisition enregistre tout dans le temps.</p>
 </header>
 <style>
 :root{--gaz:#d9b54a;--chaud:#c0392b;--froid:#2c6da6}
@@ -2716,7 +2755,7 @@ body.pc-en-cours #defis{display:none!important}
   function poserCommandes() {
     var Z = document.getElementById("cmd"), e = E();
     Z.innerHTML = ""; C = {};
-    if (exp === "banc") Z.appendChild(Sim.el("p", { classe: "fiche", html: "Tout se règle <b>sur la scène</b>, au doigt : les deux molettes du brûleur, celle du banc de charge, le circulateur. On touche la sonde, le bécher, le chronomètre, et le tableau de la chaudière pour l'allumer." }));
+    if (exp === "banc") Z.appendChild(Sim.el("p", { classe: "fiche", html: "Tout se règle <b>sur la scène</b>, au doigt ou à la souris : les deux molettes du brûleur, celle du banc de charge, le circulateur. On touche la sonde, le bécher, le chronomètre, et le tableau de la chaudière pour l'allumer." }));
     else Z.appendChild(Sim.el("p", { classe: "fiche", html: "Touche le tableau de la chaudière, ou le bouton, pour lancer la journée." }));
     majMolettes(); poserInstruments(); afficher();
   }
@@ -3013,7 +3052,7 @@ body.pc-en-cours #defis{display:none!important}
 
   /* ---------- Changer d'experience ---------- */
   var TEXTES = {
-    banc: { titre: "Sur le banc d'essai", legende: "Tourne les molettes au doigt : modulation et vis d'air du brûleur, retour du banc de charge, circulateur. Touche la sonde de l'analyseur pour la mettre dans le conduit, le bécher pour le vider, le chronomètre pour le lancer.",
+    banc: { titre: "Sur le banc d'essai", legende: "Tourne les molettes au doigt ou à la souris : modulation et vis d'air du brûleur, retour du banc de charge, circulateur. Touche la sonde de l'analyseur pour la mettre dans le conduit, le bécher pour le vider, le chronomètre pour le lancer.",
       releve: "Lance l'acquisition une fois le retour stable : elle garde l'index du gaz, les températures, l'analyse et le bécher à chaque intervalle. Trace le gaz en fonction du temps : sa pente est le débit de gaz.",
       accueil: "Touche le tableau de la chaudière pour l'allumer, place la sonde dans le conduit, et attends que le retour se stabilise." },
     jour: { titre: "Une journée d'hiver", legende: "La loi d'eau règle le départ sur la température extérieure ; les émetteurs fixent le retour. Sous la ligne de rosée, le retour fait condenser les fumées.",
@@ -3060,7 +3099,11 @@ body.pc-en-cours #defis{display:none!important}
    L'evidence retournee, partie 5 : « des radiateurs 70/50, ca ne condense jamais » (le courriel). Par la
    journee la plus froide, c'est vrai la nuit, dix heures sur vingt-quatre : 99 % sur la journee. Par la
    journee moyenne de la saison, la chaudiere condense toute la journee : 102 a 103 %. Le regime 70/50
-   n'est atteint qu'a la temperature de base, -7 °C. */
+   n'est atteint qu'a la temperature de base, -7 °C.
+   Pour aller plus loin (15 octobre 2026, facultatif, 30 a 40 min) : la chaudiere dimensionnee a rebours, comme au
+   manuel (chapitre 5, « dimensionner un generateur ») : la puissance a la base, la relance, le modele de la gamme
+   (document 6, neuf), la journee de base faite sur la simulation, puis le taux de charge et les heures sous la
+   puissance minimale de la journee moyenne, et la reponse au maitre d'ouvrage : fallait-il 24 kW ? */
 (function () {
   var C = window.chaudiere, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
   var LAMS = [1.45, 1.5, 1.55];
@@ -3119,7 +3162,13 @@ body.pc-en-cours #defis{display:none!important}
     gazF: function (ctx) { var j = jourDe(ctx, "froid"); return j ? j.gaz : NaN; },
     etaF: function (ctx) { return 100 * val(ctx, "EuF", M.EuF) / (PCI * val(ctx, "gazF", M.gazF)); },
     hF: function (ctx) { return heuresAuDessus(jourDe(ctx, "froid"), val(ctx, "coude", M.coude)); },
-    etaD: function (ctx) { var j = jourDe(ctx, "doux"); return j ? j.eta : NaN; }
+    etaD: function (ctx) { var j = jourDe(ctx, "doux"); return j ? j.eta : NaN; },
+    /* pour aller plus loin */
+    Pbase: function () { return GV_BAT * (T_INT - T_BASE); },
+    Pinst: function (ctx) { return val(ctx, "Pbase", M.Pbase) * RELANCE; },
+    PmaxBase: function () { return pMax(cleBase()); },
+    hSous: function (ctx) { return heuresSous(cleDoux(ctx), P_MIN); },
+    taux: function (ctx) { var j = jourDe(ctx, "doux"); return j ? 100 * j.Eu / (24 * P_NOM) : NaN; }
   };
   function n(x, d) { return isFinite(x) ? fr(x, d) : "…"; }
   /* les espaces insecables du dossier : jamais un nombre separe de son unite en fin de ligne */
@@ -3208,16 +3257,70 @@ body.pc-en-cours #defis{display:none!important}
       function choisir() {
         ctx.donnees.touche = z[0];
         groupes.forEach(function (x) { x.classList.toggle("choisie", x === g); });
-        dit.textContent = "Conduite choisie : vérifiez votre réponse, ou touchez-en une autre.";
+        dit.textContent = "Conduite choisie : vérifiez votre réponse, ou cliquez sur une autre.";
       }
       g.addEventListener("click", choisir);
       g.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); choisir(); } });
       return g;
     });
-    var dit = el("p", { classe: "u41-dit", "aria-live": "polite", texte: "Touchez une conduite sur le schéma." });
+    var dit = el("p", { classe: "u41-dit", "aria-live": "polite", texte: "Cliquez sur une conduite sur le schéma." });
     parent.appendChild(dit);
     return S;
   }
+  /* ---------- Pour aller plus loin : la chaudiere dimensionnee a rebours ----------
+     La puissance appelee heure par heure, gardee a la fin de chaque journee : celle que montre le calorimetre,
+     GV × (19 − θe) − apports, avec les constantes du batiment de la simulation (document 1, article 2.1). */
+  var GV_BAT = 0.6, T_INT = 19, T_BASE = -7, RELANCE = 1.15, P_MIN = 4.8, P_NOM = 24, BASE_MOY = -3;
+  var GAMME = [["CD 15", 3.0, 15.0, 2950], ["CD 20", 3.9, 19.6, 3150], ["CD 24", 4.8, 24.0, 3400], ["CD 30", 6.0, 30.0, 3800]];
+  var PUISS = {};
+  Sim.animer(function () {
+    var e = C.etatDe("jour"); if (!e || e._cle === undefined || !e.fini || e._gardeP) return;
+    e._gardeP = true;
+    PUISS[e._cle] = e.hist.map(function (p) { return { h: p.h, P: Math.max(0, GV_BAT * (T_INT - p.Te) - (p.h >= 8 && p.h < 18 ? 3 : 0)) }; });
+  });
+  /* Dans cette partie, chaque journee lancee part d'une centrale videe et relancee : sans cela, la centrale lancee en
+     partie 5 attendait la fin d'une journee entiere avant de reprendre (son temps repart a zero avec la journee), et la
+     table melait deux journees. Les journees faites ici sont notees : leurs lignes sont dans la centrale. */
+  var IDX_PLUS = 6, FAITS_ICI = {};
+  Sim.animer(function () {
+    var A = window.u4101, e = C.etatDe("jour");
+    if (!A || !e || e._cle === undefined) return;
+    if (e.fini && e._centraleNeuve) FAITS_ICI[e._cle] = true;
+    if (A.etat.courante !== IDX_PLUS || !e.jour || e._centraleNeuve) return;
+    e._centraleNeuve = true;
+    var cen = C.centrale(); cen.arreter(); cen.vider(); cen.lancer();
+  });
+  function puissances(cle) { return PUISS[cle]; }
+  function pMax(cle) { var L = puissances(cle); return L ? Math.max.apply(null, L.map(function (q) { return q.P; })) : NaN; }
+  function heuresSous(cle, seuil) {
+    var L = puissances(cle); if (!L) return NaN;
+    var s = 0;
+    for (var i = 0; i + 1 < L.length; i++) if (L[i].P < seuil) s += L[i + 1].h - L[i].h;
+    if (L.length && L[L.length - 1].P < seuil) s += Math.max(0, 24 - L[L.length - 1].h);
+    return s;
+  }
+  function cleBase() { return cle("condensation", REGIME, BASE_MOY); }
+  function cleDoux(ctx) { return cle("condensation", REGIME, cfg(ctx).doux); }
+  function erreursBase() {
+    var r = C.reglage, x = [];
+    if (r.type !== "condensation") x.push("la chaudière n'est plus celle du CCTP : reprenez la chaudière à condensation (article 3.1)");
+    if (r.regime !== REGIME) x.push("les émetteurs ne sont pas les radiateurs conservés (document 1)");
+    if (r.tmoy !== BASE_MOY) x.push("la température moyenne n'est pas celle de la journée de base (document 6)");
+    return x;
+  }
+  function documentGamme(zone) {
+    var t = el("table", { classe: "u41-tab" }, [el("tr", null, [el("td", { html: "<b>Modèle</b>" }), el("td", { html: "<b>Puissance utile, 50/30 °C</b>" }), el("td", { html: "<b>Prix HT</b>" })])]);
+    GAMME.forEach(function (m) { t.appendChild(el("tr", null, [el("td", { texte: m[0] }), el("td", { texte: "modulante de " + fr(m[1], 1) + " à " + fr(m[2], 1) + " kW" }), el("td", { texte: fr(m[3], 0) + " €" })])); });
+    zone.appendChild(insecables(el("div", { classe: "pc-docs" }, [
+      el("section", null, [el("h3", { texte: "Document 6 · Note de méthode du bureau d'études" }),
+        el("ul", null, [el("li", { html: "<b>Puissance à installer</b> : les déperditions à la température de base, majorées de <b>15 %</b> pour la relance du matin, les bureaux étant en réduit la nuit." }),
+          el("li", { html: "<b>On ne majore pas au-delà.</b> Sous sa puissance minimale, une chaudière modulante ne peut plus suivre : elle s'arrête et repart, et chaque cycle coûte un peu de gaz, quelle que soit sa durée." }),
+          el("li", { html: "Le <b>taux de charge</b> d'une journée : l'énergie utile de la journée ÷ celle que la chaudière donnerait en 24 h à pleine puissance. Sur une saison, il est de l'ordre de <b>25 à 35 %</b>." }),
+          el("li", { html: "La <b>journée de base</b> du site : <b>−3 °C</b> de moyenne, <b>−7 °C</b> vers 3 h." })])]),
+      el("section", null, [el("h3", { texte: "Document 6 (suite) · La gamme du fabricant, chaudières gaz à condensation" }), t,
+        el("p", { html: "Le modèle posé est la <b>CD 24</b>. Toute la gamme a le même échangeur et la même plage de CO₂." })])])));
+  }
+
   var NOMS_ZONES = { gaz: "l'arrivée de gaz", fumees: "le conduit de fumées", depart: "la conduite du haut, vers les radiateurs", retour: "la conduite du bas, vers la chaudière", condensats: "l'évacuation des condensats" };
   /* une conduite mal choisie : ce qu'elle est, jamais ou se trouve la bonne (14 octobre 2026) */
   var FAUX_ZONES = { gaz: "c'est l'arrivée de gaz : ce n'est pas une conduite d'eau de chauffage",
@@ -3229,15 +3332,15 @@ body.pc-en-cours #defis{display:none!important}
      document qui le donne, jamais la valeur a trouver. */
   function erreursCombustion(e) {
     var r = [];
-    if (!e.marche) r.push("la chaudière est éteinte : touchez son tableau pour l'allumer");
-    if (!e.sonde) r.push("la sonde de l'analyseur n'est pas dans le conduit de fumées : touchez-la");
+    if (!e.marche) r.push("la chaudière est éteinte : cliquez sur son tableau pour l'allumer");
+    if (!e.sonde) r.push("la sonde de l'analyseur n'est pas dans le conduit de fumées : cliquez dessus");
     if (co2(e.lam) < CO2_MIN - 1e-9 || co2(e.lam) > CO2_MAX + 1e-9) r.push("le CO₂ n'est pas dans la plage de la notice (document 2) : reprenez la vis d'air");
     if (coDe(e.lam) > CO_MAX) r.push("le CO dépasse le seuil de l'article 3.4 (document 1) : reprenez la vis d'air");
     return r;
   }
   function erreursEssai(e, c) {
     var r = [];
-    if (!e.marche) r.push("la chaudière est éteinte : touchez son tableau pour l'allumer");
+    if (!e.marche) r.push("la chaudière est éteinte : cliquez sur son tableau pour l'allumer");
     if (e.mod !== c.mod) r.push("la modulation n'est pas celle de l'article 3.5 (document 1)");
     if (e.trCons !== c.tr) r.push("le retour du banc de charge n'est pas celui de l'article 3.5 (document 1)");
     if (Math.abs(e.Q - DEBIT) >= 0.01) r.push("le circulateur n'est pas au débit de l'article 3.5 (document 1)");
@@ -3371,7 +3474,7 @@ body.pc-en-cours #defis{display:none!important}
             items: ["repère 1", "repère 2", "repère 3", "repère 4", "repère 5"],
             categories: ["circulateur", "compteur de gaz", "neutraliseur de condensats", "régulateur à loi d'eau", "sonde extérieure"], bonnes: [1, 0, 2, 4, 3],
             methode: "Suivez chaque fluide : le gaz entre par un appareil qui le compte ; l'eau est poussée par une pompe ; les condensats passent par un bac avant l'égout ; un fil relie le dehors à l'appareil qui décide." },
-          { type: "action", lib: "Touchez sur le schéma la conduite qui ramène l'eau des radiateurs à la chaudière.",
+          { type: "action", lib: "Cliquez, sur le schéma, sur la conduite qui ramène l'eau des radiateurs à la chaudière.",
             aide: "Les flèches donnent le sens de l'eau ; le circulateur est posé sur l'une des deux conduites d'eau.",
             verifier: function (ctx) {
               var t = ctx.donnees.touche; if (!t) return null;
@@ -3407,8 +3510,8 @@ body.pc-en-cours #defis{display:none!important}
             verifier: function () {
               var e = banc(); if (!e.marche && !e.sonde) return null;
               return { reponse: (e.marche ? "chaudière allumée" : "chaudière éteinte") + ", sonde " + (e.sonde ? "dans le conduit" : "à l'air libre"),
-                controles: [[e.marche, "la chaudière est éteinte : touchez son tableau pour l'allumer"],
-                  [e.sonde, "la sonde de l'analyseur n'est pas dans le conduit de fumées : touchez-la"]] };
+                controles: [[e.marche, "la chaudière est éteinte : cliquez sur son tableau pour l'allumer"],
+                  [e.sonde, "la sonde de l'analyseur n'est pas dans le conduit de fumées : cliquez dessus"]] };
             },
             methode: "Le tableau de la chaudière l'allume ; la sonde se pose dans le conduit de fumées, à la prise de mesure du document 3." },
           { type: "nombre", competence: "C12-2", lib: "Relevez la teneur en CO₂ des fumées, au réglage d'usine.", unite: "%",
@@ -3544,6 +3647,7 @@ body.pc-en-cours #defis{display:none!important}
       },
       {
         competence: "C1-2", conclusion: true, titre: "La réponse au maître d'ouvrage",
+        nom: "Conclusion",             // la partie facultative vient apres : sans ce nom, la brique l'appellerait « Partie 6 »
         recit: "Le maître d'ouvrage signe ou non le procès-verbal de réception. Il lira trois phrases, avec leurs nombres.",
         questions: function (ctx) {
           var c = cfg(ctx), eta = val(ctx, "eta", M.eta), etaF = val(ctx, "etaF", M.etaF), etaD = val(ctx, "etaD", M.etaD);
@@ -3564,6 +3668,75 @@ body.pc-en-cours #defis{display:none!important}
           ];
         },
         bravo: "Le maître d'ouvrage a sa réponse, ses nombres, et la condition qui la tient."
+      },
+      {
+        competence: "C1-2", facultative: true, titre: "Fallait-il 24 kW ? La chaudière dimensionnée à rebours",
+        recit: "Le maître d'ouvrage pose une dernière question : la chaudière de 24 kW était-elle la bonne ? On ne vérifie plus ce qui est posé : on part des déperditions, on remonte jusqu'au modèle de la gamme, et la simulation dit si le calcul tient.",
+        consigne: "Le document 6 est neuf. La journée se règle sur la carte de la chaudière, comme en partie 5. Ici, la centrale repart vide à chaque journée lancée ; sa colonne « Puissance » est à cocher.",
+        scene: documentGamme, paillasse: ["#carteReglages", "#carteScene", "#carteMesure", "#carteReleve"], large: true,
+        surOuvrir: function (ctx) { preparer(ctx); C.experience("jour"); },
+        questions: [
+          { type: "nombre", lib: "Calculez la puissance que les bureaux demandent à la température de base, apports négligés.", unite: "kW",
+            attendu: M.Pbase, tolerance: 0.02, fini: garde("Pbase", M.Pbase),
+            methode: "Les déperditions de l'article 2.1 : GV × (θ intérieure − θ de base), en watts avec GV en W/K ; puis en kilowatts." },
+          { type: "nombre", lib: "Quelle puissance faut-il installer, selon la note du bureau d'études (document 6) ?", unite: "kW",
+            attendu: M.Pinst, tolerance: 0.02, fini: garde("Pinst", M.Pinst),
+            methode: "Votre puissance à la base, majorée comme le dit la note : pour 15 %, on multiplie par 1,15." },
+          { type: "choix", competence: "C12-2", lib: "Dans la gamme du document 6, quelle chaudière fallait-il retenir ?",
+            options: GAMME.map(function (m) { return m[0] + " · jusqu'à " + fr(m[2], 1) + " kW"; }),
+            bonne: function (ctx) { var p = val(ctx, "Pinst", M.Pinst); for (var i = 0; i < GAMME.length; i++) if (GAMME[i][2] >= p) return i; return GAMME.length - 1; },
+            methode: "La plus petite de la gamme dont la puissance maximale couvre la puissance à installer : on ne majore pas au-delà." },
+          { type: "action", competence: "C2-3", lib: "Mettez votre calcul de la question 1 à l'épreuve : faites ici la journée de base du document 6, radiateurs conservés, en entier.",
+            aide: "La température moyenne se règle sur la carte de la chaudière ; la journée se lance par le bouton ou le tableau de la chaudière. Vos lectures de la partie 5 sont gardées.",
+            verifier: function (ctx) {
+              if (FAITS_ICI[cleBase()]) return { ok: true, reponse: "journée de base à " + fr(BASE_MOY, 0) + " °C de moyenne, radiateurs 70/50, faite en entier" };
+              var e = C.etatDe("jour"), r = C.reglage, errs = erreursBase(), lancee = e && (e.jour || e.h > 0);
+              if (!e || !e.fini) {
+                if (errs.length) return { attente: (lancee ? "Cette journée ne comptera pas, à corriger : " : "Avant de lancer la journée, à corriger : ") + errs.join(" ; ") + "." };
+                return lancee ? { attente: "Réglage juste (" + luJour() + "). La journée doit aller jusqu'à minuit : " + (e.jour ? "laissez tourner." : "relancez-la.") } : null;
+              }
+              if (!errs.length) return { attente: e._centraleNeuve ? "La journée vient de finir : vérifiez de nouveau." : "Cette journée a été faite hors de cette partie : relancez-la ici, pour que la centrale la garde (changez la température, puis remettez-la)." };
+              if (e._cle === cle("condensation", REGIME, cfg(ctx).doux) || e._cle === cle("condensation", REGIME, cfg(ctx).froid))
+                return { attente: "La journée affichée est une journée de la partie 5 : réglez celle de la journée de base (document 6), puis lancez-la." };
+              return { ok: false, reponse: "journée faite à " + fr(r.tmoy, 0) + " °C, émetteurs " + r.regime + ", " + TYPE_LU[r.type], corriger: errs };
+            },
+            methode: "Document 6 pour la température moyenne de la journée de base, document 1 pour les émetteurs ; la journée va jusqu'à minuit." },
+          { type: "nombre", competence: "C12-2", lib: "Relevez sur la centrale la puissance la plus forte que les bureaux ont appelée ce jour-là.", unite: "kW",
+            attendu: M.PmaxBase, tolerance: 0.03,
+            methode: "Cochez la colonne « Puissance » de la centrale et cherchez sa plus grande valeur, vers 3 h du matin. Comparez-la à votre question 1." },
+          { type: "action", competence: "C2-3", lib: "Faites maintenant ici la journée moyenne de la saison (document 5), radiateurs conservés, en entier.",
+            aide: "Changer la température moyenne remet la journée au départ ; la centrale repart vide.",
+            verifier: function (ctx) {
+              var c = cfg(ctx);
+              if (FAITS_ICI[cleDoux(ctx)]) return { ok: true, reponse: "journée moyenne à " + fr(c.doux, 0) + " °C, radiateurs 70/50, faite en entier dans cette partie" };
+              var e = C.etatDe("jour"), r = C.reglage, errs = erreursJour(ctx, "doux"), lancee = e && (e.jour || e.h > 0);
+              if (!e || !e.fini) {
+                if (errs.length) return { attente: (lancee ? "Cette journée ne comptera pas, à corriger : " : "Avant de lancer la journée, à corriger : ") + errs.join(" ; ") + "." };
+                return lancee ? { attente: "Réglage juste (" + luJour() + "). La journée doit aller jusqu'à minuit : " + (e.jour ? "laissez tourner." : "relancez-la.") } : null;
+              }
+              if (!errs.length) return { attente: e._centraleNeuve ? "La journée vient de finir : vérifiez de nouveau." : "Cette journée a été faite en partie 5 : relancez-la ici, pour que la centrale la garde (changez la température, puis remettez-la)." };
+              if (e._cle === cleBase() || e._cle === cle("condensation", REGIME, c.froid))
+                return { attente: "La journée affichée n'est pas la journée moyenne : réglez celle du document 5, puis lancez-la." };
+              return { ok: false, reponse: "journée faite à " + fr(r.tmoy, 0) + " °C, émetteurs " + r.regime + ", " + TYPE_LU[r.type], corriger: errs };
+            },
+            methode: "Seule la température moyenne change : celle de la journée moyenne du document 5 ; la journée va jusqu'à minuit." },
+          { type: "nombre", competence: "C12-2", lib: "Sur cette journée moyenne, pendant combien d'heures les bureaux ont-ils demandé moins que la puissance minimale de la chaudière posée ?", unite: "h",
+            attendu: M.hSous, tolerance: 0, toleranceAbsolue: 1,
+            methode: "La puissance minimale de la CD 24 est au document 2 ou 6. Colonne « Puissance » de la centrale : comptez les heures où elle passe dessous." },
+          { type: "nombre", competence: "C2-3", lib: "Calculez le taux de charge de la chaudière posée sur cette journée moyenne.", unite: "%",
+            attendu: M.taux, tolerance: 0.03,
+            methode: "Document 6 : l'énergie utile de la journée moyenne, au calorimètre à minuit, ÷ ce que la chaudière donnerait en 24 h à sa puissance maximale, × 100." },
+          { type: "multi", essais: 2, lib: "Fallait-il 24 kW ? Gardez les raisonnements justes.",
+            options: ["La base et la relance demandent environ 18 kW : la CD 20 de la gamme suffisait.",
+              "La CD 24 brûle davantage de gaz à chaque instant, parce que sa puissance est plus grande.",
+              "Sous sa puissance minimale, une chaudière modulante s'arrête et repart, et la journée moyenne de la saison y passe plusieurs heures.",
+              "Il fallait la CD 30, pour garder une marge de 50 % par grand froid.",
+              "La CD 15 suffisait : la température de base n'arrive que quelques heures par hiver.",
+              "Par la journée moyenne de la saison, la chaudière posée travaille en moyenne à moins du tiers de sa puissance."],
+            bonne: [0, 2, 5],
+            methode: "Une chaudière modulante suit la demande : elle ne brûle pas plus parce qu'elle est grosse, mais elle s'arrête plus souvent. Et la note du document 6 dit jusqu'où majorer." }
+        ],
+        bravo: "Le calcul retourné et la simulation disent la même chose : la CD 20 suffisait, et la CD 24 passe la saison loin de sa puissance."
       }
     ],
     fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."

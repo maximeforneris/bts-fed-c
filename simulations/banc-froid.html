@@ -146,7 +146,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 /* Molette posee sur la scene : on la tourne au doigt */
 .molette{cursor:grab;touch-action:none;outline:none}
 .molette.tourne{cursor:grabbing}
-.molette:focus-visible .molette-corps{stroke:var(--accent);stroke-width:3}
+.molette:focus-visible .molette-corps,.molette.prise .molette-corps{stroke:var(--accent);stroke-width:3}
 .molette-corps{fill:var(--carte2);stroke:var(--encre);stroke-width:2}
 .molette.tourne .molette-corps{fill:var(--accent-doux)}
 .molette-index{stroke:var(--accent);stroke-width:3.5;stroke-linecap:round}
@@ -172,6 +172,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-noeud.pc-fait.pc-ici .pc-rond{color:#fff}
 .pc-noeud.pc-ici .pc-comp{color:var(--encre)}
 .pc-drapeau .pc-rond{font-size:1.15rem}
+.pc-facultatif .pc-rond{border-style:dashed;font-size:1.3rem}
 .pc-info{display:flex;gap:12px;align-items:center;font-size:.9rem;font-weight:650;color:var(--encre2)}
 .pc-score{color:var(--tiede);font-variant-numeric:tabular-nums}
 .pc-niveau:empty,.pc-temps:empty{display:none}
@@ -1382,6 +1383,9 @@ var Sim = (function () {
       tic: function (t) {
         tCourant = t;
         if (!actif) return;
+        /* le temps de la scene repart a zero (une journee neuve) : la serie reprend, au lieu d'attendre
+           l'heure de la mesure suivante de la journee d'avant (TD U41-01, 15 octobre 2026) */
+        if (prochain !== null && t + 1e-9 < dernier) { prochain = t; debut = t; depart = t; }
         if (prochain === null) { prochain = t; if (debut === null) debut = t; depart = t; }
         if (t + 1e-9 < prochain) return;
         var l = o.lire(prochain, debut);
@@ -1401,6 +1405,10 @@ var Sim = (function () {
 
   /* Molette posee sur la scene SVG : on la tourne au doigt (glisser vers le haut ou la droite
      pour monter), a la molette de la souris ou aux fleches du clavier.
+     LA MOLETTE DE LA SOURIS N'AGIT QUE SUR UN BOUTON PRIS (15 octobre 2026, essai sur poste) : avant,
+     elle tournait tout bouton survole, et un simple defilement de la page avait descendu la vanne
+     generale du reseau de 4 a 0,8 tour sans que l'eleve le voie. Un clic (ou la tabulation) prend
+     le bouton, son contour s'allume ; sinon la page defile normalement.
      o : { x, y, r, zone, min, max, pas, valeur, dec, unite, label, surChange, format } */
   function molette(parent, o) {
     var v = o.valeur, r = o.r || 17, dec = o.dec === undefined ? 0 : o.dec;
@@ -1415,6 +1423,9 @@ var Sim = (function () {
     var index = svg("line", { x1: 0, y1: -r * 0.25, x2: 0, y2: -r + 3, "class": "molette-index" }, g);
     var titre = o.label ? svg("text", { x: 0, y: -r - 12, "text-anchor": "middle", "class": "molette-titre", texte: o.titreCourt || o.label }, g) : null;
     var val = svg("text", { x: 0, y: r + 19, "text-anchor": "middle", "class": "molette-val" }, g);
+    svg("title", { texte: (o.label ? o.label + " : " : "") + "glisser, ou cliquer puis tourner la molette de la souris, ou les flèches" }, g);
+    g.addEventListener("focus", function () { g.classList.add("prise"); });
+    g.addEventListener("blur", function () { g.classList.remove("prise"); });
     function maj() {
       var f = (v - o.min) / (o.max - o.min);
       index.setAttribute("transform", "rotate(" + (-135 + 270 * f) + ")");
@@ -1429,13 +1440,18 @@ var Sim = (function () {
     g.addEventListener("touchstart", function (e) { e.preventDefault(); }, { passive: false });
     g.addEventListener("pointerdown", function (e) {
       e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { /* evenement de synthese */ }
+      try { g.focus({ preventScroll: true }); } catch (x) { g.focus(); }   // le preventDefault empechait la prise du bouton
+      g.classList.add("prise");
       var x0 = e.clientX, y0 = e.clientY, v0 = v, course = o.course || 160;
       g.classList.add("tourne");
       function mv(e2) { poser(v0 + ((e2.clientX - x0) - (e2.clientY - y0)) / course * (o.max - o.min)); }
       function fin() { g.classList.remove("tourne"); g.removeEventListener("pointermove", mv); g.removeEventListener("pointerup", fin); g.removeEventListener("pointercancel", fin); }
       g.addEventListener("pointermove", mv); g.addEventListener("pointerup", fin); g.addEventListener("pointercancel", fin);
     });
-    g.addEventListener("wheel", function (e) { e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1)); }, { passive: false });
+    g.addEventListener("wheel", function (e) {
+      if (document.activeElement !== g) return;            // bouton pas pris : la page defile
+      e.preventDefault(); poser(v + (e.deltaY < 0 ? 1 : -1) * (o.pas || 1));
+    }, { passive: false });
     g.addEventListener("keydown", function (e) {
       var p = o.pas || 1;
       if (e.key === "ArrowUp" || e.key === "ArrowRight") { poser(v + p); e.preventDefault(); }
@@ -1556,6 +1572,11 @@ var Sim = (function () {
      qu'on n'y a rien repondu : ouverte trop tot, elle se refait quand on revient. Un nombre manquant s'affiche
      « … », jamais « NaN » ; une question dont la valeur attendue depend d'une mesure pas encore faite le dit,
      sans compter d'essai.
+     LA PARTIE FACULTATIVE (15 octobre 2026, « une partie de plus, exigeante » pour les TD du BTS) : « facultative:
+     true » sur une partie la nomme « Pour aller plus loin », la marque d'un « + » sur le chemin et l'annonce a
+     l'accueil. Intouchee, elle ne compte nulle part : ni au fichier (une ligne dit qu'elle n'est pas abordee), ni
+     dans ce qui reste a faire, ni au total des etoiles. Entamee, seules ses questions travaillees vont au fichier :
+     l'eleve rapide y gagne des items, le lent n'y perd rien. Pas d'appel dans une partie facultative.
      LE DOSSIER : « dossier: true » remet les documents de la partie 1 (sa scene) dans un panneau qu'un
      bouton « Le dossier » de la tete ouvre a gauche, dans toutes les parties ; une fonction (zone, ctx) a
      la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
@@ -1608,6 +1629,11 @@ var Sim = (function () {
     var donnees = {};                                    // partage entre les phases d'un parcours
     var appels = [];                                     // les fiches des appels lances ou a lancer
     var nPh = o.phases.length;
+    /* une partie facultative intouchee ne compte nulle part ; entamee, seulement pour ce qui y est fait */
+    var nOblig = o.phases.filter(function (ph) { return !ph.facultative; }).length || nPh;
+    var aFacultative = nOblig < nPh;
+    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide); }
+    function compte(i, f) { return !o.phases[i].facultative || touchee(f); }
     var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
     var P = $(parent);
 
@@ -1654,6 +1680,7 @@ var Sim = (function () {
     function nomPhase(i) {
       if (!epreuve) return "Phase " + (i + 1);
       if (o.phases[i].nom) return o.phases[i].nom;
+      if (o.phases[i].facultative) return "Pour aller plus loin";
       return i === nPh - 1 && (o.phases[i].conclusion || (ccf && o.phases[i].competence === "COM")) ? "Conclusion" : "Partie " + (i + 1);
     }
 
@@ -1661,9 +1688,9 @@ var Sim = (function () {
     var tete = el("div", { classe: "pc-tete" });
     var chemin = el("ol", { classe: "pc-chemin", "aria-label": epreuve ? "Les parties du sujet" : "Les phases du projet" });
     var noeuds = o.phases.map(function (ph, i) {
-      var b = el("button", { type: "button", classe: "pc-noeud", disabled: "disabled",
-        "aria-label": nomPhase(i) + " · " + nomComp(ph.competence) },
-        [el("span", { classe: "pc-rond", texte: epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
+      var b = el("button", { type: "button", classe: "pc-noeud" + (ph.facultative ? " pc-facultatif" : ""), disabled: "disabled",
+        "aria-label": nomPhase(i) + (ph.facultative ? ", facultative" : "") + " · " + nomComp(ph.competence) },
+        [el("span", { classe: "pc-rond", texte: ph.facultative ? "+" : epreuve && nomPhase(i) === "Conclusion" ? "✎" : String(i + 1) }),
          el("span", { classe: "pc-comp", texte: ph.competence }),
          el("span", { classe: "pc-etoiles", "aria-hidden": "true" })]);
       b.addEventListener("click", function () { montrer(i); });
@@ -1787,7 +1814,9 @@ var Sim = (function () {
           "Ici, <b>" + (cc.duree || "deux heures") + "</b> sur la simulation, et chaque question se rattache à une compétence de l'épreuve." }),
         el("p", { classe: "pc-surtitre", texte: "Les compétences évaluées" }),
         grille,
-        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur la tablette.</span>" }) : null,
+        aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
+          "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
+        nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
         el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
         choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
@@ -1855,7 +1884,7 @@ var Sim = (function () {
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
       var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
       var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
-        texte: i + 1 < nPh ? (epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
       suite.addEventListener("click", function () { ouvrir(i + 1); });
       var versFin = null;
       if (i + 1 < nPh) {
@@ -2070,7 +2099,8 @@ var Sim = (function () {
         bAppel.disabled = true; bProf.hidden = false;
         bloc.setAttribute("data-etat", "attente");
         retour.className = "pc-retour";
-        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur cette tablette. <b>En attendant, continuez.</b>";
+        /* le TD du BTS se fait sur poste informatique, deux heures (15 octobre 2026) ; parcours et CCF, sur tablette */
+        retour.innerHTML = "Appel lancé : levez la main, le professeur vient valider sur " + (u41 ? "votre poste" : "cette tablette") + ". <b>En attendant, continuez.</b>";
         majPhase(i); majTete(); majAppels();
       });
       bProf.addEventListener("click", function () { ouvrirProf(f); });
@@ -2182,10 +2212,13 @@ var Sim = (function () {
       drapeau.classList.toggle("pc-ici", etat.courante === nPh);
       drapeau.classList.toggle("pc-fait", etat.exporte);
     }
-    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { s += etoilesDe(i); }); return s; }
+    /* les etoiles de la partie facultative ne gonflent pas le total : elles s'affichent a part, « +2 » (15 octobre 2026) */
+    function totalEtoiles() { var s = 0; o.phases.forEach(function (ph, i) { if (!ph.facultative) s += etoilesDe(i); }); return s; }
+    function etoilesPlus() { var s = 0; o.phases.forEach(function (ph, i) { if (ph.facultative) s += etoilesDe(i); }); return s; }
+    function enPlus() { var p = etoilesPlus(); return p ? " · +" + p : ""; }
     function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
     function majTete() {
-      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nPh);
+      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
       temps.textContent = etat.debut ? minutes() + " min" : "";
       if (bDos) bDos.hidden = !etat.debut;
     }
@@ -2225,8 +2258,8 @@ var Sim = (function () {
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
-      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.appel) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
-      o.phases.forEach(function (ph, i) { if (!etat.fiches[i]) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
+      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      o.phases.forEach(function (ph, i) { if (!etat.fiches[i] && !ph.facultative) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
       var merite = !etat.aides && !passees && !restent;
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
@@ -2292,7 +2325,8 @@ var Sim = (function () {
       var restent = 0, appelsAFaire = 0;                     // les appels se comptent a part : ce ne sont pas des questions
       o.phases.forEach(function (ph, i) {
         var fs = etat.fiches[i];
-        (fs ? fs.filter(function (f) { return !f.fini; }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+        if (ph.facultative && !(fs || []).some(touchee)) return;   // pas abordee : elle ne manque pas
+        (fs ? fs.filter(function (f) { return !f.fini && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
           if (q.type === "appel") appelsAFaire++; else restent++;
         });
       });
@@ -2319,7 +2353,7 @@ var Sim = (function () {
               if ((q.competence || ph.competence) !== k) return;
               var f = fs && fs[j];
               if (q.type === "appel") ap.push("n° " + q.numero + " : " + (!f || !f.appele ? "pas fait" : !f.cote ? "en attente" : f.cote));
-              else { m++; if (f && f.note) n++; }
+              else if (compte(i, f)) { m++; if (f && f.note) n++; }
             });
           });
           if (u41 && !m && !ap.length) return;
@@ -2336,7 +2370,7 @@ var Sim = (function () {
       }
       recap.appendChild(t);
       if (epreuve) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>" + (u41 ? "Aides" : "Autonomie") + "</b> : " + autonomie().texte + "." }));
-      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nPh + "</b> · " + minutes() + " min" }));
+      recap.appendChild(el("p", { classe: "pc-score-final", html: "<b>★ " + totalEtoiles() + " / " + 3 * nOblig + enPlus() + "</b> · " + minutes() + " min" }));
       if (o.grades) {
         var g = o.grades.filter(function (x) { return totalEtoiles() >= x[0]; }).pop();
         if (g) recap.appendChild(el("p", { classe: "pc-grade", html: g[1] }));
@@ -2352,7 +2386,8 @@ var Sim = (function () {
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nPh + ", en " + minutes() + " min"];
+        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
+          (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
       out.push(new Array(64).join("="), "");
@@ -2361,8 +2396,12 @@ var Sim = (function () {
         var qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i);
         /* un bloc par competence : celle de la partie d'abord, puis celles que des questions portent */
         var groupes = [], index = {};
+        if (ph.facultative && !(fs || []).some(touchee)) {
+          out.push("Partie facultative, " + texteSeul(ph.titre) + " : non abordée, elle ne compte pas.", "");
+          return;
+        }
         qs.forEach(function (q, j) {
-          if (q.type === "appel") return;
+          if (q.type === "appel" || !compte(i, fs && fs[j])) return;
           var k = q.competence || ph.competence;
           if (!(k in index)) { index[k] = groupes.length; groupes.push({ k: k, items: [] }); }
           groupes[index[k]].items.push(j);
@@ -2598,7 +2637,7 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
 
 <div class="carte">
   <h2><span class="num">1</span>Le banc et ses conditions</h2>
-  <p class="consigne">Changer de fluide arrête le banc et le remet au repos. Les autres réglages sont sur le circuit : quatre molettes, qui se tournent au doigt.</p>
+  <p class="consigne">Changer de fluide arrête le banc et le remet au repos. Les autres réglages sont sur le circuit : quatre molettes, qui se tournent au doigt ou à la souris.</p>
   <div class="commandes" id="reglages"></div>
   <p class="plaque" id="plaque"></p>
 </div>
@@ -2609,7 +2648,7 @@ select.panne{font:inherit;padding:8px 10px;border-radius:var(--r);border:1px sol
     <div class="scene">
       <svg id="scene" viewBox="0 0 680 440" role="img" aria-label="Le circuit frigorifique : compresseur, condenseur, détendeur, évaporateur, quatre sondes de température, deux manomètres, un débitmètre et un wattmètre"></svg>
     </div>
-    <p class="legende">Touche le compresseur pour le mettre en marche. Tourne les molettes du doigt : l'air qui entre dans chaque échangeur, la vis du détendeur, le variateur. Rouge : vapeur à haute pression ; orange : liquide à haute pression ; bleu : mélange puis vapeur à basse pression. Les pastilles 1 à 4 sont les sondes de température. Les trois flèches montrent ce qu'aucun instrument ne lit : la chaleur prise, la chaleur cédée et le travail, d'autant plus larges qu'ils sont grands.</p>
+    <p class="legende">Touche le compresseur pour le mettre en marche. Tourne les molettes au doigt ou à la souris : l'air qui entre dans chaque échangeur, la vis du détendeur, le variateur. Rouge : vapeur à haute pression ; orange : liquide à haute pression ; bleu : mélange puis vapeur à basse pression. Les pastilles 1 à 4 sont les sondes de température. Les trois flèches montrent ce qu'aucun instrument ne lit : la chaleur prise, la chaleur cédée et le travail, d'autant plus larges qu'ils sont grands.</p>
   </div>
   <div class="carte" id="carteMesure">
     <h2><span class="num">3</span>Mettre en marche et mesurer</h2>
@@ -3390,7 +3429,11 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
    voisins n'ont pas les memes nombres. La paillasse est celle du mode libre, empruntee, sans ce qui
    dit juste ou faux (« Verifier mon trace ») ni le cycle du banc.
    La partie qui retourne une evidence : a +7 °C, la PAC rend 1,9 kW, plus que le besoin du CCTP ; a
-   la temperature de base, 1,36 a 1,44 kW. Deux tirages sur trois ne couvrent plus le besoin. */
+   la temperature de base, 1,36 a 1,44 kW. Deux tirages sur trois ne couvrent plus le besoin.
+   Pour aller plus loin (15 octobre 2026, facultatif, 30 a 40 min) : le variateur, dimensionne a rebours. La
+   frequence qui couvrirait le besoin si la puissance suivait la frequence, le parametre a changer (document 6,
+   neuf : la notice de mise en service), puis l'essai a cette frequence sur le banc : la puissance ne suit pas la
+   frequence en proportion, parce que la basse pression baisse et la haute monte. Lu en PAC, jamais en froid. */
 (function () {
   var B = window.bancfroid, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
   var PATM = 1.013, QV = 1300, TK = 20, SH = 6;
@@ -3507,7 +3550,10 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
     phi7: function (ctx) { return val(ctx, "qm", M.qm) * val(ctx, "qk", M.qk) * 1000; },
     cop7: function (ctx) { return val(ctx, "phi7", M.phi7) / s7(ctx).pel; },
     dT: function (ctx) { return sTb(ctx).tac - TK; },
-    phiTb: function (ctx) { return 0.34 * QV * val(ctx, "dT", M.dT); }
+    phiTb: function (ctx) { return 0.34 * QV * val(ctx, "dT", M.dT); },
+    /* pour aller plus loin */
+    dTF: function (ctx) { var s = sF(ctx); return s ? s.tac - TK : NaN; },
+    phiF: function (ctx) { return 0.34 * QV * val(ctx, "dTF", M.dTF); }
   };
   function kW(x) { return fr(x, Math.round(x * 100) % 10 ? 2 : 1); }
   /* chaque partie remet le banc dans son etat : sans cela, les parties 3 et 4 ouvertes apres la partie 5 gardaient
@@ -3517,6 +3563,61 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
     if (B.reglage.panne !== k) B.panne(k, true);
   }
   function sansPanne() { if (B.reglage.panne !== "aucune") B.panne("aucune", true); }
+
+  /* ---------- Pour aller plus loin : le variateur dimensionne a rebours ----------
+     La frequence que demanderait le besoin si la puissance suivait la frequence, calculee sur la puissance de
+     l'etudiant a la temperature de base (partie 4) ; l'essai se fait a cette frequence, arrondie au hertz
+     superieur. La mesure acceptee devient sF, comme les mesures du noyau. */
+  var FMAX = 60;
+  function fCalc(ctx) { return 50 * cfg(ctx).besoin * 1000 / val(ctx, "phiTb", M.phiTb); }
+  function fCible(ctx) { return Math.min(FMAX, Math.ceil(val(ctx, "fPL", fCalc) - 1e-6)); }
+  function sF(ctx) { return ctx.donnees.sF || null; }
+  function erreursVariateur(r, ctx) {
+    var x = [];
+    if (r.sh !== SH) x.push("la vis du détendeur n'est plus à la surchauffe réglée en usine (document 2)");
+    if (r.freq !== fCible(ctx)) x.push("le variateur n'est pas à la fréquence que vous avez calculée, arrondie au hertz supérieur");
+    if (r.panne !== "aucune") x.push("le banc n'est pas dans l'état de cette partie : quittez-la et revenez-y, elle le remet en place");
+    return x;
+  }
+  /* la meme mecanique que controle(), au variateur pres */
+  function controleF(ctx) {
+    var c = cfg(ctx), ta = c.Tb, s = B.snap(), r = B.reglage, d = ctx.donnees, dit, anciennes = ["s7", "sTb", "sP"];
+    if (!s || anciennes.some(function (k) { return d["ref" + k] === s; })) {
+      dit = [];
+      if (r.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'est pas " + airExt(ta));
+      if (r.tk !== TK) dit.push("l'air du condenseur, le bureau, n'est pas à la température intérieure du CCTP (document 1)");
+      dit = dit.concat(erreursVariateur(r, ctx));
+      if (dit.length) return { attente: "Avant de mesurer, à corriger : " + dit.join(" ; ") + "." };
+      return s ? { attente: "La dernière ligne du tableau est la mesure d'une question précédente : régime établi, prenez une mesure neuve, « Une mesure maintenant »." } : null;
+    }
+    var g = B.regime();
+    dit = [];
+    if (!s.pts) dit.push("le banc ne tournait pas pendant la mesure, compresseur à l'arrêt ou pressostat déclenché : mettez-le en marche, puis mesurez de nouveau");
+    if (s.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'était pas " + airExt(ta) + " pendant la mesure");
+    if (s.tk !== TK) dit.push("l'air du condenseur, le bureau, n'était pas à la température intérieure du CCTP (document 1) pendant la mesure");
+    dit = dit.concat(erreursVariateur(r, ctx));
+    if (s.pts && s.etabli && !dit.length && (Math.abs(s.pe / g.pe - 1) > 0.015 || Math.abs(s.pc / g.pc - 1) > 0.015))
+      dit.push("un réglage a changé depuis la mesure : la dernière ligne du tableau ne correspond plus au banc, reprenez une mesure");
+    if (s.pts && !s.etabli) {
+      if (!dit.length && r.ta !== ta) dit.push("l'air de l'évaporateur, l'air extérieur, n'est plus " + airExt(ta));
+      if (!dit.length) return { attente: "Réglages justes. La dernière mesure a été prise avant le régime établi : attendez « Régime établi » sous les instruments, puis « Une mesure maintenant »." };
+      dit.push("la mesure a été prise avant le régime établi");
+    }
+    var lu = "dernière mesure : air extérieur à " + fr(s.ta, 0) + " °C, bureau à " + fr(s.tk, 0) + " °C, variateur " + r.freq + " Hz, surchauffe réglée " + r.sh + " K" +
+      (!s.pts ? ", compresseur à l'arrêt" : s.etabli ? ", régime établi" : ", régime pas encore établi");
+    return { ok: !dit.length, corriger: dit, reponse: dit.length ? lu : "mesure en régime établi, air extérieur à " + fr(ta, 0) + " °C, bureau à 20 °C, variateur à " + r.freq + " Hz" };
+  }
+  var PARAMS = [["P03", "consigne d'ambiance", "20 °C", "16 à 26 °C"], ["P07", "fréquence maximale du compresseur en chauffage", "50 Hz", "30 à 60 Hz"],
+    ["P08", "fréquence maximale en mode silence, la nuit", "45 Hz", "30 à 50 Hz"], ["P12", "autorisation de l'appoint électrique", "non", "oui ou non"]];
+  function documentNotice(zone) {
+    var t = el("table", { classe: "fiche-tech" }, [el("tr", null, [el("td", { html: "<b>Paramètre</b>" }), el("td", { html: "<b>Rôle · réglage d'usine · plage</b>" })])]);
+    PARAMS.forEach(function (q) { t.appendChild(el("tr", null, [el("td", { texte: q[0] }), el("td", { html: q[1] + " · <b>" + q[2] + "</b> · " + q[3] })])); });
+    zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 6 · Notice de mise en service, les paramètres de l'unité extérieure" }),
+      el("p", { html: "Le compresseur est à <b>vitesse variable</b>, entraîné par un variateur. Le volume qu'il balaie à chaque seconde est <b>proportionnel à sa fréquence</b>. La fiche technique (document 2) donne les performances à <b>50 Hz</b>, la fréquence nominale." }),
+      t,
+      el("p", { html: "En chauffage, la régulation monte la fréquence, sans dépasser P07, tant que le bureau n'est pas à sa consigne. Au-delà de 55 Hz, l'unité extérieure passe de <b>48 à 54 dB(A)</b>. " +
+        "Appoint en option dans l'unité intérieure : 0,5, 1 ou 1,5 kW, à autoriser par P12." })])]));
+  }
 
   /* ---------- le dossier ---------- */
   function ligne(a, b) { return el("tr", null, [el("td", { texte: a }), el("td", { html: b })]); }
@@ -3699,7 +3800,7 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
             attendu: function (ctx) { return B.tsat(val(ctx, "hp", M.hp) + PATM) - s7(ctx).t3; }, tolerance: 0, toleranceAbsolue: 1,
             methode: "La température de condensation se lit au palier de la haute pression absolue ; on en retranche θ<sub>3</sub>." },
           { type: "action", lib: "Placez les quatre points du cycle sur le diagramme.",
-            aide: "Choisissez le point sous le diagramme, puis touchez le diagramme à sa place. Le pointeur lit la pression, l'enthalpie et la température.",
+            aide: "Choisissez le point sous le diagramme, puis cliquez sur le diagramme à sa place. Le pointeur lit la pression, l'enthalpie et la température.",
             verifier: trace,
             methode: "Pressions absolues. Point 1 : basse pression, à θ<sub>1</sub>. Point 2 : haute pression, à θ<sub>2</sub>. Point 3 : haute pression, à θ<sub>3</sub>, dans le liquide. Point 4 : à la verticale du point 3, sur la basse pression." },
           { type: "nombre", lib: "Convertissez le débit du débitmètre en kilogrammes par seconde.", unite: "kg/s", competence: "C12-2",
@@ -3775,6 +3876,7 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
       },
       {
         competence: "C1-2", conclusion: true, titre: "Le procès-verbal de réception",
+        nom: "Conclusion",             // la partie facultative vient apres : sans ce nom, la brique l'appellerait « Partie 6 »
         recit: "Le maître d'ouvrage lira le procès-verbal, pas vos calculs. Chaque phrase doit être juste, avec ses nombres et ses unités.",
         scene: function (zone) {
           zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", null, [el("h3", { texte: "Document 5 · Ce que dit un procès-verbal de réception" }),
@@ -3809,6 +3911,53 @@ var REF_COOLPROP = {"fluide":"R134a","te":-10,"tc":40,"sc":5,"sr":5,"pe":2.006,"
             methode: "Un vrai hiver est humide : que devient l'eau de l'air sur un évaporateur plus froid que 0 °C ?" }
         ],
         bravo: "Le procès-verbal dit ce qui a été mesuré, et ce que l'essai ne dit pas."
+      },
+      {
+        competence: "C2-3", facultative: true, titre: "Le variateur, dimensionné à rebours",
+        recit: "Le maître d'œuvre demande s'il suffirait de laisser le compresseur tourner plus vite par grand froid. On part du besoin du CCTP, on calcule la fréquence qu'il faudrait, et le banc dit si le calcul tient.",
+        consigne: "Le document 6 est neuf. Le variateur est une molette du circuit ; la mesure se prend comme à la partie 4, sur la dernière ligne du tableau.",
+        scene: documentNotice, paillasse: true, large: true, surOuvrir: sansPanne,
+        questions: [
+          { type: "nombre", lib: "Si la puissance rendue suivait la fréquence en proportion, à quelle fréquence le compresseur couvrirait-il juste le besoin du CCTP à la température de base ?", unite: "Hz",
+            attendu: fCalc, tolerance: 0.02, fini: garde("fPL", fCalc),
+            methode: "Votre puissance à la température de base (partie 4) est celle de 50 Hz : la fréquence qu'il faut est dans le rapport du besoin à cette puissance." },
+          { type: "choix", competence: "C12-2", lib: "Pour que la régulation puisse faire monter le compresseur au-delà de 50 Hz, quel paramètre faut-il changer (document 6) ?",
+            options: PARAMS.map(function (q) { return q[0] + " · " + q[1]; }), bonne: 1,
+            methode: "Cherchez dans la notice le paramètre qui borne la fréquence en chauffage, et son réglage d'usine." },
+          { type: "action", competence: "C12-2", lib: "Mettez le calcul à l'épreuve : air extérieur à la température de base, variateur à votre fréquence arrondie au hertz supérieur, régime établi, une mesure.",
+            aide: "La molette « variateur » du compresseur ; « Régime établi » s'affiche sous les instruments ; puis « Une mesure maintenant ».",
+            verifier: controleF, apres: prendre("sF"),
+            methode: "La température de base du CCTP sur la molette de l'air extérieur, le bureau à 20 °C, le variateur à la fréquence calculée et arrondie ; le régime établi ; puis une mesure." },
+          { type: "nombre", competence: "C12-2", lib: "Relevez l'échauffement de l'air au condenseur à cette fréquence.", unite: "K",
+            attendu: M.dTF, tolerance: 0, toleranceAbsolue: 0.2, fini: garde("dTF", M.dTF),
+            methode: "L'air sortant du condenseur, sur la dernière ligne du tableau, moins les 20 °C du bureau." },
+          { type: "nombre", lib: "Calculez la puissance rendue au bureau à cette fréquence.", unite: "W",
+            attendu: M.phiF, tolerance: 0.02, fini: garde("phiF", M.phiF),
+            methode: "Le bilan côté air du formulaire, comme à la partie 4 : 0,34 × q<sub>v</sub> × Δθ." },
+          { type: "choix", competence: "C1-2", lib: "À cette fréquence, la pompe à chaleur couvre-t-elle seule le besoin du CCTP ?", options: ["oui", "non"],
+            bonne: function (ctx) { return val(ctx, "phiF", M.phiF) >= cfg(ctx).besoin * 1000 ? 0 : 1; },
+            methode: "Votre puissance, comparée au besoin du document 1, dans la même unité." },
+          { type: "nombre", lib: "De combien de pour cent la puissance mesurée s'écarte-t-elle du besoin que visait votre calcul ? Comptez un écart positif si elle le dépasse.", unite: "%",
+            attendu: function (ctx) { var b = cfg(ctx).besoin * 1000; return 100 * (val(ctx, "phiF", M.phiF) - b) / b; }, tolerance: 0, toleranceAbsolue: 0.5,
+            methode: "(puissance mesurée − besoin) ÷ besoin × 100, avec votre puissance de la question 5." },
+          { type: "choix", lib: "Pourquoi la puissance rendue ne suit-elle pas la fréquence en proportion ?",
+            options: ["le débit balayé suit la fréquence, mais les échangeurs ne changent pas : plus vite, la basse pression baisse et la haute monte, la vapeur aspirée est moins dense et chaque kilogramme rend moins",
+              "le variateur chauffe et perd une part de la puissance électrique", "le détendeur bride le débit de fluide au-dessus de 50 Hz",
+              "elle la suit exactement : l'écart vient de l'arrondi de la mesure"], bonne: 0,
+            methode: "Comparez les deux mesures : basse pression, haute pression, débit du fluide. Le compresseur aspire un volume ; ce qui compte pour la chaleur, c'est une masse." },
+          { type: "multi", essais: 2, competence: "C1-2", lib: "Gardez les phrases justes pour le procès-verbal.",
+            /* sans nombre ni sens d'ecart : la question se construit avant la mesure, et ne se recalcule plus ensuite */
+            options: [
+                "Le calcul en proportion de la fréquence se trompe de quelques pour cent : seule une mesure à la température de base fait foi.",
+                "Monter la fréquence augmente la puissance sans rien coûter au COP.",
+                "P07 ne monte pas au-delà de 60 Hz : passé cette limite, seul l'appoint, autorisé par P12, peut compléter.",
+                "Le débit du compresseur suit la fréquence : la puissance rendue la suit donc exactement.",
+                "Ce relevé est fait en régime établi, à la température de base et le bureau à 20 °C : il vaut pour le jour le plus froid du CCTP.",
+                "Une mesure à +7 °C suffisait : la fréquence se règle une fois pour toutes."],
+            bonne: [0, 2, 4],
+            methode: "Une phrase de procès-verbal dit ce qui a été mesuré, et dans quelles conditions. Relisez la notice pour P07 et P12." }
+        ],
+        bravo: "La puissance ne suit pas la fréquence en proportion : ce sont les pressions qui bougent, et le banc le montre."
       }
     ],
     fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."
