@@ -196,6 +196,13 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
 .pc-q[data-etat="faux"]{border-color:var(--faux)}
 .pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+/* les deux modes (16 octobre 2026) : en note, une reponse enregistree n'a pas de couleur de verdict */
+.pc-q[data-etat="enregistree"]{border-color:var(--accent);background:var(--accent-doux)}
+.pc-q[data-etat="enregistree"] .pc-q-num{background:var(--accent)}
+.pc-q[data-etat="modifiee"]{border-color:var(--accent);border-style:dashed}
+.pc-bandeau-mode{margin:10px 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--accent-doux);border-radius:var(--r)}
+.pc-note .pc-bandeau-mode{border-left-color:var(--encre)}
+.pc-confirmer{margin-top:10px;padding:10px 12px;border:1px solid var(--encre);border-radius:var(--r)}
 .pc-q-lib{margin:0 0 8px;font-weight:600}
 .pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
   font-size:.8rem;margin-right:.5em;vertical-align:.1em}
@@ -1592,7 +1599,25 @@ var Sim = (function () {
      la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
      LA CALCULATRICE : Sim.calculatrice() pose celle des sites de classe (_commun/entrainement/moteur/
      calculette.js, que l'assembleur embarque dans chaque page), un bouton flottant hors parcours, un
-     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire. */
+     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire.
+     DEUX MODES (16 octobre 2026, demande de l'utilisateur pour la notation) :
+     - LE TD, par defaut : tout ce qui precede (juste ou pas encore, methode, « A corriger », aide), mais
+       AUCUN FICHIER. La fin est un bilan a l'ecran ; rien a rendre.
+     - LE MODE NOTE, par le lien du professeur : l'adresse qui contient « note » (#note). Ni verdict, ni
+       methode, ni aide, ni etoiles ; « Enregistrer » garde la reponse, que l'eleve peut changer jusqu'a
+       rendre sa copie. Rendre la copie (produire le fichier, ou en afficher le texte) VERROUILLE tout : le
+       fichier porte les verdicts, il ne doit plus servir a se corriger. Une manipulation est jugee telle
+       qu'elle est au moment ou on l'enregistre ; une reponse qui attendait une mesure est rejugee au rendu.
+       Le mode libre de la page (« Explorer la simulation ») disparait : ses defis disent juste ou pas.
+     - LES VALEURS CHANGENT D'UN MODE A L'AUTRE : Sim.note (vrai en mode note) se lit des le chargement,
+       avant que la page tire son sujet ; chaque page y prend d'autres nombres. Changer l'adresse d'un mode
+       a l'autre recharge la page.
+     - En mode note, q.apres et q.fini sont appeles A CHAQUE ENREGISTREMENT, juste ou non, avec le verdict en
+       second argument : une page ne doit rien afficher qui en depende (une mesure rappelee seulement si elle
+       est juste trahirait le verdict). ctx.note le dit aux scenes.
+     LES PROPOSITIONS D'UN CHOIX SE MELANGENT (16 octobre 2026, « la bonne reponse est trop souvent la 1re ») :
+     q.bonne garde l'indice de la source, chaque bouton porte data-k ; « ordreFixe: true » garde l'ordre ecrit
+     (une echelle, « aucune des precedentes »). */
   var COMPETENCES = {
     APP: "S'approprier", ANA: "Analyser", REA: "Réaliser", VAL: "Valider", COM: "Communiquer"
   };
@@ -1612,6 +1637,9 @@ var Sim = (function () {
     "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
   };
   var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
+  /* le mode note, par l'adresse : #note (ou #ccf-note, #u41-note) ; lu des le chargement, avant le tirage du sujet */
+  function noteDans(h) { return /(^#|[^a-z])note\b/i.test(h || ""); }
+  var NOTE_ADRESSE = noteDans(location.hash);
   var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
   var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
   /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
@@ -1629,8 +1657,15 @@ var Sim = (function () {
   }
   function deux(n) { return (n < 10 ? "0" : "") + n; }
   function heure(d) { return deux(d.getHours()) + "h" + deux(d.getMinutes()); }
+  /* le melange de Fisher-Yates, en place */
+  function melanger(t) { for (var i = t.length - 1; i > 0; i--) { var k = Math.floor(Math.random() * (i + 1)), x = t[i]; t[i] = t[k]; t[k] = x; } return t; }
   function parcours(parent, o) {
     var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
+    /* le mode note : lu a l'adresse ; passer d'un mode a l'autre recharge, pour retirer les valeurs */
+    var NOTE = NOTE_ADRESSE;
+    window.addEventListener("hashchange", function () { if (noteDans(location.hash) !== NOTE) location.reload(); });
+    /* une question a une reponse : verifiee (TD), ou enregistree (note) ; un appel, des qu'il est lance */
+    function fait(f) { return !!f && (NOTE && !f.appel ? !!f.enr : !!f.fini); }
     var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
     function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
     var niveaux = o.niveaux || ["CAP", "Seconde"];
@@ -1642,9 +1677,12 @@ var Sim = (function () {
     /* une partie facultative intouchee ne compte nulle part ; entamee, seulement pour ce qui y est fait */
     var nOblig = o.phases.filter(function (ph) { return !ph.facultative; }).length || nPh;
     var aFacultative = nOblig < nPh;
-    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide); }
+    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide || f.enr); }
     function compte(i, f) { return !o.phases[i].facultative || touchee(f); }
-    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
+    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") + (NOTE ? " pc-note" : "") });
+    /* les mots qui changent d'un mode a l'autre : en TD, la fin est un bilan ; en note, une copie ou un livrable */
+    var MOT_FIN = NOTE ? (epreuve ? "La copie" : "Le livrable") : "Le bilan";
+    var MOT_FIN_COURT = NOTE ? (epreuve ? "Copie" : "Livrable") : "Bilan";
     var P = $(parent);
 
     /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
@@ -1654,9 +1692,11 @@ var Sim = (function () {
         [el("b", { texte: "Explorer la simulation" }), el("span", { texte: o.libreTexte || "librement, sans note ni fichier" })]);
       bParcours = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "false" },
         [el("b", { texte: ccf ? "Entraînement au CCF" : u41 ? "TD sur simulation" : "Le parcours" }),
-         el("span", { texte: o.modeTexte || ((u41 ? (o.u41.duree || "deux heures") : "une heure") + ", et un fichier pour le professeur") })]);
+         el("span", { texte: (u41 ? (o.u41.duree || "deux heures") : "une heure") + ", avec les indications ; sans note ni fichier" })]);
       barreModes = el("div", { classe: "pc-modes", role: "group", "aria-label": "Deux façons d'utiliser la page" }, [bLibre, bParcours]);
       P.appendChild(barreModes);
+      /* en mode note, la simulation libre s'efface : ses defis diraient juste ou pas, sur les valeurs de l'evaluation */
+      if (NOTE) barreModes.hidden = true;
       bLibre.addEventListener("click", function () { mode(false); });
       bParcours.addEventListener("click", function () { mode(true); });
     }
@@ -1707,8 +1747,8 @@ var Sim = (function () {
       chemin.appendChild(el("li", null, [b]));
       return b;
     });
-    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": epreuve ? "La copie" : "Le livrable" },
-      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: epreuve ? "Copie" : "Livrable" }), el("span", { classe: "pc-etoiles" })]);
+    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": MOT_FIN },
+      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: MOT_FIN_COURT }), el("span", { classe: "pc-etoiles" })]);
     drapeau.addEventListener("click", function () { montrer(nPh); });
     chemin.appendChild(el("li", null, [drapeau]));
     var info = el("div", { classe: "pc-info" });
@@ -1759,7 +1799,13 @@ var Sim = (function () {
     var illus = el("div", { classe: "scene pc-illus" });
     if (c.illustration) c.illustration(illus);
     var choixNiv = el("div", { classe: "pc-choix-niveau" });
-    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: NOTE ? "Commencer l'évaluation" : ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    /* le mode, dit a l'accueil : en TD, des indications et rien a rendre ; en note, ni verdict ni aide, et un fichier */
+    var bandeauMode = el("p", { classe: "pc-bandeau-mode", html: NOTE
+      ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux et ne donne aucune méthode : « Enregistrer » garde votre réponse, " +
+        "que vous pouvez changer jusqu'à rendre votre copie. Rendre la copie produit le fichier pour le professeur et verrouille tout."
+      : "<b>TD, non noté.</b> La page dit juste ou pas encore et donne la méthode quand ça coince. À la fin, un bilan à l'écran : " +
+        "rien à rendre. L'évaluation notée se fait par le lien que donne le professeur, avec d'autres valeurs." });
     if (niveaux.length > 1) {
       choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
       var rang = el("div", { classe: "rangee" });
@@ -1815,8 +1861,9 @@ var Sim = (function () {
         grille,
         el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
         el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
-        el("p", { classe: "consigne", html: "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
-        choixNiv, partir] : [
+        el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions. En évaluation, la page ne donne aucune aide."
+          : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+        bandeauMode, choixNiv, partir] : [
         el("h2", { texte: "L'U41 et ce TD" }),
         /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
         el("p", { html: cc.format || "À l'examen, l'U41 dure <b>4 heures</b> : cinq parties indépendantes autour d'un dossier technique. " +
@@ -1827,8 +1874,8 @@ var Sim = (function () {
         aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
           "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
         nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
-        el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
-        choixNiv, partir]);
+        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question." }),
+        bandeauMode, choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
     } else {
       var carteCmd = el("div", { classe: "carte pc-commande" }, [
@@ -1846,8 +1893,8 @@ var Sim = (function () {
         el("div", null, [carteCmd, illus]),
         el("div", { classe: "carte" }, [el("h2", { texte: "Le projet en cinq phases" }), etapes,
           el("p", { classe: "consigne", html: "Une heure en tout. On passe d'une phase à l'autre comme on veut, par le chemin en haut ; " +
-            "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." }),
-          choixNiv, partir])
+            (NOTE ? "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." : "à la fin, un bilan de vos réussites.") }),
+          bandeauMode, choixNiv, partir])
       ]));
     }
     racine.appendChild(accueil);
@@ -1868,7 +1915,7 @@ var Sim = (function () {
       return qs.filter(function (q) { return !q.niveau || q.niveau === etat.niveau; });
     }
 
-    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41,
+    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41, note: NOTE,
       fr: fr, lire: lire, mesure: mesure, gauss: gauss, svg: svg, el: el, borne: borne, animer: animer };
 
     /* un recit ou une consigne peut dependre du niveau : une fonction de ctx */
@@ -1899,11 +1946,11 @@ var Sim = (function () {
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
       var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
       var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
-        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : MOT_FIN });
       suite.addEventListener("click", function () { ouvrir(i + 1); });
       var versFin = null;
       if (i + 1 < nPh) {
-        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: epreuve ? "Aller à la copie" : "Aller au livrable" });
+        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: NOTE ? (epreuve ? "Aller à la copie" : "Aller au livrable") : "Voir le bilan" });
         versFin.addEventListener("click", function () { montrer(nPh); });
       }
       s.appendChild(el("div", { classe: "pc-pied" }, [versFin, bravo, suite]));
@@ -1924,26 +1971,39 @@ var Sim = (function () {
         champ.appendChild(inp); if (q.unite) champ.appendChild(el("span", { classe: "pc-unite", html: q.unite }));
         controles.push(inp);
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+        inp.addEventListener("input", function () { modifiee(); });
         lireReponse = function () { var v = lire(inp.value); return isFinite(v) ? fr(v, q.dec === undefined ? decimalesDe(inp.value) : q.dec) + (q.unite ? " " + texteSeul(q.unite) : "") : ""; };
         verifierOk = function () {
           var v = lire(inp.value); if (!isFinite(v)) return null;
           f.valeur = v;
           var a = typeof q.attendu === "function" ? q.attendu(ctx) : q.attendu;
           if (!isFinite(a)) return "attente";               // elle repose sur une mesure, ou une reponse, d'une autre partie
-          var tol = q.tolerance === undefined ? 0.05 : q.tolerance;
-          return Math.abs(v - a) <= Math.abs(a) * tol + (q.toleranceAbsolue || 0);
+          // tolerance et toleranceAbsolue peuvent dependre du niveau : fonctions de ctx (16 octobre 2026,
+          // le bar a sirops plus tolerant en CAP qu'en seconde)
+          var tol = typeof q.tolerance === "function" ? q.tolerance(ctx) : q.tolerance === undefined ? 0.05 : q.tolerance;
+          var tolAbs = typeof q.toleranceAbsolue === "function" ? q.toleranceAbsolue(ctx) : (q.toleranceAbsolue || 0);
+          // sansSigne : une lecture d'appareil, ou le signe ne dit que le sens du branchement
+          // (-0,25 A lu quand le courant entre par COM est une lecture juste)
+          if (q.sansSigne) { v = Math.abs(v); a = Math.abs(a); }
+          return Math.abs(v - a) <= Math.abs(a) * tol + tolAbs;
         };
       } else if (q.type === "choix" || q.type === "multi") {
         var multi = q.type === "multi", choisis = [];
         var rang = el("div", { classe: "pc-options" });
         var options = typeof q.options === "function" ? q.options(ctx) : q.options;
-        options.forEach(function (op, k) {
-          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: propre(op) });
+        /* l'ordre affiche est tire au sort (16 octobre 2026 : la bonne reponse etait la premiere 135 fois sur 154) ;
+           k reste l'indice de la source, que q.bonne designe, et chaque bouton le porte en data-k */
+        var ordreVu = options.map(function (x, k) { return k; });
+        if (!q.ordreFixe) melanger(ordreVu);
+        ordreVu.forEach(function (k) {
+          var op = options[k];
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", "data-k": String(k), html: propre(op) });
           b.addEventListener("click", function () {
             if (f.fini) return;
             if (multi) { var p = choisis.indexOf(k); if (p < 0) choisis.push(k); else choisis.splice(p, 1); }
             else choisis = [k];
-            [].forEach.call(rang.children, function (x, m) { x.setAttribute("aria-pressed", choisis.indexOf(m) >= 0 ? "true" : "false"); });
+            [].forEach.call(rang.children, function (x) { x.setAttribute("aria-pressed", choisis.indexOf(Number(x.getAttribute("data-k"))) >= 0 ? "true" : "false"); });
+            modifiee();
           });
           rang.appendChild(b); controles.push(b);
         });
@@ -1967,7 +2027,7 @@ var Sim = (function () {
             var choix = el("select", { classe: "pc-classer-choix", "aria-label": texteSeul(it) });
             choix.appendChild(el("option", { value: "-1", texte: "— choisir —" }));
             q.categories.forEach(function (cat, m) { choix.appendChild(el("option", { value: String(m), texte: texteSeul(cat) })); });
-            choix.addEventListener("change", function () { if (!f.fini) places[k] = Number(choix.value); });
+            choix.addEventListener("change", function () { if (!f.fini) { places[k] = Number(choix.value); modifiee(); } });
             ligne.appendChild(choix); grille.appendChild(ligne); controles.push(choix);
             return;
           }
@@ -1978,6 +2038,7 @@ var Sim = (function () {
               if (f.fini) return;
               places[k] = m;
               [].forEach.call(cats.children, function (x, n) { x.setAttribute("aria-pressed", n === m ? "true" : "false"); });
+              modifiee();
             });
             cats.appendChild(b); controles.push(b);
           });
@@ -2009,10 +2070,10 @@ var Sim = (function () {
           return ok;
         };
       }
-      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: "Vérifier" });
+      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: NOTE ? "Enregistrer" : "Vérifier" });
       var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
       /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
-      var bAide = epreuve && q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      var bAide = epreuve && q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
       var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
       var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
       bloc.appendChild(champ);
@@ -2029,7 +2090,45 @@ var Sim = (function () {
         /* « fini » previent la scene a la cloture, juste ou passee ; « apres », seulement si juste */
         if (q.fini) q.fini(ctx, f.juste, f.reponse, f.valeur);
       }
+      /* MODE NOTE : enregistrer, sans verdict. La reponse gardee est celle du dernier « Enregistrer » ; une
+         manipulation est jugee telle qu'elle est a cet instant ; une reponse qui attend une mesure est rejugee au rendu. */
+      function enregistrer() {
+        if (f.fini) return;                                // la copie est rendue : tout est verrouille
+        var ok = verifierOk();
+        f.appuis = (f.appuis || 0) + 1;
+        retour.className = "pc-retour";
+        if (ok === null) {
+          retour.innerHTML = q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.");
+          return;
+        }
+        f.enr = true; f.modifiee = false; f.enAttente = ok === "attente"; f.note = ok === true; f.juste = f.note;
+        f.reponse = lireReponse(); f.heureEnr = new Date();
+        bloc.setAttribute("data-etat", "enregistree");
+        var vu = q.type === "action" ? (f.lu !== undefined ? f.lu : f.reponse) : "";
+        retour.innerHTML = "Réponse enregistrée à " + heure(f.heureEnr) + "." + (vu ? " <span class=\"pc-lu\">La page a gardé : " + insecables(vu) + ".</span>" : "") +
+          " Vous pouvez la changer, puis enregistrer de nouveau, jusqu'à rendre votre copie.";
+        if (q.apres) q.apres(ctx, f.note, f.reponse, f.valeur);   // a chaque enregistrement, juste ou non : rien ne doit trahir le verdict
+        if (q.fini) q.fini(ctx, f.note, f.reponse, f.valeur);
+        majPhase(i); majTete();
+      }
+      /* une reponse changee apres l'enregistrement : c'est l'ancienne qui compte tant qu'on n'enregistre pas */
+      function modifiee() {
+        if (!NOTE || !f.enr || f.fini) return;
+        f.modifiee = true;
+        bloc.setAttribute("data-etat", "modifiee");
+        retour.className = "pc-retour";
+        retour.innerHTML = "Modifiée, pas encore enregistrée : la réponse gardée reste « " + insecables(f.reponse || "") + " ».";
+      }
+      /* au rendu de la copie : rejuger ce qui attendait une mesure, puis tout fermer */
+      f.verrouiller = function () {
+        if (f.fini) return;
+        if (f.enr && f.enAttente && !f.modifiee) { var ok = verifierOk(); f.note = ok === true; f.juste = f.note; }
+        if (f.enr) f.fini = true;
+        bVerif.disabled = true;
+        controles.forEach(function (x) { x.disabled = true; });
+      };
       function verifier() {
+        if (NOTE) { enregistrer(); return; }
         if (f.fini) return;
         var ok = verifierOk();
         f.appuis = (f.appuis || 0) + 1;
@@ -2084,6 +2183,7 @@ var Sim = (function () {
         f.aide = true; etat.aides++;
         bAide.hidden = true; methodeVue.hidden = false;
       });
+      if (NOTE && etat.rendu) f.verrouiller();             // une partie ouverte apres le rendu : deja fermee
       bPasser.addEventListener("click", function () {
         f.passe = true; f.note = false;
         if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
@@ -2109,7 +2209,7 @@ var Sim = (function () {
       bloc.appendChild(retour);
       parentQ.appendChild(bloc);
       bAppel.addEventListener("click", function () {
-        if (f.appele) return;
+        if (f.appele || etat.rendu) return;
         f.appele = new Date(); f.fini = true; f.reponse = "appel lancé à " + heure(f.appele);
         bAppel.disabled = true; bProf.hidden = false;
         bloc.setAttribute("data-etat", "attente");
@@ -2201,16 +2301,16 @@ var Sim = (function () {
     }
 
     function etoilesDe(i) {
-      var fs = etat.fiches[i]; if (!fs || !fs.length) return 0;
+      var fs = etat.fiches[i]; if (NOTE || !fs || !fs.length) return 0;      // en mode note, aucune etoile : elles diraient le verdict
       if (fs.some(function (f) { return !f.fini; })) return 0;
       var n = fs.filter(function (f) { return f.note; }).length;
       return n === fs.length ? 3 : n >= fs.length * 0.6 ? 2 : 1;
     }
     function majPhase(i) {
       var fs = etat.fiches[i]; if (!fs || !fs.pied) return;
-      var finie = fs.every(function (f) { return f.fini; });
+      var finie = fs.every(fait);
       fs.pied.suite.disabled = false;
-      fs.pied.bravo.hidden = !finie || !o.phases[i].bravo;
+      fs.pied.bravo.hidden = NOTE || !finie || !o.phases[i].bravo;
       if (finie && etat.ouverte === i) etat.ouverte = i + 1;
       majChemin();
     }
@@ -2218,9 +2318,10 @@ var Sim = (function () {
       noeuds.forEach(function (b, i) {
         var dispo = !!etat.debut;                         // comme dans un controle : toutes les parties, dans l'ordre qu'on veut
         if (dispo) b.removeAttribute("disabled"); else b.setAttribute("disabled", "disabled");
-        var e = etoilesDe(i);
-        b.querySelector(".pc-etoiles").textContent = e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
-        b.classList.toggle("pc-fait", e > 0);
+        var e = etoilesDe(i), fs = etat.fiches[i];
+        var tout = NOTE && fs && fs.length && fs.every(fait);   // en mode note : une coche quand tout est enregistre, sans verdict
+        b.querySelector(".pc-etoiles").textContent = NOTE ? (tout ? "✓" : "") : e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
+        b.classList.toggle("pc-fait", NOTE ? !!tout : e > 0);
         b.classList.toggle("pc-ici", etat.courante === i);
       });
       if (etat.debut) drapeau.removeAttribute("disabled");   // le livrable s'ouvre a tout moment
@@ -2232,8 +2333,19 @@ var Sim = (function () {
     function etoilesPlus() { var s = 0; o.phases.forEach(function (ph, i) { if (ph.facultative) s += etoilesDe(i); }); return s; }
     function enPlus() { var p = etoilesPlus(); return p ? " · +" + p : ""; }
     function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
+    /* en mode note, la tete compte les reponses enregistrees, jamais les reussites */
+    function comptesNote() {
+      var n = 0, m = 0;
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        if (!fs) { if (!ph.facultative) m += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; return; }
+        fs.forEach(function (f) { if (f.appel || !compte(i, f)) return; m++; if (f.enr) n++; });
+      });
+      return { n: n, m: m };
+    }
     function majTete() {
-      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
+      var cn = NOTE ? comptesNote() : null;
+      score.textContent = NOTE ? cn.n + " / " + cn.m + " réponses" : "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
       temps.textContent = etat.debut ? minutes() + " min" : "";
       if (bDos) bDos.hidden = !etat.debut;
     }
@@ -2245,11 +2357,11 @@ var Sim = (function () {
     }
     /* une partie ouverte trop tot : ses phrases portaient « … » ; on la refait tant qu'on n'y a rien touche */
     function intacte(i) {
-      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide; });
+      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide && !f.enr; });
     }
     function rafraichir(i) {
       var ph = o.phases[i], colQ = etat.colonnes[i];
-      if (!etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
+      if (etat.rendu || !etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
       var pied = etat.fiches[i].pied;
       while (colQ.children.length > 1) colQ.removeChild(colQ.lastChild);
       etat.fiches[i] = questionsDe(i).map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
@@ -2273,9 +2385,13 @@ var Sim = (function () {
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
-      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!fait(f)) restent++; }); });
       o.phases.forEach(function (ph, i) { if (!etat.fiches[i] && !ph.facultative) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
       var merite = !etat.aides && !passees && !restent;
+      if (NOTE) {                                          // en mode note : ni aide ni question passee, seulement ce qui reste sans reponse
+        var tn = restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : "toutes les questions ont une réponse";
+        return { merite: merite, texte: u41 ? "aucune aide en évaluation, " + tn : (merite ? "bonus +0,25 mérité — " : "pas de bonus — ") + tn };
+      }
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
           passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "rien de passé"];
@@ -2295,23 +2411,54 @@ var Sim = (function () {
       if (!finalFait) {
         finalFait = true;
         titreFin = el("h2"); bulleFin = el("p", { classe: "pc-bulle" });
-        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: epreuve ? "La copie" : "Le livrable" }), titreFin, bulleFin]));
+        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: MOT_FIN }), titreFin, bulleFin]));
         recap = el("div", { classe: "carte" });
+        var simpl = null;
+        if (o.simplifie && o.simplifie.length) {
+          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
+            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
+        }
+        if (!NOTE) {                                       // en TD : rien a rendre
+          var rien = el("div", { classe: "carte pc-remise" }, [el("h2", { texte: "Rien à rendre" }),
+            el("p", { classe: "consigne", html: "En TD, la page ne produit <b>aucun fichier</b> : ce bilan vous montre ce qui est acquis et ce qui reste à revoir. " +
+              "L'évaluation notée se fait par le <b>lien que donne le professeur</b>, avec d'autres valeurs, sans indication." })]);
+          final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [rien, simpl])]));
+          return construireFinal();
+        }
         var remise = el("div", { classe: "carte pc-remise" });
         remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
         remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
           "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
         var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
-        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Produire mon fichier" });
-        var bVoir = el("button", { type: "button", classe: "bouton", texte: "Afficher le texte" });
+        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Rendre ma copie" });
+        var bVoir = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Afficher le texte" });
+        /* rendre la copie verrouille tout : le fichier porte les verdicts, il ne doit plus servir a se corriger */
+        var bOui = el("button", { type: "button", classe: "bouton principal", texte: "Oui, je rends ma copie" });
+        var bNon = el("button", { type: "button", classe: "bouton", texte: "Pas encore" });
+        var confirmer = el("div", { classe: "pc-confirmer", hidden: "hidden" }, [
+          el("p", { classe: "consigne", html: "<b>Rendre la copie verrouille toutes vos réponses</b> : plus rien ne pourra changer. Le fichier part ensuite dans vos téléchargements." }),
+          el("div", { classe: "rangee" }, [bOui, bNon])]);
         var dit = el("p", { classe: "pc-retour", "aria-live": "polite" });
         apercu = el("textarea", { classe: "pc-apercu", readonly: "readonly", rows: "10", hidden: "hidden", "aria-label": "Le texte du fichier" });
         remise.appendChild(el("div", { classe: "pc-q-champ" }, [ident]));
         remise.appendChild(el("div", { classe: "rangee" }, [bProd, bVoir]));
+        remise.appendChild(confirmer);
         remise.appendChild(dit); remise.appendChild(apercu);
         bProd.addEventListener("click", function () {
           var id = ident.value.trim();
           if (!id) { dit.className = "pc-retour faux"; dit.textContent = "Tapez d’abord l’identifiant donné en classe."; return; }
+          if (!etat.rendu) { confirmer.hidden = false; dit.textContent = ""; return; }
+          produire();
+        });
+        bNon.addEventListener("click", function () { confirmer.hidden = true; });
+        bOui.addEventListener("click", function () {
+          if (!ident.value.trim()) { confirmer.hidden = true; return; }
+          rendre(); confirmer.hidden = true; ident.disabled = true;
+          bProd.textContent = "Produire de nouveau le fichier"; bVoir.hidden = false;
+          construireFinal(); produire();
+        });
+        function produire() {
+          var id = ident.value.trim();
           var txt = fabriquer(id);
           var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
           try {
@@ -2324,16 +2471,12 @@ var Sim = (function () {
           } catch (e) {
             dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
           }
-        });
+        }
         bVoir.addEventListener("click", function () {
+          if (!etat.rendu) return;                         // le texte porte les verdicts : seulement une fois la copie rendue
           var id = ident.value.trim() || "(identifiant à taper)";
           apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
         });
-        var simpl = null;
-        if (o.simplifie && o.simplifie.length) {
-          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
-            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
-        }
         final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
       }
       /* le livrable se produit meme inacheve : ce qui reste compte comme non reussi */
@@ -2341,23 +2484,43 @@ var Sim = (function () {
       o.phases.forEach(function (ph, i) {
         var fs = etat.fiches[i];
         if (ph.facultative && !(fs || []).some(touchee)) return;   // pas abordee : elle ne manque pas
-        (fs ? fs.filter(function (f) { return !f.fini && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+        (fs ? fs.filter(function (f) { return !fait(f) && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
           if (q.type === "appel") appelsAFaire++; else restent++;
         });
       });
-      var enAttente = attente().length;
-      titreFin.innerHTML = restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
+      var enAttente = attente().length, modifiees = 0;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.modifiee && !f.fini) modifiees++; }); });
+      titreFin.innerHTML = !NOTE ? (restent ? "Le TD n’est pas fini" : "Le TD est fini")
+        : etat.rendu ? "La copie est rendue"
+        : restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
       var mots = [];
-      if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut, " +
-        "ou produire votre fichier tel quel : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + ".");
+      if (NOTE && etat.rendu) mots.push("Vos réponses sont verrouillées. Remettez le fichier au professeur.");
+      else if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut" +
+        (NOTE ? ", ou rendre votre copie telle quelle : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + "." : "."));
+      if (NOTE && !etat.rendu && modifiees) mots.push("<b>" + (modifiees > 1 ? modifiees + " réponses ont été modifiées" : "Une réponse a été modifiée") + " sans être enregistrée</b> : " +
+        (modifiees > 1 ? "c'est l'ancienne réponse qui comptera pour chacune" : "c'est l'ancienne réponse qui comptera") + ", sauf si vous appuyez sur « Enregistrer ».");
       if (appelsAFaire) mots.push("<b>" + (appelsAFaire > 1 ? appelsAFaire + " appels n'ont pas été lancés" : "Un appel n'a pas été lancé") + "</b> : " + (appelsAFaire > 1 ? "ils comptent" : "il compte") + " zéro.");
       if (enAttente) mots.push("<b>" + (enAttente > 1 ? enAttente + " appels attendent" : "Un appel attend") + " encore le professeur</b> : faites-le valider avant de produire le fichier, sinon il ne comptera pas.");
-      if (!restent && !appelsAFaire && !enAttente && o.fin) mots.push(o.fin);
+      if (!restent && !appelsAFaire && !enAttente && !(NOTE && etat.rendu)) mots.push(finTexte());
       bulleFin.innerHTML = mots.join(" ");
       bulleFin.hidden = !bulleFin.innerHTML;
       recap.innerHTML = "";
       recap.appendChild(el("h2", { texte: ccf ? "Le bilan de l'épreuve" : u41 ? "Le bilan, compétence par compétence" : "Le bilan du projet" }));
       var t = el("table", { classe: "releve pc-recap" });
+      if (NOTE) {
+        recap.firstChild.textContent = "Ce que contient votre copie";
+        t.appendChild(el("tr", null, [el("th", { texte: epreuve ? "Partie" : "Phase" }), el("th", { texte: "Compétence" }), el("th", { texte: "Réponses enregistrées" })]));
+        o.phases.forEach(function (ph, i) {
+          var fs = etat.fiches[i], qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i), n = 0, m = 0;
+          if (ph.facultative && !(fs || []).some(touchee)) { t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: "facultative, non abordée" })])); return; }
+          qs.forEach(function (q, j) { var f = fs && fs[j]; if (q.type === "appel") { m++; if (f && f.appele) n++; return; } if (!compte(i, f)) return; m++; if (f && f.enr) n++; });
+          t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: n + " sur " + m })]));
+        });
+        recap.appendChild(t);
+        if (ccf) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>Autonomie</b> : " + autonomie().texte + "." }));
+        recap.appendChild(el("p", { classe: "pc-score-final", html: minutes() + " min" }));
+        return;
+      }
       if (epreuve) {
         t.appendChild(el("tr", null, [el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Appel" })]));
         ORDRE.forEach(function (k) {
@@ -2395,13 +2558,30 @@ var Sim = (function () {
       return (s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s)
         .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "sans-identifiant";
     }
+    /* le mot de la fin des pages parle du fichier : en TD il n'y en a pas, en note le bouton est « Rendre ma copie » */
+    function finTexte() {
+      var t = String(o.fin || "");
+      var sans = t.replace(/\s*(La copie est prête|Produisez)[^.]*\.?/g, "").trim();
+      if (!NOTE) return (sans ? sans + " " : "Tout est fait. ") + "En TD, rien à rendre : relisez la méthode des questions qui ont coincé.";
+      return (sans ? sans + " " : "") + "Rendez votre copie : le fichier part dans vos téléchargements.";
+    }
+    /* rendre la copie (mode note) : rejuger ce qui attendait une mesure, et tout verrouiller */
+    function rendre() {
+      if (!NOTE || etat.rendu) return;
+      etat.rendu = true;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.verrouiller) f.verrouiller(); }); });
+      majChemin(); majTete();
+    }
     function fabriquer(id) {
+      if (NOTE) rendre();                                  // le texte porte les verdicts : le fabriquer, c'est rendre la copie
       var d = new Date();
       var out = ["BILAN DE SÉQUENCE",
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
+        "Mode       : " + (NOTE ? "évaluation notée, sans indication" : "TD, non noté"),
+        NOTE ? "Bilan      : " + comptesNote().n + " réponses enregistrées sur " + comptesNote().m + ", en " + minutes() + " min"
+          : "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
           (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
@@ -2430,7 +2610,7 @@ var Sim = (function () {
             if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
             else {
               etatCase = f.note ? "juste" : "faux";
-              var det = f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
+              var det = NOTE ? "enregistrée à " + heure(f.heureEnr) + (f.modifiee ? ", modifiée ensuite sans être enregistrée" : "") : f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
                 : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
               if (f.aide) det += ", avec aide";
               rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
@@ -2462,9 +2642,9 @@ var Sim = (function () {
       if (etat.debut && !etat.exporte) { e.preventDefault(); e.returnValue = ""; }
     });
     majTete();
-    if (libre) mode(/^#(ccf|u41|parcours)$/.test(location.hash));
+    if (libre) mode(NOTE || /^#(ccf|u41|parcours)$/.test(location.hash));
     /* la porte d'essai : etat interne et fichier, pour les controles */
-    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, fiches: function () { return etat.fiches; },
+    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, rendre: rendre, note: NOTE, fiches: function () { return etat.fiches; },
       appels: appels, mode: mode, dossier: function () { if (dossierFn) basculerDossier(); return panDos; }, coter: function (f, x) { f.cote = x; f.heureCote = new Date(); f.note = x === "A"; f.afficher(); majPhase(f.phase); majAppels(); },
       choisirNiveau: function (n) { etat.niveau = n; niv.textContent = n; }, demarrer: function (n) {
         if (libre) mode(true);
@@ -2547,7 +2727,9 @@ var Sim = (function () {
 
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
-    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice };
+    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice,
+    /* vrai quand la page est ouverte en mode note (#note) : chaque page y tire d'autres valeurs */
+    note: NOTE_ADRESSE };
 })();
 
 </script>
@@ -2673,6 +2855,14 @@ var Sim = (function () {
     ete: { texte: "Été · 32 °C, 40 %", te: 32, he: 40, ti: 26, hi: 50, zone: { t: [16, 19], r: [0, 9.5] } },
     orage: { texte: "Été orageux · 28 °C, 70 %", te: 28, he: 70, ti: 26, hi: 55, zone: { t: [16, 19], r: [0, 9.5] } }
   };
+  /* DEUX JEUX DE VALEURS (16 octobre 2026) : le TD et l'evaluation notee (#note) n'ont pas les memes nombres. Ici, ceux de la
+     simulation : l'hiver et l'ete orageux du site, les trois vitesses du banc double flux et la loi de son recuperateur. Le
+     reste du sujet change dans le script du TD, plus bas. */
+  if (Sim.note) {
+    SAISONS.hiver = { texte: "Hiver · −9 °C, 90 %", te: -9, he: 90, ti: 20, hi: 50, zone: { t: [18, 21], phi: [40, 55] } };
+    SAISONS.orage = { texte: "Été orageux · 30 °C, 65 %", te: 30, he: 65, ti: 25, hi: 55, zone: { t: [16, 19], r: [0, 9] } };
+  }
+  var SITE = Sim.note ? { vit: [0, 120, 210, 290], eps0: 0.85 } : { vit: [0, 110, 195, 270], eps0: 0.88 };
 
   /* ---------- L'etat : un par experience ---------- */
   var exp = "banc", etats = {};
@@ -2685,8 +2875,8 @@ var Sim = (function () {
 
   /* ---------- Le banc du lycee : VMC double flux, gaines de 125 mm ---------- */
   var D = 0.125, S_GAINE = Math.PI * D * D / 4;
-  function qBanc(e) { return e.marche ? [0, 110, 195, 270][e.vit] : 0; }
-  function epsBanc(Q) { return 0.88 - 0.08 * Q / 200; }
+  function qBanc(e) { return e.marche ? SITE.vit[e.vit] : 0; }
+  function epsBanc(Q) { return SITE.eps0 - 0.08 * Q / 200; }
   /* profil de vitesse en travers de la gaine : rapport a la moyenne, position 0 = centre, 1 = paroi */
   function profil(rho) {
     var X = [0, 0.33, 0.6, 0.8, 0.95, 1], Y = [1.16, 1.0, 0.93, 0.82, 0.62, 0];
@@ -3112,7 +3302,7 @@ var Sim = (function () {
   Sim.animer(pas);
 
   /* Porte des essais. */
-  window.cta = { etat: E, reglage: reg, air: { pvs: pvs, rDe: rDe, phiDe: phiDe, hDe: hDe, rosee: rosee }, calcCta: function () { return calcCta(E()); },
+  window.cta = { etat: E, reglage: reg, site: SITE, saisons: SAISONS, epsBanc: epsBanc, air: { pvs: pvs, rDe: rDe, phiDe: phiDe, hDe: hDe, rosee: rosee }, calcCta: function () { return calcCta(E()); },
     lectures: function () { return exp === "banc" ? lecBanc(E()) : lecCta(E()); }, enr: function () { return CEN[exp]; }, releve: function () { return CEN[exp]; },
     centrale: function () { return CEN[exp]; }, molettes: { banc: MB, cta: MC }, dessiner: function () { dessiner(); afficher(); },
     /* l'entrainement a l'U41 (14 octobre 2026) : l'etat de chaque experience, le regime vise du banc, la
@@ -3160,16 +3350,32 @@ var Sim = (function () {
    mesure du CCTP en trouve 195 (pour 9 personnes, il manque de l'air) ; et 0,34 × qv × Δθ ne donne
    que 6 kW d'une batterie froide qui en retire 14, l'eau condensee comprise.
    Pour aller plus loin (15 octobre 2026, facultatif, 30 a 40 min) : l'ete de la salle pleine dimensionne a rebours,
-   l'humidite a souffler par le latent (document 7, neuf), mise a l'epreuve sur la CTA, puis le debit par le sensible. */
+   l'humidite a souffler par le latent (document 7, neuf), mise a l'epreuve sur la CTA, puis le debit par le sensible.
+   DEUX MODES (16 octobre 2026) : l'evaluation notee (#note) a ses propres nombres, ceux de SUJET ci-dessous et de SITE et des
+   saisons dans la simulation : salle de reunion de 6 ou 10 personnes, salle polyvalente de 40, 46 ou 52, un autre air de
+   labo ; le banc a 120, 210, 290 m3/h et un recuperateur un peu moins bon (0,77 au debit de projet) ; fiche VMC 240 m3/h,
+   mise en service 244 m3/h ; CTA a 0,75 d'efficacite, essais de chantier a 2 000 m3/h ; hiver -9 °C, ete 30 °C 65 %,
+   9 g/kg au plus ; salle pleine a 25 °C, 60 W latents par personne. Les memes evidences. */
 (function () {
   var C = window.cta, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
-  var S = Math.PI * 0.125 * 0.125 / 4, LV = 2500, Q_CHANTIER = 1800;
+  /* les deux jeux de valeurs : le TD (adresse ordinaire, #u41) et l'evaluation notee (#note), qui ne se recouvrent pas */
+  var SUJET = Sim.note
+    ? { pers: [6, 10], N: [40, 46, 52], tLab: [18, 22, 23], hLab: [35, 55, 60], chantier: 2000, epsCta: 0.75, epsMin: 0.70,
+        vmc: { debit: 240, eps: 0.80, qEps: 120 }, mes: 244,
+        app: { sens: 0.075, lat: 0.060, eclairage: 2.0, sono: 0.6, soleil: 2.8, tSalle: 25, hSalle: 55, rSalle: 10.9 } }
+    : { pers: [7, 9], N: [44, 50, 56], tLab: [19, 20, 21], hLab: [40, 45, 50], chantier: 1800, epsCta: 0.8, epsMin: 0.75,
+        vmc: { debit: 225, eps: 0.84, qEps: 110 }, mes: 226,
+        app: { sens: 0.075, lat: 0.055, eclairage: 1.8, sono: 0.8, soleil: 2.4, tSalle: 26, hSalle: 55, rSalle: 11.6 } };
+  var HIVER = C.saisons.hiver, ORAGE = C.saisons.orage, EPS_CTA = SUJET.epsCta, VMOY = C.site.vit[2];
+  var S = Math.PI * 0.125 * 0.125 / 4, LV = 2500, Q_CHANTIER = SUJET.chantier;
+  function deg(t) { return fr(t, 0) + " °C"; }
+  function plage(z) { return fr(z[0], 0) + " à " + fr(z[1], 0); }
 
   function hasard(t) { return t[Math.floor(Math.random() * t.length)]; }
   function cfg(ctx) {
     var d = ctx.donnees;
     if (!d.cfg) {
-      d.cfg = { pers: hasard([7, 9]), N: hasard([44, 50, 56]), tLab: hasard([19, 20, 21]), hLab: hasard([40, 45, 50]) };
+      d.cfg = { pers: hasard(SUJET.pers), N: hasard(SUJET.N), tLab: hasard(SUJET.tLab), hLab: hasard(SUJET.hLab) };
       d.cfg.qReunion = d.cfg.pers * 25; d.cfg.Q = d.cfg.N * 25;
     }
     return d.cfg;
@@ -3183,7 +3389,7 @@ var Sim = (function () {
     d.pret = true;
     onglet("vueBanc");
     C.imposer("banc", { tLab: c.tLab, hLab: c.hLab, marche: false, vit: 2, Prep: 0, Pbc: 0.6, port: 3, sonde: 0.5, vu: {} });
-    C.imposer("cta", { saison: "hiver", Q: Q_CHANTIER, eps: 0.8, bypass: false, vanne: 0, Pbc: 0, humType: "vapeur", eau: 0, vu: {} });
+    C.imposer("cta", { saison: "hiver", Q: Q_CHANTIER, eps: EPS_CTA, bypass: false, vanne: 0, Pbc: 0, humType: "vapeur", eau: 0, vu: {} });
     C.centraleDe("banc").vider(); C.centraleDe("cta").vider();
   }
   function versBanc(ctx) { preparer(ctx); onglet("vueBanc"); }
@@ -3228,11 +3434,11 @@ var Sim = (function () {
     return { ok: !dit.length, corriger: dit, reponse: dit.length ? vitesseLue(e) + ", batterie de reprise à " + fr(e.Prep, 1) + " kW" : "sondes stables, batterie de reprise à " + fr(e.Prep, 1) + " kW" };
   }
   /* les conditions de soufflage du CCTP (document 1), les memes que la zone visee de la simulation */
-  var ZONES = { hiver: { t: [18, 21], phi: [40, 55] }, orage: { t: [16, 19], r: 9.5 } };
+  var ZONES = { hiver: { t: HIVER.zone.t, phi: HIVER.zone.phi }, orage: { t: ORAGE.zone.t, r: ORAGE.zone.r[1] } };
   function erreursCta(e, cf, saison) {
     var r = [];
     if (e.Q !== cf.Q) r.push("le débit du ventilateur n'est pas celui que le CCTP demande pour la salle polyvalente (document 1)");
-    if (Math.abs(e.eps - 0.8) > 1e-6) r.push("l'efficacité du récupérateur a été changée : elle reste à sa valeur de fiche (document 2)");
+    if (Math.abs(e.eps - EPS_CTA) > 1e-6) r.push("l'efficacité du récupérateur a été changée : elle reste à sa valeur de fiche (document 2)");
     if (e.bypass) r.push("le by-pass du récupérateur est ouvert : cliquez sur le récupérateur pour le fermer");
     if (e.humType !== "vapeur") r.push("l'humidificateur est passé en adiabatique : cliquez dessus pour revenir à la vapeur (document 2)");
     if (saison === "hiver" && e.vanne > 0) r.push("la batterie froide est ouverte : en hiver, sa vanne reste fermée");
@@ -3261,7 +3467,7 @@ var Sim = (function () {
     var lu = "soufflage à " + fr(c.I.t, 1) + " °C, " + fr(c.I.phi, 0) + " % et " + fr(c.I.r, 1) + " g/kg ; débit " + fr(e.Q, 0) + " m³/h, batterie chaude " + fr(e.Pbc, 1) + " kW" +
       (saison === "hiver" ? ", humidificateur " + fr(e.eau, 1) + " kg/h" : ", vanne de la batterie froide " + fr(e.vanne, 0) + " %");
     if (dit.length) lu += (saison === "hiver" && e.vanne > 0 ? ", vanne de la batterie froide " + fr(e.vanne, 0) + " %" : "") + (saison === "orage" && e.eau > 0 ? ", humidificateur " + fr(e.eau, 1) + " kg/h" : "") +
-      (Math.abs(e.eps - 0.8) > 1e-6 ? ", récupérateur à ε " + fr(e.eps, 2) : "") + (e.bypass ? ", by-pass ouvert" : "") + (e.humType !== "vapeur" ? ", humidificateur adiabatique" : "");
+      (Math.abs(e.eps - EPS_CTA) > 1e-6 ? ", récupérateur à ε " + fr(e.eps, 2) : "") + (e.bypass ? ", by-pass ouvert" : "") + (e.humType !== "vapeur" ? ", humidificateur adiabatique" : "");
     return { ok: !dit.length, corriger: dit, reponse: lu };
   }
   /* ce que la manipulation acceptee laisse : la suite se verifie la-dessus */
@@ -3274,12 +3480,15 @@ var Sim = (function () {
   }
   function prendre(cle) { return function (ctx) { ctx.donnees[cle] = photo(ctx, cle); }; }
   function etat(ctx, cle) { return ctx.donnees[cle] || photo(ctx, cle); }
-  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees["v" + cle] = juste && isFinite(v) ? v : mesure(ctx); }; }
+  /* en note, fini est appele a chaque enregistrement, juste ou non : on garde la valeur de l'etudiant quelle qu'elle soit,
+     sinon la suite trahirait le verdict ; et ce qui s'affiche ne montre que ses nombres, jamais ceux de la simulation */
+  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees["v" + cle] = (juste || Sim.note) && isFinite(v) ? v : mesure(ctx); }; }
   function val(ctx, cle, mesure) { var x = ctx.donnees["v" + cle]; return isFinite(x) ? x : mesure(ctx); }
+  function vu(ctx, cle, mesure) { var x = ctx.donnees["v" + cle]; return isFinite(x) ? x : Sim.note ? NaN : mesure(ctx); }
   var M = {
-    v: function (ctx) { return ctx.donnees.anemo ? ctx.donnees.anemo.v : 195 / 3600 / S; },
+    v: function (ctx) { return ctx.donnees.anemo ? ctx.donnees.anemo.v : VMOY / 3600 / S; },
     Q: function (ctx) { return val(ctx, "v", M.v) * S * 3600; },
-    eps: function (ctx) { var p = etat(ctx, "eps"); return p.t4 > p.t1 + 0.5 ? (p.t2 - p.t1) / (p.t4 - p.t1) : 0.88 - 0.08 * 195 / 200; },
+    eps: function (ctx) { var p = etat(ctx, "eps"); return p.t4 > p.t1 + 0.5 ? (p.t2 - p.t1) / (p.t4 - p.t1) : C.epsBanc(VMOY); },
     tS: function (ctx) { return etat(ctx, "hiver").tS; },
     Prec: function (ctx) { return 0.34 * cfg(ctx).Q * (val(ctx, "tS", M.tS) - etat(ctx, "hiver").tE) / 1000; },
     m: function (ctx) { return etat(ctx, "ete").eauBF; },
@@ -3290,7 +3499,7 @@ var Sim = (function () {
     PhiL: function (ctx) { return cfg(ctx).N * APP_L; },
     rS: function (ctx) { return R_SALLE - val(ctx, "PhiL", M.PhiL) * 1000 / (qmCctp(ctx) * LV_R); },
     tF2: function (ctx) { var p = ctx.donnees.ete2; return p ? p.tF : NaN; },
-    Qth: function (ctx) { return (cfg(ctx).N * APP_S + AUTRES_S) / (CPA * (26 - T_SOUF)) * 3600 * 0.84; }
+    Qth: function (ctx) { return (cfg(ctx).N * APP_S + AUTRES_S) / (CPA * (T_SALLE - T_SOUF)) * 3600 * 0.84; }
   };
   function suffit(ctx) { return val(ctx, "Q", M.Q) >= cfg(ctx).qReunion; }
 
@@ -3352,20 +3561,20 @@ var Sim = (function () {
     zone.appendChild(el("div", { classe: "pc-docs" }, [
       el("section", null, [el("h3", { texte: "Document 1 · Extrait du CCTP, lot ventilation" }),
         el("p", { html: "<b>Salle de réunion</b>, <b>" + c.pers + " personnes</b> : VMC double flux, gaines Ø 125 mm. Air neuf : <b>25 m³/h par personne</b>, au moins. " +
-          "Le débit se mesure à l'anémomètre dans une longueur droite, <b>à plus de 5 diamètres de tout coude</b>, sonde <b>au tiers du diamètre</b>. Récupérateur : efficacité d'au moins 0,75." }),
+          "Le débit se mesure à l'anémomètre dans une longueur droite, <b>à plus de 5 diamètres de tout coude</b>, sonde <b>au tiers du diamètre</b>. Récupérateur : efficacité d'au moins " + fr(SUJET.epsMin, 2) + "." }),
         el("p", { html: "<b>Salle polyvalente</b>, <b>" + c.N + " personnes</b> : CTA, air neuf à 25 m³/h par personne." }),
-        el("p", { html: "<b>Hiver</b> : air neuf −7 °C, 90 % ; soufflage <b>18 à 21 °C, 40 à 55 %</b>. <b>Été orageux</b> : air neuf 28 °C, 70 % ; soufflage <b>16 à 19 °C</b>, humidité absolue <b>9,5 g/kg au plus</b>." })]),
+        el("p", { html: "<b>Hiver</b> : air neuf " + deg(HIVER.te) + ", " + HIVER.he + " % ; soufflage <b>" + plage(HIVER.zone.t) + " °C, " + plage(HIVER.zone.phi) + " %</b>. <b>Été orageux</b> : air neuf " + deg(ORAGE.te) + ", " + ORAGE.he + " % ; soufflage <b>" + plage(ORAGE.zone.t) + " °C</b>, humidité absolue <b>" + fr(ORAGE.zone.r[1], 1) + " g/kg au plus</b>." })]),
       el("section", null, [el("h3", { texte: "Document 2 · Fiches techniques" }),
         el("table", { classe: "fiche-tech" }, [
-          ligne("VMC double flux", "débit en vitesse moyenne : <b>225 m³/h</b> ; efficacité du récupérateur : <b>0,84</b>, à 110 m³/h"),
-          ligne("CTA · récupérateur", "à plaques, efficacité <b>0,80</b>, by-pass d'été"),
+          ligne("VMC double flux", "débit en vitesse moyenne : <b>" + SUJET.vmc.debit + " m³/h</b> ; efficacité du récupérateur : <b>" + fr(SUJET.vmc.eps, 2) + "</b>, à " + SUJET.vmc.qEps + " m³/h"),
+          ligne("CTA · récupérateur", "à plaques, efficacité <b>" + fr(EPS_CTA, 2) + "</b>, by-pass d'été"),
           ligne("CTA · batteries", "froide à eau glacée 6/12 °C, vanne trois voies ; chaude électrique, <b>20 kW</b>"),
           ligne("CTA · humidificateur", "à vapeur, <b>15 kg/h</b> au plus"),
           ligne("CTA · ventilateur", "<b>500 à 3 000 m³/h</b>, réglable")])]),
       el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 3 · Plan de la gaine de soufflage de la VMC" }), planGaine()]),
       el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 4 · Schéma de principe de la CTA" }), schemaCta()]),
       el("section", null, [el("h3", { texte: "Document 5 · Fiche de mise en service de la VMC, par l'installateur" }),
-        el("p", { html: "« Débit mesuré au soufflage : <b>226 m³/h</b>, anémomètre au centre de la gaine, orifice B. <b>Conforme.</b> »" })]),
+        el("p", { html: "« Débit mesuré au soufflage : <b>" + SUJET.mes + " m³/h</b>, anémomètre au centre de la gaine, orifice B. <b>Conforme.</b> »" })]),
       el("section", { classe: "pc-annexe" }, [el("h3", { texte: "Annexe · formulaire" }),
         el("p", { html: "Q = v × S × 3 600 : v en m/s, S en m², Q en m³/h · S = π × D² ÷ 4<br>ε = (θ<sub>2</sub> − θ<sub>1</sub>) ÷ (θ<sub>4</sub> − θ<sub>1</sub>)<br>" +
           "P = 0,34 × q<sub>v</sub> × Δθ : q<sub>v</sub> en m³/h, P en W, quand l'humidité absolue ne change pas<br>Condenser ou vaporiser 1 kg d'eau : environ <b>2 500 kJ</b>" })])
@@ -3379,7 +3588,7 @@ var Sim = (function () {
      Le calcul retourne du manuel (chapitre 10, « trouver les conditions de soufflage ») : le latent donne
      l'humidite a souffler, le sensible donne le debit. Le document 7, neuf, est la note des apports de la salle
      pleine ; l'humidite calculee se met a l'epreuve sur la CTA d'ete. */
-  var APP_S = 0.075, APP_L = 0.055, AUTRES_S = 1.8 + 0.8 + 2.4, R_SALLE = 11.6, T_SOUF = 16, LV_R = 2501, CPA = 1.02;
+  var AP = SUJET.app, APP_S = AP.sens, APP_L = AP.lat, AUTRES_S = AP.eclairage + AP.sono + AP.soleil, R_SALLE = AP.rSalle, T_SALLE = AP.tSalle, T_SOUF = 16, LV_R = 2501, CPA = 1.02;
   function qmCctp(ctx) { return cfg(ctx).Q / (3600 * 0.84); }
   function rCible(ctx) { return val(ctx, "rS", M.rS); }
   function reglagePlus(ctx) {
@@ -3389,7 +3598,7 @@ var Sim = (function () {
     var c = C.calcDe(), p = e.pts, dit = erreursCta(e, cf, "orage"), rc = rCible(ctx);
     if (!e.vanne) return dit.length ? { attente: "À corriger : " + dit.join(" ; ") + "." } : null;
     if (c.I.r > rc + 0.05) dit.push("l'humidité absolue du soufflage dépasse celle que vous avez calculée à la question 2");
-    if (c.I.t < 16 || c.I.t > 19) dit.push("la température du soufflage est hors de la plage d'été du CCTP (document 1)");
+    if (c.I.t < ORAGE.zone.t[0] || c.I.t > ORAGE.zone.t[1]) dit.push("la température du soufflage est hors de la plage d'été du CCTP (document 1)");
     var stable = !(!p || Math.abs(p.I.t - c.I.t) > 0.2 || Math.abs(p.I.r - c.I.r) > 0.1);
     if (!dit.length && !stable) return { attente: "Réglages justes. Les sondes ne sont pas encore stables : laissez passer le temps, puis vérifiez." };
     return { ok: !dit.length, corriger: dit, reponse: "soufflage à " + fr(c.I.t, 1) + " °C et " + fr(c.I.r, 1) + " g/kg ; vanne de la batterie froide " + fr(e.vanne, 0) + " %, batterie chaude " + fr(e.Pbc, 1) + " kW" +
@@ -3397,11 +3606,11 @@ var Sim = (function () {
   }
   function documentApports(zone, ctx) {
     var c = cfg(ctx), t = el("table", { classe: "fiche-tech" }, [
-      ligne("Occupants", "<b>" + c.N + " personnes</b>, assises, activité légère : <b>75 W</b> sensibles et <b>55 W</b> latents chacune"),
-      ligne("Éclairage", "<b>1,8 kW</b>, sensibles"),
-      ligne("Sono, vidéoprojecteur", "<b>0,8 kW</b>, sensibles"),
-      ligne("Soleil par les baies", "<b>2,4 kW</b>, sensibles, à 16 h"),
-      ligne("Air de la salle", "<b>26 °C, 55 %</b>, soit <b>r = 11,6 g/kg</b>")]);
+      ligne("Occupants", "<b>" + c.N + " personnes</b>, assises, activité légère : <b>" + fr(1000 * APP_S, 0) + " W</b> sensibles et <b>" + fr(1000 * APP_L, 0) + " W</b> latents chacune"),
+      ligne("Éclairage", "<b>" + fr(AP.eclairage, 1) + " kW</b>, sensibles"),
+      ligne("Sono, vidéoprojecteur", "<b>" + fr(AP.sono, 1) + " kW</b>, sensibles"),
+      ligne("Soleil par les baies", "<b>" + fr(AP.soleil, 1) + " kW</b>, sensibles, à 16 h"),
+      ligne("Air de la salle", "<b>" + deg(T_SALLE) + ", " + AP.hSalle + " %</b>, soit <b>r = " + fr(R_SALLE, 1) + " g/kg</b>")]);
     zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 7 · Note du bureau d'études : les apports d'été de la salle polyvalente pleine" }),
       t,
       el("p", { html: "<b>Méthode.</b> Le <b>sensible</b> donne le débit : q<sub>m</sub> = Φ<sub>sensible</sub> ÷ (1,02 × Δθ), Δθ entre la salle et le soufflage, <b>10 K au plus</b> en confort. " +
@@ -3444,7 +3653,7 @@ var Sim = (function () {
             attendu: function (ctx) { return cfg(ctx).Q; }, tolerance: 0, toleranceAbsolue: 0.5,
             methode: "Même calcul, avec les personnes de la salle polyvalente." },
           { type: "nombre", lib: "En été orageux, quelle humidité absolue le soufflage ne doit-il pas dépasser ?", unite: "g/kg", competence: "C12-2",
-            attendu: 9.5, tolerance: 0, toleranceAbsolue: 0.01,
+            attendu: ORAGE.zone.r[1], tolerance: 0, toleranceAbsolue: 0.01,
             methode: "Les conditions de soufflage d'été, dans le CCTP." },
           { type: "classer", lib: "Quel est le rôle de chaque caisson de la CTA ?", competence: "C2-1",
             items: ["la batterie chaude", "l'humidificateur à vapeur", "le récupérateur à plaques", "la batterie froide"],
@@ -3484,7 +3693,7 @@ var Sim = (function () {
       },
       {
         competence: "C12-2", titre: "La VMC de la salle de réunion : le débit et le récupérateur",
-        recit: "La fiche de mise en service dit 226 m³/h. Vous mesurez selon le CCTP, puis vous mesurez l'efficacité du récupérateur.",
+        recit: "La fiche de mise en service dit " + SUJET.mes + " m³/h. Vous mesurez selon le CCTP, puis vous mesurez l'efficacité du récupérateur.",
         consigne: "Le commutateur des ventilateurs, les molettes des batteries, l'anémomètre à faire glisser d'un orifice à l'autre et sa sonde dans la section grossie, la vitesse du temps : tout est à vous.",
         paillasse: true, large: true, surOuvrir: versBanc,
         questions: [
@@ -3502,7 +3711,7 @@ var Sim = (function () {
           { type: "nombre", lib: "Calculez le débit soufflé dans la salle de réunion.", unite: "m³/h", competence: "C2-3",
             attendu: M.Q, tolerance: 0.03, fini: garde("Q", M.Q),
             methode: "Q = v × S × 3 600, avec la section en m² : le diamètre en mètres." },
-          { type: "choix", lib: "La fiche de mise en service annonçait 226 m³/h. D'où vient l'écart avec votre mesure ?", competence: "C2-3",
+          { type: "choix", lib: "La fiche de mise en service annonçait " + SUJET.mes + " m³/h. D'où vient l'écart avec votre mesure ?", competence: "C2-3",
             options: ["l'installateur a mesuré au centre de la gaine, où l'air va plus vite que la moyenne", "votre anémomètre lit trop bas",
               "le ventilateur a ralenti depuis la mise en service", "l'installateur a mesuré sur la reprise"], bonne: 0,
             methode: "Relisez où l'installateur a posé sa sonde, et ce que le CCTP demande." },
@@ -3516,8 +3725,8 @@ var Sim = (function () {
           { type: "nombre", lib: "Calculez l'efficacité du récupérateur, ε = (θ<sub>2</sub> − θ<sub>1</sub>) ÷ (θ<sub>4</sub> − θ<sub>1</sub>).", competence: "C2-3",
             attendu: M.eps, tolerance: 0.03, fini: garde("eps", M.eps),
             methode: "θ<sub>1</sub> air neuf, θ<sub>2</sub> après le récupérateur, θ<sub>4</sub> reprise : les sondes S1, S2, S4, une fois stables." },
-          { type: "choix", lib: "La fiche du récupérateur annonce 0,84 ; vous mesurez moins. Pourquoi ?", competence: "C2-3",
-            options: ["la fiche la donne à 110 m³/h : à plus fort débit, l'air passe plus vite entre les plaques et l'efficacité baisse", "le récupérateur est encrassé",
+          { type: "choix", lib: "La fiche du récupérateur annonce " + fr(SUJET.vmc.eps, 2) + " ; vous mesurez moins. Pourquoi ?", competence: "C2-3",
+            options: ["la fiche la donne à " + SUJET.vmc.qEps + " m³/h : à plus fort débit, l'air passe plus vite entre les plaques et l'efficacité baisse", "le récupérateur est encrassé",
               "la batterie de reprise fausse la mesure", "l'efficacité se calcule avec le rejet, pas avec l'air soufflé"], bonne: 0,
             methode: "Relisez les conditions de la fiche : à quel débit ?" }
         ],
@@ -3525,7 +3734,7 @@ var Sim = (function () {
       },
       {
         competence: "C4-3", titre: "La CTA de la salle polyvalente, en hiver",
-        recit: "Le ventilateur de la CTA est resté au débit des essais de chantier : 1 800 m³/h. Vous réglez la centrale pour le CCTP, puis vous faites les bilans.",
+        recit: "Le ventilateur de la CTA est resté au débit des essais de chantier : " + fr(Q_CHANTIER, 0) + " m³/h. Vous réglez la centrale pour le CCTP, puis vous faites les bilans.",
         consigne: "Une molette sous chaque caisson, la vitesse du temps, la centrale d'acquisition. Le diagramme trace l'air à chaque étape ; à vous de comparer le soufflage au CCTP.",
         paillasse: true, large: true, surOuvrir: poserHiver,
         questions: [
@@ -3555,14 +3764,14 @@ var Sim = (function () {
       },
       {
         competence: "C2-3", titre: "La même CTA, un été orageux",
-        recit: "28 °C et 70 % dehors. Le CCTP veut un air séché : 9,5 g d'eau par kilogramme d'air sec au plus. La batterie froide sèche l'air, la batterie chaude le réchauffe.",
+        recit: deg(ORAGE.te) + " et " + ORAGE.he + " % dehors. Le CCTP veut un air séché : " + fr(ORAGE.zone.r[1], 1) + " g d'eau par kilogramme d'air sec au plus. La batterie froide sèche l'air, la batterie chaude le réchauffe.",
         consigne: "La saison a changé. Réglez la vanne de la batterie froide et la batterie chaude ; l'humidificateur reste fermé.",
         paillasse: true, large: true, surOuvrir: poserEte,
         questions: [
           { type: "action", lib: "Réglez la CTA pour l'été orageux : un soufflage dans les conditions du CCTP.", competence: "C4-3",
             aide: "La vanne de la batterie froide décide de l'eau qui reste dans l'air ; la batterie chaude, de la température.",
             verifier: function (ctx) { return reglage(ctx, "orage"); }, apres: prendre("ete"),
-            methode: "La vanne de la batterie froide jusqu'à ce que r passe sous 9,5 g/kg ; la batterie chaude pour ramener la température entre 16 et 19 °C ; l'humidificateur à zéro ; puis attendre." },
+            methode: "La vanne de la batterie froide jusqu'à ce que r passe sous " + fr(ORAGE.zone.r[1], 1) + " g/kg ; la batterie chaude pour ramener la température entre " + fr(ORAGE.zone.t[0], 0) + " et " + fr(ORAGE.zone.t[1], 0) + " °C ; l'humidificateur à zéro ; puis attendre." },
           { type: "nombre", lib: "Relevez le débit d'eau condensée par la batterie froide.", unite: "kg/h", competence: "C12-2",
             attendu: function (ctx) { return etat(ctx, "ete").eauBF; }, tolerance: 0.06, toleranceAbsolue: 0.1, fini: garde("m", M.m),
             methode: "L'afficheur des condensats de la batterie froide, ou sa colonne dans le tableau." },
@@ -3598,13 +3807,13 @@ var Sim = (function () {
         questions: [
           { type: "multi", essais: 2, lib: "Gardez les phrases justes du procès-verbal.",
             options: function (ctx) {
-              var c = cfg(ctx), q = fr(val(ctx, "Q", M.Q), 0), ok = suffit(ctx), Ps = val(ctx, "Ps", M.Ps), Pl = val(ctx, "Pl", M.Pl);
+              var c = cfg(ctx), q = fr(vu(ctx, "Q", M.Q), 0), ok = suffit(ctx), Ps = vu(ctx, "Ps", M.Ps), Pl = vu(ctx, "Pl", M.Pl);
               var dit = function (oui) { return "Salle de réunion : mesuré selon le CCTP, le débit soufflé vaut environ " + q + " m³/h ; il " + (oui ? "suffit" : "ne suffit pas") + " pour " + c.pers + " personnes, " + c.qReunion + " m³/h au moins."; };
               return [
                 dit(ok),
                 dit(!ok),
-                "Le récupérateur de la VMC a une efficacité d'environ " + fr(val(ctx, "eps", M.eps), 2) + " au débit de projet ; la fiche annonce 0,84 à petit débit.",
-                "La mise en service mesurait 226 m³/h : c'est cette mesure qui fait foi.",
+                "Le récupérateur de la VMC a une efficacité d'environ " + fr(vu(ctx, "eps", M.eps), 2) + " au débit de projet ; la fiche annonce " + fr(SUJET.vmc.eps, 2) + " à petit débit.",
+                "La mise en service mesurait " + SUJET.mes + " m³/h : c'est cette mesure qui fait foi.",
                 "CTA, été orageux : la batterie froide retire environ " + fr(Ps + Pl, 1) + " kW à l'air, dont " + fr(Pl, 1) + " kW pour condenser l'eau.",
                 "CTA, été orageux : la batterie froide retire 0,34 × q<sub>v</sub> × Δθ, soit environ " + fr(Ps, 1) + " kW."
               ];
@@ -3632,36 +3841,37 @@ var Sim = (function () {
           { type: "nombre", competence: "C12-2", lib: "D'après le document 7, quels apports latents la salle pleine dégage-t-elle ?", unite: "kW",
             attendu: M.PhiL, tolerance: 0.02, fini: garde("PhiL", M.PhiL),
             methode: "Seuls les occupants dégagent du latent, dans la note : leur nombre × le latent de chacun ; en kilowatts." },
-          { type: "nombre", lib: "Avec le débit d'air neuf du CCTP, quelle humidité absolue faut-il souffler pour que la salle pleine reste à 55 % ?", unite: "g/kg",
+          { type: "nombre", lib: "Avec le débit d'air neuf du CCTP, quelle humidité absolue faut-il souffler pour que la salle pleine reste à " + AP.hSalle + " % ?", unite: "g/kg",
             attendu: M.rS, tolerance: 0, toleranceAbsolue: 0.15, dec: 2, fini: garde("rS", M.rS),
             methode: "La méthode du document 7 : q<sub>m</sub> depuis le débit du CCTP, puis r<sub>soufflage</sub> = r<sub>salle</sub> − Φ<sub>latent</sub> × 1 000 ÷ (q<sub>m</sub> × 2 501)." },
-          { type: "choix", lib: "Le CCTP admet 9,5 g/kg au soufflage d'été. Qu'en dire ?",
-            options: ["c'est trop humide pour la salle pleine : à 9,5 g/kg, l'eau des occupants ferait monter la salle au-dessus de 55 % ; il faut souffler plus sec",
+          { type: "choix", lib: "Le CCTP admet " + fr(ORAGE.zone.r[1], 1) + " g/kg au soufflage d'été. Qu'en dire ?",
+            options: ["c'est trop humide pour la salle pleine : à " + fr(ORAGE.zone.r[1], 1) + " g/kg, l'eau des occupants ferait monter la salle au-dessus de " + AP.hSalle + " % ; il faut souffler plus sec",
               "c'est trop sec : on condense de l'eau pour rien", "c'est égal : l'humidité relative de la salle ne dépend que de sa température",
               "la batterie chaude rattrapera l'humidité en réchauffant l'air"], bonne: 0,
-            methode: "Comparez votre humidité calculée aux 9,5 g/kg du CCTP : laquelle sèche le plus ? Et que change une batterie chaude à r ?" },
-          { type: "action", competence: "C4-3", lib: "Mettez votre calcul à l'épreuve : réglez la CTA d'été pour souffler à votre humidité absolue au plus, toujours entre 16 et 19 °C.",
+            methode: "Comparez votre humidité calculée aux " + fr(ORAGE.zone.r[1], 1) + " g/kg du CCTP : laquelle sèche le plus ? Et que change une batterie chaude à r ?" },
+          { type: "action", competence: "C4-3", lib: "Mettez votre calcul à l'épreuve : réglez la CTA d'été pour souffler à votre humidité absolue au plus, toujours entre " + fr(ORAGE.zone.t[0], 0) + " et " + fr(ORAGE.zone.t[1], 0) + " °C.",
             aide: "La vanne de la batterie froide décide de l'eau qui reste dans l'air ; la batterie chaude, de la température. Le reste comme en partie 5.",
             verifier: reglagePlus, apres: prendre("ete2"),
-            methode: "La vanne de la batterie froide jusqu'à passer sous votre humidité, la batterie chaude pour revenir entre 16 et 19 °C, l'humidificateur à zéro, le débit du CCTP ; puis attendre." },
+            methode: "La vanne de la batterie froide jusqu'à passer sous votre humidité, la batterie chaude pour revenir entre " + fr(ORAGE.zone.t[0], 0) + " et " + fr(ORAGE.zone.t[1], 0) + " °C, l'humidificateur à zéro, le débit du CCTP ; puis attendre." },
           { type: "nombre", competence: "C12-2", lib: "Relevez la température de l'air à la sortie de la batterie froide à ce réglage.", unite: "°C",
             attendu: M.tF2, tolerance: 0, toleranceAbsolue: 0.2,
             methode: "La sonde après la batterie froide, ou sa colonne dans le tableau. Comparez-la au soufflage voulu : c'est pour cela qu'il faut réchauffer." },
-          { type: "nombre", lib: "Avec un soufflage à 16 °C, quel débit d'air faudrait-il pour évacuer les apports sensibles de la salle pleine ?", unite: "m³/h",
+          { type: "nombre", lib: "Avec un soufflage à " + deg(T_SOUF) + ", quel débit d'air faudrait-il pour évacuer les apports sensibles de la salle pleine ?", unite: "m³/h",
             attendu: M.Qth, tolerance: 0.03,
-            methode: "Le document 7 : la somme des apports sensibles, puis q<sub>m</sub> = Φ<sub>sensible</sub> ÷ (1,02 × Δθ) avec Δθ = 26 − 16 ; enfin Q = q<sub>m</sub> × 3 600 × 0,84." },
+            methode: "Le document 7 : la somme des apports sensibles, puis q<sub>m</sub> = Φ<sub>sensible</sub> ÷ (1,02 × Δθ) avec Δθ = " + T_SALLE + " − " + T_SOUF + " ; enfin Q = q<sub>m</sub> × 3 600 × 0,84." },
           { type: "choix", competence: "C1-2", lib: "Ce débit dépasse celui de l'air neuf du CCTP. Que proposer ?",
             options: ["souffler plus d'air que l'air neuf : recycler une part de l'air repris, ou compléter par des unités terminales ; l'air neuf reste celui de l'hygiène",
               "garder le débit d'air neuf et souffler à 8 °C : on évacue autant avec moins d'air",
               "tout en air neuf à ce débit : c'est plus sain, et cela ne coûte rien de plus",
               "rien : la salle se rafraîchit d'elle-même le soir"], bonne: 0,
-            methode: "Le document 7 borne l'écart de soufflage ; et chaque mètre cube d'air neuf de plus se refroidit et se sèche depuis 28 °C et 70 %." }
+            methode: "Le document 7 borne l'écart de soufflage ; et chaque mètre cube d'air neuf de plus se refroidit et se sèche depuis " + deg(ORAGE.te) + " et " + ORAGE.he + " %." }
         ],
         bravo: "Le latent a donné l'humidité, le sensible le débit : la CTA tient l'une, et l'autre demande de l'air recyclé."
       }
     ],
     fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."
   });
+  window.u4104.SUJET = SUJET; window.u4104.HIVER = HIVER; window.u4104.ORAGE = ORAGE;   // le sujet, pour les scenarios (deux modes)
   /* la zone visee revient en mode libre, et se cache de nouveau en revenant a la CTA de l'entrainement */
   var modes = document.querySelectorAll("#u41 .pc-modes button");
   if (modes.length === 2) {

@@ -196,6 +196,13 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
 .pc-q[data-etat="faux"]{border-color:var(--faux)}
 .pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+/* les deux modes (16 octobre 2026) : en note, une reponse enregistree n'a pas de couleur de verdict */
+.pc-q[data-etat="enregistree"]{border-color:var(--accent);background:var(--accent-doux)}
+.pc-q[data-etat="enregistree"] .pc-q-num{background:var(--accent)}
+.pc-q[data-etat="modifiee"]{border-color:var(--accent);border-style:dashed}
+.pc-bandeau-mode{margin:10px 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--accent-doux);border-radius:var(--r)}
+.pc-note .pc-bandeau-mode{border-left-color:var(--encre)}
+.pc-confirmer{margin-top:10px;padding:10px 12px;border:1px solid var(--encre);border-radius:var(--r)}
 .pc-q-lib{margin:0 0 8px;font-weight:600}
 .pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
   font-size:.8rem;margin-right:.5em;vertical-align:.1em}
@@ -1592,7 +1599,25 @@ var Sim = (function () {
      la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
      LA CALCULATRICE : Sim.calculatrice() pose celle des sites de classe (_commun/entrainement/moteur/
      calculette.js, que l'assembleur embarque dans chaque page), un bouton flottant hors parcours, un
-     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire. */
+     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire.
+     DEUX MODES (16 octobre 2026, demande de l'utilisateur pour la notation) :
+     - LE TD, par defaut : tout ce qui precede (juste ou pas encore, methode, « A corriger », aide), mais
+       AUCUN FICHIER. La fin est un bilan a l'ecran ; rien a rendre.
+     - LE MODE NOTE, par le lien du professeur : l'adresse qui contient « note » (#note). Ni verdict, ni
+       methode, ni aide, ni etoiles ; « Enregistrer » garde la reponse, que l'eleve peut changer jusqu'a
+       rendre sa copie. Rendre la copie (produire le fichier, ou en afficher le texte) VERROUILLE tout : le
+       fichier porte les verdicts, il ne doit plus servir a se corriger. Une manipulation est jugee telle
+       qu'elle est au moment ou on l'enregistre ; une reponse qui attendait une mesure est rejugee au rendu.
+       Le mode libre de la page (« Explorer la simulation ») disparait : ses defis disent juste ou pas.
+     - LES VALEURS CHANGENT D'UN MODE A L'AUTRE : Sim.note (vrai en mode note) se lit des le chargement,
+       avant que la page tire son sujet ; chaque page y prend d'autres nombres. Changer l'adresse d'un mode
+       a l'autre recharge la page.
+     - En mode note, q.apres et q.fini sont appeles A CHAQUE ENREGISTREMENT, juste ou non, avec le verdict en
+       second argument : une page ne doit rien afficher qui en depende (une mesure rappelee seulement si elle
+       est juste trahirait le verdict). ctx.note le dit aux scenes.
+     LES PROPOSITIONS D'UN CHOIX SE MELANGENT (16 octobre 2026, « la bonne reponse est trop souvent la 1re ») :
+     q.bonne garde l'indice de la source, chaque bouton porte data-k ; « ordreFixe: true » garde l'ordre ecrit
+     (une echelle, « aucune des precedentes »). */
   var COMPETENCES = {
     APP: "S'approprier", ANA: "Analyser", REA: "Réaliser", VAL: "Valider", COM: "Communiquer"
   };
@@ -1612,6 +1637,9 @@ var Sim = (function () {
     "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
   };
   var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
+  /* le mode note, par l'adresse : #note (ou #ccf-note, #u41-note) ; lu des le chargement, avant le tirage du sujet */
+  function noteDans(h) { return /(^#|[^a-z])note\b/i.test(h || ""); }
+  var NOTE_ADRESSE = noteDans(location.hash);
   var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
   var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
   /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
@@ -1629,8 +1657,15 @@ var Sim = (function () {
   }
   function deux(n) { return (n < 10 ? "0" : "") + n; }
   function heure(d) { return deux(d.getHours()) + "h" + deux(d.getMinutes()); }
+  /* le melange de Fisher-Yates, en place */
+  function melanger(t) { for (var i = t.length - 1; i > 0; i--) { var k = Math.floor(Math.random() * (i + 1)), x = t[i]; t[i] = t[k]; t[k] = x; } return t; }
   function parcours(parent, o) {
     var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
+    /* le mode note : lu a l'adresse ; passer d'un mode a l'autre recharge, pour retirer les valeurs */
+    var NOTE = NOTE_ADRESSE;
+    window.addEventListener("hashchange", function () { if (noteDans(location.hash) !== NOTE) location.reload(); });
+    /* une question a une reponse : verifiee (TD), ou enregistree (note) ; un appel, des qu'il est lance */
+    function fait(f) { return !!f && (NOTE && !f.appel ? !!f.enr : !!f.fini); }
     var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
     function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
     var niveaux = o.niveaux || ["CAP", "Seconde"];
@@ -1642,9 +1677,12 @@ var Sim = (function () {
     /* une partie facultative intouchee ne compte nulle part ; entamee, seulement pour ce qui y est fait */
     var nOblig = o.phases.filter(function (ph) { return !ph.facultative; }).length || nPh;
     var aFacultative = nOblig < nPh;
-    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide); }
+    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide || f.enr); }
     function compte(i, f) { return !o.phases[i].facultative || touchee(f); }
-    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
+    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") + (NOTE ? " pc-note" : "") });
+    /* les mots qui changent d'un mode a l'autre : en TD, la fin est un bilan ; en note, une copie ou un livrable */
+    var MOT_FIN = NOTE ? (epreuve ? "La copie" : "Le livrable") : "Le bilan";
+    var MOT_FIN_COURT = NOTE ? (epreuve ? "Copie" : "Livrable") : "Bilan";
     var P = $(parent);
 
     /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
@@ -1654,9 +1692,11 @@ var Sim = (function () {
         [el("b", { texte: "Explorer la simulation" }), el("span", { texte: o.libreTexte || "librement, sans note ni fichier" })]);
       bParcours = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "false" },
         [el("b", { texte: ccf ? "Entraînement au CCF" : u41 ? "TD sur simulation" : "Le parcours" }),
-         el("span", { texte: o.modeTexte || ((u41 ? (o.u41.duree || "deux heures") : "une heure") + ", et un fichier pour le professeur") })]);
+         el("span", { texte: (u41 ? (o.u41.duree || "deux heures") : "une heure") + ", avec les indications ; sans note ni fichier" })]);
       barreModes = el("div", { classe: "pc-modes", role: "group", "aria-label": "Deux façons d'utiliser la page" }, [bLibre, bParcours]);
       P.appendChild(barreModes);
+      /* en mode note, la simulation libre s'efface : ses defis diraient juste ou pas, sur les valeurs de l'evaluation */
+      if (NOTE) barreModes.hidden = true;
       bLibre.addEventListener("click", function () { mode(false); });
       bParcours.addEventListener("click", function () { mode(true); });
     }
@@ -1707,8 +1747,8 @@ var Sim = (function () {
       chemin.appendChild(el("li", null, [b]));
       return b;
     });
-    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": epreuve ? "La copie" : "Le livrable" },
-      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: epreuve ? "Copie" : "Livrable" }), el("span", { classe: "pc-etoiles" })]);
+    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": MOT_FIN },
+      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: MOT_FIN_COURT }), el("span", { classe: "pc-etoiles" })]);
     drapeau.addEventListener("click", function () { montrer(nPh); });
     chemin.appendChild(el("li", null, [drapeau]));
     var info = el("div", { classe: "pc-info" });
@@ -1759,7 +1799,13 @@ var Sim = (function () {
     var illus = el("div", { classe: "scene pc-illus" });
     if (c.illustration) c.illustration(illus);
     var choixNiv = el("div", { classe: "pc-choix-niveau" });
-    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: NOTE ? "Commencer l'évaluation" : ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    /* le mode, dit a l'accueil : en TD, des indications et rien a rendre ; en note, ni verdict ni aide, et un fichier */
+    var bandeauMode = el("p", { classe: "pc-bandeau-mode", html: NOTE
+      ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux et ne donne aucune méthode : « Enregistrer » garde votre réponse, " +
+        "que vous pouvez changer jusqu'à rendre votre copie. Rendre la copie produit le fichier pour le professeur et verrouille tout."
+      : "<b>TD, non noté.</b> La page dit juste ou pas encore et donne la méthode quand ça coince. À la fin, un bilan à l'écran : " +
+        "rien à rendre. L'évaluation notée se fait par le lien que donne le professeur, avec d'autres valeurs." });
     if (niveaux.length > 1) {
       choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
       var rang = el("div", { classe: "rangee" });
@@ -1815,8 +1861,9 @@ var Sim = (function () {
         grille,
         el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
         el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
-        el("p", { classe: "consigne", html: "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
-        choixNiv, partir] : [
+        el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions. En évaluation, la page ne donne aucune aide."
+          : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+        bandeauMode, choixNiv, partir] : [
         el("h2", { texte: "L'U41 et ce TD" }),
         /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
         el("p", { html: cc.format || "À l'examen, l'U41 dure <b>4 heures</b> : cinq parties indépendantes autour d'un dossier technique. " +
@@ -1827,8 +1874,8 @@ var Sim = (function () {
         aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
           "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
         nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
-        el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
-        choixNiv, partir]);
+        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question." }),
+        bandeauMode, choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
     } else {
       var carteCmd = el("div", { classe: "carte pc-commande" }, [
@@ -1846,8 +1893,8 @@ var Sim = (function () {
         el("div", null, [carteCmd, illus]),
         el("div", { classe: "carte" }, [el("h2", { texte: "Le projet en cinq phases" }), etapes,
           el("p", { classe: "consigne", html: "Une heure en tout. On passe d'une phase à l'autre comme on veut, par le chemin en haut ; " +
-            "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." }),
-          choixNiv, partir])
+            (NOTE ? "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." : "à la fin, un bilan de vos réussites.") }),
+          bandeauMode, choixNiv, partir])
       ]));
     }
     racine.appendChild(accueil);
@@ -1868,7 +1915,7 @@ var Sim = (function () {
       return qs.filter(function (q) { return !q.niveau || q.niveau === etat.niveau; });
     }
 
-    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41,
+    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41, note: NOTE,
       fr: fr, lire: lire, mesure: mesure, gauss: gauss, svg: svg, el: el, borne: borne, animer: animer };
 
     /* un recit ou une consigne peut dependre du niveau : une fonction de ctx */
@@ -1899,11 +1946,11 @@ var Sim = (function () {
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
       var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
       var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
-        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : MOT_FIN });
       suite.addEventListener("click", function () { ouvrir(i + 1); });
       var versFin = null;
       if (i + 1 < nPh) {
-        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: epreuve ? "Aller à la copie" : "Aller au livrable" });
+        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: NOTE ? (epreuve ? "Aller à la copie" : "Aller au livrable") : "Voir le bilan" });
         versFin.addEventListener("click", function () { montrer(nPh); });
       }
       s.appendChild(el("div", { classe: "pc-pied" }, [versFin, bravo, suite]));
@@ -1924,26 +1971,39 @@ var Sim = (function () {
         champ.appendChild(inp); if (q.unite) champ.appendChild(el("span", { classe: "pc-unite", html: q.unite }));
         controles.push(inp);
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+        inp.addEventListener("input", function () { modifiee(); });
         lireReponse = function () { var v = lire(inp.value); return isFinite(v) ? fr(v, q.dec === undefined ? decimalesDe(inp.value) : q.dec) + (q.unite ? " " + texteSeul(q.unite) : "") : ""; };
         verifierOk = function () {
           var v = lire(inp.value); if (!isFinite(v)) return null;
           f.valeur = v;
           var a = typeof q.attendu === "function" ? q.attendu(ctx) : q.attendu;
           if (!isFinite(a)) return "attente";               // elle repose sur une mesure, ou une reponse, d'une autre partie
-          var tol = q.tolerance === undefined ? 0.05 : q.tolerance;
-          return Math.abs(v - a) <= Math.abs(a) * tol + (q.toleranceAbsolue || 0);
+          // tolerance et toleranceAbsolue peuvent dependre du niveau : fonctions de ctx (16 octobre 2026,
+          // le bar a sirops plus tolerant en CAP qu'en seconde)
+          var tol = typeof q.tolerance === "function" ? q.tolerance(ctx) : q.tolerance === undefined ? 0.05 : q.tolerance;
+          var tolAbs = typeof q.toleranceAbsolue === "function" ? q.toleranceAbsolue(ctx) : (q.toleranceAbsolue || 0);
+          // sansSigne : une lecture d'appareil, ou le signe ne dit que le sens du branchement
+          // (-0,25 A lu quand le courant entre par COM est une lecture juste)
+          if (q.sansSigne) { v = Math.abs(v); a = Math.abs(a); }
+          return Math.abs(v - a) <= Math.abs(a) * tol + tolAbs;
         };
       } else if (q.type === "choix" || q.type === "multi") {
         var multi = q.type === "multi", choisis = [];
         var rang = el("div", { classe: "pc-options" });
         var options = typeof q.options === "function" ? q.options(ctx) : q.options;
-        options.forEach(function (op, k) {
-          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: propre(op) });
+        /* l'ordre affiche est tire au sort (16 octobre 2026 : la bonne reponse etait la premiere 135 fois sur 154) ;
+           k reste l'indice de la source, que q.bonne designe, et chaque bouton le porte en data-k */
+        var ordreVu = options.map(function (x, k) { return k; });
+        if (!q.ordreFixe) melanger(ordreVu);
+        ordreVu.forEach(function (k) {
+          var op = options[k];
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", "data-k": String(k), html: propre(op) });
           b.addEventListener("click", function () {
             if (f.fini) return;
             if (multi) { var p = choisis.indexOf(k); if (p < 0) choisis.push(k); else choisis.splice(p, 1); }
             else choisis = [k];
-            [].forEach.call(rang.children, function (x, m) { x.setAttribute("aria-pressed", choisis.indexOf(m) >= 0 ? "true" : "false"); });
+            [].forEach.call(rang.children, function (x) { x.setAttribute("aria-pressed", choisis.indexOf(Number(x.getAttribute("data-k"))) >= 0 ? "true" : "false"); });
+            modifiee();
           });
           rang.appendChild(b); controles.push(b);
         });
@@ -1967,7 +2027,7 @@ var Sim = (function () {
             var choix = el("select", { classe: "pc-classer-choix", "aria-label": texteSeul(it) });
             choix.appendChild(el("option", { value: "-1", texte: "— choisir —" }));
             q.categories.forEach(function (cat, m) { choix.appendChild(el("option", { value: String(m), texte: texteSeul(cat) })); });
-            choix.addEventListener("change", function () { if (!f.fini) places[k] = Number(choix.value); });
+            choix.addEventListener("change", function () { if (!f.fini) { places[k] = Number(choix.value); modifiee(); } });
             ligne.appendChild(choix); grille.appendChild(ligne); controles.push(choix);
             return;
           }
@@ -1978,6 +2038,7 @@ var Sim = (function () {
               if (f.fini) return;
               places[k] = m;
               [].forEach.call(cats.children, function (x, n) { x.setAttribute("aria-pressed", n === m ? "true" : "false"); });
+              modifiee();
             });
             cats.appendChild(b); controles.push(b);
           });
@@ -2009,10 +2070,10 @@ var Sim = (function () {
           return ok;
         };
       }
-      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: "Vérifier" });
+      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: NOTE ? "Enregistrer" : "Vérifier" });
       var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
       /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
-      var bAide = epreuve && q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      var bAide = epreuve && q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
       var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
       var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
       bloc.appendChild(champ);
@@ -2029,7 +2090,45 @@ var Sim = (function () {
         /* « fini » previent la scene a la cloture, juste ou passee ; « apres », seulement si juste */
         if (q.fini) q.fini(ctx, f.juste, f.reponse, f.valeur);
       }
+      /* MODE NOTE : enregistrer, sans verdict. La reponse gardee est celle du dernier « Enregistrer » ; une
+         manipulation est jugee telle qu'elle est a cet instant ; une reponse qui attend une mesure est rejugee au rendu. */
+      function enregistrer() {
+        if (f.fini) return;                                // la copie est rendue : tout est verrouille
+        var ok = verifierOk();
+        f.appuis = (f.appuis || 0) + 1;
+        retour.className = "pc-retour";
+        if (ok === null) {
+          retour.innerHTML = q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.");
+          return;
+        }
+        f.enr = true; f.modifiee = false; f.enAttente = ok === "attente"; f.note = ok === true; f.juste = f.note;
+        f.reponse = lireReponse(); f.heureEnr = new Date();
+        bloc.setAttribute("data-etat", "enregistree");
+        var vu = q.type === "action" ? (f.lu !== undefined ? f.lu : f.reponse) : "";
+        retour.innerHTML = "Réponse enregistrée à " + heure(f.heureEnr) + "." + (vu ? " <span class=\"pc-lu\">La page a gardé : " + insecables(vu) + ".</span>" : "") +
+          " Vous pouvez la changer, puis enregistrer de nouveau, jusqu'à rendre votre copie.";
+        if (q.apres) q.apres(ctx, f.note, f.reponse, f.valeur);   // a chaque enregistrement, juste ou non : rien ne doit trahir le verdict
+        if (q.fini) q.fini(ctx, f.note, f.reponse, f.valeur);
+        majPhase(i); majTete();
+      }
+      /* une reponse changee apres l'enregistrement : c'est l'ancienne qui compte tant qu'on n'enregistre pas */
+      function modifiee() {
+        if (!NOTE || !f.enr || f.fini) return;
+        f.modifiee = true;
+        bloc.setAttribute("data-etat", "modifiee");
+        retour.className = "pc-retour";
+        retour.innerHTML = "Modifiée, pas encore enregistrée : la réponse gardée reste « " + insecables(f.reponse || "") + " ».";
+      }
+      /* au rendu de la copie : rejuger ce qui attendait une mesure, puis tout fermer */
+      f.verrouiller = function () {
+        if (f.fini) return;
+        if (f.enr && f.enAttente && !f.modifiee) { var ok = verifierOk(); f.note = ok === true; f.juste = f.note; }
+        if (f.enr) f.fini = true;
+        bVerif.disabled = true;
+        controles.forEach(function (x) { x.disabled = true; });
+      };
       function verifier() {
+        if (NOTE) { enregistrer(); return; }
         if (f.fini) return;
         var ok = verifierOk();
         f.appuis = (f.appuis || 0) + 1;
@@ -2084,6 +2183,7 @@ var Sim = (function () {
         f.aide = true; etat.aides++;
         bAide.hidden = true; methodeVue.hidden = false;
       });
+      if (NOTE && etat.rendu) f.verrouiller();             // une partie ouverte apres le rendu : deja fermee
       bPasser.addEventListener("click", function () {
         f.passe = true; f.note = false;
         if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
@@ -2109,7 +2209,7 @@ var Sim = (function () {
       bloc.appendChild(retour);
       parentQ.appendChild(bloc);
       bAppel.addEventListener("click", function () {
-        if (f.appele) return;
+        if (f.appele || etat.rendu) return;
         f.appele = new Date(); f.fini = true; f.reponse = "appel lancé à " + heure(f.appele);
         bAppel.disabled = true; bProf.hidden = false;
         bloc.setAttribute("data-etat", "attente");
@@ -2201,16 +2301,16 @@ var Sim = (function () {
     }
 
     function etoilesDe(i) {
-      var fs = etat.fiches[i]; if (!fs || !fs.length) return 0;
+      var fs = etat.fiches[i]; if (NOTE || !fs || !fs.length) return 0;      // en mode note, aucune etoile : elles diraient le verdict
       if (fs.some(function (f) { return !f.fini; })) return 0;
       var n = fs.filter(function (f) { return f.note; }).length;
       return n === fs.length ? 3 : n >= fs.length * 0.6 ? 2 : 1;
     }
     function majPhase(i) {
       var fs = etat.fiches[i]; if (!fs || !fs.pied) return;
-      var finie = fs.every(function (f) { return f.fini; });
+      var finie = fs.every(fait);
       fs.pied.suite.disabled = false;
-      fs.pied.bravo.hidden = !finie || !o.phases[i].bravo;
+      fs.pied.bravo.hidden = NOTE || !finie || !o.phases[i].bravo;
       if (finie && etat.ouverte === i) etat.ouverte = i + 1;
       majChemin();
     }
@@ -2218,9 +2318,10 @@ var Sim = (function () {
       noeuds.forEach(function (b, i) {
         var dispo = !!etat.debut;                         // comme dans un controle : toutes les parties, dans l'ordre qu'on veut
         if (dispo) b.removeAttribute("disabled"); else b.setAttribute("disabled", "disabled");
-        var e = etoilesDe(i);
-        b.querySelector(".pc-etoiles").textContent = e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
-        b.classList.toggle("pc-fait", e > 0);
+        var e = etoilesDe(i), fs = etat.fiches[i];
+        var tout = NOTE && fs && fs.length && fs.every(fait);   // en mode note : une coche quand tout est enregistre, sans verdict
+        b.querySelector(".pc-etoiles").textContent = NOTE ? (tout ? "✓" : "") : e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
+        b.classList.toggle("pc-fait", NOTE ? !!tout : e > 0);
         b.classList.toggle("pc-ici", etat.courante === i);
       });
       if (etat.debut) drapeau.removeAttribute("disabled");   // le livrable s'ouvre a tout moment
@@ -2232,8 +2333,19 @@ var Sim = (function () {
     function etoilesPlus() { var s = 0; o.phases.forEach(function (ph, i) { if (ph.facultative) s += etoilesDe(i); }); return s; }
     function enPlus() { var p = etoilesPlus(); return p ? " · +" + p : ""; }
     function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
+    /* en mode note, la tete compte les reponses enregistrees, jamais les reussites */
+    function comptesNote() {
+      var n = 0, m = 0;
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        if (!fs) { if (!ph.facultative) m += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; return; }
+        fs.forEach(function (f) { if (f.appel || !compte(i, f)) return; m++; if (f.enr) n++; });
+      });
+      return { n: n, m: m };
+    }
     function majTete() {
-      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
+      var cn = NOTE ? comptesNote() : null;
+      score.textContent = NOTE ? cn.n + " / " + cn.m + " réponses" : "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
       temps.textContent = etat.debut ? minutes() + " min" : "";
       if (bDos) bDos.hidden = !etat.debut;
     }
@@ -2245,11 +2357,11 @@ var Sim = (function () {
     }
     /* une partie ouverte trop tot : ses phrases portaient « … » ; on la refait tant qu'on n'y a rien touche */
     function intacte(i) {
-      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide; });
+      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide && !f.enr; });
     }
     function rafraichir(i) {
       var ph = o.phases[i], colQ = etat.colonnes[i];
-      if (!etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
+      if (etat.rendu || !etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
       var pied = etat.fiches[i].pied;
       while (colQ.children.length > 1) colQ.removeChild(colQ.lastChild);
       etat.fiches[i] = questionsDe(i).map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
@@ -2273,9 +2385,13 @@ var Sim = (function () {
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
-      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!fait(f)) restent++; }); });
       o.phases.forEach(function (ph, i) { if (!etat.fiches[i] && !ph.facultative) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
       var merite = !etat.aides && !passees && !restent;
+      if (NOTE) {                                          // en mode note : ni aide ni question passee, seulement ce qui reste sans reponse
+        var tn = restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : "toutes les questions ont une réponse";
+        return { merite: merite, texte: u41 ? "aucune aide en évaluation, " + tn : (merite ? "bonus +0,25 mérité — " : "pas de bonus — ") + tn };
+      }
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
           passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "rien de passé"];
@@ -2295,23 +2411,54 @@ var Sim = (function () {
       if (!finalFait) {
         finalFait = true;
         titreFin = el("h2"); bulleFin = el("p", { classe: "pc-bulle" });
-        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: epreuve ? "La copie" : "Le livrable" }), titreFin, bulleFin]));
+        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: MOT_FIN }), titreFin, bulleFin]));
         recap = el("div", { classe: "carte" });
+        var simpl = null;
+        if (o.simplifie && o.simplifie.length) {
+          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
+            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
+        }
+        if (!NOTE) {                                       // en TD : rien a rendre
+          var rien = el("div", { classe: "carte pc-remise" }, [el("h2", { texte: "Rien à rendre" }),
+            el("p", { classe: "consigne", html: "En TD, la page ne produit <b>aucun fichier</b> : ce bilan vous montre ce qui est acquis et ce qui reste à revoir. " +
+              "L'évaluation notée se fait par le <b>lien que donne le professeur</b>, avec d'autres valeurs, sans indication." })]);
+          final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [rien, simpl])]));
+          return construireFinal();
+        }
         var remise = el("div", { classe: "carte pc-remise" });
         remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
         remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
           "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
         var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
-        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Produire mon fichier" });
-        var bVoir = el("button", { type: "button", classe: "bouton", texte: "Afficher le texte" });
+        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Rendre ma copie" });
+        var bVoir = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Afficher le texte" });
+        /* rendre la copie verrouille tout : le fichier porte les verdicts, il ne doit plus servir a se corriger */
+        var bOui = el("button", { type: "button", classe: "bouton principal", texte: "Oui, je rends ma copie" });
+        var bNon = el("button", { type: "button", classe: "bouton", texte: "Pas encore" });
+        var confirmer = el("div", { classe: "pc-confirmer", hidden: "hidden" }, [
+          el("p", { classe: "consigne", html: "<b>Rendre la copie verrouille toutes vos réponses</b> : plus rien ne pourra changer. Le fichier part ensuite dans vos téléchargements." }),
+          el("div", { classe: "rangee" }, [bOui, bNon])]);
         var dit = el("p", { classe: "pc-retour", "aria-live": "polite" });
         apercu = el("textarea", { classe: "pc-apercu", readonly: "readonly", rows: "10", hidden: "hidden", "aria-label": "Le texte du fichier" });
         remise.appendChild(el("div", { classe: "pc-q-champ" }, [ident]));
         remise.appendChild(el("div", { classe: "rangee" }, [bProd, bVoir]));
+        remise.appendChild(confirmer);
         remise.appendChild(dit); remise.appendChild(apercu);
         bProd.addEventListener("click", function () {
           var id = ident.value.trim();
           if (!id) { dit.className = "pc-retour faux"; dit.textContent = "Tapez d’abord l’identifiant donné en classe."; return; }
+          if (!etat.rendu) { confirmer.hidden = false; dit.textContent = ""; return; }
+          produire();
+        });
+        bNon.addEventListener("click", function () { confirmer.hidden = true; });
+        bOui.addEventListener("click", function () {
+          if (!ident.value.trim()) { confirmer.hidden = true; return; }
+          rendre(); confirmer.hidden = true; ident.disabled = true;
+          bProd.textContent = "Produire de nouveau le fichier"; bVoir.hidden = false;
+          construireFinal(); produire();
+        });
+        function produire() {
+          var id = ident.value.trim();
           var txt = fabriquer(id);
           var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
           try {
@@ -2324,16 +2471,12 @@ var Sim = (function () {
           } catch (e) {
             dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
           }
-        });
+        }
         bVoir.addEventListener("click", function () {
+          if (!etat.rendu) return;                         // le texte porte les verdicts : seulement une fois la copie rendue
           var id = ident.value.trim() || "(identifiant à taper)";
           apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
         });
-        var simpl = null;
-        if (o.simplifie && o.simplifie.length) {
-          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
-            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
-        }
         final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
       }
       /* le livrable se produit meme inacheve : ce qui reste compte comme non reussi */
@@ -2341,23 +2484,43 @@ var Sim = (function () {
       o.phases.forEach(function (ph, i) {
         var fs = etat.fiches[i];
         if (ph.facultative && !(fs || []).some(touchee)) return;   // pas abordee : elle ne manque pas
-        (fs ? fs.filter(function (f) { return !f.fini && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+        (fs ? fs.filter(function (f) { return !fait(f) && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
           if (q.type === "appel") appelsAFaire++; else restent++;
         });
       });
-      var enAttente = attente().length;
-      titreFin.innerHTML = restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
+      var enAttente = attente().length, modifiees = 0;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.modifiee && !f.fini) modifiees++; }); });
+      titreFin.innerHTML = !NOTE ? (restent ? "Le TD n’est pas fini" : "Le TD est fini")
+        : etat.rendu ? "La copie est rendue"
+        : restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
       var mots = [];
-      if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut, " +
-        "ou produire votre fichier tel quel : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + ".");
+      if (NOTE && etat.rendu) mots.push("Vos réponses sont verrouillées. Remettez le fichier au professeur.");
+      else if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut" +
+        (NOTE ? ", ou rendre votre copie telle quelle : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + "." : "."));
+      if (NOTE && !etat.rendu && modifiees) mots.push("<b>" + (modifiees > 1 ? modifiees + " réponses ont été modifiées" : "Une réponse a été modifiée") + " sans être enregistrée</b> : " +
+        (modifiees > 1 ? "c'est l'ancienne réponse qui comptera pour chacune" : "c'est l'ancienne réponse qui comptera") + ", sauf si vous appuyez sur « Enregistrer ».");
       if (appelsAFaire) mots.push("<b>" + (appelsAFaire > 1 ? appelsAFaire + " appels n'ont pas été lancés" : "Un appel n'a pas été lancé") + "</b> : " + (appelsAFaire > 1 ? "ils comptent" : "il compte") + " zéro.");
       if (enAttente) mots.push("<b>" + (enAttente > 1 ? enAttente + " appels attendent" : "Un appel attend") + " encore le professeur</b> : faites-le valider avant de produire le fichier, sinon il ne comptera pas.");
-      if (!restent && !appelsAFaire && !enAttente && o.fin) mots.push(o.fin);
+      if (!restent && !appelsAFaire && !enAttente && !(NOTE && etat.rendu)) mots.push(finTexte());
       bulleFin.innerHTML = mots.join(" ");
       bulleFin.hidden = !bulleFin.innerHTML;
       recap.innerHTML = "";
       recap.appendChild(el("h2", { texte: ccf ? "Le bilan de l'épreuve" : u41 ? "Le bilan, compétence par compétence" : "Le bilan du projet" }));
       var t = el("table", { classe: "releve pc-recap" });
+      if (NOTE) {
+        recap.firstChild.textContent = "Ce que contient votre copie";
+        t.appendChild(el("tr", null, [el("th", { texte: epreuve ? "Partie" : "Phase" }), el("th", { texte: "Compétence" }), el("th", { texte: "Réponses enregistrées" })]));
+        o.phases.forEach(function (ph, i) {
+          var fs = etat.fiches[i], qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i), n = 0, m = 0;
+          if (ph.facultative && !(fs || []).some(touchee)) { t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: "facultative, non abordée" })])); return; }
+          qs.forEach(function (q, j) { var f = fs && fs[j]; if (q.type === "appel") { m++; if (f && f.appele) n++; return; } if (!compte(i, f)) return; m++; if (f && f.enr) n++; });
+          t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: n + " sur " + m })]));
+        });
+        recap.appendChild(t);
+        if (ccf) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>Autonomie</b> : " + autonomie().texte + "." }));
+        recap.appendChild(el("p", { classe: "pc-score-final", html: minutes() + " min" }));
+        return;
+      }
       if (epreuve) {
         t.appendChild(el("tr", null, [el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Appel" })]));
         ORDRE.forEach(function (k) {
@@ -2395,13 +2558,30 @@ var Sim = (function () {
       return (s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s)
         .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "sans-identifiant";
     }
+    /* le mot de la fin des pages parle du fichier : en TD il n'y en a pas, en note le bouton est « Rendre ma copie » */
+    function finTexte() {
+      var t = String(o.fin || "");
+      var sans = t.replace(/\s*(La copie est prête|Produisez)[^.]*\.?/g, "").trim();
+      if (!NOTE) return (sans ? sans + " " : "Tout est fait. ") + "En TD, rien à rendre : relisez la méthode des questions qui ont coincé.";
+      return (sans ? sans + " " : "") + "Rendez votre copie : le fichier part dans vos téléchargements.";
+    }
+    /* rendre la copie (mode note) : rejuger ce qui attendait une mesure, et tout verrouiller */
+    function rendre() {
+      if (!NOTE || etat.rendu) return;
+      etat.rendu = true;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.verrouiller) f.verrouiller(); }); });
+      majChemin(); majTete();
+    }
     function fabriquer(id) {
+      if (NOTE) rendre();                                  // le texte porte les verdicts : le fabriquer, c'est rendre la copie
       var d = new Date();
       var out = ["BILAN DE SÉQUENCE",
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
+        "Mode       : " + (NOTE ? "évaluation notée, sans indication" : "TD, non noté"),
+        NOTE ? "Bilan      : " + comptesNote().n + " réponses enregistrées sur " + comptesNote().m + ", en " + minutes() + " min"
+          : "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
           (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
@@ -2430,7 +2610,7 @@ var Sim = (function () {
             if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
             else {
               etatCase = f.note ? "juste" : "faux";
-              var det = f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
+              var det = NOTE ? "enregistrée à " + heure(f.heureEnr) + (f.modifiee ? ", modifiée ensuite sans être enregistrée" : "") : f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
                 : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
               if (f.aide) det += ", avec aide";
               rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
@@ -2462,9 +2642,9 @@ var Sim = (function () {
       if (etat.debut && !etat.exporte) { e.preventDefault(); e.returnValue = ""; }
     });
     majTete();
-    if (libre) mode(/^#(ccf|u41|parcours)$/.test(location.hash));
+    if (libre) mode(NOTE || /^#(ccf|u41|parcours)$/.test(location.hash));
     /* la porte d'essai : etat interne et fichier, pour les controles */
-    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, fiches: function () { return etat.fiches; },
+    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, rendre: rendre, note: NOTE, fiches: function () { return etat.fiches; },
       appels: appels, mode: mode, dossier: function () { if (dossierFn) basculerDossier(); return panDos; }, coter: function (f, x) { f.cote = x; f.heureCote = new Date(); f.note = x === "A"; f.afficher(); majPhase(f.phase); majAppels(); },
       choisirNiveau: function (n) { etat.niveau = n; niv.textContent = n; }, demarrer: function (n) {
         if (libre) mode(true);
@@ -2547,7 +2727,9 @@ var Sim = (function () {
 
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
-    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice };
+    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice,
+    /* vrai quand la page est ouverte en mode note (#note) : chaque page y tire d'autres valeurs */
+    note: NOTE_ADRESSE };
 })();
 
 </script>
@@ -2676,6 +2858,45 @@ var Sim = (function () {
   function E() { return etats[exp]; }
   var fr = Sim.fr;
 
+  /* DEUX JEUX DE VALEURS (16 octobre 2026) : le TD (#u41) et l'evaluation notee (#note) n'ont pas les memes nombres.
+     En note, une autre maison : 1982, 12,00 x 7,50 m sous 2,40 m, un doublage de 8 ou 10 cm sur parpaing de 15, d'autres
+     menuiseries, combles, plancher, vide sanitaire, convecteurs de 8 kW ; d'autres villes, d'autres essais, d'autres prix
+     et d'autres devis. Les evidences tiennent : l'air neuf reste le premier poste (26 a 31 % en note), et l'isolation
+     interieure garde le pont du refend. Inchanges : le banc du lycee (1,20 m), les lambda des materiaux, la consigne de
+     19 °C, la relance de 1,15, les exigences des aides, les debits de la VMC. Le TD garde exactement ses valeurs. */
+  var NOTE = Sim.note;
+  var SUJET = NOTE ? {
+      annee: 1982, villes: [{ nom: "Nantes", tb: -5, dju: 2300 }, { nom: "Clermont-Ferrand", tb: -8, dju: 2600 }, { nom: "Besançon", tb: -12, dju: 2900 }],
+      ePse: [8, 10], teBanc: [-8, -3, 2], teLog: [-3, 1, 3], n50: [8, 10, 12], parpaing: 15, enduit: 2.0,
+      long: 12, larg: 7.5, haut: 2.4, refends: [4.8, 8.2],
+      cloisons: [[0, 3.0, 4.8, 3.0], [4.8, 2.8, 8.2, 2.8], [6.4, 0, 6.4, 2.8], [8.2, 3.8, 12, 3.8]],
+      dims: { F1: [2.1, 2.15], F2: [1.4, 1.25], F3: [0.8, 1.15], F4: [1.1, 1.25], F5: [1.1, 1.25], F6: [0.9, 1.25], F7: [0.6, 0.6], PE: [0.9, 2.15] },
+      men: [["F3", "n", 1.8], ["PE", "n", 5.3], ["F7", "n", 7.1], ["F1", "s", 1.2], ["F4", "s", 5.9], ["F6", "s", 9.8], ["F2", "o", 4.6], ["F5", "e", 1.3]],
+      pieces: [["cuisine", 2.4, 1.5], ["séjour", 2.4, 5.3], ["entrée", 5.6, 1.4], ["salle", 7.3, 1.2], ["de bains", 7.3, 1.2, 13], ["couloir", 6.5, 3.3, 4], ["chambre 2", 6.5, 5.6], ["chambre 1", 10.1, 1.9], ["chambre 3", 10.1, 5.7]],
+      upf: 0.35, laineCombles: 12, upl: 0.90, uw: 3.1, psiPb: { orig: [0.65, 0.60], iti: [0.75, 0.70], ite: [0.40, 0.25] }, hvs: 75, pmax: 8000,
+      prix: 0.27, lots: [3200, 2800, 85, 11000, 3800], iti: { m: "lm", l: 0.038, e: 16 }, ite: { e: 16, prix: 160, psiRef: 0.08 }, hr: 65, rosee: 13.2 }
+    : {
+      annee: 1975, villes: [{ nom: "Rouen", tb: -7, dju: 2400 }, { nom: "Lyon", tb: -10, dju: 2500 }, { nom: "Strasbourg", tb: -15, dju: 3000 }],
+      ePse: [4, 5, 6], teBanc: [-10, -5, 0], teLog: [-2, 0, 2], n50: [7, 9, 11], parpaing: 20, enduit: 1.5,
+      long: 11, larg: 8, haut: 2.5, refends: [4.4, 7.6],
+      cloisons: [[0, 3.2, 4.4, 3.2], [4.4, 3.0, 7.6, 3.0], [5.9, 0, 5.9, 3.0], [7.6, 4.0, 11, 4.0]],
+      dims: { F1: [2.4, 2.15], F2: [1.2, 1.35], F3: [1.0, 1.15], F4: [1.2, 1.35], F5: [1.2, 1.35], F6: [1.0, 1.35], F7: [0.6, 0.8], PE: [0.9, 2.2] },
+      men: [["F3", "n", 1.6], ["PE", "n", 4.9], ["F7", "n", 6.5], ["F1", "s", 1.0], ["F4", "s", 5.4], ["F6", "s", 9.0], ["F2", "o", 5.0], ["F5", "e", 1.4]],
+      pieces: [["cuisine", 2.2, 1.6], ["séjour", 2.2, 5.6], ["entrée", 5.15, 1.5], ["salle", 6.75, 1.3], ["de bains", 6.75, 1.3, 13], ["couloir", 6.0, 3.5, 4], ["chambre 2", 6.0, 5.8], ["chambre 1", 9.3, 2.0], ["chambre 3", 9.3, 6.0]],
+      upf: 0.40, laineCombles: 10, upl: 1.0, uw: 2.9, psiPb: { orig: [0.60, 0.55], iti: [0.70, 0.65], ite: [0.45, 0.30] }, hvs: 96.6, pmax: 9000,
+      prix: 0.25, lots: [3000, 2600, 80, 12000, 3500], iti: { m: "lv", l: 0.032, e: 12 }, ite: { e: 14, prix: 150, psiRef: 0.10 }, hr: 60, rosee: 12.0 };
+  /* la geometrie qui en decoule : surfaces et longueurs interieures, comme le document reponse 1 les demande */
+  function r6(x) { return Math.round(x * 1e6) / 1e6; }
+  var GEO = (function (S) {
+    var per = 2 * (S.long + S.larg), sMen = 0;
+    Object.keys(S.dims).forEach(function (k) { sMen += S.dims[k][0] * S.dims[k][1]; });
+    return { sSol: r6(S.long * S.larg), per: r6(per), sMursB: r6(per * S.haut), sMen: r6(sMen), sMurs: r6(per * S.haut - sMen), v: r6(S.long * S.larg * S.haut),
+      lPb: r6(per), lRef: r6(S.refends.length * 2 * S.haut) };
+  })(SUJET);
+  [].forEach.call(document.querySelectorAll("#libre details.modele li"), function (li, i) {
+    if (i === 7) li.innerHTML = li.innerHTML.replace("9 kW", fr(SUJET.pmax / 1000, 0) + " kW");
+  });
+
   /* ---------- Les matériaux : les λ du composeur de paroi du cours (kit web), et une épaisseur du commerce ---------- */
   var ISO = [2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 24, 30];
   var MAT = [
@@ -2729,13 +2950,13 @@ var Sim = (function () {
   }
 
   /* ---------- Le logement : une maison de plain-pied des années 1970 ---------- */
-  var V_LOG = 220, S_SOL = 88, S_MURS = 80.02, S_MEN = 14.98, L_PB = 38, L_REF = 10, H_VS = 96.6, C_A = 2e6, C_M = 18e6, PMAX = 9000;
+  var V_LOG = GEO.v, S_SOL = GEO.sSol, S_MURS = GEO.sMurs, S_MEN = GEO.sMen, L_PB = GEO.lPb, L_REF = GEO.lRef, H_VS = SUJET.hvs, C_A = 2e6, C_M = 18e6, PMAX = SUJET.pmax;
   var BOUCHES = { auto: [[45, 30, 15], [135, 30, 15]], hygro: [[25, 20, 10], [105, 20, 10]], df: [[45, 30, 15], [135, 30, 15]] };
   var NOMS_BOUCHES = ["cuisine", "salle de bains", "WC"];
-  function murOrigine(e) { return [{ m: "platre", e: 1.3 }, { m: "pse", e: e }, { m: "parpaing", e: 20 }, { m: "enduit", e: 1.5 }]; }
+  function murOrigine(e) { return [{ m: "platre", e: 1.3 }, { m: "pse", e: e }, { m: "parpaing", e: SUJET.parpaing }, { m: "enduit", e: SUJET.enduit }]; }
   function murDe(h) {
-    if (h.reno.murs === "iti") return [{ m: "platre", e: 1.3 }, { m: "lv", e: 12 }, { m: "pse", e: h.ePse }, { m: "parpaing", e: 20 }, { m: "enduit", e: 1.5 }];
-    if (h.reno.murs === "ite") return murOrigine(h.ePse).concat([{ m: "pseg", e: 14 }, { m: "enduit", e: 1.0 }]);
+    if (h.reno.murs === "iti") return [{ m: "platre", e: 1.3 }, { m: SUJET.iti.m, e: SUJET.iti.e }, { m: "pse", e: h.ePse }, { m: "parpaing", e: SUJET.parpaing }, { m: "enduit", e: SUJET.enduit }];
+    if (h.reno.murs === "ite") return murOrigine(h.ePse).concat([{ m: "pseg", e: SUJET.ite.e }, { m: "enduit", e: 1.0 }]);
     return murOrigine(h.ePse);
   }
   function debitBouche(h, k) {
@@ -2746,10 +2967,10 @@ var Sim = (function () {
   function qFan(h) { return h.porte ? 40 * h.fan : 0; }
   function coefs(h) {
     var mur = murDe(h), Um = Uparoi(mur), psiRef = psiDe(mur, "refend");
-    var psiPb = { orig: [0.60, 0.55], iti: [0.70, 0.65], ite: [0.45, 0.30] }[h.reno.murs][h.reno.plancher === "isole" ? 1 : 0];
-    var Upf = h.reno.combles === "isole" ? 1 / (1 / 0.40 + 0.30 / 0.039) : 0.40;
-    var Upl = h.reno.plancher === "isole" ? 1 / (1 / 1.0 + 0.10 / 0.035) : 1.0;
-    var Uw = h.reno.menuis === "neuves" ? 1.3 : 2.9;
+    var psiPb = SUJET.psiPb[h.reno.murs][h.reno.plancher === "isole" ? 1 : 0];
+    var Upf = h.reno.combles === "isole" ? 1 / (1 / SUJET.upf + 0.30 / 0.039) : SUJET.upf;
+    var Upl = h.reno.plancher === "isole" ? 1 / (1 / SUJET.upl + 0.10 / 0.035) : SUJET.upl;
+    var Uw = h.reno.menuis === "neuves" ? 1.3 : SUJET.uw;
     var Hpl = Upl * S_SOL, b = H_VS / (Hpl + H_VS);
     var n50 = h.reno.etanch === "traitee" ? 3 : h.n50, qinf = n50 * V_LOG / 20;
     var qv = debitVmc(h), eps = h.reno.ventil === "df" ? 0.85 : 0;
@@ -2784,7 +3005,7 @@ var Sim = (function () {
       return e;
     }
     var h = { exp: x, t: 8 * 3600, marche: true, cons: 19, teR: 2, meteo: "journee", occupe: true, volets: false, fenetre: false, vmc: 1, obtur: false, porte: false, fan: 0,
-      ePse: 4, n50: 9, reno: { murs: "orig", combles: "orig", plancher: "orig", menuis: "orig", ventil: "auto", etanch: "orig" },
+      ePse: SUJET.ePse[0], n50: SUJET.n50[1], reno: { murs: "orig", combles: "orig", plancher: "orig", menuis: "orig", ventil: "auto", etanch: "orig" },
       balo: 0, flux: "mur", E: 0, hist: [], vu: {} };
     equilibrer(h);
     return h;
@@ -2933,10 +3154,10 @@ var Sim = (function () {
       document.getElementById("fiche").innerHTML = "Une <b>boîte chaude gardée</b> : l'échantillon de <b>1,20 m × 1,20 m</b> sépare deux chambres. La boîte de mesure, côté chaud, fournit juste ce qu'il faut pour garder son air à la consigne : <b>en régime établi, sa puissance est ce qui traverse la paroi</b>. Clique sur une couche de la scène pour régler son épaisseur à la molette ; clique sur la caméra pour l'allumer.";
     } else {
       var lots = [
-        ["murs", "Murs", [["orig", "d'origine"], ["iti", "par l'intérieur, + 12 cm de laine"], ["ite", "par l'extérieur, + 14 cm de polystyrène"]]],
-        ["combles", "Combles perdus", [["orig", "d'origine, 10 cm tassés"], ["isole", "+ 30 cm d'ouate soufflée"]]],
+        ["murs", "Murs", [["orig", "d'origine"], ["iti", "par l'intérieur, + " + SUJET.iti.e + " cm de laine"], ["ite", "par l'extérieur, + " + SUJET.ite.e + " cm de polystyrène"]]],
+        ["combles", "Combles perdus", [["orig", "d'origine, " + SUJET.laineCombles + " cm tassés"], ["isole", "+ 30 cm d'ouate soufflée"]]],
         ["plancher", "Plancher bas", [["orig", "d'origine, sans isolant"], ["isole", "isolé en sous-face, 10 cm"]]],
-        ["menuis", "Menuiseries", [["orig", "d'origine, Uw 2,9"], ["neuves", "neuves, Uw 1,3"]]],
+        ["menuis", "Menuiseries", [["orig", "d'origine, Uw " + fr(SUJET.uw, 1)], ["neuves", "neuves, Uw 1,3"]]],
         ["ventil", "Ventilation", [["auto", "VMC autoréglable"], ["hygro", "VMC hygroréglable B"], ["df", "VMC double flux"]]],
         ["etanch", "Étanchéité à l'air", [["orig", "d'origine"], ["traitee", "traitée, n50 = 3"]]]];
       lots.forEach(function (l) {
@@ -2949,7 +3170,7 @@ var Sim = (function () {
         surChange: function (v) { E().meteo = v; } });
       CURS.te = Sim.curseur(R, { label: e.meteo === "journee" ? "Température extérieure moyenne" : "Température extérieure", min: -15, max: 15, pas: 1, valeur: e.teR, unite: "°C", dec: 0,
         surChange: function (v) { E().teR = v; } });
-      document.getElementById("fiche").innerHTML = "Une maison de plain-pied de <b>88 m²</b>, 2,50 m sous plafond, sur vide sanitaire, chauffée par des <b>convecteurs électriques de 9 kW</b> en tout. Le thermostat se tourne sur le refend, la VMC sur son caisson. Clique sur la fenêtre, son volet, la porte d'entrée, une bouche ou une paroi.";
+      document.getElementById("fiche").innerHTML = "Une maison de plain-pied de <b>" + fr(S_SOL, 0) + " m²</b>, " + fr(SUJET.haut, 2) + " m sous plafond, sur vide sanitaire, chauffée par des <b>convecteurs électriques de " + fr(PMAX / 1000, 0) + " kW</b> en tout. Le thermostat se tourne sur le refend, la VMC sur son caisson. Clique sur la fenêtre, son volet, la porte d'entrée, une bouche ou une paroi.";
     }
   }
   var CURS = {};
@@ -3415,7 +3636,7 @@ var Sim = (function () {
       legende: "Les molettes règlent les deux chambres et l'épaisseur de la couche choisie. La courbe rouge sur la coupe est la température dans la paroi ; en bas, la chaleur qui entre et celle qui sort. Clique sur la caméra pour voir la face chaude.",
       releve: "Une mesure par heure suffit : la paroi met des heures à se stabiliser. Trace la puissance de la boîte et la surface chaude, et attends des courbes plates.",
       accueil: "Mets en route avec le mur proposé, passe à « × 36 000 », et regarde la chaleur côté chaud rejoindre la chaleur côté froid." },
-    log: { titre: "La maison et ce qu'elle perd", reglages: "La maison et sa rénovation", consigne: "Une maison de 1975 : parpaing doublé de polystyrène, combles isolés de 10 cm, plancher sur vide sanitaire, VMC autoréglable, menuiseries d'origine.",
+    log: { titre: "La maison et ce qu'elle perd", reglages: "La maison et sa rénovation", consigne: "Une maison de " + SUJET.annee + " : parpaing doublé de polystyrène, combles isolés de " + SUJET.laineCombles + " cm, plancher sur vide sanitaire, VMC autoréglable, menuiseries d'origine.",
       legende: "Les flèches rouges suivent la chaleur qui part, poste par poste ; les bleues, l'air. Tourne les molettes du thermostat et de la VMC ; clique sur le volet, la fenêtre, la porte, une bouche, une paroi.",
       releve: "Une mesure par heure, et l'arrêt automatique au bout de deux jours : la masse de la maison met longtemps à suivre un changement.",
       accueil: "La maison vit une journée d'hiver, occupée. Pour mesurer ce qu'elle perd, vide-la : inoccupée, température constante, et attends." }
@@ -3440,6 +3661,7 @@ var Sim = (function () {
 
   /* La porte d'essai : l'etat, les lectures, et ce que le TD a l'U41 regle (le mur d'origine du sujet, l'etancheite) */
   window.deperditions = {
+    SUJET: SUJET, GEO: GEO,          // le sujet du mode (TD ou note), et la geometrie de la maison : le TD et les scenarios les lisent
     etat: E, exp: function () { return exp; }, etatDe: function (x) { if (!etats[x]) etats[x] = etatNeuf(x); return etats[x]; }, reglage: reg,
     lectures: function () { return lec(E()); }, centrale: function () { return CEN[exp]; }, molettes: M, dessiner: function () { dessiner(); afficher(); }, defis: poserDefis,
     regimeBanc: function () { return regimeBanc(etats.banc); }, regimeLog: function () { return regimeLog(etats.log); }, flux: function () { return flux(etats.banc); },
@@ -3466,30 +3688,38 @@ var Sim = (function () {
    de base, le conseil. Note sur les sept competences de l'epreuve. Sujet tire au sort : la ville (temperature
    de base et DJU), l'epaisseur du doublage d'origine, la chambre froide de l'essai au banc, la temperature de
    la semaine d'essai, la permeabilite de la maison.
+   DEUX MODES (16 octobre 2026) : en TD (#u41) les nombres ci-dessous ; en evaluation notee (#note), une autre maison et
+   d'autres essais, tous tires du SUJET du premier script (1982, 12 x 7,50 m, doublage de 8 ou 10 cm, Nantes, Clermont ou
+   Besancon, convecteurs de 8 kW, devis A en laine minerale de 16 cm).
    L'evidence qu'il retourne : les proprietaires veulent isoler les murs par l'interieur, « c'est la qu'on a
    froid » ; le bilan met l'air neuf devant les murs, et la camera montre que l'isolation interieure garde le
    pont du refend (la partie facultative le mesure : il grandit quand on isole). */
 (function () {
   var R = window.deperditions, fr = Sim.fr, el = Sim.el, svg = Sim.svg, lire = Sim.lire;
-  var VILLES = [{ nom: "Rouen", tb: -7, dju: 2400 }, { nom: "Lyon", tb: -10, dju: 2500 }, { nom: "Strasbourg", tb: -15, dju: 3000 }];
-  var S = 1.44, L = 1.20, TI = 19, V = 220, S_MURS_B = 95.00, S_MEN = 14.98, S_MN = 80.02, S_SOL = 88.00, L_PB = 38.00, L_REF = 10.00;
-  var U_PF = 0.40, U_PL = 1.00, UW = 2.9, PSI_PB = 0.60, PSI_PB_ITI = 0.70, Q_VMC = 90, PRIX = 0.25, COUT_ITI = 80;
+  /* le sujet du mode (TD ou note), pose par la simulation : voir SUJET et GEO dans le premier script */
+  var SU = R.SUJET, GEO = R.GEO, NOTE = Sim.note, VILLES = SU.villes;
+  var S = 1.44, L = 1.20, TI = 19, V = GEO.v, S_MURS_B = GEO.sMursB, S_MEN = GEO.sMen, S_MN = GEO.sMurs, S_SOL = GEO.sSol, L_PB = GEO.lPb, L_REF = GEO.lRef;
+  var U_PF = SU.upf, U_PL = SU.upl, UW = SU.uw, PSI_PB = SU.psiPb.orig[0], PSI_PB_ITI = SU.psiPb.iti[0], Q_VMC = 90, PRIX = SU.prix, COUT_ITI = SU.lots[2];
+  var KW = SU.pmax / 1000, NOM_ITI = R.MATS[SU.iti.m].nom.toLowerCase();
+  function f2(x) { return fr(x, 2); }
 
   function tirer(l) { return l[Math.floor(Math.random() * l.length)]; }
   function cfg(ctx) {
     var d = ctx.donnees;
-    if (!d.cfg) d.cfg = { ville: tirer(VILLES), e: tirer([4, 5, 6]), teBanc: tirer([-10, -5, 0]), teLog: tirer([-2, 0, 2]), n50: tirer([7, 9, 11]) };
+    if (!d.cfg) d.cfg = { ville: tirer(VILLES), e: tirer(SU.ePse), teBanc: tirer(SU.teBanc), teLog: tirer(SU.teLog), n50: tirer(SU.n50) };
     return d.cfg;
   }
   function preparer(ctx) { if (ctx.donnees.regle) return; ctx.donnees.regle = true; var c = cfg(ctx); R.regler({ ePse: c.e, n50: c.n50 }); }
   function onglet(id) { var banc = R.exp() === "banc"; if (banc !== (id === "vueBanc")) document.querySelector('#experiences [data-vue="' + id + '"]').click(); }
-  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees[cle] = juste && isFinite(v) ? v : mesure(ctx); }; }
+  /* en note, fini() est appele a chaque enregistrement, juste ou non : on garde le nombre de l'etudiant quel qu'il soit,
+     sinon les phrases suivantes trahiraient le verdict (16 octobre 2026) */
+  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees[cle] = (juste || NOTE) && isFinite(v) ? v : mesure(ctx); }; }
   function val(ctx, cle, mesure) { var x = ctx.donnees[cle]; return isFinite(x) ? x : mesure(ctx); }
   function proche(a, b, t) { return Math.abs(a - b) <= t; }
 
   /* ---------- ce que le sujet contient, et ce que la simulation donne en verite ---------- */
   function murOrig(ctx) { return R.murOrigine(cfg(ctx).e); }
-  function murIti(ctx) { return [{ m: "platre", e: 1.3 }, { m: "lv", e: 12 }, { m: "pse", e: cfg(ctx).e }, { m: "parpaing", e: 20 }, { m: "enduit", e: 1.5 }]; }
+  function murIti(ctx) { return [{ m: "platre", e: 1.3 }, { m: SU.iti.m, e: SU.iti.e }, { m: "pse", e: cfg(ctx).e }, { m: "parpaing", e: SU.parpaing }, { m: "enduit", e: SU.enduit }]; }
   function dTb(ctx) { return 20 - cfg(ctx).teBanc; }                // l'ecart de l'essai au banc
   function dTl(ctx) { return TI - cfg(ctx).teLog; }                 // l'ecart de l'essai de co-chauffage
   function dTbase(ctx) { return TI - cfg(ctx).ville.tb; }           // l'ecart de base
@@ -3532,18 +3762,18 @@ var Sim = (function () {
 
   /* ---------- le dossier ---------- */
   function planCote() {
-    var s = svg("svg", { viewBox: "0 0 620 420", "class": "schema", role: "img", "aria-label": "Plan coté du logement : 11,00 m sur 8,00 m intérieur, deux refends du nord au sud, huit menuiseries repérées" });
-    var k = 34, ox = 92, oy = 64, W = 11 * k, H = 8 * k;
+    var s = svg("svg", { viewBox: "0 0 620 420", "class": "schema", role: "img", "aria-label": "Plan coté du logement : " + f2(SU.long) + " m sur " + f2(SU.larg) + " m intérieur, deux refends du nord au sud, huit menuiseries repérées" });
+    var k = 34, ox = 92, oy = 64, W = SU.long * k, H = SU.larg * k;
     function X(m) { return ox + m * k; } function Y(m) { return oy + m * k; }
     function t(x, y, txt, o) { svg("text", Object.assign({ x: x, y: y, "text-anchor": "middle" }, o || {}), s).textContent = txt; }
     svg("rect", { x: ox - 9, y: oy - 9, width: W + 18, height: H + 18, "class": "s-mur" }, s);
     svg("rect", { x: ox, y: oy, width: W, height: H, fill: "var(--carte)" }, s);
-    [4.4, 7.6].forEach(function (m) { svg("rect", { x: X(m) - 3, y: oy, width: 6, height: H, "class": "s-mur" }, s); });
+    SU.refends.forEach(function (m) { svg("rect", { x: X(m) - 3, y: oy, width: 6, height: H, "class": "s-mur" }, s); });
     // les cloisons, minces
-    [["M", 0, 3.2, 4.4, 3.2], ["M", 4.4, 3.0, 7.6, 3.0], ["M", 5.9, 0, 5.9, 3.0], ["M", 7.6, 4.0, 11, 4.0]].forEach(function (c) {
-      svg("line", { x1: X(c[1]), y1: Y(c[2]), x2: X(c[3]), y2: Y(c[4]), stroke: "var(--encre)", "stroke-width": 1.6 }, s); });
-    // les menuiseries : une baie dans le mur, et son repere
-    var men = [["F3", "n", 1.6, 1.0], ["PE", "n", 4.9, 0.9], ["F7", "n", 6.5, 0.6], ["F1", "s", 1.0, 2.4], ["F4", "s", 5.4, 1.2], ["F6", "s", 9.0, 1.0], ["F2", "o", 5.0, 1.2], ["F5", "e", 1.4, 1.2]];
+    SU.cloisons.forEach(function (c) {
+      svg("line", { x1: X(c[0]), y1: Y(c[1]), x2: X(c[2]), y2: Y(c[3]), stroke: "var(--encre)", "stroke-width": 1.6 }, s); });
+    // les menuiseries : une baie dans le mur, et son repere (largeur : celle du tableau)
+    var men = SU.men.map(function (f) { return [f[0], f[1], f[2], SU.dims[f[0]][0]]; });
     men.forEach(function (f) {
       var r = f[1] === "n" ? { x: X(f[2]), y: oy - 9, width: f[3] * k, height: 9 } : f[1] === "s" ? { x: X(f[2]), y: oy + H, width: f[3] * k, height: 9 } :
         f[1] === "o" ? { x: ox - 9, y: Y(f[2]), width: 9, height: f[3] * k } : { x: ox + W, y: Y(f[2]), width: 9, height: f[3] * k };
@@ -3551,14 +3781,13 @@ var Sim = (function () {
       var cx = r.x + r.width / 2, cy = r.y + r.height / 2;
       t(f[1] === "o" ? cx - 20 : f[1] === "e" ? cx + 20 : cx, f[1] === "n" ? cy - 10 : f[1] === "s" ? cy + 20 : cy + 4, f[0], { "class": "s-nom" });
     });
-    t(X(2.2), Y(1.6), "cuisine"); t(X(2.2), Y(5.6), "séjour"); t(X(5.15), Y(1.5), "entrée"); t(X(6.75), Y(1.3), "salle"); t(X(6.75), Y(1.3) + 13, "de bains");
-    t(X(6.0), Y(3.5) + 4, "couloir"); t(X(6.0), Y(5.8), "chambre 2"); t(X(9.3), Y(2.0), "chambre 1"); t(X(9.3), Y(6.0), "chambre 3");
-    t(X(4.4), Y(8) + 34, "refend", { "class": "s-nom" }); t(X(7.6), Y(8) + 34, "refend", { "class": "s-nom" });
+    SU.pieces.forEach(function (p) { t(X(p[1]), Y(p[2]) + (p[3] || 0), p[0]); });
+    SU.refends.forEach(function (m) { t(X(m), Y(SU.larg) + 34, "refend", { "class": "s-nom" }); });
     // les cotes interieures
     svg("path", { d: "M" + ox + " " + (oy - 38) + " H" + (ox + W) + " M" + ox + " " + (oy - 44) + " V" + (oy - 32) + " M" + (ox + W) + " " + (oy - 44) + " V" + (oy - 32), "class": "s-cote" }, s);
-    t(ox + W / 2, oy - 44, "11,00 (cote intérieure)");
+    t(ox + W / 2, oy - 44, f2(SU.long) + " (cote intérieure)");
     svg("path", { d: "M" + (ox + W + 40) + " " + oy + " V" + (oy + H) + " M" + (ox + W + 34) + " " + oy + " H" + (ox + W + 46) + " M" + (ox + W + 34) + " " + (oy + H) + " H" + (ox + W + 46), "class": "s-cote" }, s);
-    t(ox + W + 54, oy + H / 2, "8,00", { "text-anchor": "start" });
+    t(ox + W + 54, oy + H / 2, f2(SU.larg), { "text-anchor": "start" });
     // le nord
     svg("path", { d: "M" + 40 + " " + 40 + " l8 22 l-8 -6 l-8 6 z", fill: "var(--encre)" }, s); t(40, 30, "N", { "class": "s-nom" });
     t(310, 412, "Cotes intérieures en mètres · menuiseries repérées F1 à F7 et PE, largeurs à l'échelle");
@@ -3578,14 +3807,14 @@ var Sim = (function () {
     svg("rect", { x: 53, y: 120, width: 16, height: 50, "class": "s-men" }, s); svg("rect", { x: 52, y: 112, width: 18, height: 5, fill: "var(--encre)" }, s);
     svg("rect", { x: 400, y: 56, width: 54, height: 20, "class": "s-rep" }, s); svg("path", { d: "M427 76 V86 M440 76 Q470 76 470 94", "class": "s-trait" }, s);
     svg("rect", { x: 462, y: 94, width: 16, height: 4, fill: "var(--encre)" }, s);
-    svg("path", { d: "M90 94 V198 M84 94 H96 M84 198 H96", "class": "s-cote" }, s); t(110, 150, "2,50", { "text-anchor": "start" });
+    svg("path", { d: "M90 94 V198 M84 94 H96 M84 198 H96", "class": "s-cote" }, s); t(110, 150, f2(SU.haut), { "text-anchor": "start" });
     t(200, 160, "pièce principale"); t(430, 160, "pièce d'eau"); t(310, 230, "vide sanitaire ventilé");
     rep(427, 44, 1); rep(32, 218, 2); rep(32, 114, 3); rep(310, 130, 4); rep(500, 112, 5);
     t(310, 248, "Coupe de principe, sans échelle · hauteur sous plafond en mètres");
     return s;
   }
   function coupeMur(ctx) {
-    var c = cfg(ctx), cs = [["plâtre", 1.3, "#ece6da"], ["polystyrène", c.e, "#f7f7f2"], ["parpaing creux", 20, "#b3b0aa"], ["enduit", 1.5, "#cfc8bb"]];
+    var c = cfg(ctx), cs = [["plâtre", 1.3, "#ece6da"], ["polystyrène", c.e, "#f7f7f2"], ["parpaing creux", SU.parpaing, "#b3b0aa"], ["enduit", SU.enduit, "#cfc8bb"]];
     var s = svg("svg", { viewBox: "0 0 620 150", "class": "schema", role: "img", "aria-label": "Coupe du mur d'origine, de l'intérieur vers l'extérieur, épaisseurs cotées en centimètres" });
     function t(x, y, txt, o) { svg("text", Object.assign({ x: x, y: y, "text-anchor": "middle" }, o || {}), s).textContent = txt; }
     var k = 12, tot = cs.reduce(function (a, x) { return a + x[1]; }, 0), x = 310 - tot * k / 2;
@@ -3602,28 +3831,32 @@ var Sim = (function () {
     return s;
   }
   function ligne(a, b, nb) { return el("tr", null, [el("td", { html: a }), el("td", { html: b, classe: nb ? "nb" : "" })]); }
+  function dim(n) { return f2(SU.dims[n][0]) + " × " + f2(SU.dims[n][1]); }
+  function mil(x) { return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }   // les milliers, comme le dossier les ecrivait
+  /* les points de rosee d'un air a 20 °C (annexe) ; la ligne de l'humidite du sujet en gras */
+  var ROSEES = [[40, 6.0], [50, 9.3], [60, 12.0]].concat(SU.hr === 65 ? [[65, 13.2]] : []).concat([[70, 14.4]]);
   function dossier(zone, ctx) {
     preparer(ctx);
     var c = cfg(ctx), v = c.ville;
     var d = el("div", { classe: "pc-docs" });
     d.appendChild(el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 1 · Cahier des charges de l'audit et de la rénovation (extrait)" }),
-      el("p", { html: "<b>Maison de plain-pied, 1975, à " + v.nom + "</b>. Température extérieure de base <b>" + fr(v.tb, 0) + " °C</b> ; <b>" + fr(v.dju, 0) + " DJU</b> base 18. Consigne <b>19 °C</b>. Convecteurs électriques, <b>9 kW</b> installés ; électricité à <b>0,25 €</b> le kWh." }),
+      el("p", { html: "<b>Maison de plain-pied, " + SU.annee + ", à " + v.nom + "</b>. Température extérieure de base <b>" + fr(v.tb, 0) + " °C</b> ; <b>" + fr(v.dju, 0) + " DJU</b> base 18. Consigne <b>19 °C</b>. Convecteurs électriques, <b>" + fr(KW, 0) + " kW</b> installés ; électricité à <b>" + f2(PRIX) + " €</b> le kWh." }),
       el("p", { html: "<b>Conventions du bureau d'études.</b> Puissance à installer = déperditions de base × <b>1,15</b>, pour la relance. Besoin annuel = GV × DJU × 24 / 1 000 : les DJU base 18 contiennent déjà les apports gratuits, <b>on ne les retire pas</b>." }),
       el("p", { html: "<b>Essai de co-chauffage.</b> Logement <b>inoccupé</b>, volets fermés, fenêtres fermées, VMC en <b>petite vitesse</b>, consigne 19 °C ; la semaine de l'essai, il fait <b>" + fr(c.teLog, 0) + " °C</b> dehors, sans soleil. On relève la puissance des convecteurs en régime établi." }),
       el("p", { html: "<b>Exigences des aides, par lot</b> : isolant ajouté aux murs <b>R ≥ 3,7</b> m²·K/W ; combles perdus <b>R ≥ 7</b> ; plancher bas <b>R ≥ 3</b> ; fenêtres <b>Uw ≤ 1,3</b> W/(m²·K). La ventilation garde les débits d'hygiène." }),
-      el("p", { html: "<b>Estimation des lots, TTC</b> : étanchéité à l'air et VMC hygroréglable 3 000 € ; combles 2 600 € ; murs par l'intérieur 80 € par m² de mur ; menuiseries 12 000 € ; plancher bas 3 500 €." }),
+      el("p", { html: "<b>Estimation des lots, TTC</b> : étanchéité à l'air et VMC hygroréglable " + mil(SU.lots[0]) + " € ; combles " + mil(SU.lots[1]) + " € ; murs par l'intérieur " + SU.lots[2] + " € par m² de mur ; menuiseries " + mil(SU.lots[3]) + " € ; plancher bas " + mil(SU.lots[4]) + " €." }),
       el("p", { html: "<b>Les propriétaires</b> veulent commencer par isoler les murs par l'intérieur : « c'est là qu'on a froid »." })]));
     d.appendChild(el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 2 · Plan coté et coupe de principe" }), planCote(),
-      el("table", { classe: "fiche-tech" }, [ligne("F1 · porte-fenêtre du séjour", "2,40 × 2,15", true), ligne("F2 · séjour", "1,20 × 1,35", true), ligne("F3 · cuisine", "1,00 × 1,15", true),
-        ligne("F4 · chambre 2 · F5 · chambre 1", "1,20 × 1,35 chacune", true), ligne("F6 · chambre 3", "1,00 × 1,35", true), ligne("F7 · salle de bains", "0,60 × 0,80", true),
-        ligne("PE · porte d'entrée", "0,90 × 2,20", true), ligne("Menuiseries", "largeur × hauteur, en m", true)]),
+      el("table", { classe: "fiche-tech" }, [ligne("F1 · porte-fenêtre du séjour", dim("F1"), true), ligne("F2 · séjour", dim("F2"), true), ligne("F3 · cuisine", dim("F3"), true),
+        ligne("F4 · chambre 2 · F5 · chambre 1", dim("F4") + " chacune", true), ligne("F6 · chambre 3", dim("F6"), true), ligne("F7 · salle de bains", dim("F7"), true),
+        ligne("PE · porte d'entrée", dim("PE"), true), ligne("Menuiseries", "largeur × hauteur, en m", true)]),
       coupeAA()]));
     d.appendChild(el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 3 · Les parois relevées" }), coupeMur(ctx),
       el("table", { classe: "fiche-tech" }, [ligne("Mur, de l'intérieur vers l'extérieur", "plaque de plâtre λ 0,25 · polystyrène expansé λ 0,035 · parpaing creux λ 1,05 (équivalent) · enduit ciment λ 1,15"),
-        ligne("Plafond sous combles perdus", "laine de 10 cm tassée : U = 0,40 ; combles ventilés, comptés comme l'extérieur"),
-        ligne("Plancher bas sur vide sanitaire", "entrevous béton, sans isolant : U = 1,00"),
-        ligne("Menuiseries et porte", "d'origine : Uw = 2,9"),
-        ligne("Liaison plancher bas–murs", "tables, isolation intérieure : ψ = 0,60"),
+        ligne("Plafond sous combles perdus", "laine de " + SU.laineCombles + " cm tassée : U = " + f2(U_PF) + " ; combles ventilés, comptés comme l'extérieur"),
+        ligne("Plancher bas sur vide sanitaire", "entrevous béton, sans isolant : U = " + f2(U_PL)),
+        ligne("Menuiseries et porte", "d'origine : Uw = " + fr(UW, 1)),
+        ligne("Liaison plancher bas–murs", "tables, isolation intérieure : ψ = " + f2(PSI_PB)),
         ligne("Liaisons refends–murs", "pas de valeur dans les tables pour ce doublage : <b>à mesurer au banc</b> (document 5)")])]));
     d.appendChild(el("section", null, [el("h3", { texte: "Document 4 · La VMC et la perméabilité" }),
       el("p", { html: "<b>VMC autoréglable</b>. Bouches : cuisine <b>45</b> m³/h, <b>135</b> en grande vitesse ; salle de bains <b>30</b> ; WC <b>15</b>. Entrées d'air dans le séjour et les chambres." }),
@@ -3632,7 +3865,8 @@ var Sim = (function () {
       el("p", { html: "Boîte chaude gardée, échantillon de <b>1,20 m × 1,20 m</b> ; échantillon de jonction : un refend sur toute la hauteur, <b>L = 1,20 m</b>." }),
       el("p", { html: "Essai normalisé : chambre chaude <b>20 °C</b>, chambre froide <b>" + fr(c.teBanc, 0) + " °C</b>. En régime établi, la puissance de la boîte de mesure est ce qui traverse l'échantillon. Caméra thermique ; thermomètre infrarouge à ± 0,5 K." })]));
     d.appendChild(el("section", { classe: "pc-annexe" }, [el("h3", { texte: "Annexe · données" }),
-      el("p", { html: "R<sub>si</sub> / R<sub>se</sub> : mur 0,13 / 0,04 · plafond 0,10 / 0,04 · plancher bas 0,17 / 0,04 m²·K/W<br>Air : 0,34 W·h/(m³·K)<br>Point de rosée d'un air à 20 °C : 6,0 °C à 40 % · 9,3 °C à 50 % · <b>12,0 °C à 60 %</b> · 14,4 °C à 70 %" })]));
+      el("p", { html: "R<sub>si</sub> / R<sub>se</sub> : mur 0,13 / 0,04 · plafond 0,10 / 0,04 · plancher bas 0,17 / 0,04 m²·K/W<br>Air : 0,34 W·h/(m³·K)<br>Point de rosée d'un air à 20 °C : " +
+        ROSEES.map(function (r) { var t = fr(r[1], 1) + " °C à " + r[0] + " %"; return r[0] === SU.hr ? "<b>" + t + "</b>" : t; }).join(" · ") })]));
     zone.appendChild(d);
   }
 
@@ -3850,14 +4084,14 @@ var Sim = (function () {
   window.u4107 = Sim.parcours("#u41", {
     dossier: true,
     code: "U41-07",
-    titre: "L'audit de la maison de 1975",
+    titre: "L'audit de la maison de " + SU.annee,
     niveaux: ["BTS 2e année"],
     libre: "#libre",
     paillasse: ["#carteReglages", "#carteScene", "#carteMesure", "#carteReleve"],
     u41: { problematique: "Par quoi commencer la rénovation de cette maison : par les murs, comme le veulent ses propriétaires, ou par un autre poste ? Et que gagne-t-on vraiment, jonctions comprises ?", duree: "deux heures" },
     commande: {
       client: "Bureau d'études thermiques · audit avant rénovation",
-      texte: "<p>Une maison de plain-pied de 1975, chauffée par des convecteurs électriques. Ses propriétaires veulent la rénover, en commençant par <b>isoler les murs par l'intérieur</b>. Vous faites l'audit : le mur d'origine passe au <b>banc du lycée</b>, la maison passe un <b>essai de co-chauffage</b> et la <b>porte soufflante</b>, puis vous établissez le bilan à la température de base et vous conseillez un premier lot.</p>"
+      texte: "<p>Une maison de plain-pied de " + SU.annee + ", chauffée par des convecteurs électriques. Ses propriétaires veulent la rénover, en commençant par <b>isoler les murs par l'intérieur</b>. Vous faites l'audit : le mur d'origine passe au <b>banc du lycée</b>, la maison passe un <b>essai de co-chauffage</b> et la <b>porte soufflante</b>, puis vous établissez le bilan à la température de base et vous conseillez un premier lot.</p>"
     },
     simplifie: simplifie,
     phases: [
@@ -3942,9 +4176,9 @@ var Sim = (function () {
           { type: "nombre", competence: "C12-2", lib: "À la caméra, relevez au thermomètre infrarouge la température de surface la plus basse, sur la ligne du refend.", unite: "°C",
             attendu: M.tsp, tolerance: 0, toleranceAbsolue: 0.6, fini: garde("tsp", M.tsp),
             methode: "Une échelle resserrée fait ressortir la ligne ; le viseur se pose au plus froid ; la lecture bouge de ± 0,5 K, relevez une valeur moyenne." },
-          { type: "choix", competence: "C1-2", lib: "Dans le logement, l'air est à 20 °C et 60 % (annexe). La ligne du refend, dans les conditions de cet essai, se couvre-t-elle de buée ?",
-            options: ["oui : sa surface descend sous le point de rosée de l'air", "non : sa surface reste au-dessus du point de rosée de l'air"],
-            bonne: function (ctx) { return val(ctx, "tsp", M.tsp) <= 12.0 ? 0 : 1; },
+          { type: "choix", competence: "C1-2", lib: "Dans le logement, l'air est à 20 °C et " + SU.hr + " % (annexe). La ligne du refend, dans les conditions de cet essai, se couvre-t-elle de buée ?",
+            options: ["oui : sa surface descend sous le point de rosée de l'air", "non : sa surface reste au-dessus du point de rosée de l'air"], ordreFixe: true,
+            bonne: function (ctx) { return val(ctx, "tsp", M.tsp) <= SU.rosee ? 0 : 1; },
             methode: "On compare la surface relevée au point de rosée de l'annexe." },
           { type: "appel", numero: 1, competence: "C2-3",
             lib: "Expliquez au professeur, à l'oral, ce que montre la caméra sur la jonction, et ce que le coefficient U ne dit pas.",
@@ -4029,8 +4263,8 @@ var Sim = (function () {
         questions: function (ctx) { return [ /* une fonction : les phrases s'ecrivent avec les nombres de l'eleve, et se refont tant qu'on n'y a pas touche */
           { type: "multi", essais: 2, lib: "Gardez les phrases justes du rapport d'audit.",
             options: function (ctx) {
-              var d = bilanEleve(ctx), tot = somme(d), pi = val(ctx, "Pi", M.Pi), ok = pi <= 9, tb = cfg(ctx).ville.tb;
-              var dit = function (oui) { return "Les convecteurs de 9 kW " + (oui ? "suffisent" : "ne suffisent pas") + " pour les " + fr(pi, 1) + " kW à installer par " + fr(tb, 0) + " °C."; };
+              var d = bilanEleve(ctx), tot = somme(d), pi = val(ctx, "Pi", M.Pi), ok = pi <= KW, tb = cfg(ctx).ville.tb;
+              var dit = function (oui) { return "Les convecteurs de " + fr(KW, 0) + " kW " + (oui ? "suffisent" : "ne suffisent pas") + " pour les " + fr(pi, 1) + " kW à installer par " + fr(tb, 0) + " °C."; };
               return ["L'air neuf, ventilation et infiltrations, est le premier poste : environ " + fr(100 * d.air / tot, 0) + " % des déperditions de base.",
                 "Les murs sont le premier poste des déperditions : c'est là que les propriétaires ont froid.",
                 "Une isolation des murs par l'intérieur garderait le pont des refends, mesuré au banc à ψ ≈ " + fr(val(ctx, "psi", M.psi), 2) + " W/(m·K).",
@@ -4063,34 +4297,34 @@ var Sim = (function () {
         scene: function (zone, ctx) {
           preparer(ctx);
           zone.appendChild(el("div", { classe: "pc-docs" }, [el("section", { classe: "doc-large" }, [el("h3", { texte: "Document 6 · Deux devis pour les murs" }),
-            el("p", { html: "<b>Devis A · par l'intérieur.</b> Dépose du parement en plâtre du doublage d'origine, <b>le polystyrène reste</b> ; contre-cloison en <b>laine de verre λ = 0,032</b>, et plaque de plâtre de 1,3 cm. Épaisseur de laine : celle qui atteint l'exigence du document 1, arrondie aux <b>12 cm</b> du commerce. <b>80 € TTC par m² de mur.</b> Après travaux, tables : liaison plancher bas–murs <b>ψ = 0,70</b>." }),
-            el("p", { html: "<b>Devis B · par l'extérieur.</b> Polystyrène graphité λ = 0,031, 14 cm, et enduit mince. <b>150 € TTC par m² de façade</b> ; déclaration préalable en mairie. Après travaux, tables : liaison plancher bas–murs ψ = 0,45 ; liaisons refends–murs <b>ψ = 0,10</b>." })])]));
+            el("p", { html: "<b>Devis A · par l'intérieur.</b> Dépose du parement en plâtre du doublage d'origine, <b>le polystyrène reste</b> ; contre-cloison en <b>" + NOM_ITI + " λ = " + fr(SU.iti.l, 3) + "</b>, et plaque de plâtre de 1,3 cm. Épaisseur de laine : celle qui atteint l'exigence du document 1, arrondie aux <b>" + SU.iti.e + " cm</b> du commerce. <b>" + COUT_ITI + " € TTC par m² de mur.</b> Après travaux, tables : liaison plancher bas–murs <b>ψ = " + f2(PSI_PB_ITI) + "</b>." }),
+            el("p", { html: "<b>Devis B · par l'extérieur.</b> Polystyrène graphité λ = 0,031, " + SU.ite.e + " cm, et enduit mince. <b>" + SU.ite.prix + " € TTC par m² de façade</b> ; déclaration préalable en mairie. Après travaux, tables : liaison plancher bas–murs ψ = " + f2(SU.psiPb.ite[0]) + " ; liaisons refends–murs <b>ψ = " + f2(SU.ite.psiRef) + "</b>." })])]));
         },
         paillasse: true, large: true,
         surOuvrir: function (ctx) { preparer(ctx); onglet("vueBanc"); },
         questions: function (ctx) { return [
           { type: "nombre", competence: "C1-2", lib: "Quelle épaisseur de laine de verre faut-il, au moins, pour que cet isolant atteigne la résistance exigée pour les murs ?", unite: "cm",
-            attendu: 3.7 * 0.032 * 100, tolerance: 0.01, toleranceAbsolue: 0.05, dec: 2,
+            attendu: 3.7 * SU.iti.l * 100, tolerance: 0.01, toleranceAbsolue: 0.05, dec: 2,
             methode: "e = R × λ : la résistance exigée par le document 1, le λ du devis A ; le résultat sort en mètres." },
-          { type: "nombre", lib: "Calculez le U du mur rénové selon le devis A, avec 12 cm de laine.", unite: "W/(m²·K)",
+          { type: "nombre", lib: "Calculez le U du mur rénové selon le devis A, avec " + SU.iti.e + " cm de laine.", unite: "W/(m²·K)",
             attendu: M.Ur, tolerance: 0.02, fini: garde("Ur", M.Ur), dec: 3,
             methode: "La nouvelle coupe : plâtre, laine, polystyrène d'origine, parpaing, enduit ; R total puis U = 1 / R total." },
           { type: "action", competence: "C2-1", lib: "Composez au banc le mur rénové du devis A, avec la jonction refend, chambres de l'essai normalisé, et attendez le régime établi.",
             aide: "Cinq couches, de la pièce vers le dehors. La paroi plus isolée change aussi la jonction.",
             verifier: function (ctx) { return verifierBanc(ctx, murIti(ctx), "refend"); },
-            methode: "Plâtre 1,3 cm, laine de verre 12 cm, polystyrène d'origine, parpaing 20 cm, enduit 1,5 cm ; jonction refend ; 20 °C et la chambre froide du document 5 ; attendre." },
+            methode: "Plâtre 1,3 cm, " + NOM_ITI + " " + SU.iti.e + " cm, polystyrène d'origine, parpaing " + SU.parpaing + " cm, enduit " + fr(SU.enduit, 1) + " cm ; jonction refend ; 20 °C et la chambre froide du document 5 ; attendre." },
           { type: "nombre", lib: "Calculez le ψ de la jonction refend–mur rénové, en prenant pour la partie courante le U que vous avez calculé.", unite: "W/(m·K)",
             attendu: M.psi2, tolerance: 0.08, fini: garde("psi2", M.psi2), dec: 3,
             methode: "La puissance relevée, moins U × S × ΔT de la partie courante, divisée par L × ΔT." },
           { type: "nombre", lib: "Calculez le gain net de GV du devis A : les murs, moins ce que les deux jonctions reprennent.", unite: "W/K",
             attendu: M.gain, tolerance: 0.03, fini: garde("gain", M.gain),
-            methode: "(U d'origine − U rénové) × surface nette des murs, moins (ψ rénové − ψ d'origine) × longueur des refends, moins (0,70 − 0,60) × longueur de la liaison plancher bas–murs." },
+            methode: "(U d'origine − U rénové) × surface nette des murs, moins (ψ rénové − ψ d'origine) × longueur des refends, moins (" + f2(PSI_PB_ITI) + " − " + f2(PSI_PB) + ") × longueur de la liaison plancher bas–murs." },
           { type: "nombre", lib: "Calculez le temps de retour du devis A, au prix et selon la convention du document 1.", unite: "ans",
             attendu: M.retour, tolerance: 0.03,
-            methode: "Coût : 80 € par m² de mur net. Économie annuelle : gain de GV × DJU × 24 / 1 000, en kWh, fois le prix du kWh. Puis coût ÷ économie." },
+            methode: "Coût : " + COUT_ITI + " € par m² de mur net. Économie annuelle : gain de GV × DJU × 24 / 1 000, en kWh, fois le prix du kWh. Puis coût ÷ économie." },
           { type: "multi", essais: 2, competence: "C1-2", lib: "Gardez les phrases justes pour comparer les deux devis.",
             options: function (ctx) {
-              return ["Le devis B traite le pont des refends : ψ ≈ 0,10 au lieu des " + fr(val(ctx, "psi2", M.psi2), 2) + " mesurés après le devis A ; le gain des murs n'y est plus repris par les jonctions.",
+              return ["Le devis B traite le pont des refends : ψ ≈ " + f2(SU.ite.psiRef) + " au lieu des " + fr(val(ctx, "psi2", M.psi2), 2) + " mesurés après le devis A ; le gain des murs n'y est plus repris par les jonctions.",
                 "Les deux devis donnent le même gain, puisque les deux isolants ont presque la même résistance.",
                 "Le devis B garde la masse du parpaing du côté chaud, et ne prend aucune surface habitable.",
                 "Le devis B coûte presque deux fois plus et demande une déclaration en mairie : c'est ce qui peut le faire écarter.",

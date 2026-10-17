@@ -196,6 +196,13 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
 .pc-q[data-etat="faux"]{border-color:var(--faux)}
 .pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+/* les deux modes (16 octobre 2026) : en note, une reponse enregistree n'a pas de couleur de verdict */
+.pc-q[data-etat="enregistree"]{border-color:var(--accent);background:var(--accent-doux)}
+.pc-q[data-etat="enregistree"] .pc-q-num{background:var(--accent)}
+.pc-q[data-etat="modifiee"]{border-color:var(--accent);border-style:dashed}
+.pc-bandeau-mode{margin:10px 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--accent-doux);border-radius:var(--r)}
+.pc-note .pc-bandeau-mode{border-left-color:var(--encre)}
+.pc-confirmer{margin-top:10px;padding:10px 12px;border:1px solid var(--encre);border-radius:var(--r)}
 .pc-q-lib{margin:0 0 8px;font-weight:600}
 .pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
   font-size:.8rem;margin-right:.5em;vertical-align:.1em}
@@ -1592,7 +1599,25 @@ var Sim = (function () {
      la place de true en donne d'autres. La scene doit supporter d'etre appelee deux fois (effets gardes).
      LA CALCULATRICE : Sim.calculatrice() pose celle des sites de classe (_commun/entrainement/moteur/
      calculette.js, que l'assembleur embarque dans chaque page), un bouton flottant hors parcours, un
-     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire. */
+     bouton dans la tete du parcours pendant l'entrainement. Rien n'est garde : pas de memoire.
+     DEUX MODES (16 octobre 2026, demande de l'utilisateur pour la notation) :
+     - LE TD, par defaut : tout ce qui precede (juste ou pas encore, methode, « A corriger », aide), mais
+       AUCUN FICHIER. La fin est un bilan a l'ecran ; rien a rendre.
+     - LE MODE NOTE, par le lien du professeur : l'adresse qui contient « note » (#note). Ni verdict, ni
+       methode, ni aide, ni etoiles ; « Enregistrer » garde la reponse, que l'eleve peut changer jusqu'a
+       rendre sa copie. Rendre la copie (produire le fichier, ou en afficher le texte) VERROUILLE tout : le
+       fichier porte les verdicts, il ne doit plus servir a se corriger. Une manipulation est jugee telle
+       qu'elle est au moment ou on l'enregistre ; une reponse qui attendait une mesure est rejugee au rendu.
+       Le mode libre de la page (« Explorer la simulation ») disparait : ses defis disent juste ou pas.
+     - LES VALEURS CHANGENT D'UN MODE A L'AUTRE : Sim.note (vrai en mode note) se lit des le chargement,
+       avant que la page tire son sujet ; chaque page y prend d'autres nombres. Changer l'adresse d'un mode
+       a l'autre recharge la page.
+     - En mode note, q.apres et q.fini sont appeles A CHAQUE ENREGISTREMENT, juste ou non, avec le verdict en
+       second argument : une page ne doit rien afficher qui en depende (une mesure rappelee seulement si elle
+       est juste trahirait le verdict). ctx.note le dit aux scenes.
+     LES PROPOSITIONS D'UN CHOIX SE MELANGENT (16 octobre 2026, « la bonne reponse est trop souvent la 1re ») :
+     q.bonne garde l'indice de la source, chaque bouton porte data-k ; « ordreFixe: true » garde l'ordre ecrit
+     (une echelle, « aucune des precedentes »). */
   var COMPETENCES = {
     APP: "S'approprier", ANA: "Analyser", REA: "Réaliser", VAL: "Valider", COM: "Communiquer"
   };
@@ -1612,6 +1637,9 @@ var Sim = (function () {
     "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
   };
   var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
+  /* le mode note, par l'adresse : #note (ou #ccf-note, #u41-note) ; lu des le chargement, avant le tirage du sujet */
+  function noteDans(h) { return /(^#|[^a-z])note\b/i.test(h || ""); }
+  var NOTE_ADRESSE = noteDans(location.hash);
   var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
   var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
   /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
@@ -1629,8 +1657,15 @@ var Sim = (function () {
   }
   function deux(n) { return (n < 10 ? "0" : "") + n; }
   function heure(d) { return deux(d.getHours()) + "h" + deux(d.getMinutes()); }
+  /* le melange de Fisher-Yates, en place */
+  function melanger(t) { for (var i = t.length - 1; i > 0; i--) { var k = Math.floor(Math.random() * (i + 1)), x = t[i]; t[i] = t[k]; t[k] = x; } return t; }
   function parcours(parent, o) {
     var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
+    /* le mode note : lu a l'adresse ; passer d'un mode a l'autre recharge, pour retirer les valeurs */
+    var NOTE = NOTE_ADRESSE;
+    window.addEventListener("hashchange", function () { if (noteDans(location.hash) !== NOTE) location.reload(); });
+    /* une question a une reponse : verifiee (TD), ou enregistree (note) ; un appel, des qu'il est lance */
+    function fait(f) { return !!f && (NOTE && !f.appel ? !!f.enr : !!f.fini); }
     var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
     function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
     var niveaux = o.niveaux || ["CAP", "Seconde"];
@@ -1642,9 +1677,12 @@ var Sim = (function () {
     /* une partie facultative intouchee ne compte nulle part ; entamee, seulement pour ce qui y est fait */
     var nOblig = o.phases.filter(function (ph) { return !ph.facultative; }).length || nPh;
     var aFacultative = nOblig < nPh;
-    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide); }
+    function touchee(f) { return !!f && !!(f.fini || f.essais || f.appuis || f.aide || f.enr); }
     function compte(i, f) { return !o.phases[i].facultative || touchee(f); }
-    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") });
+    var racine = el("div", { classe: "pc" + (ccf ? " pc-ccf" : "") + (u41 ? " pc-u41" : "") + (NOTE ? " pc-note" : "") });
+    /* les mots qui changent d'un mode a l'autre : en TD, la fin est un bilan ; en note, une copie ou un livrable */
+    var MOT_FIN = NOTE ? (epreuve ? "La copie" : "Le livrable") : "Le bilan";
+    var MOT_FIN_COURT = NOTE ? (epreuve ? "Copie" : "Livrable") : "Bilan";
     var P = $(parent);
 
     /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
@@ -1654,9 +1692,11 @@ var Sim = (function () {
         [el("b", { texte: "Explorer la simulation" }), el("span", { texte: o.libreTexte || "librement, sans note ni fichier" })]);
       bParcours = el("button", { type: "button", classe: "pc-mode", "aria-pressed": "false" },
         [el("b", { texte: ccf ? "Entraînement au CCF" : u41 ? "TD sur simulation" : "Le parcours" }),
-         el("span", { texte: o.modeTexte || ((u41 ? (o.u41.duree || "deux heures") : "une heure") + ", et un fichier pour le professeur") })]);
+         el("span", { texte: (u41 ? (o.u41.duree || "deux heures") : "une heure") + ", avec les indications ; sans note ni fichier" })]);
       barreModes = el("div", { classe: "pc-modes", role: "group", "aria-label": "Deux façons d'utiliser la page" }, [bLibre, bParcours]);
       P.appendChild(barreModes);
+      /* en mode note, la simulation libre s'efface : ses defis diraient juste ou pas, sur les valeurs de l'evaluation */
+      if (NOTE) barreModes.hidden = true;
       bLibre.addEventListener("click", function () { mode(false); });
       bParcours.addEventListener("click", function () { mode(true); });
     }
@@ -1707,8 +1747,8 @@ var Sim = (function () {
       chemin.appendChild(el("li", null, [b]));
       return b;
     });
-    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": epreuve ? "La copie" : "Le livrable" },
-      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: epreuve ? "Copie" : "Livrable" }), el("span", { classe: "pc-etoiles" })]);
+    var drapeau = el("button", { type: "button", classe: "pc-noeud pc-drapeau", disabled: "disabled", "aria-label": MOT_FIN },
+      [el("span", { classe: "pc-rond", html: "&#9873;" }), el("span", { classe: "pc-comp", texte: MOT_FIN_COURT }), el("span", { classe: "pc-etoiles" })]);
     drapeau.addEventListener("click", function () { montrer(nPh); });
     chemin.appendChild(el("li", null, [drapeau]));
     var info = el("div", { classe: "pc-info" });
@@ -1759,7 +1799,13 @@ var Sim = (function () {
     var illus = el("div", { classe: "scene pc-illus" });
     if (c.illustration) c.illustration(illus);
     var choixNiv = el("div", { classe: "pc-choix-niveau" });
-    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: NOTE ? "Commencer l'évaluation" : ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
+    /* le mode, dit a l'accueil : en TD, des indications et rien a rendre ; en note, ni verdict ni aide, et un fichier */
+    var bandeauMode = el("p", { classe: "pc-bandeau-mode", html: NOTE
+      ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux et ne donne aucune méthode : « Enregistrer » garde votre réponse, " +
+        "que vous pouvez changer jusqu'à rendre votre copie. Rendre la copie produit le fichier pour le professeur et verrouille tout."
+      : "<b>TD, non noté.</b> La page dit juste ou pas encore et donne la méthode quand ça coince. À la fin, un bilan à l'écran : " +
+        "rien à rendre. L'évaluation notée se fait par le lien que donne le professeur, avec d'autres valeurs." });
     if (niveaux.length > 1) {
       choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
       var rang = el("div", { classe: "rangee" });
@@ -1815,8 +1861,9 @@ var Sim = (function () {
         grille,
         el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
         el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
-        el("p", { classe: "consigne", html: "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
-        choixNiv, partir] : [
+        el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions. En évaluation, la page ne donne aucune aide."
+          : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+        bandeauMode, choixNiv, partir] : [
         el("h2", { texte: "L'U41 et ce TD" }),
         /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
         el("p", { html: cc.format || "À l'examen, l'U41 dure <b>4 heures</b> : cinq parties indépendantes autour d'un dossier technique. " +
@@ -1827,8 +1874,8 @@ var Sim = (function () {
         aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
           "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
         nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
-        el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question ; le fichier dit combien d'aides vous avez demandées." }),
-        choixNiv, partir]);
+        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question." }),
+        bandeauMode, choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
     } else {
       var carteCmd = el("div", { classe: "carte pc-commande" }, [
@@ -1846,8 +1893,8 @@ var Sim = (function () {
         el("div", null, [carteCmd, illus]),
         el("div", { classe: "carte" }, [el("h2", { texte: "Le projet en cinq phases" }), etapes,
           el("p", { classe: "consigne", html: "Une heure en tout. On passe d'une phase à l'autre comme on veut, par le chemin en haut ; " +
-            "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." }),
-          choixNiv, partir])
+            (NOTE ? "à la fin, vous produisez un <b>fichier</b> à remettre au professeur." : "à la fin, un bilan de vos réussites.") }),
+          bandeauMode, choixNiv, partir])
       ]));
     }
     racine.appendChild(accueil);
@@ -1868,7 +1915,7 @@ var Sim = (function () {
       return qs.filter(function (q) { return !q.niveau || q.niveau === etat.niveau; });
     }
 
-    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41,
+    var ctx = { donnees: donnees, niveau: function () { return etat.niveau; }, ccf: ccf, u41: u41, note: NOTE,
       fr: fr, lire: lire, mesure: mesure, gauss: gauss, svg: svg, el: el, borne: borne, animer: animer };
 
     /* un recit ou une consigne peut dependre du niveau : une fonction de ctx */
@@ -1899,11 +1946,11 @@ var Sim = (function () {
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
       var bravo = el("p", { classe: "pc-bravo", hidden: "hidden", html: ph.bravo || "" });
       var suite = el("button", { type: "button", classe: "bouton principal pc-suite", disabled: "disabled",
-        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : (epreuve ? "La copie" : "Le livrable") });
+        texte: i + 1 < nPh ? (o.phases[i + 1].facultative ? "Pour aller plus loin, facultatif" : epreuve ? (nomPhase(i + 1) === "Conclusion" ? "La conclusion" : "Partie suivante") : "Phase suivante") : MOT_FIN });
       suite.addEventListener("click", function () { ouvrir(i + 1); });
       var versFin = null;
       if (i + 1 < nPh) {
-        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: epreuve ? "Aller à la copie" : "Aller au livrable" });
+        versFin = el("button", { type: "button", classe: "bouton pc-vers-fin", texte: NOTE ? (epreuve ? "Aller à la copie" : "Aller au livrable") : "Voir le bilan" });
         versFin.addEventListener("click", function () { montrer(nPh); });
       }
       s.appendChild(el("div", { classe: "pc-pied" }, [versFin, bravo, suite]));
@@ -1924,26 +1971,39 @@ var Sim = (function () {
         champ.appendChild(inp); if (q.unite) champ.appendChild(el("span", { classe: "pc-unite", html: q.unite }));
         controles.push(inp);
         inp.addEventListener("keydown", function (e) { if (e.key === "Enter") verifier(); });
+        inp.addEventListener("input", function () { modifiee(); });
         lireReponse = function () { var v = lire(inp.value); return isFinite(v) ? fr(v, q.dec === undefined ? decimalesDe(inp.value) : q.dec) + (q.unite ? " " + texteSeul(q.unite) : "") : ""; };
         verifierOk = function () {
           var v = lire(inp.value); if (!isFinite(v)) return null;
           f.valeur = v;
           var a = typeof q.attendu === "function" ? q.attendu(ctx) : q.attendu;
           if (!isFinite(a)) return "attente";               // elle repose sur une mesure, ou une reponse, d'une autre partie
-          var tol = q.tolerance === undefined ? 0.05 : q.tolerance;
-          return Math.abs(v - a) <= Math.abs(a) * tol + (q.toleranceAbsolue || 0);
+          // tolerance et toleranceAbsolue peuvent dependre du niveau : fonctions de ctx (16 octobre 2026,
+          // le bar a sirops plus tolerant en CAP qu'en seconde)
+          var tol = typeof q.tolerance === "function" ? q.tolerance(ctx) : q.tolerance === undefined ? 0.05 : q.tolerance;
+          var tolAbs = typeof q.toleranceAbsolue === "function" ? q.toleranceAbsolue(ctx) : (q.toleranceAbsolue || 0);
+          // sansSigne : une lecture d'appareil, ou le signe ne dit que le sens du branchement
+          // (-0,25 A lu quand le courant entre par COM est une lecture juste)
+          if (q.sansSigne) { v = Math.abs(v); a = Math.abs(a); }
+          return Math.abs(v - a) <= Math.abs(a) * tol + tolAbs;
         };
       } else if (q.type === "choix" || q.type === "multi") {
         var multi = q.type === "multi", choisis = [];
         var rang = el("div", { classe: "pc-options" });
         var options = typeof q.options === "function" ? q.options(ctx) : q.options;
-        options.forEach(function (op, k) {
-          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", html: propre(op) });
+        /* l'ordre affiche est tire au sort (16 octobre 2026 : la bonne reponse etait la premiere 135 fois sur 154) ;
+           k reste l'indice de la source, que q.bonne designe, et chaque bouton le porte en data-k */
+        var ordreVu = options.map(function (x, k) { return k; });
+        if (!q.ordreFixe) melanger(ordreVu);
+        ordreVu.forEach(function (k) {
+          var op = options[k];
+          var b = el("button", { type: "button", classe: "pc-option", "aria-pressed": "false", "data-k": String(k), html: propre(op) });
           b.addEventListener("click", function () {
             if (f.fini) return;
             if (multi) { var p = choisis.indexOf(k); if (p < 0) choisis.push(k); else choisis.splice(p, 1); }
             else choisis = [k];
-            [].forEach.call(rang.children, function (x, m) { x.setAttribute("aria-pressed", choisis.indexOf(m) >= 0 ? "true" : "false"); });
+            [].forEach.call(rang.children, function (x) { x.setAttribute("aria-pressed", choisis.indexOf(Number(x.getAttribute("data-k"))) >= 0 ? "true" : "false"); });
+            modifiee();
           });
           rang.appendChild(b); controles.push(b);
         });
@@ -1967,7 +2027,7 @@ var Sim = (function () {
             var choix = el("select", { classe: "pc-classer-choix", "aria-label": texteSeul(it) });
             choix.appendChild(el("option", { value: "-1", texte: "— choisir —" }));
             q.categories.forEach(function (cat, m) { choix.appendChild(el("option", { value: String(m), texte: texteSeul(cat) })); });
-            choix.addEventListener("change", function () { if (!f.fini) places[k] = Number(choix.value); });
+            choix.addEventListener("change", function () { if (!f.fini) { places[k] = Number(choix.value); modifiee(); } });
             ligne.appendChild(choix); grille.appendChild(ligne); controles.push(choix);
             return;
           }
@@ -1978,6 +2038,7 @@ var Sim = (function () {
               if (f.fini) return;
               places[k] = m;
               [].forEach.call(cats.children, function (x, n) { x.setAttribute("aria-pressed", n === m ? "true" : "false"); });
+              modifiee();
             });
             cats.appendChild(b); controles.push(b);
           });
@@ -2009,10 +2070,10 @@ var Sim = (function () {
           return ok;
         };
       }
-      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: "Vérifier" });
+      var bVerif = el("button", { type: "button", classe: "bouton principal", texte: NOTE ? "Enregistrer" : "Vérifier" });
       var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
       /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
-      var bAide = epreuve && q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      var bAide = epreuve && q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
       var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
       var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
       bloc.appendChild(champ);
@@ -2029,7 +2090,45 @@ var Sim = (function () {
         /* « fini » previent la scene a la cloture, juste ou passee ; « apres », seulement si juste */
         if (q.fini) q.fini(ctx, f.juste, f.reponse, f.valeur);
       }
+      /* MODE NOTE : enregistrer, sans verdict. La reponse gardee est celle du dernier « Enregistrer » ; une
+         manipulation est jugee telle qu'elle est a cet instant ; une reponse qui attend une mesure est rejugee au rendu. */
+      function enregistrer() {
+        if (f.fini) return;                                // la copie est rendue : tout est verrouille
+        var ok = verifierOk();
+        f.appuis = (f.appuis || 0) + 1;
+        retour.className = "pc-retour";
+        if (ok === null) {
+          retour.innerHTML = q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.");
+          return;
+        }
+        f.enr = true; f.modifiee = false; f.enAttente = ok === "attente"; f.note = ok === true; f.juste = f.note;
+        f.reponse = lireReponse(); f.heureEnr = new Date();
+        bloc.setAttribute("data-etat", "enregistree");
+        var vu = q.type === "action" ? (f.lu !== undefined ? f.lu : f.reponse) : "";
+        retour.innerHTML = "Réponse enregistrée à " + heure(f.heureEnr) + "." + (vu ? " <span class=\"pc-lu\">La page a gardé : " + insecables(vu) + ".</span>" : "") +
+          " Vous pouvez la changer, puis enregistrer de nouveau, jusqu'à rendre votre copie.";
+        if (q.apres) q.apres(ctx, f.note, f.reponse, f.valeur);   // a chaque enregistrement, juste ou non : rien ne doit trahir le verdict
+        if (q.fini) q.fini(ctx, f.note, f.reponse, f.valeur);
+        majPhase(i); majTete();
+      }
+      /* une reponse changee apres l'enregistrement : c'est l'ancienne qui compte tant qu'on n'enregistre pas */
+      function modifiee() {
+        if (!NOTE || !f.enr || f.fini) return;
+        f.modifiee = true;
+        bloc.setAttribute("data-etat", "modifiee");
+        retour.className = "pc-retour";
+        retour.innerHTML = "Modifiée, pas encore enregistrée : la réponse gardée reste « " + insecables(f.reponse || "") + " ».";
+      }
+      /* au rendu de la copie : rejuger ce qui attendait une mesure, puis tout fermer */
+      f.verrouiller = function () {
+        if (f.fini) return;
+        if (f.enr && f.enAttente && !f.modifiee) { var ok = verifierOk(); f.note = ok === true; f.juste = f.note; }
+        if (f.enr) f.fini = true;
+        bVerif.disabled = true;
+        controles.forEach(function (x) { x.disabled = true; });
+      };
       function verifier() {
+        if (NOTE) { enregistrer(); return; }
         if (f.fini) return;
         var ok = verifierOk();
         f.appuis = (f.appuis || 0) + 1;
@@ -2084,6 +2183,7 @@ var Sim = (function () {
         f.aide = true; etat.aides++;
         bAide.hidden = true; methodeVue.hidden = false;
       });
+      if (NOTE && etat.rendu) f.verrouiller();             // une partie ouverte apres le rendu : deja fermee
       bPasser.addEventListener("click", function () {
         f.passe = true; f.note = false;
         if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
@@ -2109,7 +2209,7 @@ var Sim = (function () {
       bloc.appendChild(retour);
       parentQ.appendChild(bloc);
       bAppel.addEventListener("click", function () {
-        if (f.appele) return;
+        if (f.appele || etat.rendu) return;
         f.appele = new Date(); f.fini = true; f.reponse = "appel lancé à " + heure(f.appele);
         bAppel.disabled = true; bProf.hidden = false;
         bloc.setAttribute("data-etat", "attente");
@@ -2201,16 +2301,16 @@ var Sim = (function () {
     }
 
     function etoilesDe(i) {
-      var fs = etat.fiches[i]; if (!fs || !fs.length) return 0;
+      var fs = etat.fiches[i]; if (NOTE || !fs || !fs.length) return 0;      // en mode note, aucune etoile : elles diraient le verdict
       if (fs.some(function (f) { return !f.fini; })) return 0;
       var n = fs.filter(function (f) { return f.note; }).length;
       return n === fs.length ? 3 : n >= fs.length * 0.6 ? 2 : 1;
     }
     function majPhase(i) {
       var fs = etat.fiches[i]; if (!fs || !fs.pied) return;
-      var finie = fs.every(function (f) { return f.fini; });
+      var finie = fs.every(fait);
       fs.pied.suite.disabled = false;
-      fs.pied.bravo.hidden = !finie || !o.phases[i].bravo;
+      fs.pied.bravo.hidden = NOTE || !finie || !o.phases[i].bravo;
       if (finie && etat.ouverte === i) etat.ouverte = i + 1;
       majChemin();
     }
@@ -2218,9 +2318,10 @@ var Sim = (function () {
       noeuds.forEach(function (b, i) {
         var dispo = !!etat.debut;                         // comme dans un controle : toutes les parties, dans l'ordre qu'on veut
         if (dispo) b.removeAttribute("disabled"); else b.setAttribute("disabled", "disabled");
-        var e = etoilesDe(i);
-        b.querySelector(".pc-etoiles").textContent = e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
-        b.classList.toggle("pc-fait", e > 0);
+        var e = etoilesDe(i), fs = etat.fiches[i];
+        var tout = NOTE && fs && fs.length && fs.every(fait);   // en mode note : une coche quand tout est enregistre, sans verdict
+        b.querySelector(".pc-etoiles").textContent = NOTE ? (tout ? "✓" : "") : e ? "★★★".slice(0, e) + "☆☆☆".slice(0, 3 - e) : "";
+        b.classList.toggle("pc-fait", NOTE ? !!tout : e > 0);
         b.classList.toggle("pc-ici", etat.courante === i);
       });
       if (etat.debut) drapeau.removeAttribute("disabled");   // le livrable s'ouvre a tout moment
@@ -2232,8 +2333,19 @@ var Sim = (function () {
     function etoilesPlus() { var s = 0; o.phases.forEach(function (ph, i) { if (ph.facultative) s += etoilesDe(i); }); return s; }
     function enPlus() { var p = etoilesPlus(); return p ? " · +" + p : ""; }
     function minutes() { return etat.debut ? Math.floor((Date.now() - etat.debut) / 60000) : 0; }
+    /* en mode note, la tete compte les reponses enregistrees, jamais les reussites */
+    function comptesNote() {
+      var n = 0, m = 0;
+      o.phases.forEach(function (ph, i) {
+        var fs = etat.fiches[i];
+        if (!fs) { if (!ph.facultative) m += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; return; }
+        fs.forEach(function (f) { if (f.appel || !compte(i, f)) return; m++; if (f.enr) n++; });
+      });
+      return { n: n, m: m };
+    }
     function majTete() {
-      score.textContent = "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
+      var cn = NOTE ? comptesNote() : null;
+      score.textContent = NOTE ? cn.n + " / " + cn.m + " réponses" : "★ " + totalEtoiles() + " / " + (3 * nOblig) + enPlus();
       temps.textContent = etat.debut ? minutes() + " min" : "";
       if (bDos) bDos.hidden = !etat.debut;
     }
@@ -2245,11 +2357,11 @@ var Sim = (function () {
     }
     /* une partie ouverte trop tot : ses phrases portaient « … » ; on la refait tant qu'on n'y a rien touche */
     function intacte(i) {
-      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide; });
+      return (etat.fiches[i] || []).every(function (f) { return !f.fini && !f.essais && !f.appuis && !f.appele && !f.aide && !f.enr; });
     }
     function rafraichir(i) {
       var ph = o.phases[i], colQ = etat.colonnes[i];
-      if (!etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
+      if (etat.rendu || !etat.construites[i] || typeof ph.questions !== "function" || !colQ || !intacte(i)) return;
       var pied = etat.fiches[i].pied;
       while (colQ.children.length > 1) colQ.removeChild(colQ.lastChild);
       etat.fiches[i] = questionsDe(i).map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
@@ -2273,9 +2385,13 @@ var Sim = (function () {
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
-      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!f.fini) restent++; }); });
+      etat.fiches.forEach(function (fs, i) { (fs || []).forEach(function (f) { if (f.appel || !compte(i, f)) return; if (f.passe) passees++; if (!fait(f)) restent++; }); });
       o.phases.forEach(function (ph, i) { if (!etat.fiches[i] && !ph.facultative) restent += questionsDe(i).filter(function (q) { return q.type !== "appel"; }).length; });
       var merite = !etat.aides && !passees && !restent;
+      if (NOTE) {                                          // en mode note : ni aide ni question passee, seulement ce qui reste sans reponse
+        var tn = restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : "toutes les questions ont une réponse";
+        return { merite: merite, texte: u41 ? "aucune aide en évaluation, " + tn : (merite ? "bonus +0,25 mérité — " : "pas de bonus — ") + tn };
+      }
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
           passees ? passees + " question" + (passees > 1 ? "s" : "") + " passée" + (passees > 1 ? "s" : "") : "rien de passé"];
@@ -2295,23 +2411,54 @@ var Sim = (function () {
       if (!finalFait) {
         finalFait = true;
         titreFin = el("h2"); bulleFin = el("p", { classe: "pc-bulle" });
-        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: epreuve ? "La copie" : "Le livrable" }), titreFin, bulleFin]));
+        final.appendChild(el("div", { classe: "pc-phase-tete" }, [el("div", { classe: "pc-surtitre", texte: MOT_FIN }), titreFin, bulleFin]));
         recap = el("div", { classe: "carte" });
+        var simpl = null;
+        if (o.simplifie && o.simplifie.length) {
+          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
+            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
+        }
+        if (!NOTE) {                                       // en TD : rien a rendre
+          var rien = el("div", { classe: "carte pc-remise" }, [el("h2", { texte: "Rien à rendre" }),
+            el("p", { classe: "consigne", html: "En TD, la page ne produit <b>aucun fichier</b> : ce bilan vous montre ce qui est acquis et ce qui reste à revoir. " +
+              "L'évaluation notée se fait par le <b>lien que donne le professeur</b>, avec d'autres valeurs, sans indication." })]);
+          final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [rien, simpl])]));
+          return construireFinal();
+        }
         var remise = el("div", { classe: "carte pc-remise" });
         remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
         remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
           "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
         var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
-        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Produire mon fichier" });
-        var bVoir = el("button", { type: "button", classe: "bouton", texte: "Afficher le texte" });
+        var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Rendre ma copie" });
+        var bVoir = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Afficher le texte" });
+        /* rendre la copie verrouille tout : le fichier porte les verdicts, il ne doit plus servir a se corriger */
+        var bOui = el("button", { type: "button", classe: "bouton principal", texte: "Oui, je rends ma copie" });
+        var bNon = el("button", { type: "button", classe: "bouton", texte: "Pas encore" });
+        var confirmer = el("div", { classe: "pc-confirmer", hidden: "hidden" }, [
+          el("p", { classe: "consigne", html: "<b>Rendre la copie verrouille toutes vos réponses</b> : plus rien ne pourra changer. Le fichier part ensuite dans vos téléchargements." }),
+          el("div", { classe: "rangee" }, [bOui, bNon])]);
         var dit = el("p", { classe: "pc-retour", "aria-live": "polite" });
         apercu = el("textarea", { classe: "pc-apercu", readonly: "readonly", rows: "10", hidden: "hidden", "aria-label": "Le texte du fichier" });
         remise.appendChild(el("div", { classe: "pc-q-champ" }, [ident]));
         remise.appendChild(el("div", { classe: "rangee" }, [bProd, bVoir]));
+        remise.appendChild(confirmer);
         remise.appendChild(dit); remise.appendChild(apercu);
         bProd.addEventListener("click", function () {
           var id = ident.value.trim();
           if (!id) { dit.className = "pc-retour faux"; dit.textContent = "Tapez d’abord l’identifiant donné en classe."; return; }
+          if (!etat.rendu) { confirmer.hidden = false; dit.textContent = ""; return; }
+          produire();
+        });
+        bNon.addEventListener("click", function () { confirmer.hidden = true; });
+        bOui.addEventListener("click", function () {
+          if (!ident.value.trim()) { confirmer.hidden = true; return; }
+          rendre(); confirmer.hidden = true; ident.disabled = true;
+          bProd.textContent = "Produire de nouveau le fichier"; bVoir.hidden = false;
+          construireFinal(); produire();
+        });
+        function produire() {
+          var id = ident.value.trim();
           var txt = fabriquer(id);
           var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
           try {
@@ -2324,16 +2471,12 @@ var Sim = (function () {
           } catch (e) {
             dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
           }
-        });
+        }
         bVoir.addEventListener("click", function () {
+          if (!etat.rendu) return;                         // le texte porte les verdicts : seulement une fois la copie rendue
           var id = ident.value.trim() || "(identifiant à taper)";
           apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
         });
-        var simpl = null;
-        if (o.simplifie && o.simplifie.length) {
-          simpl = el("details", { classe: "modele carte" }, [el("summary", { texte: "Ce que la simulation simplifie" }),
-            el("ul", null, o.simplifie.map(function (t) { return el("li", { html: t }); }))]);
-        }
         final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
       }
       /* le livrable se produit meme inacheve : ce qui reste compte comme non reussi */
@@ -2341,23 +2484,43 @@ var Sim = (function () {
       o.phases.forEach(function (ph, i) {
         var fs = etat.fiches[i];
         if (ph.facultative && !(fs || []).some(touchee)) return;   // pas abordee : elle ne manque pas
-        (fs ? fs.filter(function (f) { return !f.fini && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
+        (fs ? fs.filter(function (f) { return !fait(f) && compte(i, f); }).map(function (f) { return f.q; }) : questionsDe(i)).forEach(function (q) {
           if (q.type === "appel") appelsAFaire++; else restent++;
         });
       });
-      var enAttente = attente().length;
-      titreFin.innerHTML = restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
+      var enAttente = attente().length, modifiees = 0;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.modifiee && !f.fini) modifiees++; }); });
+      titreFin.innerHTML = !NOTE ? (restent ? "Le TD n’est pas fini" : "Le TD est fini")
+        : etat.rendu ? "La copie est rendue"
+        : restent || appelsAFaire ? (epreuve ? "La copie n’est pas finie" : "Le projet n’est pas fini") : (o.livrableTitre || (epreuve ? "La copie est finie" : "Le projet est fini"));
       var mots = [];
-      if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut, " +
-        "ou produire votre fichier tel quel : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + ".");
+      if (NOTE && etat.rendu) mots.push("Vos réponses sont verrouillées. Remettez le fichier au professeur.");
+      else if (restent) mots.push("Il reste <b>" + restent + " question" + (restent > 1 ? "s" : "") + "</b> sans réponse. Vous pouvez y revenir par le chemin, en haut" +
+        (NOTE ? ", ou rendre votre copie telle quelle : " + (restent > 1 ? "elles compteront" : "elle comptera") + " comme non réussie" + (restent > 1 ? "s" : "") + "." : "."));
+      if (NOTE && !etat.rendu && modifiees) mots.push("<b>" + (modifiees > 1 ? modifiees + " réponses ont été modifiées" : "Une réponse a été modifiée") + " sans être enregistrée</b> : " +
+        (modifiees > 1 ? "c'est l'ancienne réponse qui comptera pour chacune" : "c'est l'ancienne réponse qui comptera") + ", sauf si vous appuyez sur « Enregistrer ».");
       if (appelsAFaire) mots.push("<b>" + (appelsAFaire > 1 ? appelsAFaire + " appels n'ont pas été lancés" : "Un appel n'a pas été lancé") + "</b> : " + (appelsAFaire > 1 ? "ils comptent" : "il compte") + " zéro.");
       if (enAttente) mots.push("<b>" + (enAttente > 1 ? enAttente + " appels attendent" : "Un appel attend") + " encore le professeur</b> : faites-le valider avant de produire le fichier, sinon il ne comptera pas.");
-      if (!restent && !appelsAFaire && !enAttente && o.fin) mots.push(o.fin);
+      if (!restent && !appelsAFaire && !enAttente && !(NOTE && etat.rendu)) mots.push(finTexte());
       bulleFin.innerHTML = mots.join(" ");
       bulleFin.hidden = !bulleFin.innerHTML;
       recap.innerHTML = "";
       recap.appendChild(el("h2", { texte: ccf ? "Le bilan de l'épreuve" : u41 ? "Le bilan, compétence par compétence" : "Le bilan du projet" }));
       var t = el("table", { classe: "releve pc-recap" });
+      if (NOTE) {
+        recap.firstChild.textContent = "Ce que contient votre copie";
+        t.appendChild(el("tr", null, [el("th", { texte: epreuve ? "Partie" : "Phase" }), el("th", { texte: "Compétence" }), el("th", { texte: "Réponses enregistrées" })]));
+        o.phases.forEach(function (ph, i) {
+          var fs = etat.fiches[i], qs = fs ? fs.map(function (f) { return f.q; }) : questionsDe(i), n = 0, m = 0;
+          if (ph.facultative && !(fs || []).some(touchee)) { t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: "facultative, non abordée" })])); return; }
+          qs.forEach(function (q, j) { var f = fs && fs[j]; if (q.type === "appel") { m++; if (f && f.appele) n++; return; } if (!compte(i, f)) return; m++; if (f && f.enr) n++; });
+          t.appendChild(el("tr", null, [el("td", { texte: nomPhase(i) }), el("td", { texte: ph.competence }), el("td", { texte: n + " sur " + m })]));
+        });
+        recap.appendChild(t);
+        if (ccf) recap.appendChild(el("p", { classe: "pc-autonomie", html: "<b>Autonomie</b> : " + autonomie().texte + "." }));
+        recap.appendChild(el("p", { classe: "pc-score-final", html: minutes() + " min" }));
+        return;
+      }
       if (epreuve) {
         t.appendChild(el("tr", null, [el("th", { texte: "Compétence" }), el("th", { texte: "Réussi du premier coup" }), el("th", { texte: "Appel" })]));
         ORDRE.forEach(function (k) {
@@ -2395,13 +2558,30 @@ var Sim = (function () {
       return (s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s)
         .replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "sans-identifiant";
     }
+    /* le mot de la fin des pages parle du fichier : en TD il n'y en a pas, en note le bouton est « Rendre ma copie » */
+    function finTexte() {
+      var t = String(o.fin || "");
+      var sans = t.replace(/\s*(La copie est prête|Produisez)[^.]*\.?/g, "").trim();
+      if (!NOTE) return (sans ? sans + " " : "Tout est fait. ") + "En TD, rien à rendre : relisez la méthode des questions qui ont coincé.";
+      return (sans ? sans + " " : "") + "Rendez votre copie : le fichier part dans vos téléchargements.";
+    }
+    /* rendre la copie (mode note) : rejuger ce qui attendait une mesure, et tout verrouiller */
+    function rendre() {
+      if (!NOTE || etat.rendu) return;
+      etat.rendu = true;
+      etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.verrouiller) f.verrouiller(); }); });
+      majChemin(); majTete();
+    }
     function fabriquer(id) {
+      if (NOTE) rendre();                                  // le texte porte les verdicts : le fabriquer, c'est rendre la copie
       var d = new Date();
       var out = ["BILAN DE SÉQUENCE",
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
+        "Mode       : " + (NOTE ? "évaluation notée, sans indication" : "TD, non noté"),
+        NOTE ? "Bilan      : " + comptesNote().n + " réponses enregistrées sur " + comptesNote().m + ", en " + minutes() + " min"
+          : "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
           (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
@@ -2430,7 +2610,7 @@ var Sim = (function () {
             if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
             else {
               etatCase = f.note ? "juste" : "faux";
-              var det = f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
+              var det = NOTE ? "enregistrée à " + heure(f.heureEnr) + (f.modifiee ? ", modifiée ensuite sans être enregistrée" : "") : f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
                 : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
               if (f.aide) det += ", avec aide";
               rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
@@ -2462,9 +2642,9 @@ var Sim = (function () {
       if (etat.debut && !etat.exporte) { e.preventDefault(); e.returnValue = ""; }
     });
     majTete();
-    if (libre) mode(/^#(ccf|u41|parcours)$/.test(location.hash));
+    if (libre) mode(NOTE || /^#(ccf|u41|parcours)$/.test(location.hash));
     /* la porte d'essai : etat interne et fichier, pour les controles */
-    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, fiches: function () { return etat.fiches; },
+    return { etat: etat, donnees: donnees, ouvrir: ouvrir, fabriquer: fabriquer, rendre: rendre, note: NOTE, fiches: function () { return etat.fiches; },
       appels: appels, mode: mode, dossier: function () { if (dossierFn) basculerDossier(); return panDos; }, coter: function (f, x) { f.cote = x; f.heureCote = new Date(); f.note = x === "A"; f.afficher(); majPhase(f.phase); majAppels(); },
       choisirNiveau: function (n) { etat.niveau = n; niv.textContent = n; }, demarrer: function (n) {
         if (libre) mode(true);
@@ -2547,7 +2727,9 @@ var Sim = (function () {
 
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
-    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice };
+    defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice,
+    /* vrai quand la page est ouverte en mode note (#note) : chaque page y tire d'autres valeurs */
+    note: NOTE_ADRESSE };
 })();
 
 </script>
@@ -2649,10 +2831,10 @@ body.pc-en-cours #defis{display:none!important}
   <details class="modele">
     <summary>Ce que la simulation simplifie</summary>
     <ul>
-      <li>Le COP vaut 52 % de la limite de Carnot calculée sur les températures d'évaporation et de condensation, plafonné à 6,5. L'évaporation se fait 2 à 8 °C sous l'air, la condensation 1 à 4 °C au-dessus de l'eau de départ, selon la vitesse du compresseur.</li>
+      <li id="simplifieMachine">Le COP vaut 52 % de la limite de Carnot calculée sur les températures d'évaporation et de condensation, plafonné à 6,5. L'évaporation se fait 2 à 8 °C sous l'air, la condensation 1 à 4 °C au-dessus de l'eau de départ, selon la vitesse du compresseur.</li>
       <li>La pression de saturation du R32 suit ln p = 10,83 − 2 386 ÷ T, en bar absolus, à 2 % près de −30 à 60 °C. Les manomètres lisent en bar relatifs, avec l'échelle de température du R32.</li>
       <li>La puissance de la PAC baisse de 2,5 % par degré de froid sous 7 °C, et de 0,8 % par degré d'eau au-dessus de 35 °C. Le givre se forme entre −7 et 6 °C quand l'air est humide ; le dégivrage dure quatre minutes, pris sur l'eau du chauffage ; pendant ce temps, dans la journée, l'appoint maintient le chauffage de la maison.</li>
-      <li>La maison a un GV de 200 W/K et 0,5 kW d'apports ; la loi d'eau est bien réglée sur ses émetteurs. L'appoint est une résistance électrique qui couvre ce que la PAC ne peut pas fournir.</li>
+      <li id="simplifieMaison">La maison a un GV de 200 W/K et 0,5 kW d'apports ; la loi d'eau est bien réglée sur ses émetteurs. L'appoint est une résistance électrique qui couvre ce que la PAC ne peut pas fournir.</li>
     </ul>
   </details>
 </div>
@@ -2660,6 +2842,15 @@ body.pc-en-cours #defis{display:none!important}
 
 <script>
 (function () {
+  /* DEUX JEUX DE VALEURS (16 octobre 2026) : le TD et l'evaluation notee (#note) n'ont pas les memes nombres. Ici, ceux de
+     la maison et de la machine : le GV, la temperature de base, le debit du banc, et l'ecart d'evaporation (un autre
+     evaporateur, plus grand). Le reste du sujet change dans le script du TD, plus bas. */
+  var SITE = Sim.note ? { gv: 210, base: -10, q: 1.3, ev: [1, 4] } : { gv: 200, base: -7, q: 1.2, ev: [2, 6] };
+  if (Sim.note) {
+    var liM = document.getElementById("simplifieMachine"), liH = document.getElementById("simplifieMaison");
+    if (liM) liM.innerHTML = liM.innerHTML.replace("2 à 8 °C sous l'air", "1 à 5 °C sous l'air");
+    if (liH) liH.innerHTML = liH.innerHTML.replace("GV de 200 W/K", "GV de " + SITE.gv + " W/K");
+  }
   /* ---------- Le R32 et la machine ---------- */
   function psat(t) { return Math.exp(10.829 - 2385.6 / (t + 273.15)); }                  // bar absolus
   function tsat(p) { return 2385.6 / (10.829 - Math.log(p)) - 273.15; }
@@ -2667,7 +2858,7 @@ body.pc-en-cours #defis{display:none!important}
   /* La machine a une vitesse s (0,3 a 1), l'air a ta, l'eau de depart a td, le givre g (0 a 1). */
   function machine(Pnom, ta, td, s, g) {
     var fcap = Math.max(0.3, (1 + 0.025 * (ta - 7)) * (1 - 0.008 * (td - 35))) * (1 - 0.2 * g);
-    var te = ta - (2 + 6 * s) - 4 * g, tc = td + (1 + 3 * s);
+    var te = ta - (SITE.ev[0] + SITE.ev[1] * s) - 4 * g, tc = td + (1 + 3 * s);
     var cop = Math.min(COPMAX, ETA * (tc + 273.15) / (tc - te));
     var Pc = Pnom * fcap * s, Pe = Pc / cop + AUX;
     return { Pc: Pc, Pe: Pe, Pevap: Pc - (Pe - AUX), te: te, tc: tc, cop: cop, carnot: (tc + 273.15) / (tc - te), pBP: psat(te) - 1.013, pHP: psat(tc) - 1.013,
@@ -2677,14 +2868,14 @@ body.pc-en-cours #defis{display:none!important}
   /* ---------- Les reglages ---------- */
   var reg = { vitesse: 10, Pnom: 8, emetteurs: "plancher", tmoy: -5 };
   var EMET = { plancher: { d: 35, r: 30, nom: "plancher chauffant 35/30" }, radiateurs: { d: 55, r: 45, nom: "radiateurs 55/45" } };
-  var GV = 200, TI = 19, GAINS = 0.5, PAPP = 6;
+  var GV = SITE.gv, TI = 19, GAINS = 0.5, PAPP = 6, TBASE = SITE.base;
   function tExt(h) { return reg.tmoy + 4 * Math.sin(2 * Math.PI * (h - 9) / 24); }
 
   /* ---------- L'etat ---------- */
   var exp = "banc", etats = {};
   function E() { return etats[exp]; }
   function etatNeuf(x) {
-    return { exp: x, t: 0, marche: false, ta: 7, hr: 85, trCons: 30, s: 0.7, Q: 1.2, givre: 0, degivre: 0, nDeg: 0,
+    return { exp: x, t: 0, marche: false, ta: 7, hr: 85, trCons: 30, s: 0.7, Q: SITE.q, givre: 0, degivre: 0, nDeg: 0,
       Td: 20, Tr: 20, m: machine(8, 7, 35, 0.7, 0), Pc: 0, Pe: 0, wh: 0, kWhc: 0,
       h: 0, jour: false, fini: false, z: { Qpac: 0, Qapp: 0, Epac: 0, Eapp: 0 }, Pdem: 0, Papp: 0, hist: [] };
   }
@@ -2713,7 +2904,7 @@ body.pc-en-cours #defis{display:none!important}
   function pasJour(e, dt) {
     if (!e.jour || e.fini) { e.Pc = 0; e.Pe = 0; e.Papp = 0; return; }
     var h = e.h, R = EMET[reg.emetteurs], ta = tExt(h);
-    var Pdem = Math.max(0, GV * (TI - ta) / 1000 - GAINS), x = Pdem / (GV * 26 / 1000);
+    var Pdem = Math.max(0, GV * (TI - ta) / 1000 - GAINS), x = Pdem / (GV * (TI - TBASE) / 1000);
     var td = TI + ((R.d + R.r) / 2 - TI) * Math.pow(Math.max(x, 0.01), 1 / (R.d > 40 ? 1.3 : 1.1)) + (R.d - R.r) * x / 2;
     e.ta = ta; e.Pdem = Pdem; e.Td = td; e.Tr = td - (R.d - R.r) * x;
     var Pc = 0, Pe = 0, Papp = 0;
@@ -2758,7 +2949,7 @@ body.pc-en-cours #defis{display:none!important}
       Sim.choix(R, { label: "Les émetteurs", valeur: reg.emetteurs, options: Object.keys(EMET).map(function (k) { return { val: k, texte: EMET[k].nom }; }),
         surChange: function (v) { reg.emetteurs = v; etats.jour = etatNeuf("jour"); poserCommandes(); } });
       Sim.curseur(R, { label: "Température extérieure moyenne du jour", min: -12, max: 8, pas: 1, valeur: reg.tmoy, unite: "°C", dec: 0, surChange: function (v) { reg.tmoy = v; etats.jour = etatNeuf("jour"); poserCommandes(); } });
-      document.getElementById("fiche").innerHTML = "Une maison de <b>GV 200 W/K</b> à 19 °C : <b>5,2 kW</b> à −7 °C. Un <b>appoint électrique</b> de 6 kW couvre ce que la PAC ne fournit pas. Deux compteurs d'électricité, PAC et appoint, et un <b>calorimètre</b> sur le chauffage.";
+      document.getElementById("fiche").innerHTML = "Une maison de <b>GV " + GV + " W/K</b> à 19 °C : <b>" + Sim.fr(GV * (TI - TBASE) / 1000, 1) + " kW</b> à " + Sim.fr(TBASE, 0) + " °C. Un <b>appoint électrique</b> de 6 kW couvre ce que la PAC ne fournit pas. Deux compteurs d'électricité, PAC et appoint, et un <b>calorimètre</b> sur le chauffage.";
     }
   }
   var C = {};
@@ -3052,7 +3243,7 @@ body.pc-en-cours #defis{display:none!important}
   Sim.animer(pas);
 
   /* Porte des essais. */
-  window.pac = { etat: E, reglage: reg, machine: machine, psat: psat, tsat: tsat, lectures: function () { return lec(E()); }, enr: function () { return CEN[exp]; },
+  window.pac = { etat: E, reglage: reg, site: SITE, machine: machine, psat: psat, tsat: tsat, lectures: function () { return lec(E()); }, enr: function () { return CEN[exp]; },
     releve: function () { return CEN[exp]; }, centrale: function () { return CEN[exp]; }, molettes: M, dessiner: function () { dessiner(); afficher(); },
     etatDe: function (x) { return etats[x]; }, experience: function (x) { og.montrer(x === "jour" ? "vueJour" : "vueBanc"); },
     /* l'entrainement a l'U41 impose la PAC du sujet : l'experience touchee repart au depart */
@@ -3081,11 +3272,24 @@ body.pc-en-cours #defis{display:none!important}
    Pour aller plus loin (15 octobre 2026, facultatif, 30 a 40 min) : la PAC dimensionnee a rebours, comme au manuel
    (chapitre 7, « dimensionner en bivalent ») : le point de bivalence sur les mesures de l'etudiant, la puissance au
    catalogue qu'il faudrait, la gamme du fabricant (document 6, neuf), l'appoint a la base, puis la journee de
-   reference refaite avec l'autre PAC de la gamme pour mettre le choix a l'epreuve, et la reponse sur la 11 kW. */
+   reference refaite avec l'autre PAC de la gamme pour mettre le choix a l'epreuve, et la reponse sur la 11 kW.
+   DEUX MODES (16 octobre 2026) : l'evaluation notee (#note) a ses propres nombres, ceux de SUJET ci-dessous et de SITE dans
+   la simulation : une maison de GV 210 W/K a -10 °C de base (6,1 kW), les PAC de 8 ou 11 kW (COP 4,2 et 4,1, un evaporateur
+   plus grand : evaporation 1 a 5 K sous l'air), un debit de banc de 1,3 m3/h, des journees a -9, -8 ou -7 °C, l'appoint
+   borne a 8 % et le COP a 2,4. La meme evidence : la petite ne garde qu'un peu plus de la moitie de sa plaque a la base,
+   l'appoint passe le plafond ; la grande garde juste le besoin. La gamme du plus loin devient 8, 11, 14 kW. */
 (function () {
   var P = window.pac, fr = Sim.fr, el = Sim.el, svg = Sim.svg;
-  var PACS = [{ P: 6, cop: 3.9 }, { P: 8, cop: 3.8 }], JOURS_REF = [-6, -5, -4];
-  var BESOIN = 5.2, PART_MAX = 10, COP_MIN = 2.5, DEBIT = 1.2, RETOUR = 30, PRIX = 0.25;
+  /* les deux jeux de valeurs : le TD (adresse ordinaire, #u41) et l'evaluation notee (#note), qui ne se recouvrent pas */
+  var SUJET = Sim.note
+    ? { pacs: [{ P: 8, cop: 4.2 }, { P: 11, cop: 4.1 }], jours: [-9, -8, -7], partMax: 8, copMin: 2.4, prix: 0.23, ecart: "1 900 €",
+        gamme: [{ P: 8, prix: 11500 }, { P: 11, prix: 13400 }, { P: 14, prix: 15600 }], givre: { ta: 1, hr: 90 } }
+    : { pacs: [{ P: 6, cop: 3.9 }, { P: 8, cop: 3.8 }], jours: [-6, -5, -4], partMax: 10, copMin: 2.5, prix: 0.25, ecart: "1 400 €",
+        gamme: [{ P: 6, prix: 9800 }, { P: 8, prix: 11200 }, { P: 11, prix: 13100 }], givre: { ta: 2, hr: 85 } };
+  var TB = P.site.base, GV_M = P.site.gv / 1000;                    // la base du site, le GV en kW/K
+  var PACS = SUJET.pacs, JOURS_REF = SUJET.jours, PETITE = PACS[0].P, GRANDE = PACS[1].P, PLUS = SUJET.gamme[2].P;
+  var BESOIN = Math.round(GV_M * (19 - TB) * 1000) / 1000, PART_MAX = SUJET.partMax, COP_MIN = SUJET.copMin, DEBIT = P.site.q, RETOUR = 30, PRIX = SUJET.prix;
+  var GIVRE = SUJET.givre, TEV = TB - (P.site.ev[0] + P.site.ev[1]);     // l'evaporation a pleine vitesse, par l'air de base
   function tirer(t) { return t[Math.floor(Math.random() * t.length)]; }
   function cfg(ctx) {
     var d = ctx.donnees;
@@ -3122,15 +3326,18 @@ body.pc-en-cours #defis{display:none!important}
   function jourRef(ctx) { var c = cfg(ctx); return JOURS[cle(c.P, "plancher", c.tmoy)]; }
 
   /* ce que l'etudiant a trouve, ou a defaut ce que la simulation dit : la suite se calcule sur SES nombres */
-  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees[cle] = juste && isFinite(v) ? v : mesure(ctx); }; }
+  /* en note, fini est appele a chaque enregistrement, juste ou non : on garde la valeur de l'etudiant quelle qu'elle soit,
+     sinon la suite trahirait le verdict ; et ce qui s'affiche ne montre que ses nombres, jamais ceux de la simulation */
+  function garde(cle, mesure) { return function (ctx, juste, rep, v) { ctx.donnees[cle] = (juste || Sim.note) && isFinite(v) ? v : mesure(ctx); }; }
   function val(ctx, cle, mesure) { var x = ctx.donnees[cle]; return isFinite(x) ? x : mesure(ctx); }
+  function vu(ctx, cle, mesure) { var x = ctx.donnees[cle]; return isFinite(x) ? x : Sim.note ? NaN : mesure(ctx); }
   var M = {
     besoin: function () { return BESOIN; },
     Pe7: function (ctx) { return 1000 * equilibre(ctx, 7).Pe; },
     dT7: function (ctx) { return equilibre(ctx, 7).dT; },
     Pc7: function (ctx) { return 1.163 * DEBIT * val(ctx, "dT7", M.dT7); },
     cop7: function (ctx) { return val(ctx, "Pc7", M.Pc7) / (val(ctx, "Pe7", M.Pe7) / 1000); },
-    dTf: function (ctx) { return equilibre(ctx, -7).dT; },
+    dTf: function (ctx) { return equilibre(ctx, TB).dT; },
     Pcf: function (ctx) { return 1.163 * DEBIT * val(ctx, "dTf", M.dTf); },
     pct: function (ctx) { return 100 * val(ctx, "Pcf", M.Pcf) / cfg(ctx).P; },
     Q: function (ctx) { var j = jourRef(ctx); return j ? j.Q : NaN; },
@@ -3153,15 +3360,15 @@ body.pc-en-cours #defis{display:none!important}
      Le document 6 donne la gamme a A7, A2, A-7 et A-15, eau sortant a 35 °C : la loi de la simulation, la puissance
      baissant de 2,5 % par degre sous 7 °C. Le point de bivalence se calcule sur les deux mesures de l'etudiant, avec
      la maison du document 1 (GV 200 W/K, 19 °C, apports negliges). */
-  var GV_MAISON = 0.2, T_INT = 19;
-  var GAMME = [{ P: 6, prix: 9800 }, { P: 8, prix: 11200 }, { P: 11, prix: 13100 }], A_TABLE = [7, 2, -7, -15];
+  var GV_MAISON = GV_M, T_INT = 19;
+  var GAMME = SUJET.gamme, A_TABLE = [7, 2, TB, -15];
   function pCat(Pn, ta) { return Pn * (1 + 0.025 * (ta - 7)); }
-  function autre(ctx) { return cfg(ctx).P === 6 ? 8 : 6; }
+  function autre(ctx) { return cfg(ctx).P === PETITE ? GRANDE : PETITE; }
   function jourAutre(ctx) { var c = cfg(ctx); return JOURS[cle(autre(ctx), "plancher", c.tmoy)]; }
   function partDe(j) { return j ? 100 * j.app / j.Q : NaN; }
   function biv(ctx) {
-    var p7 = val(ctx, "Pc7", M.Pc7), pf = val(ctx, "Pcf", M.Pcf), a = (p7 - pf) / 14;
-    return (GV_MAISON * T_INT - pf - 7 * a) / (GV_MAISON + a);
+    var p7 = val(ctx, "Pc7", M.Pc7), pf = val(ctx, "Pcf", M.Pcf), a = (p7 - pf) / (7 - TB);
+    return (GV_MAISON * T_INT - pf + TB * a) / (GV_MAISON + a);
   }
   function documentGamme(zone) {
     var t = el("table", { classe: "u41-tab" }, [el("tr", null, [el("td", { html: "<b>Modèle</b>" })].concat(A_TABLE.map(function (a) { return el("td", { html: "<b>A" + (a < 0 ? "−" + (-a) : a) + "/W35</b>" }); })).concat([el("td", { html: "<b>Prix posé</b>" })]))]);
@@ -3170,7 +3377,7 @@ body.pc-en-cours #defis{display:none!important}
     });
     zone.appendChild(insecables(el("div", { classe: "pc-docs" }, [
       el("section", { classe: "u41-large" }, [el("h3", { texte: "Document 6 · La gamme du fabricant : puissance calorifique selon l'air extérieur" }),
-        el("p", { html: "PAC air-eau monobloc, R32, compresseur à pleine vitesse, <b>eau sortant à 35 °C</b>. A−7/W35 : air extérieur à −7 °C, eau à 35 °C. Appoint électrique intégré de 6 kW sur toute la gamme." }),
+        el("p", { html: "PAC air-eau monobloc, R32, compresseur à pleine vitesse, <b>eau sortant à 35 °C</b>. A" + fr(TB, 0) + "/W35 : air extérieur à " + fr(TB, 0) + " °C, eau à 35 °C. Appoint électrique intégré de 6 kW sur toute la gamme." }),
         el("div", { classe: "u41-defile" }, [t]),
         el("p", { html: "<b>Note de dimensionnement du fabricant.</b> Choisir la PAC sur la puissance qu'elle garde à la température de base du site, pas sur sa plaque. " +
           "Le <b>point de bivalence</b> est la température extérieure où la puissance de la PAC égale le besoin du bâtiment ; plus froid, l'appoint complète ce qui manque. " +
@@ -3270,11 +3477,11 @@ body.pc-en-cours #defis{display:none!important}
      document qui le donne, jamais la valeur a trouver. Les memes conditions que stable(), une par une. */
   function erreursBanc(ctx, ta) {
     var e = banc(), c = cfg(ctx), r = [], froid = ta !== 7;
-    if (e.ta !== ta) r.push(froid ? "l'air de la chambre n'est pas à −7 °C" : "l'air de la chambre n'est pas celui du régime du catalogue (document 2)");
+    if (e.ta !== ta) r.push(froid ? "l'air de la chambre n'est pas à " + fr(TB, 0) + " °C" : "l'air de la chambre n'est pas celui du régime du catalogue (document 2)");
     if (Math.round(e.s * 100) !== 100) r.push(froid ? "le variateur n'est plus au réglage du régime du catalogue : seul l'air change" : "le variateur du compresseur n'est pas au régime du catalogue (document 2)");
     if (e.trCons !== RETOUR) r.push(froid ? "le retour imposé n'est plus celui du régime du catalogue : seul l'air change" : "le retour imposé par le banc n'est pas celui du régime du catalogue (document 2)");
     if (P.reglage.Pnom !== c.P) r.push("la PAC montée n'est plus celle de la fiche catalogue (document 2) : reprenez-la sur la carte de la maison, partie 5");
-    if (bloqueParGivre(ctx, ta)) r.push("l'évaporateur garde du givre de l'essai à 2 °C : laissez la PAC finir un dégivrage, puis revenez tout de suite à l'air de cet essai");
+    if (bloqueParGivre(ctx, ta)) r.push("l'évaporateur garde du givre de l'essai à " + GIVRE.ta + " °C : laissez la PAC finir un dégivrage, puis revenez tout de suite à l'air de cet essai");
     return r;
   }
   /* le givre laisse par l'essai a 2 °C ne fond qu'au degivrage : a +7 ou −7 °C, il empeche le depart d'atteindre l'equilibre */
@@ -3313,15 +3520,15 @@ body.pc-en-cours #defis{display:none!important}
   }
   function documents(zone, ctx) {
     var c = cfg(ctx);
-    var avis = c.P === 6
-      ? "« L'installateur propose la PAC de 6 kW : 6 kW pour 5,2 kW de besoin, elle suffit largement, et elle coûte 1 400 € de moins que la 8 kW. »"
-      : "« L'installateur propose la PAC de 8 kW. Mon voisin assure qu'elle est trop grosse : 8 kW pour 5,2 kW de besoin ! La 6 kW suffisait, et coûtait 1 400 € de moins. »";
+    var avis = c.P === PETITE
+      ? "« L'installateur propose la PAC de " + PETITE + " kW : " + PETITE + " kW pour " + fr(BESOIN, 1) + " kW de besoin, elle suffit largement, et elle coûte " + SUJET.ecart + " de moins que la " + GRANDE + " kW. »"
+      : "« L'installateur propose la PAC de " + GRANDE + " kW. Mon voisin assure qu'elle est trop grosse : " + GRANDE + " kW pour " + fr(BESOIN, 1) + " kW de besoin ! La " + PETITE + " kW suffisait, et coûtait " + SUJET.ecart + " de moins. »";
     zone.appendChild(insecables(el("div", { classe: "pc-docs" }, [
       el("section", null, [el("h3", { texte: "Document 1 · Cahier des charges du maître d'ouvrage" }),
         el("table", { classe: "u41-tab" }, [
-          ligne("Art. 1", "Maison rénovée, <b>plancher chauffant</b> neuf, régime 35/30. Déperditions : <b>GV = 200 W/K</b>, 19 °C intérieur, <b>−7 °C de base</b>."),
+          ligne("Art. 1", "Maison rénovée, <b>plancher chauffant</b> neuf, régime 35/30. Déperditions : <b>GV = " + P.site.gv + " W/K</b>, 19 °C intérieur, <b>" + fr(TB, 0) + " °C de base</b>."),
           ligne("Art. 2", "Pompe à chaleur air-eau, appoint électrique intégré, une loi d'eau sur la sonde extérieure."),
-          ligne("Art. 3", "Par la journée de référence (document 5) : l'appoint fournit <b>10 % au plus</b> de la chaleur ; le <b>COP de l'installation</b>, appoint compris, vaut <b>2,5 au moins</b>.")])]),
+          ligne("Art. 3", "Par la journée de référence (document 5) : l'appoint fournit <b>" + PART_MAX + " % au plus</b> de la chaleur ; le <b>COP de l'installation</b>, appoint compris, vaut <b>" + fr(COP_MIN, 1) + " au moins</b>.")])]),
       el("section", null, [el("h3", { texte: "Document 2 · Fiche catalogue de la PAC proposée" }),
         el("ul", null, [el("li", { html: "PAC air-eau <b>monobloc</b>, fluide <b>R32</b>, compresseur à vitesse variable." }),
           el("li", { html: "Puissance calorifique : <b>" + c.P + " kW</b> · COP : <b>" + fr(c.cop, 1) + "</b>, au régime <b>A7/W35</b>." }),
@@ -3332,7 +3539,7 @@ body.pc-en-cours #defis{display:none!important}
       el("section", null, [el("h3", { texte: "Document 5 · La journée de référence, le tarif" }),
         el("table", { classe: "u41-tab" }, [
           ligne("Journée de référence", "la plus froide de l'hiver dernier : <b>" + fr(c.tmoy, 0) + " °C</b> de moyenne, " + fr(c.tmoy - 4, 0) + " °C vers 3 h, air humide"),
-          ligne("Électricité", "<b>0,25 €</b> le kWh, PAC et appoint")])]),
+          ligne("Électricité", "<b>" + fr(PRIX, 2) + " €</b> le kWh, PAC et appoint")])]),
       el("section", { classe: "pc-annexe u41-large" }, [el("h3", { texte: "Annexe · formulaire et R32" }),
         el("p", { html: "<b>P<sub>chauffage</sub> = 1,163 × Q × (θ<sub>départ</sub> − θ<sub>retour</sub>)</b> — P en kW, Q en m³/h, écart en K<br>" +
           "<b>COP = P<sub>chauffage</sub> ÷ P<sub>électrique</sub></b>, les deux dans la même unité ; sur une journée, COP = chaleur ÷ électricité<br>" +
@@ -3371,9 +3578,9 @@ body.pc-en-cours #defis{display:none!important}
             options: ["le document 1, le cahier des charges", "le document 2, la fiche catalogue", "le document 4, le message du propriétaire", "le document 5, la journée de référence"], bonne: 2,
             methode: "Une pièce du marché ou du fabricant engage celui qui l'a écrite. Un avis rapporté, même juste, se vérifie." },
           { type: "choix", competence: "C12-2", lib: "À quel régime le catalogue donne-t-il la puissance de la PAC ?",
-            options: ["air extérieur à 7 °C, eau sortant à 35 °C", "air extérieur à 35 °C, eau sortant à 7 °C", "air extérieur à −7 °C, eau sortant à 35 °C", "air extérieur à 7 °C, eau entrant à 35 °C"], bonne: 0,
+            options: ["air extérieur à 7 °C, eau sortant à 35 °C", "air extérieur à 35 °C, eau sortant à 7 °C", "air extérieur à " + fr(TB, 0) + " °C, eau sortant à 35 °C", "air extérieur à 7 °C, eau entrant à 35 °C"], bonne: 0,
             methode: "A7/W35 : A pour l'air, W pour l'eau, la température qui suit chaque lettre. Le document 2 le détaille." },
-          { type: "nombre", competence: "C1-2", lib: "Calculez la puissance que la maison demande par −7 °C, apports négligés.", unite: "kW",
+          { type: "nombre", competence: "C1-2", lib: "Calculez la puissance que la maison demande par " + fr(TB, 0) + " °C, apports négligés.", unite: "kW",
             attendu: BESOIN, tolerance: 0.02, fini: garde("besoin", M.besoin),
             methode: "Le formulaire : GV × (θ intérieur − θ extérieur), en watts avec GV en W/K ; puis en kilowatts." }
         ],
@@ -3392,7 +3599,8 @@ body.pc-en-cours #defis{display:none!important}
             aide: "Les flèches donnent le sens du fluide ; le manomètre HP est sur le côté haute pression.",
             verifier: function (ctx) {
               var t = ctx.donnees.touche; if (!t) return null;
-              return { ok: t === "refoulement", reponse: "conduite touchée : " + NOMS_ZONES[t], corriger: t === "refoulement" ? [] : [FAUX_ZONES[t]] };
+              return { ok: t === "refoulement", reponse: "conduite touchée : " + NOMS_ZONES[t], corriger: t === "refoulement" ? [] : [FAUX_ZONES[t]],
+                lu: Sim.note ? "conduite " + (Object.keys(NOMS_ZONES).indexOf(t) + 1) + " du schéma" : undefined };
             },
             methode: "Le compresseur élève la pression et la température du fluide : le plus chaud est à sa sortie, avant que le condenseur ne le refroidisse." },
           { type: "choix", lib: "D'après le schéma, sur quelle conduite le manomètre BP est-il branché ?",
@@ -3405,8 +3613,8 @@ body.pc-en-cours #defis{display:none!important}
             items: ["la chaleur prise à l'air extérieur", "l'énergie électrique du compresseur", "la chaleur cédée à l'eau du plancher", "la chaleur de l'appoint électrique"],
             categories: ["elle entre dans le fluide", "elle sort du fluide", "elle ne passe pas par le fluide"], bonnes: [0, 0, 1, 2],
             methode: "Le fluide reçoit deux énergies et en rend une, leur somme. L'appoint chauffe l'eau directement." },
-          { type: "choix", competence: "C2-3", lib: "Comment l'évaporateur peut-il prendre de la chaleur à un air à −7 °C ?",
-            options: ["le fluide s'y évapore plus froid encore, vers −15 °C : la chaleur va toujours du plus chaud au plus froid", "le ventilateur réchauffe l'air avant l'évaporateur", "le compresseur renvoie de la chaleur dans l'évaporateur", "il n'en prend pas : par −7 °C la PAC ne chauffe qu'avec son électricité"], bonne: 0,
+          { type: "choix", competence: "C2-3", lib: "Comment l'évaporateur peut-il prendre de la chaleur à un air à " + fr(TB, 0) + " °C ?",
+            options: ["le fluide s'y évapore plus froid encore, vers " + fr(TEV, 0) + " °C : la chaleur va toujours du plus chaud au plus froid", "le ventilateur réchauffe l'air avant l'évaporateur", "le compresseur renvoie de la chaleur dans l'évaporateur", "il n'en prend pas : par " + fr(TB, 0) + " °C la PAC ne chauffe qu'avec son électricité"], bonne: 0,
             methode: "La pression basse fixe une température d'évaporation basse : le manomètre BP la lit sur son échelle du R32." },
           { type: "appel", numero: 1, competence: "C2-3",
             lib: "Expliquez au professeur, sur le schéma, le trajet du fluide et d'où vient la chaleur qu'il donne à l'eau.",
@@ -3460,46 +3668,46 @@ body.pc-en-cours #defis{display:none!important}
       },
       {
         competence: "C1-2", titre: "Par grand froid",
-        recit: "Le catalogue parle de +7 °C. La maison demande sa puissance par −7 °C. Même chambre, même banc : on refroidit l'air.",
-        consigne: "Seul l'air de la chambre change. Puis, pour le givre, l'air à 2 °C et l'humidité à 85 %, au temps × 600.",
+        recit: "Le catalogue parle de +7 °C. La maison demande sa puissance par " + fr(TB, 0) + " °C. Même chambre, même banc : on refroidit l'air.",
+        consigne: "Seul l'air de la chambre change. Puis, pour le givre, l'air à " + GIVRE.ta + " °C et l'humidité à " + GIVRE.hr + " %, au temps × 600.",
         paillasse: ["#carteScene", "#carteMesure", "#carteReleve"], large: true,
         surOuvrir: function (ctx) { preparer(ctx); P.experience("banc"); },
         questions: [
-          { type: "action", lib: "Descendez l'air de la chambre à −7 °C, sans rien changer d'autre, et attendez un départ stable.",
+          { type: "action", lib: "Descendez l'air de la chambre à " + fr(TB, 0) + " °C, sans rien changer d'autre, et attendez un départ stable.",
             aide: "La molette « air » de la chambre climatique.",
             verifier: function (ctx) {
               var e = banc(), errs; if (e.ta === 7) return null;
               if (!e.marche) {
-                errs = erreursBanc(ctx, -7);
+                errs = erreursBanc(ctx, TB);
                 return { attente: (errs.length ? "À corriger : " + errs.join(" ; ") + ". " : "") + "La PAC est arrêtée : cliquez sur le groupe extérieur pour la démarrer." };
               }
-              if (stable(ctx, -7)) return { ok: true, reponse: luBanc(e) };
-              errs = erreursBanc(ctx, -7);
+              if (stable(ctx, TB)) return { ok: true, reponse: luBanc(e) };
+              errs = erreursBanc(ctx, TB);
               return errs.length ? { reponse: luBanc(e), corriger: errs } : attendreBanc(e);
             },
-            methode: "Air à −7 °C, compresseur toujours à pleine vitesse, retour toujours à 30 °C ; on attend que le départ ne bouge plus." },
+            methode: "Air à " + fr(TB, 0) + " °C, compresseur toujours à pleine vitesse, retour toujours à 30 °C ; on attend que le départ ne bouge plus." },
           { type: "nombre", competence: "C12-2", lib: "Relevez l'écart de température entre le départ et le retour.", unite: "K",
             attendu: M.dTf, tolerance: 0, toleranceAbsolue: 0.2, fini: garde("dTf", M.dTf),
             methode: "Départ moins retour, moyenné sur plusieurs lignes de la centrale." },
-          { type: "nombre", lib: "Calculez la puissance de chauffage par −7 °C.", unite: "kW",
+          { type: "nombre", lib: "Calculez la puissance de chauffage par " + fr(TB, 0) + " °C.", unite: "kW",
             attendu: M.Pcf, tolerance: 0.02, fini: garde("Pcf", M.Pcf),
             methode: "Même formule qu'à +7 °C, avec votre nouvel écart." },
-          { type: "nombre", lib: "Quelle part de la puissance du catalogue reste-t-il par −7 °C ?", unite: "%",
+          { type: "nombre", lib: "Quelle part de la puissance du catalogue reste-t-il par " + fr(TB, 0) + " °C ?", unite: "%",
             attendu: M.pct, tolerance: 0.02, fini: garde("pct", M.pct),
-            methode: "Votre puissance à −7 °C ÷ la puissance du document 2, × 100." },
-          { type: "choix", lib: "Par −7 °C, la PAC couvre-t-elle seule le besoin de la maison ?",
+            methode: "Votre puissance à " + fr(TB, 0) + " °C ÷ la puissance du document 2, × 100." },
+          { type: "choix", lib: "Par " + fr(TB, 0) + " °C, la PAC couvre-t-elle seule le besoin de la maison ?",
             options: ["oui : elle en fournit encore assez", "non : il lui manque de la puissance, l'appoint devra compléter", "oui : sa puissance au catalogue dépasse le besoin", "non : une PAC s'arrête sous 0 °C"],
             bonne: function (ctx) { return val(ctx, "Pcf", M.Pcf) >= val(ctx, "besoin", M.besoin) ? 0 : 1; },
-            methode: "Comparez votre puissance à −7 °C au besoin calculé en partie 1, pas à la plaque." },
+            methode: "Comparez votre puissance à " + fr(TB, 0) + " °C au besoin calculé en partie 1, pas à la plaque." },
           { type: "choix", competence: "C2-3", lib: "Pourquoi la puissance et le COP baissent-ils par grand froid ?",
             options: ["l'évaporation descend avec l'air : l'écart entre évaporation et condensation grandit, et le compresseur peine davantage pour chaque kilowatt", "le ventilateur gèle et tourne moins vite", "l'appoint prend une part de l'électricité de la PAC", "le R32 ne s'évapore plus sous 0 °C"], bonne: 0,
-            methode: "Comparez le manomètre BP à +7 °C et à −7 °C : la température d'évaporation a suivi l'air." },
-          { type: "action", competence: "C2-3", lib: "Air à 2 °C, humidité à 85 %, temps × 600 : laissez tourner jusqu'au premier dégivrage.",
+            methode: "Comparez le manomètre BP à +7 °C et à " + fr(TB, 0) + " °C : la température d'évaporation a suivi l'air." },
+          { type: "action", competence: "C2-3", lib: "Air à " + GIVRE.ta + " °C, humidité à " + GIVRE.hr + " %, temps × 600 : laissez tourner jusqu'au premier dégivrage.",
             aide: "La centrale montre un dégivrage comme un creux dans la courbe du départ.",
             verifier: function () {
               var e = banc();
-              var controles = [[e.ta > -7 && e.ta < 6, "l'air de la chambre n'est pas dans les conditions du givre : remettez-le à 2 °C"],
-                [e.hr >= 70, "l'air de la chambre est trop sec : remettez l'humidité à 85 %"]];
+              var controles = [[e.ta > -7 && e.ta < 6, "l'air de la chambre n'est pas dans les conditions du givre : remettez-le à " + GIVRE.ta + " °C"],
+                [e.hr >= 70, "l'air de la chambre est trop sec : remettez l'humidité à " + GIVRE.hr + " %"]];
               if (!e.nDeg) {
                 var errs = controles.filter(function (x) { return !x[0]; }).map(function (x) { return x[1]; });
                 if (!e.marche) errs.push("la PAC est arrêtée : cliquez sur le groupe extérieur");
@@ -3560,7 +3768,7 @@ body.pc-en-cours #defis{display:none!important}
             lib: "Montrez au professeur, sur la courbe de la centrale et le schéma, qui chauffe la maison la nuit : d'où vient l'énergie, et ce qui décide de lancer l'appoint.",
             attendus: ["la sonde extérieure et la loi d'eau fixent le départ ; la PAC module jusqu'à pleine vitesse", "quand la PAC plafonne sous le besoin, le régulateur lance l'appoint, sur le départ", "l'appoint convertit 1 kWh d'électricité en 1 kWh de chaleur, la PAC 2 à 3", "les heures d'appoint et les dégivrages montrés sur la courbe", "chaîne d'information et chaîne d'énergie distinguées"] },
           { type: "choix", competence: "C1-2", lib: "La PAC proposée respecte-t-elle l'article 3 du cahier des charges ?",
-            options: ["oui : l'appoint reste sous 10 % de la chaleur, et le COP de l'installation au-dessus de 2,5", "non : l'appoint dépasse 10 % de la chaleur, ou le COP de l'installation tombe sous 2,5", "oui : sa puissance au catalogue dépasse le besoin de la maison", "non : une PAC ne doit jamais faire appel à l'appoint"],
+            options: ["oui : l'appoint reste sous " + PART_MAX + " % de la chaleur, et le COP de l'installation au-dessus de " + fr(COP_MIN, 1), "non : l'appoint dépasse " + PART_MAX + " % de la chaleur, ou le COP de l'installation tombe sous " + fr(COP_MIN, 1) + "", "oui : sa puissance au catalogue dépasse le besoin de la maison", "non : une PAC ne doit jamais faire appel à l'appoint"],
             bonne: function (ctx) { return conforme(ctx) ? 0 : 1; },
             methode: "Les deux exigences de l'article 3, comparées à vos deux résultats." }
         ],
@@ -3571,26 +3779,26 @@ body.pc-en-cours #defis{display:none!important}
         nom: "Conclusion",             // la partie facultative vient apres : sans ce nom, la brique l'appellerait « Partie 6 »
         recit: "Le propriétaire signe ou non l'offre. Il lira trois phrases, avec leurs nombres.",
         questions: function (ctx) {
-          var c = cfg(ctx), oui = conforme(ctx), pct = val(ctx, "pct", M.pct), Pcf = val(ctx, "Pcf", M.Pcf), part = val(ctx, "part", M.part), copI = val(ctx, "copI", M.copI);
+          var c = cfg(ctx), oui = conforme(ctx), pct = vu(ctx, "pct", M.pct), Pcf = vu(ctx, "Pcf", M.Pcf), part = vu(ctx, "part", M.part), copI = vu(ctx, "copI", M.copI), B = fr(BESOIN, 1), T = fr(TB, 0);
           var o = oui ? [
             "Oui : par la journée de référence, l'appoint ne fournit que " + n(part, 1) + " % de la chaleur, et le COP de l'installation vaut " + n(copI, 2) + " : le cahier des charges est tenu.",
             "Elle garde ses " + c.P + " kW par grand froid : elle est trop grosse pour la maison.",
-            "Par −7 °C, elle ne garde que " + n(pct, 0) + " % de sa puissance du catalogue, " + n(Pcf, 2) + " kW, à peu près les 5,2 kW de la maison : sa marge n'est pas de trop.",
+            "Par " + T + " °C, elle ne garde que " + n(pct, 0) + " % de sa puissance du catalogue, " + n(Pcf, 2) + " kW, à peu près les " + B + " kW de la maison : sa marge n'est pas de trop.",
             "Son COP de " + fr(c.cop, 1) + " au catalogue vaut aussi par grand froid.",
             "Une PAC se choisit sur la puissance qu'elle garde par grand froid, pas sur celle de sa plaque.",
             "L'appoint électrique chauffe avec un COP de 3, comme la PAC."]
             : [
-            "Non : par la journée de référence, l'appoint fournit " + n(part, 1) + " % de la chaleur, plus que les 10 % permis, et le COP de l'installation tombe à " + n(copI, 2) + ".",
-            "Oui : " + c.P + " kW au catalogue couvrent les 5,2 kW de la maison.",
-            "Par −7 °C, elle ne garde que " + n(pct, 0) + " % de sa puissance du catalogue : " + n(Pcf, 2) + " kW pour 5,2 kW demandés.",
+            "Non : par la journée de référence, l'appoint fournit " + n(part, 1) + " % de la chaleur, plus que les " + PART_MAX + " % permis, et le COP de l'installation tombe à " + n(copI, 2) + ".",
+            "Oui : " + c.P + " kW au catalogue couvrent les " + B + " kW de la maison.",
+            "Par " + T + " °C, elle ne garde que " + n(pct, 0) + " % de sa puissance du catalogue : " + n(Pcf, 2) + " kW pour " + B + " kW demandés.",
             "Son COP de " + fr(c.cop, 1) + " au catalogue vaut aussi par grand froid.",
-            "Il faut choisir la PAC sur sa puissance à −7 °C : à " + n(pct, 0) + " %, une PAC de 8 kW en garderait " + n(8 * pct / 100, 1) + " kW.",
+            "Il faut choisir la PAC sur sa puissance à " + T + " °C : à " + n(pct, 0) + " %, une PAC de " + GRANDE + " kW en garderait " + n(GRANDE * pct / 100, 1) + " kW.",
             "L'appoint électrique chauffe avec un COP de 3, comme la PAC."];
           return [
             { type: "multi", essais: 2, lib: "Gardez les phrases qui répondent juste au propriétaire.", options: o, bonne: [0, 2, 4],
               methode: "Une réponse dit oui ou non à l'article 3, avec ses nombres. Une plaque est donnée à +7 °C ; un appoint électrique chauffe à 1 kWh pour 1 kWh." },
             { type: "choix", lib: "Pour chiffrer la facture de l'année, que ne dit pas la journée de référence ?",
-              options: ["le nombre de jours froids de la saison, et le COP de la PAC à mi-saison", "la puissance de la PAC à +7 °C", "le besoin de la maison par −7 °C", "le prix du kilowattheure"], bonne: 0,
+              options: ["le nombre de jours froids de la saison, et le COP de la PAC à mi-saison", "la puissance de la PAC à +7 °C", "le besoin de la maison par " + fr(TB, 0) + " °C", "le prix du kilowattheure"], bonne: 0,
               methode: "Une journée de référence est la plus froide : la facture se fait surtout les autres jours." }
           ];
         },
@@ -3605,23 +3813,23 @@ body.pc-en-cours #defis{display:none!important}
         questions: [
           { type: "nombre", competence: "C2-3", lib: "Le point de bivalence de la PAC proposée : à quelle température extérieure sa puissance égale-t-elle le besoin de la maison ? Interpolez entre vos deux mesures des parties 3 et 4.", unite: "°C",
             attendu: biv, tolerance: 0, toleranceAbsolue: 0.5,
-            methode: "Deux droites : le besoin, GV × (19 − θ), et la PAC, qui passe par vos puissances à +7 °C et à −7 °C. On les égale, et on résout en θ." },
-          { type: "nombre", lib: "Quelle puissance au catalogue, à +7 °C, faudrait-il à une PAC qui couvre seule la maison jusqu'à −7 °C ?", unite: "kW",
+            methode: "Deux droites : le besoin, GV × (19 − θ), et la PAC, qui passe par vos puissances à +7 °C et à " + fr(TB, 0) + " °C. On les égale, et on résout en θ." },
+          { type: "nombre", lib: "Quelle puissance au catalogue, à +7 °C, faudrait-il à une PAC qui couvre seule la maison jusqu'à " + fr(TB, 0) + " °C ?", unite: "kW",
             attendu: function (ctx) { return BESOIN / (val(ctx, "pct", M.pct) / 100); }, tolerance: 0.03,
-            methode: "Votre partie 4 dit quelle part de sa plaque une PAC garde à −7 °C : le besoin à −7 °C doit en être cette part." },
+            methode: "Votre partie 4 dit quelle part de sa plaque une PAC garde à " + fr(TB, 0) + " °C : le besoin à " + fr(TB, 0) + " °C doit en être cette part." },
           { type: "choix", competence: "C12-2", lib: "Dans la gamme du document 6, quelle PAC retenir pour la maison ?",
-            options: GAMME.map(function (g) { return "la PAC de " + g.P + " kW"; }), bonne: 1,
-            methode: "La plus petite de la gamme dont la puissance à A−7/W35 couvre le besoin de la maison à −7 °C." },
-          { type: "nombre", competence: "C12-2", lib: "D'après le catalogue, quelle puissance l'appoint doit-il fournir à −7 °C si l'on pose la PAC de 6 kW ?", unite: "kW",
-            attendu: BESOIN - pCat(6, -7), tolerance: 0, toleranceAbsolue: 0.05,
-            methode: "Ce qui manque à −7 °C : le besoin de la maison moins la puissance de la PAC de 6 kW à A−7/W35." },
-          { type: "action", competence: "C2-3", lib: "Mettez votre choix à l'épreuve : faites la journée de référence avec l'autre PAC de la gamme, entre 6 et 8 kW, celle que la partie 5 n'a pas essayée.",
+            options: GAMME.map(function (g) { return "la PAC de " + g.P + " kW"; }), bonne: 1, ordreFixe: true,   // la gamme, rangee par puissance
+            methode: "La plus petite de la gamme dont la puissance à A" + fr(TB, 0) + "/W35 couvre le besoin de la maison à " + fr(TB, 0) + " °C." },
+          { type: "nombre", competence: "C12-2", lib: "D'après le catalogue, quelle puissance l'appoint doit-il fournir à " + fr(TB, 0) + " °C si l'on pose la PAC de " + PETITE + " kW ?", unite: "kW",
+            attendu: BESOIN - pCat(PETITE, TB), tolerance: 0, toleranceAbsolue: 0.05,
+            methode: "Ce qui manque à " + fr(TB, 0) + " °C : le besoin de la maison moins la puissance de la PAC de " + PETITE + " kW à A" + fr(TB, 0) + "/W35." },
+          { type: "action", competence: "C2-3", lib: "Mettez votre choix à l'épreuve : faites la journée de référence avec l'autre PAC de la gamme, entre " + PETITE + " et " + GRANDE + " kW, celle que la partie 5 n'a pas essayée.",
             aide: "La PAC se choisit sur la carte de la maison ; le plancher et la température de la journée de référence ne changent pas. Vos lectures de la partie 5 sont gardées.",
             verifier: function (ctx) {
               var c = cfg(ctx), x = autre(ctx);
               if (jourAutre(ctx)) return { ok: true, reponse: "journée à " + fr(c.tmoy, 0) + " °C, PAC de " + x + " kW, plancher, faite en entier" };
               var e = P.etatDe("jour"), r = P.reglage, errs = [], lancee = e && (e.jour || e.h > 0);
-              if (r.Pnom !== x) errs.push(r.Pnom === c.P ? "la PAC montée est celle que propose l'installateur : choisissez l'autre de la gamme, entre 6 et 8 kW" : "la PAC montée n'est pas entre 6 et 8 kW");
+              if (r.Pnom !== x) errs.push(r.Pnom === c.P ? "la PAC montée est celle que propose l'installateur : choisissez l'autre de la gamme, entre " + PETITE + " et " + GRANDE + " kW" : "la PAC montée n'est pas entre " + PETITE + " et " + GRANDE + " kW");
               if (r.emetteurs !== "plancher") errs.push("les émetteurs ne sont pas ceux du cahier des charges (document 1)");
               if (r.tmoy !== c.tmoy) errs.push("la température moyenne n'est pas celle de la journée de référence (document 5)");
               if (!e || !e.fini) {
@@ -3637,27 +3845,28 @@ body.pc-en-cours #defis{display:none!important}
             attendu: function (ctx) { return partDe(jourAutre(ctx)); }, tolerance: 0.02, toleranceAbsolue: 0.2,
             methode: "Les compteurs à minuit : la chaleur de l'appoint, qui vaut son électricité, ÷ toute la chaleur du calorimètre, × 100." },
           { type: "choix", lib: "Les deux journées confirment-elles votre dimensionnement à rebours ?",
-            options: ["oui : avec la PAC de 8 kW l'appoint reste sous les 10 % du cahier des charges ; avec celle de 6 kW, il les dépasse",
-              "non : avec la PAC de 8 kW, l'appoint aurait dû ne plus tourner du tout",
-              "non : la PAC de 6 kW tient aussi l'article 3",
+            options: ["oui : avec la PAC de " + GRANDE + " kW l'appoint reste sous les " + PART_MAX + " % du cahier des charges ; avec celle de " + PETITE + " kW, il les dépasse",
+              "non : avec la PAC de " + GRANDE + " kW, l'appoint aurait dû ne plus tourner du tout",
+              "non : la PAC de " + PETITE + " kW tient aussi l'article 3",
               "on ne peut pas conclure : la journée de référence est plus froide que la température de base"],
-            bonne: function (ctx) { var c = cfg(ctx); return partDe(JOURS[cle(6, "plancher", c.tmoy)]) <= PART_MAX ? 2 : 0; },
+            bonne: function (ctx) { var c = cfg(ctx); return partDe(JOURS[cle(PETITE, "plancher", c.tmoy)]) <= PART_MAX ? 2 : 0; },
             methode: "Mettez côte à côte vos deux parts d'appoint, celle de la partie 5 et celle-ci, et comparez-les à l'article 3 du document 1." },
-          { type: "multi", essais: 2, lib: "« Prenons la PAC de 11 kW, pour être tranquille. » Gardez les raisonnements justes.",
-            options: ["La PAC de 8 kW couvre déjà seule la maison jusqu'à la température de base : la 11 kW n'enlèverait qu'une petite part de l'appoint, celle des nuits plus froides que la base ; celle des dégivrages resterait.",
-              "Trop grosse, la 11 kW passerait la plus grande partie de la saison à sa vitesse minimale, ou s'arrêterait et repartirait : des cycles courts, qui usent le compresseur.",
+          { type: "multi", essais: 2, lib: "« Prenons la PAC de " + PLUS + " kW, pour être tranquille. » Gardez les raisonnements justes.",
+            options: ["La PAC de " + GRANDE + " kW couvre déjà seule la maison jusqu'à la température de base : la " + PLUS + " kW n'enlèverait qu'une petite part de l'appoint, celle des nuits plus froides que la base ; celle des dégivrages resterait.",
+              "Trop grosse, la " + PLUS + " kW passerait la plus grande partie de la saison à sa vitesse minimale, ou s'arrêterait et repartirait : des cycles courts, qui usent le compresseur.",
               "Une PAC plus grosse a toujours un meilleur COP.",
-              "La plaque de la 8 kW ne laisse que 2,8 kW de marge sur les 5,2 kW de la maison : c'est trop juste, il faut la 11 kW.",
-              "La 11 kW permettrait de retirer l'appoint électrique de l'installation.",
+              "La plaque de la " + GRANDE + " kW ne laisse que " + fr(GRANDE - BESOIN, 1) + " kW de marge sur les " + fr(BESOIN, 1) + " kW de la maison : c'est trop juste, il faut la " + PLUS + " kW.",
+              "La " + PLUS + " kW permettrait de retirer l'appoint électrique de l'installation.",
               "Une PAC se choisit sur la puissance qu'elle garde à la température de base, puis l'appoint se vérifie sur une journée froide."],
             bonne: [0, 1, 5],
-            methode: "Relisez la note du document 6, et comparez la ligne A−7/W35 au besoin de la maison." }
+            methode: "Relisez la note du document 6, et comparez la ligne A" + fr(TB, 0) + "/W35 au besoin de la maison." }
         ],
-        bravo: "Le calcul retourné, le catalogue et la journée disent la même chose : la PAC de 8 kW, et pas plus."
+        bravo: "Le calcul retourné, le catalogue et la journée disent la même chose : la PAC de " + GRANDE + " kW, et pas plus."
       }
     ],
     fin: "La copie est prête : produisez le fichier, il part dans vos téléchargements."
   });
+  window.u4102.SUJET = SUJET; window.u4102.BESOIN = BESOIN;   // le sujet, pour les scenarios (deux modes)
 })();
 </script>
 <footer class="pied">Simulation hors ligne, sans compte et sans enregistrement. Modèle simplifié : ce qu'il néglige est écrit sous la simulation.</footer>

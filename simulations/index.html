@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Les simulations du BTS</title>
-<meta name="description" content="Des TD sur simulation au format de l&#x27;U41, deux heures sur poste informatique : un dossier technique, des essais sur une installation qu&#x27;on règle et qu&#x27;on mesure avec les vrais instruments, et un fichier noté sur les compétences de l&#x27;épreuve. Chaque page garde sa simulation en accès libre, par le bouton « Explorer la simulation ». Tout s&#x27;ouvre sans réseau.">
+<meta name="description" content="Des TD sur simulation au format de l&#x27;U41, deux heures sur poste informatique : un dossier technique, des essais sur une installation qu&#x27;on règle et qu&#x27;on mesure avec les vrais instruments, en TD avec les indications, ou en évaluation notée par le lien du professeur, avec d&#x27;autres valeurs et un fichier noté sur les compétences de l&#x27;épreuve. Chaque page garde sa simulation en accès libre, par le bouton « Explorer la simulation ». Tout s&#x27;ouvre sans réseau.">
 <meta name="etiquette" content="Par thème">
 <meta name="porte-compte" content="7 simulations">
 <style>
@@ -197,6 +197,13 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-q[data-etat="juste"]{border-color:var(--juste);background:var(--juste-doux)}
 .pc-q[data-etat="faux"]{border-color:var(--faux)}
 .pc-q[data-etat="passe"]{border-style:dashed;opacity:.85}
+/* les deux modes (16 octobre 2026) : en note, une reponse enregistree n'a pas de couleur de verdict */
+.pc-q[data-etat="enregistree"]{border-color:var(--accent);background:var(--accent-doux)}
+.pc-q[data-etat="enregistree"] .pc-q-num{background:var(--accent)}
+.pc-q[data-etat="modifiee"]{border-color:var(--accent);border-style:dashed}
+.pc-bandeau-mode{margin:10px 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--accent-doux);border-radius:var(--r)}
+.pc-note .pc-bandeau-mode{border-left-color:var(--encre)}
+.pc-confirmer{margin-top:10px;padding:10px 12px;border:1px solid var(--encre);border-radius:var(--r)}
 .pc-q-lib{margin:0 0 8px;font-weight:600}
 .pc-q-num{display:inline-grid;place-items:center;width:1.6em;height:1.6em;border-radius:50%;background:var(--encre);color:var(--carte);
   font-size:.8rem;margin-right:.5em;vertical-align:.1em}
@@ -490,7 +497,7 @@ section h2{font-size:1.1rem;margin-top:8px}
 <header class="tete">
 <div class="surtitre">BTS FED option C · génie climatique</div>
 <h1>Les simulations du BTS</h1>
-<p class="chapeau">Des TD sur simulation au format de l'U41, deux heures sur poste informatique : un dossier technique, des essais sur une installation qu'on règle et qu'on mesure avec les vrais instruments, et un fichier noté sur les compétences de l'épreuve. Chaque page garde sa simulation en accès libre, par le bouton « Explorer la simulation ». Tout s'ouvre sans réseau.</p>
+<p class="chapeau">Des TD sur simulation au format de l'U41, deux heures sur poste informatique : un dossier technique, des essais sur une installation qu'on règle et qu'on mesure avec les vrais instruments, en TD avec les indications, ou en évaluation notée par le lien du professeur, avec d'autres valeurs et un fichier noté sur les compétences de l'épreuve. Chaque page garde sa simulation en accès libre, par le bouton « Explorer la simulation ». Tout s'ouvre sans réseau.</p>
 </header>
 <section><h2>Les TD sur simulation, au format de l'U41 · deux heures sur poste informatique</h2><div class="grille"><a class="carte-sim" href="chaudiere-condensation.html#u41"><span class="code">U41-01</span><span class="nom">La chaudière et les radiateurs conservés</span><span class="quoi">CCTP et mise en service, réglage de la combustion, condenser avec des radiateurs 70/50 : la journée froide contre la journée moyenne</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="pac-cop.html#u41"><span class="code">U41-02</span><span class="nom">La pompe à chaleur et le grand froid</span><span class="quoi">la plaque à +7 °C contre le besoin à −7 °C, le givre, l'appoint et le COP de l'installation</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="banc-froid.html#u41"><span class="code">U41-03</span><span class="nom">La pompe à chaleur du bureau d'accueil</span><span class="quoi">le cycle sur le diagramme enthalpique, la puissance à la température de base, une panne à diagnostiquer</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="cta-air-humide.html#u41"><span class="code">U41-04</span><span class="nom">L'air du centre culturel</span><span class="quoi">le débit mesuré selon le CCTP, l'air neuf par personne, l'humidité, la chaleur latente de la batterie froide</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="regulation-loi-d-eau.html#u41"><span class="code">U41-05</span><span class="nom">La réception de la régulation</span><span class="quoi">le régulateur livré en P contre le CCTP, le PI, la loi d'eau calculée qu'il faut régler à l'usage</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="reseau-hydraulique.html#u41"><span class="code">U41-06</span><span class="nom">Le bureau du bout du couloir</span><span class="quoi">le point de fonctionnement mesuré et recalculé, les débits à la valise d'équilibrage, le gros circulateur proposé contre l'équilibrage des vannes</span><span class="origine">TD sur simulation · hors ligne</span></a><a class="carte-sim" href="deperditions-logement.html#u41"><span class="code">U41-07</span><span class="nom">L'audit de la maison de 1975</span><span class="quoi">le mur au banc et son refend à la caméra, l'essai de co-chauffage et la porte soufflante, le bilan à la base : l'air neuf avant les murs</span><span class="origine">TD sur simulation · hors ligne</span></a></div></section>
 <footer class="pied">Simulations hors ligne, sans compte et sans enregistrement. Chaque page dit sous la simulation ce que son modèle simplifie.</footer>
