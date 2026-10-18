@@ -1163,7 +1163,10 @@ var Sim = (function () {
            lire: function (tPlanifie, tDebut) -> ligne, periodes, valeur, durees, duree, trace: [cle1, cle2],
            nomFichier, surChange }
      « jours: true » sur un temps en heures : le tableau et l'axe ecrivent « J8 · 10 h 25 » au lieu de
-     « 178,42 h », illisible passe le premier jour (14 octobre 2026) ; la copie et le CSV gardent les heures. */
+     « 178,42 h », illisible passe le premier jour (14 octobre 2026) ; la copie et le CSV gardent les heures.
+     « axeCommun: true » : les deux courbes tracees partagent la meme echelle, calculee sur les deux (17 octobre
+     2026, la chaine du froid : deux sondes de temperature sur deux axes differents semblaient se croiser a 0 °C
+     alors que l'eau salee etait a −6 °C). Pour deux voies de meme grandeur ; sans l'option, chacune a son axe. */
   var COULEURS_VOIES = ["--accent", "--faux"];
   function centrale(parent, o) {
     var lignes = [], actif = false, prochain = null, debut = null, depart = 0, dernier = 0, tCourant = 0;
@@ -1198,8 +1201,8 @@ var Sim = (function () {
     var pastille = function (i) { return el("span", { classe: "centrale-pastille", style: "background:" + css(COULEURS_VOIES[i]) }); };
     var pastilles = [pastille(0), pastille(1)];
     zone.appendChild(el("div", { classe: "centrale-traces" }, [
-      el("label", null, [pastilles[0], el("span", { texte: "Courbe 1, à gauche" }), selects[0]]),
-      el("label", null, [pastilles[1], el("span", { texte: "Courbe 2, à droite" }), selects[1]])
+      el("label", null, [pastilles[0], el("span", { texte: o.axeCommun ? "Courbe 1" : "Courbe 1, à gauche" }), selects[0]]),
+      el("label", null, [pastilles[1], el("span", { texte: o.axeCommun ? "Courbe 2, même échelle" : "Courbe 2, à droite" }), selects[1]])
     ]));
     /* Le canevas se dessine a la largeur reelle de son cadre : sur un telephone, les graduations
        restent lisibles au lieu d'etre reduites de moitie. */
@@ -1267,15 +1270,15 @@ var Sim = (function () {
       return (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * p;
     }
     function bornes(cle) {
-      var a = Infinity, b = -Infinity;
-      lignes.forEach(function (l) { var y = l[cle]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } });
+      var cles = [].concat(cle), a = Infinity, b = -Infinity;      // une cle, ou plusieurs pour un axe commun
+      lignes.forEach(function (l) { cles.forEach(function (c) { var y = l[c]; if (typeof y === "number" && isFinite(y)) { a = Math.min(a, y); b = Math.max(b, y); } }); });
       if (!isFinite(a)) return null;
       // Une etendue minimale : en regime etabli, quelques dixiemes de bruit prenaient toute
       // la hauteur et une courbe plate paraissait agitee (releve par l'utilisateur sur U41-07,
       // le 15 octobre 2026). 10 % de la valeur lue et au moins une unite, centres sur les
       // mesures ; une voie peut fixer la sienne, etendueMin.
-      var v = voies.filter(function (q) { return q.cle === cle; })[0];
-      var mini = v && v.etendueMin !== undefined ? v.etendueMin : Math.max(Math.max(Math.abs(a), Math.abs(b)) * 0.1, 1);
+      var v = voies.filter(function (q) { return cles.indexOf(q.cle) >= 0 && q.etendueMin !== undefined; })[0];
+      var mini = v ? v.etendueMin : Math.max(Math.max(Math.abs(a), Math.abs(b)) * 0.1, 1);
       if (b - a < mini) { var mil = (a + b) / 2; a = mil - mini / 2; b = mil + mini / 2; }
       var marge = (b - a) * 0.04; a -= marge; b += marge;
       var pas = pasJoli(b - a, 5); return { min: Math.floor(a / pas) * pas, max: Math.ceil(b / pas) * pas, pas: pas };
@@ -1307,9 +1310,10 @@ var Sim = (function () {
       }
       ctx.fillStyle = css("--encre"); ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.textAlign = "right"; ctx.textBaseline = "bottom";
       ctx.fillText(titreCol(TP), larg - md, haut - 3);
+      var bCommun = o.axeCommun ? bornes(trace.filter(Boolean)) : null;
       trace.forEach(function (cle, i) {
         if (!cle) return;
-        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bornes(cle), coul = css(COULEURS_VOIES[i]);
+        var v = voies.filter(function (q) { return q.cle === cle; })[0], b = bCommun || bornes(cle), coul = css(COULEURS_VOIES[i]);
         ctx.font = "600 12px system-ui, Segoe UI, Arial, sans-serif"; ctx.fillStyle = coul; ctx.textBaseline = "top";
         ctx.textAlign = i ? "right" : "left"; ctx.fillText(v.titre + (v.unite ? " (" + v.unite + ")" : ""), i ? larg - 6 : 6, 5);
         if (!b) return;

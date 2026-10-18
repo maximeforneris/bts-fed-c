@@ -55,7 +55,7 @@
 <tbody>
 <tr>
 <td>Débit d’un réseau, d’après la puissance</td>
-<td>Q = P / (1 163 × ΔT)</td>
+<td>Q = P / (1 163 × ΔT)</td>
 <td>Q en m³/h, P en W, ΔT en K</td>
 </tr>
 <tr>
@@ -80,13 +80,13 @@
 </tr>
 <tr>
 <td>Conversion de pression</td>
-<td>1 mCE = 9 810 Pa</td>
-<td>1 bar ≈ 10 mCE</td>
+<td>1 mCE = 9 810 Pa</td>
+<td>1 bar ≈ 10 mCE</td>
 </tr>
 </tbody>
 </table></div>
 <div class="cle">
-<p>Deux critères valident un tronçon, jamais un seul : la <strong>vitesse</strong> sous 1 m/s en habitation, et la <strong>perte linéique</strong> sous 200 Pa/m environ.</p>
+<p>Deux critères valident un tronçon, jamais un seul : la <strong>vitesse</strong> sous 1 m/s en habitation, et la <strong>perte linéique</strong> sous 200 Pa/m environ.</p>
 </div>
 <h2 id="seance-7-les-reseaux">Séance 7 · les réseaux</h2>
 <p>Bitube, monotube, pieuvre. Le choix ne se joue pas sur la longueur de tube mais sur ce qu’on veut pouvoir régler, et sur l’endroit où passent les raccords.</p>
@@ -115,7 +115,7 @@
 <div class="outil" data-outil="ecs">
 
 </div>
-<p>Les températures ne se négocient pas : <strong>60 °C au ballon, 55 °C en tout point du bouclage, 50 °C maximum au puisage</strong>. La légionelle prolifère entre 25 et 45 °C dans une eau stagnante ; au-dessus de 50 °C, on brûle en quelques secondes.</p>
+<p>Les températures ne se négocient pas : <strong>60 °C au ballon, 50 °C au moins en tout point du bouclage, 50 °C maximum au puisage</strong>. La légionelle prolifère entre 25 et 45 °C dans une eau stagnante ; au-dessus de 50 °C, on brûle en quelques secondes.</p>
 <h2 id="vous-verifier">Vous vérifier</h2>
 <div class="quiz">
 <ul>
@@ -131,21 +131,21 @@
 <li>Brider une vanne d’équilibrage fait que le débit : <strong>diminue</strong> | augmente</li>
 <li>L’énergie d’une journée d’ECS dépend : <strong>du volume total</strong> | de l’heure de pointe</li>
 <li>Le stockage permet de réduire : <strong>la puissance</strong> | l’énergie</li>
-<li>Chauffer 1 000 L de 10 à 60 °C demande environ : <strong>58 kWh</strong> | 5,8 kWh</li>
-<li>La température minimale en tout point du bouclage est de : <strong>55 °C</strong> | 45 °C</li>
+<li>Chauffer 1 000 L de 10 à 60 °C demande environ : <strong>58 kWh</strong> | 5,8 kWh</li>
+<li>La température minimale en tout point du bouclage est de : <strong>50 °C</strong> | 45 °C</li>
 </ul>
 </div>
 <h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">D&#39;où vient la formule de Blasius</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte linéique s’écrit toujours <strong>j = λ × ρ v² / (2 d)</strong>, quel que soit le fluide. Toute la difficulté tient dans λ, le coefficient de perte de charge, qui dépend du régime d’écoulement.</p>
-<p>Ce régime se caractérise par le <strong>nombre de Reynolds</strong> : <strong>Re = v × d / ν</strong>, avec ν = 0,474 × 10⁻⁶ m²/s pour l’eau à 60 °C.</p>
+<p>Ce régime se caractérise par le <strong>nombre de Reynolds</strong> : <strong>Re = v × d / ν</strong>, avec ν = 0,474 × 10⁻⁶ m²/s pour l’eau à 60 °C.</p>
 <ul>
-<li><strong>Re &lt; 2 000</strong> : laminaire, λ = 64/Re. Presque jamais rencontré en chauffage.</li>
-<li><strong>Re &gt; 4 000</strong> : turbulent. Pour un tube lisse, <strong>λ = 0,3164 / Re^0,25</strong> : c’est Blasius, valable jusqu’à Re ≈ 100 000.</li>
+<li><strong>Re &lt; 2 000</strong> : laminaire, λ = 64/Re. Presque jamais rencontré en chauffage.</li>
+<li><strong>Re &gt; 4 000</strong> : turbulent. Pour un tube lisse, <strong>λ = 0,3164 / Re^0,25</strong> : c’est Blasius, valable jusqu’à Re ≈ 100 000.</li>
 </ul>
 <p>L’abaque du polycopié n’est rien d’autre que le tracé de cette formule pour quelques diamètres. L’outil de cette page la calcule directement, ce qui permet des diamètres que l’abaque ne porte pas.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi le carré, alors que l&#39;exposant réel est 1,75</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La vitesse est proportionnelle au débit, donc <strong>v²</strong> donne déjà un carré. Mais λ dépend aussi du débit : par Blasius il varie comme Re^−0,25, donc comme Q^−0,25.</p>
 <p>Le produit λv² varie donc comme <strong>Q^1,75</strong>, et non comme Q².</p>
-<p>On retient 2 pour trois raisons : l’écart est faible sur la plage utile, de l’ordre de 5 % ; les pertes singulières, elles, sont bien en Q² ; et une parabole se trace à la main. Un logiciel garde l’exposant exact.</p>
+<p>On retient 2 pour trois raisons : l’écart est faible sur la plage utile, de l’ordre de 5 % ; les pertes singulières, elles, sont bien en Q² ; et une parabole se trace à la main. Un logiciel garde l’exposant exact.</p>
 <p>C’est l’une des rares approximations du programme dont l’écart est mesurable, mais il reste sous l’incertitude des longueurs équivalentes, qui sont elles-mêmes des valeurs de catalogue.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le tronçon le plus défavorisé, et pourquoi on dégrade les autres</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un réseau réel comporte des dizaines de circuits en parallèle. Le circulateur ne peut fournir qu’<strong>une seule</strong> hauteur manométrique, la même pour tous.</p>
 <p>Le bureau d’études calcule donc les pertes de charge de chaque branche et retient la plus élevée, le <strong>tronçon le plus défavorisé</strong>, presque toujours l’émetteur le plus éloigné. La pompe est dimensionnée sur lui.</p>
@@ -157,7 +157,7 @@
 <li><strong>Pression constante</strong> : la hauteur est maintenue quel que soit le débit. Pour un réseau à forte perte de charge fixe.</li>
 <li><strong>Pression proportionnelle</strong> : la consigne baisse avec le débit. Pour un réseau à robinets thermostatiques, où les branches se ferment une à une.</li>
 </ul>
-<p>L’enjeu est la consommation : la puissance absorbée varie comme le <strong>cube</strong> du débit. Réduire le débit de 20 % réduit la consommation de moitié.</p>
+<p>L’enjeu est la consommation : la puissance absorbée varie comme le <strong>cube</strong> du débit. Réduire le débit de 20 % réduit la consommation de moitié.</p>
 <p>Sans cette régulation, la fermeture des thermostatiques en mi-saison fait monter la pression dans les branches restées ouvertes, d’où les sifflements de novembre.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Instantané, accumulation, semi-accumulation</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
 <colgroup>
@@ -197,19 +197,19 @@
 </table></div>
 <p>Le sujet U41 2026 impose une production <strong>instantanée</strong> pour les douches des ateliers, non pour la performance, mais pour supprimer tout volume stagnant. L’ inconvénient est assumé : une puissance de pointe très élevée, qui se paie sur l’abonnement au réseau de chaleur.</p>
 <p>C’est un bon exemple de contrainte non technique qui décide d’un choix technique.</p></div></details>
-<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que coûte vraiment un bouclage</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une boucle de distribution perd de la chaleur en permanence, chauffage arrêté compris. Le calcul est simple : une longueur, une déperdition linéique de 8 à 15 W/m selon le diamètre et le calorifuge, et <strong>8 760 heures par an</strong>.</p>
-<p>Cent mètres de boucle à 10 W/m, c’est 1 kW en continu, soit près de <strong>8 800 kWh par an</strong>, souvent davantage que l’eau chaude réellement puisée dans un petit tertiaire.</p>
+<details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que coûte vraiment un bouclage</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une boucle de distribution perd de la chaleur en permanence, chauffage arrêté compris. Le calcul est simple : une longueur, une déperdition linéique de 8 à 15 W/m selon le diamètre et le calorifuge, et <strong>8 760 heures par an</strong>.</p>
+<p>Cent mètres de boucle à 10 W/m, c’est 1 kW en continu, soit près de <strong>8 800 kWh par an</strong>, souvent davantage que l’eau chaude réellement puisée dans un petit tertiaire.</p>
 <p>Trois leviers, dans cet ordre : <strong>raccourcir</strong> la boucle en rapprochant la production des points de puisage, <strong>calorifuger</strong> correctement y compris les supports et les vannes, puis seulement <strong>réguler</strong> le circulateur.</p>
 <p>C’est l’un des rares postes où la conception pèse plus que l’équipement : aucun ballon performant ne rattrape une boucle mal tracée.</p></div></details>
 </div><h2 id="s-entrainer">S’entraîner</h2>
 <p>Les valeurs attendues ne sont pas dans la page : elle vous dit si c’est juste et vous rappelle la méthode. Le corrigé reste dans le polycopié.</p>
 <section class="exo" id="SEQ2-e1" data-exo="SEQ2-e1" data-type="calcul" data-savoir="A3-1" data-a="IXgueGB4OTs2OS82eHZ4LHhga3RpbWx2eC41NnhgaXRqdngveGB4NwYvamo4aXUyeCc="><p class="k">Exercice · A3-1</p><h4>Le débit d’un départ</h4><div class="enonce">
 
-<p>Un départ de sous-station transporte <strong>24 kW</strong> en régime <strong>70/55</strong>. Quel débit d’eau faut-il ?</p>
+<p>Un départ de sous-station transporte <strong>24 kW</strong> en régime <strong>70/55</strong>. Quel débit d’eau faut-il ?</p>
 </div><div class="indice" hidden>Q = P / (1 163 × ΔT). Le régime donne l’écart : c’est la différence entre le départ et le retour. Attention, la formule veut P en watts.</div></section>
 <section class="exo" id="SEQ2-e2" data-exo="SEQ2-e2" data-type="lecture" data-savoir="C12-2" data-a="IXgueGB4Nj85Li8oP3h2eDt4YAF4HhRob3h2eB4UemhveHZ4aG94dng+NGhveHZ4Nj96HhR6aG94Byc="><p class="k">Exercice · C12-2</p><h4>Choisir le diamètre</h4><div class="enonce">
 
-<p>Ce départ transporte 1,38 m³/h. On veut rester <strong>sous 1 m/s</strong>.</p>
+<p>Ce départ transporte 1,38 m³/h. On veut rester <strong>sous 1 m/s</strong>.</p>
 <div class="enveloppe-tbl"><table>
 <thead>
 <tr>
@@ -221,23 +221,23 @@
 <tbody>
 <tr>
 <td>DN 16</td>
-<td style="text-align: right;">16 mm</td>
-<td style="text-align: right;">2,01 cm²</td>
+<td style="text-align: right;">16 mm</td>
+<td style="text-align: right;">2,01 cm²</td>
 </tr>
 <tr>
 <td>DN 20</td>
-<td style="text-align: right;">20 mm</td>
-<td style="text-align: right;">3,14 cm²</td>
+<td style="text-align: right;">20 mm</td>
+<td style="text-align: right;">3,14 cm²</td>
 </tr>
 <tr>
 <td>DN 25</td>
-<td style="text-align: right;">25 mm</td>
-<td style="text-align: right;">4,91 cm²</td>
+<td style="text-align: right;">25 mm</td>
+<td style="text-align: right;">4,91 cm²</td>
 </tr>
 <tr>
 <td>DN 32</td>
-<td style="text-align: right;">32 mm</td>
-<td style="text-align: right;">8,04 cm²</td>
+<td style="text-align: right;">32 mm</td>
+<td style="text-align: right;">8,04 cm²</td>
 </tr>
 </tbody>
 </table></div>
@@ -245,7 +245,7 @@
 </div><div class="indice" hidden>v = Q / (0,36 × S), avec S en cm² et Q en m³/h. Essayez le plus petit, montez d’un cran tant que la vitesse dépasse 1 m/s.</div></section>
 <section class="exo" id="SEQ2-e3" data-exo="SEQ2-e3" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2tsaWp0anZ4LjU2eGBodGp2eC94YHgNMngn"><p class="k">Exercice · B3-2</p><h4>L’énergie d’un ballon</h4><div class="enonce">
 
-<p>Un ballon de <strong>200 litres</strong> est réchauffé de 10 °C à 60 °C. Quelle énergie faut-il lui fournir ?</p>
+<p>Un ballon de <strong>200 litres</strong> est réchauffé de 10 °C à 60 °C. Quelle énergie faut-il lui fournir ?</p>
 </div><div class="indice" hidden>E = V × 1,163 × ΔT, avec V en litres et E en Wh. Le 1,163 est la capacité de l’eau exprimée en Wh par litre et par kelvin.</div></section>
 <section class="exo" id="SEQ2-e4" data-exo="SEQ2-e4" data-type="justification" data-savoir="A3-3" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A3-3</p><h4>Le circulateur va trop vite</h4><div class="enonce">
 
