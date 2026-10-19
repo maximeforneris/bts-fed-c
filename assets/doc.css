@@ -180,7 +180,7 @@
 @media (min-width:1280px){
   .doc-corps{grid-template-columns:var(--col-plan,var(--doc-plan)) minmax(0,1fr)
                                    var(--col-som,var(--doc-som))}
-  .doc-som-ferme{--col-som:0px}
+  .doc-som-ferme,.doc-sans-som{--col-som:0px}
   .doc-som-ferme .doc-som{display:none}
   .doc-som .fermer{display:none}
 }

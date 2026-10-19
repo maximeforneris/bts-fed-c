@@ -252,7 +252,11 @@
 
   /* ─── 4. le sommaire de la page, avec suivi de la lecture ────────── */
   var titres = [].slice.call(page.querySelectorAll("h2[id]"));
-  if (titres.length > 1) {
+  /* Pas de sommaire sur l'accueil : ses deux ou trois sections se voient d'un
+     coup d'oeil (demande le 19 octobre 2026). L'accueil est la seule page a la
+     racine sans data-page qui porte des sections. */
+  var accueilSite = !ici && racine === "";
+  if (titres.length > 1 && !accueilSite) {
     var p = document.createElement("p");
     p.textContent = "Sur cette page";
     som.appendChild(p);
@@ -282,6 +286,7 @@
     som.style.display = "none";
     boutonSom.style.display = "none";
     som.dataset.vide = "1";
+    document.documentElement.classList.add("doc-sans-som");   /* la colonne ne reste pas vide */
   }
 
   /* le bouton de fermeture du sommaire, quand il est en tiroir */
