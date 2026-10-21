@@ -281,6 +281,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 @keyframes pc-pulse{50%{box-shadow:0 0 0 5px var(--accent-doux)}}
 .pc-methode{margin:6px 0 0;font-size:.92rem;color:var(--encre2);border-left:3px solid var(--trait);padding-left:8px}
 .pc-aide-btn{color:var(--encre2)}
+.pc-aide-btn.pc-confirme{color:var(--accent);border-color:var(--accent);font-weight:700}
 .pc-autonomie{margin:10px 0 0}
 .pc-voile{position:fixed;inset:0;z-index:30;background:rgba(20,20,22,.5);display:grid;place-items:center;padding:16px}
 .pc-prof{width:min(100%,600px);max-height:90vh;overflow:auto;margin:0}
@@ -1621,6 +1622,10 @@ var Sim = (function () {
      - LES VALEURS CHANGENT D'UN MODE A L'AUTRE : Sim.note (vrai en mode note) se lit des le chargement,
        avant que la page tire son sujet ; chaque page y prend d'autres nombres, et ses resultats de calcul
        changent avec eux. Le fichier rendu est CHIFFRE pour le professeur (LA COPIE CHIFFREE, plus bas).
+     - TROIS INDICES EN EVALUATION NOTEE (21 octobre 2026, « c'est trop dur pour les eleves ») : « Voir l'indice »
+       y montre la methode d'une question, jamais la valeur ni le verdict, trois fois au plus pour toute la copie
+       (INDICES_NOTE), apres une confirmation ; le fichier les compte (« Indices : n sur 3 », « avec indice » sur la
+       question), et en CCF un indice vu fait perdre le bonus d'autonomie.
      - En mode note, q.apres et q.fini sont appeles A CHAQUE ENREGISTREMENT, juste ou non, avec le verdict en
        second argument : une page ne doit rien afficher qui en depende (une mesure rappelee seulement si elle
        est juste trahirait le verdict). ctx.note le dit aux scenes.
@@ -1650,6 +1655,7 @@ var Sim = (function () {
      lu des le chargement, avant le tirage du sujet. Une page sans SIM_MODE est en TD. */
   var NOTE_COPIE = window.SIM_MODE === "note";
   var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
+  var INDICES_NOTE = 3;           // les indices d'une evaluation notee, pour toute la copie
   /* LA COPIE CHIFFREE (21 octobre 2026, « de preference un doc chiffre, que je dechiffrerai avec ton aide ») :
      en evaluation notee, le fichier rendu est chiffre pour le professeur. Une cle AES-256-GCM tiree pour la copie
      chiffre le texte ; la cle publique RSA-OAEP (SHA-256) ci-dessous chiffre cette cle. Seule la cle privee, HORS
@@ -1706,7 +1712,7 @@ var Sim = (function () {
     function nomComp(k) { return NOMS[k] || COMPETENCES[k] || U41[k] || k; }
     var niveaux = o.niveaux || ["CAP", "Seconde"];
     var etat = { niveau: niveaux.length === 1 ? niveaux[0] : null, debut: null, courante: -1, ouverte: -1,
-      fiches: [], construites: [], colonnes: [], exporte: false, aides: 0 };
+      fiches: [], construites: [], colonnes: [], exporte: false, aides: 0, indices: [] };
     var donnees = {};                                    // partage entre les phases d'un parcours
     var appels = [];                                     // les fiches des appels lances ou a lancer
     var nPh = o.phases.length;
@@ -1838,7 +1844,7 @@ var Sim = (function () {
     var partir = el("button", { type: "button", classe: "bouton principal pc-partir", texte: NOTE ? "Commencer l'évaluation" : ccf ? "Commencer l'épreuve" : u41 ? "Commencer" : "Accepter la mission" });
     /* le mode, dit a l'accueil : en TD, des indications et rien a rendre ; en note, ni verdict ni aide, et un fichier */
     var bandeauMode = el("p", { classe: "pc-bandeau-mode", html: NOTE
-      ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux et ne donne aucune méthode : « Enregistrer » garde votre réponse, " +
+      ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux. <b>Trois indices</b> pour toute l'évaluation : « Voir l'indice » montre la méthode d'une question, jamais la valeur" + (ccf ? ", et fait perdre le bonus d'autonomie" : "") + ". « Enregistrer » garde votre réponse, " +
         "que vous pouvez changer jusqu'à rendre votre copie. Rendre la copie produit le fichier pour le professeur et verrouille tout."
       : "<b>TD, non noté.</b> La page dit juste ou pas encore et donne la méthode quand ça coince. À la fin, un bilan à l'écran : " +
         "rien à rendre. L'évaluation notée se fait dans l'espace d'évaluation, avec la clé que donne le professeur, et d'autres valeurs." });
@@ -1897,7 +1903,7 @@ var Sim = (function () {
         grille,
         el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
         el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
-        el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions. En évaluation, la page ne donne aucune aide."
+        el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions sans voir d'indice. Trois indices au plus pour toute l'évaluation."
           : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans voir d'indice. « Voir l'indice » n'est pas interdit, et ne retire rien d'autre." }),
         bandeauMode, choixNiv, partir] : [
         el("h2", { texte: "L'U41 et ce TD" }),
@@ -1910,7 +1916,7 @@ var Sim = (function () {
         aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
           "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
         nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
-        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Voir l'indice »</b> donne la méthode, jamais la valeur. Il ne retire rien à la question ; le bilan compte les indices vus." }),
+        el("p", { classe: "consigne", html: NOTE ? "<b>Trois indices</b> pour toute l'évaluation : « Voir l'indice » donne la méthode d'une question, jamais la valeur, et le fichier les compte." : "<b>« Voir l'indice »</b> donne la méthode, jamais la valeur. Il ne retire rien à la question ; le bilan compte les indices vus." }),
         bandeauMode, choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
     } else {
@@ -2110,11 +2116,12 @@ var Sim = (function () {
       var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
       /* « Voir l'indice » (21 octobre 2026, demande de l'utilisateur) : la methode, a cote de « Verifier », des la
          premiere lecture. En CCF et au BTS, c'est l'aide de l'epreuve : elle se compte, et le bonus d'autonomie s'en va.
-         En evaluation notee, ni indice ni aide. */
-      var bAide = q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", texte: "Voir l'indice" }) : null;
+         En evaluation notee, trois pour toute la copie, apres confirmation (INDICES_NOTE). */
+      var bAide = q.methode ? el("button", { type: "button", classe: "bouton pc-aide-btn", texte: "Voir l'indice" }) : null;
       var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
       var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: (q.methode || "") + (epreuve && q.methode ?
         " <span class=\"pc-lu\">Indice vu : il compte comme une aide" + (ccf ? ", et le bonus d'autonomie s'en va" : "") + ".</span>" : "") });
+      if (bAide && NOTE) { etat.indices.push({ b: bAide, f: f }); majIndices(); }
       bloc.appendChild(champ);
       bloc.appendChild(el("div", { classe: "rangee" }, [bVerif, bAide, bPasser]));
       bloc.appendChild(retour);
@@ -2219,8 +2226,17 @@ var Sim = (function () {
       bVerif.addEventListener("click", verifier);
       if (bAide) bAide.addEventListener("click", function () {
         if (f.aide) return;
+        if (NOTE) {                                        // un indice compte : il se confirme, et il n'y en a que trois
+          if (etat.rendu || etat.aides >= INDICES_NOTE) return;
+          if (!bAide.classList.contains("pc-confirme")) {
+            bAide.classList.add("pc-confirme");
+            bAide.textContent = INDICES_NOTE - etat.aides > 1 ? "Confirmer : utiliser 1 des " + (INDICES_NOTE - etat.aides) + " indices restants" : "Confirmer : utiliser le dernier indice";
+            return;
+          }
+        }
         f.aide = true; etat.aides++;
         bAide.hidden = true; methodeVue.hidden = false;
+        if (NOTE) majIndices();
       });
       if (NOTE && etat.rendu) f.verrouiller();             // une partie ouverte apres le rendu : deja fermee
       bPasser.addEventListener("click", function () {
@@ -2421,6 +2437,16 @@ var Sim = (function () {
       racine.scrollIntoView({ block: "start", behavior: "smooth" });
     }
 
+    /* les boutons d'indice d'une evaluation notee disent ce qui reste, et s'eteignent a zero */
+    function majIndices() {
+      var r = INDICES_NOTE - etat.aides;
+      etat.indices.forEach(function (x) {
+        if (x.f.aide) return;
+        x.b.classList.remove("pc-confirme");
+        x.b.disabled = r <= 0 || !!etat.rendu;
+        x.b.textContent = r <= 0 ? "Plus d'indice (" + INDICES_NOTE + " vus)" : "Voir l'indice · " + r + " restant" + (r > 1 ? "s" : "");
+      });
+    }
     /* ---- l'autonomie, au sens de l'epreuve : ni aide demandee, ni question passee ---- */
     function autonomie() {
       var passees = 0, restent = 0;
@@ -2429,7 +2455,8 @@ var Sim = (function () {
       var merite = !etat.aides && !passees && !restent;
       if (NOTE) {                                          // en mode note : ni aide ni question passee, seulement ce qui reste sans reponse
         var tn = restent ? restent + " question" + (restent > 1 ? "s" : "") + " sans réponse" : "toutes les questions ont une réponse";
-        return { merite: merite, texte: u41 ? "aucune aide en évaluation, " + tn : (merite ? "bonus +0,25 mérité — " : "pas de bonus — ") + tn };
+        var ti = etat.aides ? etat.aides + " indice" + (etat.aides > 1 ? "s" : "") + " sur " + INDICES_NOTE : "aucun indice";
+        return { merite: merite, texte: u41 ? ti + ", " + tn : (merite ? "bonus +0,25 mérité — " : "pas de bonus — ") + ti + ", " + tn };
       }
       if (u41) {
         var u = [etat.aides ? etat.aides + " aide" + (etat.aides > 1 ? "s" : "") + " demandée" + (etat.aides > 1 ? "s" : "") : "aucune aide demandée",
@@ -2624,6 +2651,7 @@ var Sim = (function () {
       if (!NOTE || etat.rendu) return;
       etat.rendu = true;
       etat.fiches.forEach(function (fs) { (fs || []).forEach(function (f) { if (f.verrouiller) f.verrouiller(); }); });
+      majIndices();
       majChemin(); majTete();
     }
     function fabriquer(id) {
@@ -2633,10 +2661,11 @@ var Sim = (function () {
         "Page       : " + (ccf ? "Entraînement au CCF " : u41 ? "TD sur simulation " : "Parcours ") + (o.code ? o.code + " · " : "") + texteSeul(o.titre) + " · " + etat.niveau,
         "Identifiant: " + id,
         "Date       : " + deux(d.getDate()) + "/" + deux(d.getMonth() + 1) + "/" + d.getFullYear() + " à " + deux(d.getHours()) + "h" + deux(d.getMinutes()),
-        "Mode       : " + (NOTE ? "évaluation notée, sans indication" : "TD, non noté"),
+        "Mode       : " + (NOTE ? "évaluation notée, " + INDICES_NOTE + " indices au plus" : "TD, non noté"),
         NOTE ? "Bilan      : " + comptesNote().n + " réponses enregistrées sur " + comptesNote().m + ", en " + minutes() + " min"
           : "Bilan      : " + totalEtoiles() + " étoiles sur " + 3 * nOblig + ", en " + minutes() + " min" +
           (etoilesPlus() ? ", et " + etoilesPlus() + " de plus en partie facultative" : "")];
+      if (NOTE) out.push("Indices    : " + etat.aides + " sur " + INDICES_NOTE);
       if (ccf) out.push("Autonomie  : " + autonomie().texte);
       if (u41) out.push("Grille     : BTS FED · U41", "Aides      : " + autonomie().texte);
       out.push(new Array(64).join("="), "");
@@ -2661,12 +2690,12 @@ var Sim = (function () {
           g.items.forEach(function (j, n) {
             var q = qs[j], f = fs && fs[j];
             var etatCase, rep;
-            if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)"; }
+            if (!f || !f.fini) { etatCase = "non vérifié"; rep = "(non faite)" + (f && f.aide ? ", avec indice" : ""); }
             else {
               etatCase = f.note ? "juste" : "faux";
               var det = NOTE ? "enregistrée à " + heure(f.heureEnr) + (f.modifiee ? ", modifiée ensuite sans être enregistrée" : "") : f.passe ? (f.essais ? "passée après " + f.essais + " essai" + (f.essais > 1 ? "s" : "") : "passée sans réponse")
                 : (f.essais === 1 ? "juste au 1er essai" : "trouvée au " + f.essais + "e essai");
-              if (f.aide) det += ", avec aide";
+              if (f.aide) det += NOTE ? ", avec indice" : ", avec aide";
               rep = f.passe && !f.essais ? det : (f.reponse || "(vide)") + " — " + det;
             }
             out.push("  " + (n + 1) + ". " + texteSeul(q.lib));
