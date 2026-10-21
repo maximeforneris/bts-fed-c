@@ -265,7 +265,7 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-mode span{font-size:.85rem;color:var(--encre2)}
 .pc-mode[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-doux)}
 .pc-en-cours .pc-modes{display:none}
-@media (max-width:480px){.pc-modes{grid-template-columns:1fr}}
+@media (max-width:480px){.pc-modes{grid-template-columns:1fr}.pc-info{flex-wrap:wrap}}
 .pc-problematique{margin:12px 0 0;padding:10px 12px;border-left:4px solid var(--accent);background:var(--carte2);border-radius:0 var(--r) var(--r) 0}
 .pc-grille{list-style:none;margin:10px 0;padding:0;border-top:1px solid var(--trait2)}
 .pc-grille li{padding:7px 0;border-bottom:1px solid var(--trait2)}
@@ -478,6 +478,7 @@ h1,h2,h3{font-family:Barlow,"Helvetica Neue",Arial,sans-serif}
 
 </style>
 <script>
+window.SIM_MODE = "td";
 /* Entrainement · les nombres a la francaise, dans les deux sens.
    Ecrire : virgule decimale, espace fine insecable entre les milliers, ecriture
    scientifique au-dela de dix millions ou en deca d'un millieme.
@@ -1569,8 +1570,9 @@ var Sim = (function () {
        (le bandeau du haut l'y mene depuis n'importe quelle partie) : NA, ECA ou A. Dans le fichier,
        un bloc EXERCICE : 0, 1 ou 2 points sur 2. Un appel lance mais non evalue ne compte pas ; un
        appel jamais lance compte 0. Les appels se posent dans un tableau de questions, pas une fonction.
-     - L'aide : apres un premier echec, « Demander de l'aide » montre la methode. Elle ne retire rien a
-       la question, mais le bonus d'autonomie s'en va, comme en epreuve. Le fichier le dit.
+     - L'indice : « Voir l'indice », a cote de « Verifier », montre la methode des la premiere lecture
+       (21 octobre 2026 ; avant, « Demander de l'aide » apres un premier echec). Il ne retire rien a la
+       question, mais il compte comme une aide : le bonus d'autonomie s'en va, comme en epreuve.
      - « competence » sur une question la sort du bloc de sa partie : une conclusion cotee COM dans la
        partie 4, par exemple.
      LE MODE LIBRE ET LA PAILLASSE : « libre: "#libre" » garde la simulation telle qu'elle etait, et
@@ -1607,15 +1609,18 @@ var Sim = (function () {
      DEUX MODES (16 octobre 2026, demande de l'utilisateur pour la notation) :
      - LE TD, par defaut : tout ce qui precede (juste ou pas encore, methode, « A corriger », aide), mais
        AUCUN FICHIER. La fin est un bilan a l'ecran ; rien a rendre.
-     - LE MODE NOTE, par le lien du professeur : l'adresse qui contient « note » (#note). Ni verdict, ni
+     - LE MODE NOTE, dans l'espace d'evaluation : une COPIE de la page, assemblee avec window.SIM_MODE = "note"
+       et chiffree par la cle d'acces de _commun/evaluation/ (forneris.fr/evaluation/). Les pages publiques sont
+       assemblees en TD (SIM_MODE = "td") et l'adresse ne change plus de mode : le lien #note, du 16 au
+       21 octobre 2026, se passait d'un eleve a l'autre (demande de l'utilisateur, 21 octobre). Ni verdict, ni
        methode, ni aide, ni etoiles ; « Enregistrer » garde la reponse, que l'eleve peut changer jusqu'a
        rendre sa copie. Rendre la copie (produire le fichier, ou en afficher le texte) VERROUILLE tout : le
        fichier porte les verdicts, il ne doit plus servir a se corriger. Une manipulation est jugee telle
        qu'elle est au moment ou on l'enregistre ; une reponse qui attendait une mesure est rejugee au rendu.
        Le mode libre de la page (« Explorer la simulation ») disparait : ses defis disent juste ou pas.
      - LES VALEURS CHANGENT D'UN MODE A L'AUTRE : Sim.note (vrai en mode note) se lit des le chargement,
-       avant que la page tire son sujet ; chaque page y prend d'autres nombres. Changer l'adresse d'un mode
-       a l'autre recharge la page.
+       avant que la page tire son sujet ; chaque page y prend d'autres nombres, et ses resultats de calcul
+       changent avec eux. Le fichier rendu est CHIFFRE pour le professeur (LA COPIE CHIFFREE, plus bas).
      - En mode note, q.apres et q.fini sont appeles A CHAQUE ENREGISTREMENT, juste ou non, avec le verdict en
        second argument : une page ne doit rien afficher qui en depende (une mesure rappelee seulement si elle
        est juste trahirait le verdict). ctx.note le dit aux scenes.
@@ -1641,10 +1646,39 @@ var Sim = (function () {
     "C2-3": "Décrire le fonctionnement du système", "C1-2": "Exprimer les contraintes"
   };
   var ORDRE_U41 = ["C12-1", "C12-2", "C4-3", "C2-1", "C2-2", "C2-3", "C1-2"];
-  /* le mode note, par l'adresse : #note (ou #ccf-note, #u41-note) ; lu des le chargement, avant le tirage du sujet */
-  function noteDans(h) { return /(^#|[^a-z])note\b/i.test(h || ""); }
-  var NOTE_ADRESSE = noteDans(location.hash);
+  /* le mode note : fixe par la copie de la page (window.SIM_MODE, pose par l'assembleur), jamais par l'adresse ;
+     lu des le chargement, avant le tirage du sujet. Une page sans SIM_MODE est en TD. */
+  var NOTE_COPIE = window.SIM_MODE === "note";
   var COTES = { NA: "non acquis", ECA: "en cours d'acquisition", A: "acquis" };
+  /* LA COPIE CHIFFREE (21 octobre 2026, « de preference un doc chiffre, que je dechiffrerai avec ton aide ») :
+     en evaluation notee, le fichier rendu est chiffre pour le professeur. Une cle AES-256-GCM tiree pour la copie
+     chiffre le texte ; la cle publique RSA-OAEP (SHA-256) ci-dessous chiffre cette cle. Seule la cle privee, HORS
+     DU DEPOT (Documents\copies-notees\cle-privee-copies.pem), les ouvre : NOTER-LES-BILANS.html, quand on la
+     depose avec les copies, ou python _commun\notation\cle-copies.py dechiffrer. L'eleve ne lit pas ses verdicts
+     et ne peut pas les retoucher ; avec la cle publique, il pourrait fabriquer une copie de toutes pieces : le
+     fichier reste declaratif. CHANGER LA CLE : cle-copies.py nouvelle, puis reassembler les simulations ; les
+     copies deja rendues ne s'ouvrent qu'avec l'ancienne cle privee. Les deux lignes sont ecrites par cle-copies.py. */
+  var CLE_COPIES = "MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAvwVFXIR9jrulZQs//J+yPdPFqN7hXN3JxF4udRpy1+SWPPbiiVeUpR3IGde3Oj/tp9lh8WT+DQcIlAh1CLPXSURHWSHACzdn8v+BEYi9i2EH9N6lRbImGA2JmQgIU/8eNjJDdH4wvJvHnn4D5Xvh5RwaUNfoNzzeAadwJ6s4oxCBPTb8ACPfRuOyOeFszvgHmWIQ+7EvlmiW2Wg7SO23VbMS393mKYah/Tf21RJQwfcX82s5uACCmNyccOvq7C3TdHufNnUDZGIdwqVVsKsC/neoAq8rLU5xUtmi/7WqYYLebpOToxygXBf6egFQKEg8RPJrEnhLY4nKsGsojGoJ1WIE0e6M6VZDOO2rhof5m8N/1KBTkNY3B3JNynoB9obcxPgDhyY/AskyM0ip/Xm+WCYRrkJ6qUCzcbcJNXf+4JMAUMg4nBZCgIj/b8sMGzkxBmIbK10lvcBBG5FWaQKJ5JbOD98WP9Yo7C0ABOKA7qT2K8PJRBjgynu+A12kWYy9AgMBAAE=";
+  var EMPREINTE_COPIES = "e91c6a6e32d3";
+  function octets(b) { var x = atob(b), u = new Uint8Array(x.length); for (var i = 0; i < x.length; i++) u[i] = x.charCodeAt(i); return u; }
+  function enB64(u) { var s = ""; for (var i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); }
+  function chiffrerCopie(txt, tete) {
+    var s = window.crypto && crypto.subtle;
+    if (!s || !CLE_COPIES) return Promise.reject(new Error("chiffrement indisponible"));
+    var iv = crypto.getRandomValues(new Uint8Array(12));
+    return Promise.all([
+      s.importKey("spki", octets(CLE_COPIES), { name: "RSA-OAEP", hash: "SHA-256" }, false, ["encrypt"]),
+      s.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt"])
+    ]).then(function (k) {
+      return Promise.all([
+        s.exportKey("raw", k[1]).then(function (brute) { return s.encrypt({ name: "RSA-OAEP" }, k[0], brute); }),
+        s.encrypt({ name: "AES-GCM", iv: iv }, k[1], new TextEncoder().encode(txt))]);
+    }).then(function (r) {
+      return tete.concat(["", "-----DEBUT DE LA COPIE CHIFFREE-----", "empreinte: " + EMPREINTE_COPIES,
+        "cle: " + enB64(new Uint8Array(r[0])), "iv: " + enB64(iv)], enB64(new Uint8Array(r[1])).match(/.{1,76}/g),
+        ["-----FIN DE LA COPIE CHIFFREE-----", ""]).join("\r\n");
+    });
+  }
   var POINTS_COTE = { NA: 0, ECA: 1, A: 2 };
   /* Le code du professeur pour valider un appel : seule son empreinte est dans la page. Pour le
      changer : node -e "..." avec la fonction empreinte ci-dessous sur « labo|<code> », et remplacer
@@ -1665,9 +1699,7 @@ var Sim = (function () {
   function melanger(t) { for (var i = t.length - 1; i > 0; i--) { var k = Math.floor(Math.random() * (i + 1)), x = t[i]; t[i] = t[k]; t[k] = x; } return t; }
   function parcours(parent, o) {
     var ccf = !!o.ccf, u41 = !!o.u41, epreuve = ccf || u41;
-    /* le mode note : lu a l'adresse ; passer d'un mode a l'autre recharge, pour retirer les valeurs */
-    var NOTE = NOTE_ADRESSE;
-    window.addEventListener("hashchange", function () { if (noteDans(location.hash) !== NOTE) location.reload(); });
+    var NOTE = NOTE_COPIE;
     /* une question a une reponse : verifiee (TD), ou enregistree (note) ; un appel, des qu'il est lance */
     function fait(f) { return !!f && (NOTE && !f.appel ? !!f.enr : !!f.fini); }
     var NOMS = u41 ? U41 : COMPETENCES, ORDRE = u41 ? ORDRE_U41 : ORDRE_COMP;
@@ -1809,7 +1841,7 @@ var Sim = (function () {
       ? "<b>Évaluation notée.</b> La page ne dit ni juste ni faux et ne donne aucune méthode : « Enregistrer » garde votre réponse, " +
         "que vous pouvez changer jusqu'à rendre votre copie. Rendre la copie produit le fichier pour le professeur et verrouille tout."
       : "<b>TD, non noté.</b> La page dit juste ou pas encore et donne la méthode quand ça coince. À la fin, un bilan à l'écran : " +
-        "rien à rendre. L'évaluation notée se fait par le lien que donne le professeur, avec d'autres valeurs." });
+        "rien à rendre. L'évaluation notée se fait dans l'espace d'évaluation, avec la clé que donne le professeur, et d'autres valeurs." });
     if (niveaux.length > 1) {
       choixNiv.appendChild(el("p", { classe: "pc-surtitre", texte: "Ma classe" }));
       var rang = el("div", { classe: "rangee" });
@@ -1838,7 +1870,7 @@ var Sim = (function () {
         el("div", { classe: "pc-surtitre", texte: cc.surtitre || "Le sujet" }),
         c.client ? el("p", { classe: "pc-client", html: c.client }) : null,
         el("div", { classe: "pc-texte", html: c.texte || "" }),
-        el("p", { classe: "pc-problematique", html: "<b>Problématique</b> « " + cc.problematique + " »" })
+        el("p", { classe: "pc-problematique", html: "<b>Problématique</b> « " + String(cc.problematique).replace(/ ([?!:;])/g, " $1") + " »" })
       ]);
       var grille = el("ul", { classe: "pc-grille", "aria-label": "La grille de l'épreuve" });
       ORDRE.forEach(function (k) {
@@ -1866,7 +1898,7 @@ var Sim = (function () {
         el("p", { classe: "consigne", html: "<b>Chaque compétence est cotée à part</b> : non acquis, en cours d'acquisition, acquis. Rater une partie ne fait pas perdre les autres." }),
         el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>Deux appels professeur</b>, à des moments précis du sujet, et notés. Vous appelez, puis vous continuez : le professeur vient valider sur la tablette.</span>" }),
         el("p", { classe: "consigne", html: NOTE ? "<b>Bonus d'autonomie de +0,25</b> : il va à qui répond à toutes les questions. En évaluation, la page ne donne aucune aide."
-          : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans demander d'aide. Demander n'est pas interdit, et ne retire rien d'autre." }),
+          : "<b>Bonus d'autonomie de +0,25</b> : il va à qui termine sans voir d'indice. « Voir l'indice » n'est pas interdit, et ne retire rien d'autre." }),
         bandeauMode, choixNiv, partir] : [
         el("h2", { texte: "L'U41 et ce TD" }),
         /* les parts des consignes : relevees sur les neuf sujets 2018-2026 (bts-fed-c-u41.yml) */
@@ -1878,7 +1910,7 @@ var Sim = (function () {
         aFacultative ? el("p", { classe: "consigne", html: "<b>« Pour aller plus loin »</b>, la partie marquée <b>+</b> sur le chemin, est <b>facultative</b> : " +
           "si vous n'y touchez pas, elle ne compte pas ; si vous l'abordez, seules les questions que vous y travaillez comptent." }) : null,
         nAppels ? el("p", { classe: "pc-appel-annonce", html: "<span class=\"pc-main\" aria-hidden=\"true\">✋</span><span><b>" + (nAppels > 1 ? nAppels + " appels" : "Un appel") + " professeur</b>, à l'oral, notés. Vous appelez, puis vous continuez : le professeur vient évaluer sur votre poste.</span>" }) : null,
-        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Demander de l'aide »</b> donne la méthode, jamais la valeur. Elle ne retire rien à la question." }),
+        NOTE ? null : el("p", { classe: "consigne", html: "<b>« Voir l'indice »</b> donne la méthode, jamais la valeur. Il ne retire rien à la question ; le bilan compte les indices vus." }),
         bandeauMode, choixNiv, partir]);
       accueil.appendChild(el("div", { classe: "plan pc-plan-accueil" }, [el("div", null, [sujet, illus]), carteFormat]));
     } else {
@@ -1967,7 +1999,7 @@ var Sim = (function () {
       var f = { q: q, essais: 0, juste: false, fini: false, passe: false, reponse: "", note: false, aide: false };
       var maxNote = q.essais || ((q.type === "nombre" || q.type === "action" || q.type === "classer") ? 2 : 1);
       var bloc = el("div", { classe: "pc-q", "data-etat": "a-faire" });
-      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-q-num\">" + (j + 1) + "</span>" + propre(q.lib) }));
+      bloc.appendChild(el("p", { classe: "pc-q-lib", html: "<span class=\"pc-q-num\">" + (j + 1) + "</span>" + insecables(propre(q.lib)) }));   // pas de « ? » seul en debut de ligne
       var champ = el("div", { classe: "pc-q-champ" });
       var lireReponse, verifierOk, controles = [];
       if (q.type === "nombre") {
@@ -1988,7 +2020,7 @@ var Sim = (function () {
           var tolAbs = typeof q.toleranceAbsolue === "function" ? q.toleranceAbsolue(ctx) : (q.toleranceAbsolue || 0);
           // sansSigne : une lecture d'appareil, ou le signe ne dit que le sens du branchement
           // (-0,25 A lu quand le courant entre par COM est une lecture juste)
-          if (q.sansSigne) { v = Math.abs(v); a = Math.abs(a); }
+          if (q.sansSigne) { v = Math.abs(v); a = Math.abs(a); f.valeur = v; }   // la valeur gardee pour la suite est sans signe
           return Math.abs(v - a) <= Math.abs(a) * tol + tolAbs;
         };
       } else if (q.type === "choix" || q.type === "multi") {
@@ -2076,10 +2108,13 @@ var Sim = (function () {
       }
       var bVerif = el("button", { type: "button", classe: "bouton principal", texte: NOTE ? "Enregistrer" : "Vérifier" });
       var bPasser = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Continuer sans trouver" });
-      /* en CCF, la methode se demande : c'est l'appel a l'aide de l'epreuve, et il coute le bonus d'autonomie */
-      var bAide = epreuve && q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", hidden: "hidden", texte: "Demander de l'aide" }) : null;
+      /* « Voir l'indice » (21 octobre 2026, demande de l'utilisateur) : la methode, a cote de « Verifier », des la
+         premiere lecture. En CCF et au BTS, c'est l'aide de l'epreuve : elle se compte, et le bonus d'autonomie s'en va.
+         En evaluation notee, ni indice ni aide. */
+      var bAide = q.methode && !NOTE ? el("button", { type: "button", classe: "bouton pc-aide-btn", texte: "Voir l'indice" }) : null;
       var retour = el("div", { classe: "pc-retour", "aria-live": "polite" });
-      var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: q.methode || "" });
+      var methodeVue = el("p", { classe: "pc-methode", hidden: "hidden", html: (q.methode || "") + (epreuve && q.methode ?
+        " <span class=\"pc-lu\">Indice vu : il compte comme une aide" + (ccf ? ", et le bonus d'autonomie s'en va" : "") + ".</span>" : "") });
       bloc.appendChild(champ);
       bloc.appendChild(el("div", { classe: "rangee" }, [bVerif, bAide, bPasser]));
       bloc.appendChild(retour);
@@ -2148,7 +2183,7 @@ var Sim = (function () {
           retour.className = "pc-retour";
           if (bloc.getAttribute("data-etat") === "faux") bloc.setAttribute("data-etat", "a-faire");
           retour.innerHTML = (q.type === "nombre" ? "Écrivez un nombre." : (q.type === "action" ? "Faites d'abord la manipulation." : "Choisissez d'abord.")) +
-            (!epreuve && f.appuis >= 3 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : "");
+            (!epreuve && f.appuis >= 3 && q.methode && methodeVue.hidden ? " <span class=\"methode\">" + q.methode + "</span>" : "");
           if (bAide && !f.aide) bAide.hidden = false;
           if (f.appuis >= 3) bPasser.hidden = false;          // personne ne reste bloque : on peut continuer
           return;
@@ -2177,7 +2212,7 @@ var Sim = (function () {
           retour.innerHTML = "Pas encore." + compte + " Encore un essai.";
           if (bAide && !f.aide) bAide.hidden = false;
         } else {
-          retour.innerHTML = "Pas encore." + compte + (f.essais >= 2 && q.methode ? " <span class=\"methode\">" + q.methode + "</span>" : " Encore un essai.");
+          retour.innerHTML = "Pas encore." + compte + (f.essais >= 2 && q.methode && methodeVue.hidden ? " <span class=\"methode\">" + q.methode + "</span>" : " Encore un essai.");
         }
         if (f.essais >= 3 || f.appuis >= 3) bPasser.hidden = false;
       }
@@ -2192,7 +2227,7 @@ var Sim = (function () {
         f.passe = true; f.note = false;
         if (!f.reponse) f.reponse = q.type === "action" ? "(manipulation non faite)" : "(sans réponse)";
         bloc.setAttribute("data-etat", "passe");
-        retour.className = "pc-retour"; retour.innerHTML = "On continue." + (epreuve ? "" : " <span class=\"methode\">" + (q.methode || "") + "</span>");
+        retour.className = "pc-retour"; retour.innerHTML = "On continue." + (epreuve || !methodeVue.hidden ? "" : " <span class=\"methode\">" + (q.methode || "") + "</span>");
         if (epreuve && q.methode) methodeVue.hidden = false;
         clore();
       });
@@ -2425,14 +2460,14 @@ var Sim = (function () {
         if (!NOTE) {                                       // en TD : rien a rendre
           var rien = el("div", { classe: "carte pc-remise" }, [el("h2", { texte: "Rien à rendre" }),
             el("p", { classe: "consigne", html: "En TD, la page ne produit <b>aucun fichier</b> : ce bilan vous montre ce qui est acquis et ce qui reste à revoir. " +
-              "L'évaluation notée se fait par le <b>lien que donne le professeur</b>, avec d'autres valeurs, sans indication." })]);
+              "L'évaluation notée se fait dans l'<b>espace d'évaluation</b>, avec la clé que donne le professeur : d'autres valeurs, aucune indication." })]);
           final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [rien, simpl])]));
           return construireFinal();
         }
         var remise = el("div", { classe: "carte pc-remise" });
         remise.appendChild(el("h2", { texte: "Mon fichier pour le professeur" }));
         remise.appendChild(el("p", { classe: "consigne", html: "Tapez l’<b>identifiant donné en classe</b>, puis produisez le fichier. " +
-          "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
+          "Il se fabrique <b>dans cette page</b> : rien n’est envoyé, rien n’est enregistré. Il est <b>chiffré</b> : seul le professeur peut le lire. Il part dans vos téléchargements, et c’est vous qui le remettez." }));
         var ident = el("input", { type: "text", autocomplete: "off", "aria-label": "Identifiant", placeholder: "identifiant donné en classe" });
         var bProd = el("button", { type: "button", classe: "bouton principal", texte: "Rendre ma copie" });
         var bVoir = el("button", { type: "button", classe: "bouton", hidden: "hidden", texte: "Afficher le texte" });
@@ -2461,25 +2496,40 @@ var Sim = (function () {
           bProd.textContent = "Produire de nouveau le fichier"; bVoir.hidden = false;
           construireFinal(); produire();
         });
+        /* le fichier est chiffre pour le professeur (LA COPIE CHIFFREE) : l'en-tete reste lisible, pour le ranger */
+        var copie = null;
+        function chiffree(id) {
+          var txt = fabriquer(id), l = txt.split("\r\n");
+          return chiffrerCopie(txt, ["COPIE CHIFFRÉE · évaluation notée"].concat(l.slice(1, 4),
+            ["Elle ne se lit qu'avec la clé du professeur. À remettre telle quelle."]));
+        }
         function produire() {
           var id = ident.value.trim();
-          var txt = fabriquer(id);
           var nom = "bilan-" + nettoie(id) + "-" + nettoie(o.code || "parcours") + ".txt";
-          try {
-            var url = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
-            var a = el("a", { href: url, download: nom }); document.body.appendChild(a); a.click();
-            setTimeout(function () { URL.revokeObjectURL(url); a.parentNode.removeChild(a); }, 1500);
-            etat.exporte = true; majChemin();
-            dit.className = "pc-retour juste";
-            dit.textContent = "Fichier produit : " + nom + ". S’il n’apparaît pas, « Afficher le texte » permet de le copier.";
-          } catch (e) {
-            dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
-          }
+          dit.className = "pc-retour"; dit.textContent = "Chiffrement de la copie…";
+          chiffree(id).then(function (c) {
+            copie = c;
+            try {
+              var url = URL.createObjectURL(new Blob([c], { type: "text/plain;charset=utf-8" }));
+              var a = el("a", { href: url, download: nom }); document.body.appendChild(a); a.click();
+              setTimeout(function () { URL.revokeObjectURL(url); a.parentNode.removeChild(a); }, 1500);
+              etat.exporte = true; majChemin();
+              dit.className = "pc-retour juste";
+              dit.textContent = "Fichier produit : " + nom + ". S’il n’apparaît pas, « Afficher le texte » permet de le copier.";
+            } catch (e) {
+              dit.className = "pc-retour faux"; dit.textContent = "Le téléchargement est bloqué ici : affichez le texte et copiez-le.";
+            }
+          }, function () {
+            dit.className = "pc-retour faux"; dit.textContent = "Ce navigateur ne sait pas chiffrer la copie : appelez le professeur, sans fermer la page.";
+          });
         }
         bVoir.addEventListener("click", function () {
-          if (!etat.rendu) return;                         // le texte porte les verdicts : seulement une fois la copie rendue
-          var id = ident.value.trim() || "(identifiant à taper)";
-          apercu.value = fabriquer(id); apercu.hidden = false; apercu.focus(); apercu.select();
+          if (!etat.rendu) return;                         // seulement une fois la copie rendue ; et c'est la copie chiffree
+          function montrer(c) { copie = c; apercu.value = c; apercu.hidden = false; apercu.focus(); apercu.select(); }
+          if (copie) montrer(copie);
+          else chiffree(ident.value.trim() || "(identifiant à taper)").then(montrer, function () {
+            dit.className = "pc-retour faux"; dit.textContent = "Ce navigateur ne sait pas chiffrer la copie : appelez le professeur, sans fermer la page.";
+          });
         });
         final.appendChild(el("div", { classe: "plan" }, [recap, el("div", null, [remise, simpl])]));
       }
@@ -2732,8 +2782,8 @@ var Sim = (function () {
   return { fr: fr, lire: lire, el: el, $: $, borne: borne, mesure: mesure, gauss: gauss, onglets: onglets, curseur: curseur, choix: choix,
     afficheur: afficheur, graphe: graphe, releve: releve, enregistreur: enregistreur, centrale: centrale, molette: molette,
     defi: defi, animer: animer, avancer: avancer, svg: svg, parcours: parcours, calculatrice: calculatrice,
-    /* vrai quand la page est ouverte en mode note (#note) : chaque page y tire d'autres valeurs */
-    note: NOTE_ADRESSE };
+    /* vrai dans la copie notee (l'espace d'evaluation) : chaque page y tire d'autres valeurs */
+    note: NOTE_COPIE };
 })();
 
 </script>
