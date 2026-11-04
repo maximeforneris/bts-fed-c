@@ -306,6 +306,26 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 /* une colonne bornee ne grandit pas a la taille de son contenu : ce qui est large defile dans son cadre */
 .pc-avec-paillasse > *,.pc-paillasse,.pc-paillasse > *{min-width:0}
 .pc-paillasse .releve-zone{grid-template-columns:minmax(0,1fr)}
+/* LA TABLETTE COUCHEE (4 novembre 2026 : « ils sont tous sur tablettes mode paysage ») : a 1 024 px la scene
+   n'avait que 530 px, perdus entre deux cartes emboitees et une colonne de questions de 343 px. Les marges se
+   resserrent, la colonne des questions s'arrete a 320 px. « Agrandir la scene » donne a la scene toute la
+   largeur et passe les questions dessous (commun.js, AGRANDIR LA SCENE). */
+@media (min-width:821px) and (max-width:1400px){
+  .page{padding-left:10px;padding-right:10px}
+  .pc-ecran > .plan:not(.pc-sans-scene){grid-template-columns:minmax(0,1fr) minmax(270px,320px)}
+  .pc-scene{padding:10px}
+  .pc-paillasse > .carte,.pc-paillasse .plan > .carte{padding:10px}
+}
+.pc-agrandir{float:right;margin:0 0 8px 10px;min-height:38px;padding:6px 12px;font-size:.88rem}
+/* la consigne coule a cote du bouton, la scene passe dessous : a cote, avec son overflow, elle perdait 150 px */
+.pc-scene > :not(.pc-agrandir):not(.consigne){clear:both}
+.pc-agrandir[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.pc-agrandir-barre{display:flex;justify-content:flex-end;margin:0 0 8px}
+.pc-agrandir-barre .pc-agrandir{float:none;margin:0}
+.plan.pc-grand{grid-template-columns:minmax(0,1fr)!important}
+.pc-ecran > .plan.pc-grand > .pc-scene{position:static!important;max-height:none!important;overflow:visible}
+@media (max-width:820px){.pc-agrandir,.pc-agrandir-barre{display:none}}
+@media print{.pc-agrandir,.pc-agrandir-barre{display:none}}
 .pc-paillasse .releve-zone > div,.pc-paillasse table.releve{overflow-x:auto}
 /* les documents d'un sujet : fiches, consignes, annexe */
 .pc-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}

@@ -306,6 +306,26 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 /* une colonne bornee ne grandit pas a la taille de son contenu : ce qui est large defile dans son cadre */
 .pc-avec-paillasse > *,.pc-paillasse,.pc-paillasse > *{min-width:0}
 .pc-paillasse .releve-zone{grid-template-columns:minmax(0,1fr)}
+/* LA TABLETTE COUCHEE (4 novembre 2026 : « ils sont tous sur tablettes mode paysage ») : a 1 024 px la scene
+   n'avait que 530 px, perdus entre deux cartes emboitees et une colonne de questions de 343 px. Les marges se
+   resserrent, la colonne des questions s'arrete a 320 px. « Agrandir la scene » donne a la scene toute la
+   largeur et passe les questions dessous (commun.js, AGRANDIR LA SCENE). */
+@media (min-width:821px) and (max-width:1400px){
+  .page{padding-left:10px;padding-right:10px}
+  .pc-ecran > .plan:not(.pc-sans-scene){grid-template-columns:minmax(0,1fr) minmax(270px,320px)}
+  .pc-scene{padding:10px}
+  .pc-paillasse > .carte,.pc-paillasse .plan > .carte{padding:10px}
+}
+.pc-agrandir{float:right;margin:0 0 8px 10px;min-height:38px;padding:6px 12px;font-size:.88rem}
+/* la consigne coule a cote du bouton, la scene passe dessous : a cote, avec son overflow, elle perdait 150 px */
+.pc-scene > :not(.pc-agrandir):not(.consigne){clear:both}
+.pc-agrandir[aria-pressed="true"]{border-color:var(--accent);color:var(--accent)}
+.pc-agrandir-barre{display:flex;justify-content:flex-end;margin:0 0 8px}
+.pc-agrandir-barre .pc-agrandir{float:none;margin:0}
+.plan.pc-grand{grid-template-columns:minmax(0,1fr)!important}
+.pc-ecran > .plan.pc-grand > .pc-scene{position:static!important;max-height:none!important;overflow:visible}
+@media (max-width:820px){.pc-agrandir,.pc-agrandir-barre{display:none}}
+@media print{.pc-agrandir,.pc-agrandir-barre{display:none}}
 .pc-paillasse .releve-zone > div,.pc-paillasse table.releve{overflow-x:auto}
 /* les documents d'un sujet : fiches, consignes, annexe */
 .pc-docs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
@@ -1796,6 +1816,7 @@ var Sim = (function () {
     var MOT_FIN_COURT = NOTE ? (epreuve ? "Copie" : "Livrable") : "Bilan";
     var P = $(parent);
 
+    var grand = false, boutonsGrand = [];               // « Agrandir la scene », plus bas
     /* ---- deux facons d'utiliser la page : la simulation libre, ou le parcours ---- */
     var libre = o.libre ? $(o.libre) : null, barreModes = null, bLibre = null, bParcours = null;
     if (libre) {
@@ -1810,9 +1831,42 @@ var Sim = (function () {
       if (NOTE) barreModes.hidden = true;
       bLibre.addEventListener("click", function () { mode(false); });
       bParcours.addEventListener("click", function () { mode(true); });
+      /* le mode libre a aussi son « Agrandir la scene » : une barre au-dessus de CHAQUE grille a scene (une
+         par onglet, par experience ou par protocole), hors des cartes, qui partent dans la paillasse du
+         parcours sans l'emporter. Toutes les barres agissent ensemble. */
+      [].filter.call(libre.querySelectorAll(".plan"), function (x) {
+        return x.firstElementChild && x.firstElementChild.querySelector("svg") && !x.parentNode.closest(".plan");
+      }).forEach(function (x) {
+        x.parentNode.insertBefore(el("div", { classe: "pc-agrandir-barre" }, [boutonAgrandir()]), x);
+      });
     }
     P.appendChild(racine);
     if (!libre) document.body.classList.add("pc-visible");
+    /* AGRANDIR LA SCENE (4 novembre 2026 : « ils sont tous sur tablettes mode paysage » ; a 1 024 px, la
+       scene n'avait que 530 px et ses textes tombaient a 6 ou 8 px). Un bouton par partie, et un au-dessus de
+       la simulation libre : la scene prend toute la largeur, les questions passent dessous. Le choix vaut pour
+       toute la page jusqu'a ce qu'on le defasse ; il n'est pas garde. */
+    function boutonAgrandir() {
+      var b = el("button", { type: "button", classe: "bouton pc-agrandir", "aria-pressed": grand ? "true" : "false",
+        title: "La scène prend toute la largeur ; les questions passent dessous", texte: grand ? "Réduire la scène" : "Agrandir la scène" });
+      b.addEventListener("click", function () {
+        agrandir(!grand);
+        var cible = b.closest(".pc-scene") || b.parentNode;
+        if (grand && cible && cible.scrollIntoView) cible.scrollIntoView({ block: "start" });
+      });
+      boutonsGrand.push(b);
+      return b;
+    }
+    function agrandir(oui) {
+      grand = !!oui;
+      [].forEach.call(document.querySelectorAll(".pc-ecran > .plan, .pc-agrandir-barre + .plan"), function (x) {
+        x.classList.toggle("pc-grand", grand);
+      });
+      boutonsGrand.forEach(function (b) {
+        b.textContent = grand ? "Réduire la scène" : "Agrandir la scène";
+        b.setAttribute("aria-pressed", grand ? "true" : "false");
+      });
+    }
     function mode(p) {
       if (!libre) return;
       bLibre.setAttribute("aria-pressed", p ? "false" : "true");
@@ -2052,6 +2106,7 @@ var Sim = (function () {
       // une carte vide a gauche et ses questions serrees a droite : elles prennent la largeur.
       // Releve par l'utilisateur le 15 octobre 2026.
       if (!zone.firstChild) { zone.hidden = true; plan.classList.add("pc-sans-scene"); }
+      else { zone.insertBefore(boutonAgrandir(), zone.firstChild); plan.classList.toggle("pc-grand", grand); }
       var qs = questionsDe(i);
       etat.colonnes[i] = colQ;
       etat.fiches[i] = qs.map(function (q, j) { return q.type === "appel" ? poserAppel(colQ, q, i) : poserQuestion(colQ, q, i, j); });
