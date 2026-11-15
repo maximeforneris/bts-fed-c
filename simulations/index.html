@@ -285,6 +285,11 @@ details.modele ul{margin:8px 0 0;padding-left:1.2em;color:var(--encre2);font-siz
 .pc-badge-appel{font:inherit;font-weight:700;font-size:.85rem;min-height:40px;padding:6px 12px;border-radius:999px;cursor:pointer;
   border:2px solid var(--tiede);background:var(--carte);color:var(--encre);animation:pc-pulse 1.6s ease-in-out infinite}
 @keyframes pc-pulse{50%{box-shadow:0 0 0 5px var(--accent-doux)}}
+/* LA VIGILANCE (commun.js) : les sorties de la page en evaluation notee, lisibles du professeur qui passe */
+.pc-vigil{display:inline-flex;align-items:center;font-weight:700;font-size:.85rem;min-height:32px;padding:4px 10px;border-radius:999px;
+  border:2px solid var(--faux);color:var(--faux);background:var(--carte)}
+.pc-vigil[hidden]{display:none}
+.pc-vigil-retour{border-left-color:var(--faux);background:var(--faux-doux)}
 .pc-methode{margin:6px 0 0;font-size:.92rem;color:var(--encre2);border-left:3px solid var(--trait);padding-left:8px}
 .pc-aide-btn{color:var(--encre2)}
 .pc-aide-btn.pc-confirme{color:var(--accent);border-color:var(--accent);font-weight:700}
