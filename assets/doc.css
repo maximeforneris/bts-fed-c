@@ -45,6 +45,11 @@
 /* Les deux commandes de colonne. Elles vivent dans la barre, donc elles sont
    atteignables sans remonter — c'est tout l'interet d'une barre collante. */
 .doc-plier{display:inline-flex;align-items:center;gap:7px}
+/* le retour a la porte commune, forneris.fr (option « porte-commune: », 23 novembre 2026) */
+.doc-barre .vers-porte{display:inline-flex;align-items:center;gap:6px}
+/* avec ce bouton, le titre du site n'a plus la place sous 820 px (tablette debout) : il ne
+   montrait que « … » ; l'accueil du site reste en tete du plan */
+@media (max-width:819px){.doc-barre.avec-porte .titre{display:none}}
 .doc-plier .mot{display:inline}
 .doc-som-plier{display:none}          /* sous 1 000 px : nav.somm joue ce role */
 .doc-barre .replie{opacity:.72}

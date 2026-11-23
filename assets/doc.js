@@ -49,6 +49,18 @@
   /* ─── 2. la barre : ce que portait la barre de page ──────────────── */
   var vieille = page.querySelector(".barre-site");
   var accueil = vieille && vieille.querySelector(".accueil");
+  /* La porte commune, forneris.fr, en tete de la barre : option « porte-commune: » du SITE.md
+     (23 novembre 2026, « sur les sites eleves il faut aussi un bouton pour revenir a forneris.fr »). */
+  var porte = window.PLAN.porte || "";
+  if (porte) {
+    var versPorte = document.createElement("a");
+    versPorte.className = "bouton vers-porte";
+    versPorte.href = porte;
+    versPorte.title = "Revenir à forneris.fr, l'accueil de tous les sites";
+    versPorte.innerHTML = "<span aria-hidden=\"true\">←</span> <span class=\"mot\">Accueil</span>";   /* « mets plutôt menu ou accueil » */
+    barre.appendChild(versPorte);
+    barre.classList.add("avec-porte");
+  }
   var bouton = document.createElement("button");
   bouton.type = "button";
   bouton.className = "doc-plier";
@@ -108,6 +120,13 @@
   vers.href = titre.href;
   vers.textContent = "Accueil du site";
   plan.appendChild(vers);
+  if (porte) {
+    var versP = document.createElement("a");
+    versP.className = "vers-accueil vers-porte";
+    versP.href = porte;
+    versP.textContent = "← Accueil de tous les sites";
+    plan.appendChild(versP);
+  }
 
   /* Un dossier joint mis en avant (« ! » devant son id dans joints:) passe en
      tete, en lien direct : une seule page, rien a deplier. Ajoute le 6 octobre
