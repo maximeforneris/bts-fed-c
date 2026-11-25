@@ -29,6 +29,8 @@ header h1 b{color:#ffb38f;font-weight:600}
 .plans a:hover{background:#333b41;color:#fff}
 .plans a[aria-current]{color:#fff;border-color:#ffb38f}
 .plans small{color:#9aa4aa;font-size:12px;margin-left:4px}
+.plans .grp{display:flex;flex-wrap:wrap;align-items:center;gap:4px}.plans .grp+.grp{border-left:1px solid #4a5258;padding-left:8px}
+.plans i{font:600 11px 'Barlow Semi Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#9aa4aa;font-style:normal;margin-right:2px}
 .barre{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 18px;background:#fff;border-bottom:1px solid #d6d2c8}
 .modes{display:flex;border:1px solid #b9b3a5;border-radius:8px;overflow:hidden}
 .modes button{border:0;background:#fff;padding:7px 12px;font:600 15px 'Barlow Semi Condensed','Barlow',sans-serif;cursor:pointer;color:var(--encre)}
@@ -72,13 +74,16 @@ aside p{margin:0 0 12px}
 @media (prefers-reduced-motion:reduce){.flux.on{animation:none;stroke-dasharray:none;opacity:.6}}
 .sans-flux .flux{display:none}
 .fl-depart{stroke:#e53935}.fl-retour{stroke:#1e63b8}.fl-tiede{stroke:#fb8c00}.fl-retiede{stroke:#5aa0dc}.fl-chaudserp{stroke:#e53935}
+.fl-an{stroke:#3c9a3c}.fl-as{stroke:#2a6497}.fl-ar{stroke:#c79a12}.fl-ae{stroke:#7a4a2a}.fl-recy{stroke:#e07b1a}
+.fl-an,.fl-as,.fl-ar,.fl-ae,.fl-recy{stroke-width:8}
+.fl-eg{stroke:#0f8fb8}.fl-egr{stroke:#6cc3dd}.fl-vap{stroke:#a7b3bb}
 .fl-ef{stroke:#00a5c8}.fl-ecs{stroke:#d81b60}.fl-mitige{stroke:#f06292}
 .fl-gaz{stroke:#f2b705}.fl-fumees{stroke:#616161}.fl-air{stroke:#7cc4ea}.fl-cond{stroke:#7a9a01}
 .fiche{position:fixed;left:12px;right:12px;bottom:12px;max-height:46vh;overflow:auto;background:#fff;border-radius:12px;box-shadow:0 10px 34px rgba(0,0,0,.28);padding:14px 16px;z-index:5;border:1px solid #d6d2c8}
 .fiche h2{margin:0 0 4px;font:600 21px/1.2 'Barlow Semi Condensed','Barlow',sans-serif}.fiche p{margin:0 0 10px}.fiche .fam{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--doux);margin:0 0 6px}.fiche .cartes-liees{margin:8px 0 0;flex-direction:row;flex-wrap:wrap}.fiche .cartes-liees a{padding:6px 9px}.fiche .cartes-liees small{display:none}
 @media (max-width:1100px){main{grid-template-columns:1fr}aside{position:static;max-height:none;border-left:0;border-top:1px solid #d6d2c8}}
 </style></head><body>
-<header><a class="retour" id="accueil" hidden>← Accueil</a><h1>La chaufferie, <b>organe par organe</b></h1></header>
+<header><a class="retour" id="accueil" hidden>← Accueil</a><h1>La chaufferie, <b>organe par organe</b></h1><nav class="plans" aria-label="Les plans"><span class="grp"><i>Chauffage</i><a href="PLAN-CHAUFFERIE.html" aria-current="page">La maison<small></small></a></span><span class="grp"><i>Air</i><a href="PLAN-CTA.html">La CTA d&#x27;un bâtiment<small></small></a></span></nav></header>
 <div class="barre">
 <div class="modes" role="group" aria-label="La marche de l'installation"><button type="button" data-m="chauffage" aria-pressed="true">Chauffage</button><button type="button" data-m="ballon" aria-pressed="false">Recharge du ballon</button><button type="button" data-m="arret" aria-pressed="false">À l&#x27;arrêt</button></div>
 <label><input type="checkbox" id="puise"> On puise de l&#x27;eau chaude</label>
@@ -123,6 +128,7 @@ function majFlux(){
   OPTIONS.forEach(function(o){if(document.getElementById(o.id).checked){actifs=actifs.concat(o.c).filter(function(x){return o.r.indexOf(x)<0;});t+=' '+o.t;}});
   svg.querySelectorAll('.flux').forEach(function(p){p.classList.toggle('on',actifs.indexOf(p.getAttribute('data-c'))>=0);});
   document.getElementById('marche').textContent=t;
+  if(window.PLAN_HOOK&&PLAN_HOOK.marche)PLAN_HOOK.marche(marche,OPTIONS.filter(function(o){return document.getElementById(o.id).checked;}).map(function(o){return o.id;}));
 }
 document.querySelectorAll('.modes button').forEach(function(b){b.addEventListener('click',function(){
   marche=b.getAttribute('data-m');document.querySelectorAll('.modes button').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});majFlux();});});
@@ -142,13 +148,14 @@ function liste(){
 }
 function choisir(id){
   svg.querySelectorAll('.org,.num').forEach(function(g){g.classList.toggle('sel',g.getAttribute('data-id')===id);});
-  if(!id){fiche.hidden=true;liste();history.replaceState(null,'',location.pathname+location.search);return;}
+  if(!id){if(window.PLAN_HOOK&&PLAN_HOOK.organe)PLAN_HOOK.organe(null,null);fiche.hidden=true;liste();history.replaceState(null,'',location.pathname+location.search);return;}
   var o=parId[id],fam=FAM.filter(function(x){return x[0]===o.fam;})[0][1];
   var h='<button class="fermer" type="button">'+(etroit()?'Fermer':'Tous les organes')+'</button><p class="fam">'+o.rang+' · '+fam+'</p><h2>'+esc(o.nom)+'</h2><p>'+esc(o.texte)+'</p>'+
     '<div class="cartes-liees">'+o.cartes.map(lien).join('')+'</div>';
   var ou=etroit()?fiche:panneau;
   if(etroit()){fiche.hidden=false;if(!panneau.querySelector('.liste'))liste();}
   ou.innerHTML=h;
+  if(window.PLAN_HOOK&&PLAN_HOOK.organe)PLAN_HOOK.organe(id,ou);
   ou.querySelector('.fermer').addEventListener('click',function(){choisir(null);});
   history.replaceState(null,'','#'+id);
 }
