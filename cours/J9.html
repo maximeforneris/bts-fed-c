@@ -16,7 +16,7 @@
 <script src="../assets/kit.js?v=333cf6bc-9360ff" defer></script>
 <script src="../assets/site.js?v=333cf6bc-8f14b5" defer></script>
 <script src="../assets/vivant.js?v=333cf6bc-6f1fc9" defer></script>
-<script src="../assets/plan.js?v=333cf6bc-045c48" defer></script>
+<script src="../assets/plan.js?v=333cf6bc-35967e" defer></script>
 <script src="../assets/doc.js?v=333cf6bc-adbd1d" defer></script>
 <script src="../assets/nombres.js?v=333cf6bc-c9f0c8" defer></script>
 <script src="../assets/calculette.js?v=333cf6bc-95903e" defer></script>
@@ -32,95 +32,170 @@
     <p class="sur">BTS FED option C · 2e année</p>
     <h1>Le point<span>de fonctionnement</span></h1>
   </div>
-  <p class="accroche">Le circulateur propose, le réseau dispose. Là où leurs deux courbes se croisent, l'installation travaille, et personne ne lui a demandé son avis.</p>
-  <p class="contenu">1 outil · 8 questions · 9 replis · 1 figure</p>
-  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A3-2 Caractéristique d'une pompe · niveau 2</span><span class="tag">A3-3 Point de fonctionnement · niveau 2</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
+  <p class="accroche">Les salles du fond ont froid, l'accueil est trop chaud, et l'exploitant veut faire tourner le circulateur plus vite. Avant de lui répondre, il faut savoir ce qu'un circulateur sait faire, et comment l'eau se partage entre deux branches.</p>
+  <p class="contenu">1 outil · 10 questions · 3 exercices · 9 replis · 5 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag">A3-3 Point de fonctionnement · niveau 2</span><span class="tag">A3-4 Équilibrage · niveau 2</span><span class="tag">B4-1 Réseaux hydrauliques · niveau 2</span></div>
 </header>
 <aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J8.html">La caractéristique du réseau</a></b><span class="ou">Séance 8 · Les pertes de charge</span><span class="car">la courbe du réseau est la perte de charge en fonction du débit, celle de la séance 8 ; le point de fonctionnement est dessus.</span></li><li><b><a href="J7.html">Le débit demandé par le réseau</a></b><span class="ou">Séance 7 · Les réseaux hydrauliques</span><span class="car">trop ou pas assez de débit se juge par rapport au débit du calcul, celui qui transporte la puissance.</span></li><li><b>Lire l'intersection de deux courbes</b><span class="car">le point de fonctionnement est le point commun à la courbe de la pompe et à celle du réseau ; on le lit sur le graphique, on ne le calcule pas.</span></li></ul></aside>
-<nav class="somm"><div class="in"><a href="#objectifs-de-la-seance">Objectifs de la séance</a><a href="#un-reseau-ne-resiste-pas-d-une-resistance-fixe">Un réseau ne résiste pas d’une résistance fixe</a><a href="#la-courbe-du-circulateur-descend">La courbe du circulateur descend</a><a href="#la-ou-les-deux-se-croisent">Là où les deux se croisent</a><a href="#trop-de-debit-ce-n-est-pas-neutre">Trop de débit, ce n’est pas neutre</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
-<h2 id="objectifs-de-la-seance">Objectifs de la séance</h2>
-<p>La séance 8 a calculé la pression que le réseau demande pour un débit donné. Mais un circulateur n’impose ni l’un ni l’autre : il s’installe là où sa courbe croise celle du réseau.</p>
-<p>À la fin de la séance, vous savez <strong>tracer la courbe du réseau</strong>, <strong>lire le point de fonctionnement</strong> pour chaque vitesse du circulateur, et dire ce que coûte un débit plus fort que nécessaire.</p>
-<h2 id="un-reseau-ne-resiste-pas-d-une-resistance-fixe">Un réseau ne résiste pas d’une résistance fixe</h2>
-<p>C’est le point que la séance installe, et il n’est pas intuitif. Un réseau ne se comporte pas comme une résistance électrique, où doubler la tension double le courant.</p>
-<p><strong>Plus l’eau va vite, plus elle frotte.</strong> La perte de charge ne croît pas proportionnellement au débit : elle croît comme son <strong>carré</strong>.</p>
+<nav class="somm"><div class="in"><a href="#la-question-du-jour">La question du jour</a><a href="#un-groupe-de-chauffage-organe-par-organe">Un groupe de chauffage, organe par organe</a><a href="#ce-que-le-circulateur-donne-ce-que-le-reseau-demande">Ce que le circulateur donne, ce que le réseau demande</a><a href="#la-ou-les-deux-se-croisent">Là où les deux se croisent</a><a href="#equilibrer-deux-branches">Équilibrer deux branches</a><a href="#trop-de-debit-ce-n-est-pas-neutre">Trop de débit, ce n’est pas neutre</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#sur-la-simulation">Sur la simulation</a><a href="#vous-verifier">Vous vérifier</a><a href="#apres-la-seance">Après la séance</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<h2 id="la-question-du-jour">La question du jour</h2>
+<p>Dans une micro-crèche, les salles du fond sont froides le matin, l’accueil est trop chaud et ses robinets sifflent. L’exploitant propose de laisser le circulateur à sa plus grande vitesse.</p>
+<p>Pour lui répondre, il faut trois choses : ce qu’un circulateur sait faire, ce que le réseau lui demande, et comment l’eau se partage entre deux branches. <strong>Le dossier est dans le polycopié</strong> : cette page rappelle le cours, pas les réponses.</p>
+<h2 id="un-groupe-de-chauffage-organe-par-organe">Un groupe de chauffage, organe par organe</h2>
+<p><strong>La bouteille sépare la production de la distribution.</strong> La chaudière pousse son débit dans la bouteille, chaque groupe y prend le sien. Elle ne freine presque pas l’eau : chaque circulateur ne voit que son propre circuit.</p>
+<p><strong>Un groupe porte toujours les mêmes organes.</strong> Au départ, une vanne d’arrêt, le circulateur, un clapet anti-retour ; au retour, une vanne d’arrêt. Souvent, la poignée de chaque vanne porte un thermomètre : l’écart entre départ et retour dit si le débit est juste.</p>
+<div class="cle">
+<p>Deux branches qui partent du même point et reviennent au même point sont <strong>en parallèle</strong> : elles voient la même différence de pression, et c’est le débit qui se partage entre elles.</p>
+</div>
+<p><strong>Pour suivre l’eau</strong> : <a href="https://forneris.fr/bts-fed-c/plan-chaufferie/PLAN-CHAUFFERIE.html">le plan de la chaufferie</a>, marches « Chauffage » et « Recharge du ballon ». Chaque organe y renvoie à sa carte.</p>
+<p><strong>Les cartes de la séance</strong>, à relire avant le contrôle : <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-11">H-11 le circulateur</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-13">H-13 la vitesse variable</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-15">H-15 la bouteille</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-16">H-16 le collecteur</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-22">H-22 la vanne d’équilibrage</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-24">H-24 le robinet thermostatique</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-26">H-26 la vanne mélangeuse</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-33">H-33 le clapet</a>, <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-46">H-46 les prises de pression</a>.</p>
+<h2 id="ce-que-le-circulateur-donne-ce-que-le-reseau-demande">Ce que le circulateur donne, ce que le réseau demande</h2>
+<p><strong>Le circulateur a une caractéristique, pas une valeur.</strong> À débit nul, il donne sa hauteur la plus grande ; plus il débite, moins il pousse. Un circulateur à trois vitesses porte donc trois courbes, l’une au-dessus de l’autre.</p>
+<figure>
+<img src="img/J9/fig1-grille.png" alt="Les trois caractéristiques d’un circulateur à trois vitesses." />
+<figcaption aria-hidden="true">Les trois caractéristiques d’un circulateur à trois vitesses.</figcaption>
+</figure>
+<p><strong>Le réseau a lui aussi sa courbe.</strong> En circuit fermé, l’eau qui monte d’un côté redescend de l’autre : le circulateur ne paie que les frottements. Ils ne croissent pas comme le débit, mais comme son <strong>carré</strong>.</p>
 <div class="formule">
 <p><strong>Δp = k × Q²</strong></p>
 <ul>
 <li><strong>Δp</strong><span>: perte de charge du réseau, en mCE</span></li>
-<li><strong>k</strong><span>: résistance du réseau, sans unité pratique</span></li>
+<li><strong>k</strong><span>: résistance du réseau, propre à ses tubes, coudes, vannes et radiateurs</span></li>
 <li><strong>Q</strong><span>: débit, en m³/h</span></li>
 </ul>
 <blockquote>
 <p>Doubler le débit multiplie la perte de charge par <strong>quatre</strong>.</p>
 </blockquote>
 </div>
-<p>Le coefficient k se déduit d’un seul point mesuré ou calculé : k = Δp / Q². Une fois connu, il donne toute la courbe.</p>
-<div class="cle">
-<p>La courbe du réseau est une <strong>parabole qui part de zéro</strong>. À débit nul, aucune perte : un réseau à l’arrêt n’oppose rien.</p>
-</div>
-<h2 id="la-courbe-du-circulateur-descend">La courbe du circulateur descend</h2>
-<p>Une pompe centrifuge ne fournit pas une pression constante. Plus on lui demande de débit, moins elle peut pousser fort : sa caractéristique descend quand Q augmente.</p>
-<p>Un circulateur à trois vitesses porte donc <strong>trois courbes</strong>, l’une au-dessus de l’autre. La vitesse III pousse le plus fort, la I le moins.</p>
+<p><strong>D’où vient cette courbe.</strong> On calcule Δp pour quelques débits, on place les points sur le même repère que la courbe du circulateur, et on les relie. Un circuit perd 1,5 mCE à 1 m³/h : k = 1,5 ÷ 1² = 1,5.</p>
+<div class="enveloppe-tbl"><table>
+<thead>
+<tr>
+<th>Débit Q, en m³/h</th>
+<th>0</th>
+<th>0,5</th>
+<th>1</th>
+<th>1,5</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Δp = 1,5 × Q², en mCE</td>
+<td>0</td>
+<td>0,375</td>
+<td>1,5</td>
+<td>3,375</td>
+<td>6</td>
+</tr>
+</tbody>
+</table></div>
 <figure>
-<img src="img/J9/fig1-grille.png" alt="Les trois caractéristiques du circulateur de la séance 8." />
-<figcaption aria-hidden="true">Les trois caractéristiques du circulateur de la séance 8.</figcaption>
+<img src="img/J9/fig-web-reseau.png" alt="La courbe du réseau seule, sur le repère du circulateur : elle part de zéro et monte de plus en plus vite." />
+<figcaption aria-hidden="true">La courbe du réseau seule, sur le repère du circulateur : elle part de zéro et monte de plus en plus vite.</figcaption>
 </figure>
+<p>Elle part de zéro : sans débit, aucun frottement. À 2 m³/h, le circuit perd 6 mCE, quatre fois plus qu’à 1 m³/h pour deux fois plus de débit.</p>
+<section class="exo" id="J9-e1" data-exo="J9-e1" data-type="calcul" data-savoir="A3-3" data-a="IXgueGB4OTs2OS82eHZ4LHhgbnRvdnguNTZ4YGl0anZ4L3hgeDcZH3gn"><p class="k">Exercice · A3-3</p><h4>La perte à un autre débit</h4><div class="enonce">
+
+<p>Un circuit perd <strong>2,0 mCE</strong> quand il débite <strong>0,8 m³/h</strong>. Quelle perte de charge aura-t-il à <strong>1,2 m³/h</strong> ?</p>
+</div><div class="indice" hidden>Calculez d’abord k avec le point connu, puis Δp = k × Q² au nouveau débit.</div></section>
 <h2 id="la-ou-les-deux-se-croisent">Là où les deux se croisent</h2>
-<p>Une courbe qui monte, une qui descend : elles se coupent en <strong>un seul point</strong>. C’est là, et nulle part ailleurs, que l’installation fonctionne.</p>
-<p>Ce point n’est pas un choix. Il est imposé par la rencontre du réseau et de la pompe. On ne peut le déplacer qu’en changeant l’un des deux : changer de vitesse déplace la courbe de pompe, brider une vanne déplace la courbe de réseau.</p>
+<p>Le circulateur et le réseau sont traversés par le même débit, et la hauteur que donne l’un est celle que perd l’autre. <strong>Un seul débit satisfait les deux : c’est le point de fonctionnement.</strong></p>
+<p><strong>On pose la courbe du réseau sur celle du circulateur.</strong> C’est la même parabole que plus haut, sur le même repère : chaque vitesse la croise en un point, qu’on lit sur les deux axes.</p>
+<figure>
+<img src="img/J9/fig-web-point.png" alt="Les trois vitesses du circulateur et la courbe du réseau : trois points de fonctionnement." />
+<figcaption aria-hidden="true">Les trois vitesses du circulateur et la courbe du réseau : trois points de fonctionnement.</figcaption>
+</figure>
+<p><strong>On ne le choisit pas, on le déplace.</strong> Changer de vitesse, c’est changer de courbe de circulateur. Fermer une vanne, c’est rendre le réseau plus résistant : la parabole se redresse, et le point remonte le long de la courbe du circulateur, vers moins de débit et plus de hauteur.</p>
+<figure>
+<img src="img/J9/fig-web-vanne.png" alt="Fermer une vanne redresse la courbe du réseau : en vitesse II, le point passe de 1 à 2." />
+<figcaption aria-hidden="true">Fermer une vanne redresse la courbe du réseau : en vitesse II, le point passe de 1 à 2.</figcaption>
+</figure>
 <div class="outil" data-outil="point-fonctionnement">
 
 </div>
-<p>Déplacez la résistance du réseau : la parabole se redresse, et les trois points de fonctionnement glissent tous vers la gauche. Un réseau plus résistant, c’est moins de débit, à circulateur inchangé.</p>
+<p>Déplacez la résistance du réseau : la parabole se redresse, et les trois points de fonctionnement glissent tous vers la gauche. L’outil démarre sur un circuit voisin de celui du polycopié, pas sur le même.</p>
 <div class="piege">
-<p>Le débit obtenu est presque toujours <strong>supérieur</strong> à celui dont le circuit a besoin, même à la plus petite vitesse. Les circulateurs sont dimensionnés par gammes ; il n’en existe pas un par installation.</p>
+<p>Le bureau d’études calcule un réseau <strong>vannes réglées</strong>. Livré vannes grandes ouvertes, le réseau est moins résistant que prévu : le débit total dépasse le calcul, et pourtant une branche peut manquer d’eau.</p>
+</div>
+<h2 id="equilibrer-deux-branches">Équilibrer deux branches</h2>
+<p><strong>Deux branches en parallèle voient la même pression ; c’est le débit qui s’adapte.</strong> La branche courte, peu résistante, prend plus que sa part ; la longue manque d’eau. Une branche quatre fois plus résistante reçoit deux fois moins de débit.</p>
+<figure>
+<img src="img/J9/fig-cours-branches.png" alt="Deux branches de même puissance sur un même départ." />
+<figcaption aria-hidden="true">Deux branches de même puissance sur un même départ.</figcaption>
+</figure>
+<p><strong>Le manque d’eau se voit au thermomètre.</strong> À puissance voisine, une branche qui manque de débit rend son eau plus froide, et celle qui en reçoit trop la rend trop chaude. Le radiateur, lui, perd peu de puissance : c’est au bout du réseau, par grand froid, qu’on s’en aperçoit.</p>
+<div class="cle">
+<p><strong>Une vanne d’équilibrage se ferme, elle ne s’ouvre pas.</strong> Elle ajoute une perte de charge, réglée une fois pour toutes, à la branche favorisée ; celle de la branche la plus défavorisée reste grande ouverte.</p>
+</div>
+<div class="formule">
+<p><strong>Δp = (Q ÷ K<sub>v</sub>)²</strong></p>
+<ul>
+<li><strong>Δp</strong><span>: perte de charge de la vanne, en <strong>bar</strong></span></li>
+<li><strong>Q</strong><span>: débit qui la traverse, en m³/h</span></li>
+<li><strong>K<sub>v</sub></strong><span>: débit sous 1 bar, donné par la notice pour chaque position de la molette</span></li>
+</ul>
+<blockquote>
+<p>1 mCE = 0,0981 bar : on convertit <strong>avant</strong> de calculer.</p>
+</blockquote>
+</div>
+<p><strong>Un exemple.</strong> Une vanne doit créer 0,8 mCE à 0,4 m³/h. En bar, 0,8 × 0,0981 = 0,078 bar ; donc K<sub>v</sub> = 0,4 ÷ √0,078 = 1,43 m³/h. On cherche cette valeur dans la notice, et on lit la position.</p>
+<section class="exo" id="J9-e2" data-exo="J9-e2" data-type="calcul" data-savoir="A3-4" data-a="IXgueGB4OTs2OS82eHZ4LHhga3Rpb3Z4LjU2eGBpdGp2eC94YHg3Bi9qajhpdTJ4Jw=="><p class="k">Exercice · A3-4</p><h4>Le Kv d’une vanne d’équilibrage</h4><div class="enonce">
+
+<p>Une vanne d’équilibrage doit créer <strong>0,5 mCE</strong> quand elle laisse passer <strong>0,3 m³/h</strong>. Quel K<sub>v</sub> doit-elle avoir ?</p>
+</div><div class="indice" hidden>Convertissez d’abord la perte de charge en bar, puis Kv = Q ÷ √Δp.</div></section>
+<section class="exo" id="J9-e3" data-exo="J9-e3" data-type="justification" data-savoir="A3-4" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · A3-4</p><h4>Plus vite, ou régler ?</h4><div class="enonce">
+
+<p>Le fond d’un bâtiment a froid, l’entrée a trop chaud. On propose de passer le circulateur à sa plus grande vitesse. Dites en trois lignes pourquoi l’équilibrage vaut mieux.</p>
+</div><ul class="verifier" hidden><li>J’ai dit ce que devient le débit de la branche déjà favorisée</li><li>J’ai cité au moins une conséquence : bruit, retour trop chaud, consommation</li><li>J’ai dit quelle vanne on ferme, et pourquoi on n’en ouvre pas</li></ul></section>
+<div class="piege">
+<p><strong>L’équilibrage ne fait pas économiser le circulateur.</strong> Le réseau réglé est plus résistant : le circulateur fournit plus de hauteur pour moins de débit. Ce qu’on économise, c’est le chauffage des pièces trop chaudes, et une chaudière à condensation qui retrouve un retour froid.</p>
 </div>
 <h2 id="trop-de-debit-ce-n-est-pas-neutre">Trop de débit, ce n’est pas neutre</h2>
-<p>Un débit excessif a trois conséquences, et aucune n’est bonne.</p>
-<p>L’<strong>écart départ / retour s’écrase</strong>. La puissance transportée étant P = Q × 1 163 × ΔT, un débit doublé pour la même puissance divise le ΔT par deux. Une chaudière à condensation, qui a besoin d’un retour froid, condense alors beaucoup moins.</p>
-<p>Le <strong>bruit apparaît</strong>. La vitesse monte dans les tubes et dans les robinets, et un réseau qui siffle ne se corrige pas après coup.</p>
-<p>Le <strong>circulateur consomme pour rien</strong>. Il pousse davantage d’eau que nécessaire, toute la saison de chauffe.</p>
+<p>L’<strong>écart départ et retour s’écrase</strong>. La puissance transportée étant P = 1,163 × Q × ΔT, un débit doublé pour la même puissance divise l’écart par deux : une chaudière à condensation condense beaucoup moins.</p>
+<p>Le <strong>bruit apparaît</strong> : la vitesse monte dans les tubes et dans les robinets thermostatiques, qui sifflent quand ils se ferment. Et le <strong>circulateur consomme pour rien</strong>, toute la saison de chauffe.</p>
+<p><strong>Le circulateur à vitesse variable</strong> règle lui-même sa vitesse pour tenir une pression. En Δp proportionnel, sa hauteur baisse quand les robinets ferment : c’est le mode qui convient aux radiateurs à robinets thermostatiques.</p>
 <h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
 <div class="etapes">
 <ol type="1">
-<li>Déduire k d’un point calculé en séance 8</li>
-<li>Construire le tableau Δp = k Q² pour six débits</li>
-<li>Tracer la courbe du réseau sur la grille du circulateur</li>
-<li>Relever les trois points de fonctionnement, un par vitesse</li>
-<li>Comparer au débit réellement nécessaire, et en tirer les conséquences</li>
+<li>Lire le schéma de la chaufferie et nommer ses organes, avec les cartes</li>
+<li>Placer les points mesurés à chaque vitesse, et tracer la courbe du réseau</li>
+<li>Comparer le point de calcul au point réel, et dire pourquoi le fond a froid</li>
+<li>Refuser la vitesse III, choisir la vanne à régler et sa position</li>
+<li>Équilibrer quatre bureaux sur la simulation</li>
 </ol>
 </div>
-<div class="mission">
-<p><strong>À observer en entreprise</strong></p>
-<p>Relever la vitesse sur laquelle est réglé un circulateur de l’entreprise. Demander au maître d’apprentissage <strong>pourquoi cette vitesse-là</strong>, la réponse est souvent « elle y était ».</p>
-<p>Si l’installation dispose d’un compteur d’énergie ou de thermomètres de départ et de retour, relever le ΔT réel et le comparer au régime nominal de la plaque.</p>
-</div>
+<h2 id="sur-la-simulation">Sur la simulation</h2>
+<p>Le TD de la séance : <a href="https://forneris.fr/bts-fed-c/simulations/reseau-hydraulique.html#u41">« Le bureau du bout du couloir »</a>, partie 3 et conclusion. Pour vous entraîner seul, <a href="https://forneris.fr/bts-fed-c/simulations/reseau-hydraulique.html">le mode libre de la même simulation</a> : le circulateur et le réseau, puis l’équilibrage des quatre bureaux, avec ses défis.</p>
 <h2 id="vous-verifier">Vous vérifier</h2>
 <div class="quiz">
 <ul>
 <li>La perte de charge d’un réseau varie comme : <strong>le carré du débit</strong> | le débit</li>
-<li>Doubler le débit multiplie la perte de charge par : <strong>quatre</strong> | deux</li>
 <li>À débit nul, la perte de charge d’un réseau vaut : <strong>zéro</strong> | la hauteur de la pompe</li>
 <li>La caractéristique d’un circulateur, quand le débit augmente : <strong>descend</strong> | monte</li>
 <li>Le point de fonctionnement est : <strong>imposé par les deux courbes</strong> | choisi par l’installateur</li>
-<li>Brider une vanne d’équilibrage fait que la courbe du réseau : <strong>se redresse</strong> | s’aplatit</li>
-<li>À puissance constante, doubler le débit fait que le ΔT : <strong>est divisé par deux</strong> | double</li>
-<li>Un ΔT écrasé pénalise surtout : <strong>une chaudière à condensation</strong> | un radiateur électrique</li>
+<li>Deux branches en parallèle voient la même : <strong>différence de pression</strong> | valeur de débit</li>
+<li>Une branche quatre fois plus résistante reçoit : <strong>deux fois moins de débit</strong> | quatre fois moins de débit</li>
+<li>Une vanne d’équilibrage se règle sur : <strong>la branche favorisée</strong> | la branche défavorisée</li>
+<li>Après l’équilibrage, la hauteur fournie par le circulateur : <strong>augmente</strong> | diminue</li>
+<li>À puissance égale, la branche qui reçoit trop d’eau a un écart départ et retour : <strong>petit</strong> | grand</li>
+<li>Avec des robinets thermostatiques, le circulateur à vitesse variable se règle en : <strong>Δp proportionnel</strong> | Δp constant</li>
 </ul>
 </div>
+<h2 id="apres-la-seance">Après la séance</h2>
+<p><strong>Le cas « L’équilibrage de la résidence »</strong>, dans <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#cas-2b">les cartes de l’hydraulique</a>, trente minutes, seul, avant la séance 10. Puis « Je me teste », en mode révision, sur les cartes H-11, H-13, H-15 et H-22.</p>
 <h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Pourquoi le carré, et pas autre chose</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La perte de charge s’écrit j = λ ρ v² / (2 d), et la vitesse est proportionnelle au débit. Le terme <strong>v²</strong> donne donc déjà un carré.</p>
 <p>Reste λ, qui dépend du débit lui aussi, par Blasius, λ varie comme Re^−0,25, donc comme Q^−0,25. Le produit λ v² varie ainsi comme Q^1,75, pas exactement comme Q².</p>
 <p><strong>L’exposant réel est donc voisin de 1,75, pas de 2.</strong> On retient 2 parce que l’écart est faible sur la plage utile, parce que les singularités, elles, sont bien en Q², et parce qu’une parabole se trace à la main.</p>
-<p>Un logiciel de calcul, lui, garde l’exposant exact. C’est l’une des rares approximations du programme dont l’écart est mesurable, de l’ordre de 5 % sur la perte de charge, ce qui reste sous l’incertitude des longueurs équivalentes.</p></div></details>
+<p>Un logiciel de calcul, lui, garde l’exposant exact. C’est l’une des rares approximations du programme dont l’écart est mesurable, de l’ordre de 5 % sur la perte de charge, ce qui reste sous l’incertitude des longueurs équivalentes.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le circulateur à vitesse variable change la question</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Tout ce qui précède suppose un circulateur à trois vitesses fixes. Les circulateurs posés aujourd’hui sont <strong>à vitesse variable</strong>, et la réglementation l’impose depuis 2013 pour les circulateurs de chauffage.</p>
 <p>Un tel circulateur ne suit plus une courbe mais <strong>une famille de courbes</strong>, et son électronique choisit celle qui maintient une consigne. Deux lois de régulation :</p>
 <ul>
 <li><strong>Pression constante</strong> : la pompe maintient sa hauteur quel que soit le débit. Convient aux réseaux à forte perte de charge fixe.</li>
 <li><strong>Pression proportionnelle</strong> : la consigne baisse quand le débit baisse. Convient aux réseaux équipés de robinets thermostatiques, où les branches se ferment une à une.</li>
 </ul>
-<p>L’intérêt n’est pas le confort mais la consommation : la puissance absorbée d’une pompe varie comme le <strong>cube</strong> du débit. Réduire le débit de 20 % réduit la consommation de moitié.</p>
+<p>L’intérêt n’est pas le confort mais la consommation : la puissance absorbée d’une pompe varie comme le <strong>cube</strong> du débit. Réduire le débit de 20 % réduit la consommation de moitié.</p>
 <p>C’est aussi pourquoi la question « sur quelle vitesse est-il réglé ? » n’a plus de réponse simple sur une installation récente, mais la question « quel débit obtient-on vraiment ? » reste, elle, exactement la même.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Ce qui déplace un point de fonctionnement</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><div class="enveloppe-tbl"><table>
 <colgroup>
@@ -173,16 +248,16 @@
 <p>H₀ − a Q² = k Q² → Q = √( H₀ / (a + k) )</p>
 <p>Q = √( 6,6 / (1,5 + 2,43) ) = <strong>1,30 m³/h</strong>, et H = 6,6 − 1,5 × 1,30² = <strong>4,08 mCE</strong></p>
 <div class="cle">
-<p><strong>Le circuit demandait 1,03 m³/h, il en reçoit 1,30 : 26 % de trop.</strong> Ce n’est pas une erreur de calcul, c’est la réalité de toute installation, les circulateurs se vendent par gammes, pas sur mesure.</p>
+<p><strong>Le circuit demandait 1,03 m³/h, il en reçoit 1,30 : 26 % de trop.</strong> Ce n’est pas une erreur de calcul, c’est la réalité de toute installation, les circulateurs se vendent par gammes, pas sur mesure.</p>
 </div>
 <p><strong>Et voilà ce que ça coûte.</strong> La puissance transportée est imposée par les émetteurs, pas par la pompe. Le débit augmente donc à puissance constante, et c’est l’écart départ / retour qui absorbe la différence :</p>
-<p>ΔT = 24 000 / (1 163 × 1,30) = <strong>15,9 K</strong> au lieu des 20 K prévus</p>
-<p>Un régime 70/50 devient un 70/54. Une chaudière à condensation reçoit un retour à 54 °C au lieu de 50 : elle condense moins. C’est le lien direct avec la séance 11, et c’est pourquoi le trop-plein de débit n’est jamais neutre.</p></div></details>
+<p>ΔT = 24 000 / (1 163 × 1,30) = <strong>15,9 K</strong> au lieu des 20 K prévus</p>
+<p>Un régime 70/50 devient un 70/54. Une chaudière à condensation reçoit un retour à 54 °C au lieu de 50 : elle condense moins. C’est le lien direct avec la séance 11, et c’est pourquoi le trop-plein de débit n’est jamais neutre.</p></div></details>
 <details class="appro"><summary><span class="niv"></span><span class="titre-appro">Choisir un circulateur, et lire son catalogue</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>La démarche est courte, et chacune de ses quatre étapes est une question possible à l’épreuve.</p>
 <p><strong>1. Le point de fonctionnement requis.</strong> Un débit, issu de la puissance et du régime ; une hauteur manométrique, issue du bilan de charge du tronçon <strong>le plus défavorisé</strong>. Chez nous : 1,03 m³/h et 2,6 mCE.</p>
 <p><strong>2. Le report sur les courbes du catalogue.</strong> On place ce point sur le réseau de courbes du fabricant. Le circulateur retenu est celui dont une courbe passe <strong>juste au-dessus</strong> du point requis. Juste au-dessus, pas très au-dessus.</p>
 <p><strong>3. Le point de fonctionnement réel.</strong> C’est le croisement, pas le point requis. Il donne un débit supérieur, et c’est lui qui décide de la vitesse de l’eau, du bruit et de la consommation.</p>
-<p><strong>4. La vérification.</strong> Le débit réel reste-t-il sous 1 m/s dans les tubes ? L’écart départ / retour reste-t-il acceptable pour le générateur ?</p>
+<p><strong>4. La vérification.</strong> Le débit réel reste-t-il sous 1 m/s dans les tubes ? L’écart départ / retour reste-t-il acceptable pour le générateur ?</p>
 <div class="piege">
 <p><strong>Un circulateur ne se choisit jamais « avec de la marge ».</strong> La marge se paie trois fois : en bruit, en consommation permanente, et en écrasement du ΔT. Si un doute subsiste, on prend la taille en dessous et on monte d’une vitesse, pas l’inverse.</p>
 </div>
@@ -249,26 +324,26 @@
 </thead>
 <tbody>
 <tr>
-<td>75 %</td>
-<td style="text-align: right;">75 %</td>
-<td style="text-align: right;">56 %</td>
-<td style="text-align: right;"><strong>42 %</strong></td>
+<td>75 %</td>
+<td style="text-align: right;">75 %</td>
+<td style="text-align: right;">56 %</td>
+<td style="text-align: right;"><strong>42 %</strong></td>
 </tr>
 <tr>
-<td>50 %</td>
-<td style="text-align: right;">50 %</td>
-<td style="text-align: right;">25 %</td>
-<td style="text-align: right;"><strong>12 %</strong></td>
+<td>50 %</td>
+<td style="text-align: right;">50 %</td>
+<td style="text-align: right;">25 %</td>
+<td style="text-align: right;"><strong>12 %</strong></td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>Descendre d’un cran de vitesse coûte un quart du débit et fait économiser près de 60 % de la consommation.</strong> C’est le calcul qui justifie à lui seul le circulateur à vitesse variable, et c’est exactement la même loi qui justifie le débit d’air variable sur une CTA.</p>
+<p><strong>Descendre d’un cran de vitesse coûte un quart du débit et fait économiser près de 60 % de la consommation.</strong> C’est le calcul qui justifie à lui seul le circulateur à vitesse variable, et c’est exactement la même loi qui justifie le débit d’air variable sur une CTA.</p>
 <div class="cle">
 <p>Ces lois relient un <strong>même appareil à deux vitesses</strong>. Elles ne comparent pas deux pompes différentes, et elles ne disent rien de la courbe du réseau, qui ne bouge pas quand la pompe ralentit. Le point de fonctionnement, lui, se déplace le long de la parabole du réseau.</p>
 </div>
-<p><strong>Le contrôle de vraisemblance.</strong> Si vous trouvez qu’une pompe ralentie de 25 % consomme 75 % de sa puissance, vous avez appliqué la loi du débit à la puissance. Le bon réflexe : la puissance est le <strong>produit</strong> d’un débit et d’une pression, donc elle subit les deux effets à la fois.</p></div></details>
+<p><strong>Le contrôle de vraisemblance.</strong> Si vous trouvez qu’une pompe ralentie de 25 % consomme 75 % de sa puissance, vous avez appliqué la loi du débit à la puissance. Le bon réflexe : la puissance est le <strong>produit</strong> d’un débit et d’une pression, donc elle subit les deux effets à la fois.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Le rendement d&#39;un circulateur, et pourquoi les anciens ont disparu</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un circulateur consomme peu à l’instant (quelques dizaines de watts) mais il tourne <strong>cinq à sept mille heures par an</strong>. C’est cette durée qui fait la facture.</p>
-<p><strong>Le rendement d’un ancien circulateur à rotor noyé et moteur asynchrone plafonne autour de 20 à 25 %.</strong> Le reste part en chaleur dans l’eau. Un circulateur récent à moteur synchrone à aimants permanents, piloté par variateur, dépasse largement le double, et surtout il <strong>module</strong>.</p>
+<p><strong>Le rendement d’un ancien circulateur à rotor noyé et moteur asynchrone plafonne autour de 20 à 25 %.</strong> Le reste part en chaleur dans l’eau. Un circulateur récent à moteur synchrone à aimants permanents, piloté par variateur, dépasse largement le double, et surtout il <strong>module</strong>.</p>
 <p><strong>L’indice EEI</strong> (<em>Energy Efficiency Index</em>) a été institué pour rendre les appareils comparables sur un profil de charge annuel, et non à un seul point de fonctionnement. Plus il est bas, meilleur est l’appareil. La réglementation européenne d’écoconception a progressivement interdit la mise sur le marché des circulateurs au-dessus d’un seuil, ce qui a fait disparaître les modèles à trois vitesses fixes du neuf.</p>
 <blockquote>
 <p><strong>La valeur du seuil et son calendrier ne se récitent pas</strong> : ils se lisent dans le règlement en vigueur ou dans le CCTP du projet. Ce qui est à retenir, c’est le sens de l’indice et le fait qu’un remplacement de circulateur soit aujourd’hui l’un des gestes de rénovation au temps de retour le plus court.</p>
@@ -276,7 +351,7 @@
 <p><strong>Le calcul de temps de retour</strong>, qui est une question d’épreuve classique : on compare deux puissances absorbées <strong>sur la durée annuelle de fonctionnement</strong>, on convertit en euros, et on divise le surcoût d’achat par l’économie annuelle. C’est exactement l’outil de la séance 5.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Deux pompes en série, deux pompes en parallèle</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Un bureau d’études double parfois la pompe. Les deux montages n’ont ni le même but ni le même effet, et les confondre est une erreur classique.</p>
 <p><strong>En parallèle, pour le débit.</strong> Les deux pompes puisent au même endroit et refoulent au même endroit. À hauteur donnée, <strong>les débits s’ajoutent</strong>. La courbe résultante se construit en doublant l’abscisse à chaque ordonnée.</p>
-<p>Mais le réseau, lui, n’a pas changé : sa parabole est toujours la même. Le nouveau point de fonctionnement monte le long de cette parabole, donc <strong>le débit total est loin d’être doublé</strong>, typiquement +30 à +40 %. C’est le piège du montage : deux pompes ne font pas deux fois le débit.</p>
+<p>Mais le réseau, lui, n’a pas changé : sa parabole est toujours la même. Le nouveau point de fonctionnement monte le long de cette parabole, donc <strong>le débit total est loin d’être doublé</strong>, typiquement +30 à +40 %. C’est le piège du montage : deux pompes ne font pas deux fois le débit.</p>
 <p><strong>En série, pour la hauteur.</strong> L’une refoule dans l’autre. À débit donné, <strong>les hauteurs s’ajoutent</strong>. On y recourt quand un réseau est très résistant : grande hauteur d’immeuble, réseau très long.</p>
 <p><strong>Pourquoi on double vraiment</strong>, dans neuf cas sur dix : ce n’est ni pour le débit ni pour la hauteur, c’est pour la <strong>redondance</strong>. Deux pompes en parallèle avec permutation automatique, une qui tourne et une en secours, sur un bâtiment où l’arrêt du chauffage n’est pas acceptable, un hôpital, un musée, une piscine. Le CCTP l’écrit alors noir sur blanc, et la GTB gère la permutation : c’est un point de commande de la séance 20.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, l&#39;autre point de fonctionnement</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une machine frigorifique a elle aussi un point de fonctionnement, et il se construit comme celui de cette séance : <strong>deux courbes qui se croisent</strong>.</p>

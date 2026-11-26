@@ -16,7 +16,7 @@
 <script src="../assets/kit.js?v=333cf6bc-9360ff" defer></script>
 <script src="../assets/site.js?v=333cf6bc-8f14b5" defer></script>
 <script src="../assets/vivant.js?v=333cf6bc-6f1fc9" defer></script>
-<script src="../assets/plan.js?v=333cf6bc-045c48" defer></script>
+<script src="../assets/plan.js?v=333cf6bc-35967e" defer></script>
 <script src="../assets/doc.js?v=333cf6bc-adbd1d" defer></script>
 <script src="../assets/nombres.js?v=333cf6bc-c9f0c8" defer></script>
 <script src="../assets/calculette.js?v=333cf6bc-95903e" defer></script>
@@ -32,80 +32,144 @@
     <p class="sur">BTS FED option C · 2e année</p>
     <h1>L'eau chaude<span>sanitaire</span></h1>
   </div>
-  <p class="accroche">L'énergie d'une journée d'eau chaude est une chose. La puissance à installer en est une autre, et c'est le stockage qui sépare les deux.</p>
-  <p class="contenu">1 outil · 8 questions · 9 replis · 2 figures</p>
-  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span><span class="tag">A3-1 Pertes de charge · niveau 2</span></div>
+  <p class="accroche">Des légionelles à la douche la plus éloignée, et un gestionnaire qui veut supprimer le ballon. Avant de lui répondre, il faut savoir combien d'eau chaude un bâtiment demande, ce que le stockage change, et ce que la boucle doit tenir.</p>
+  <p class="contenu">1 outil · 10 questions · 4 exercices · 9 replis · 3 figures</p>
+  <p class="k-savoirs">Savoirs travaillés</p><div class="savoirs"><span class="tag n3">B3-2 Production et distribution d'ECS · niveau 3</span><span class="tag">B4-1 Réseaux hydrauliques · niveau 2</span><span class="tag">A1-1 Thermique des tubes, isolation · niveau 1</span></div>
 </header>
-<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J1.html">L'énergie pour chauffer une masse d'eau</a></b><span class="ou">Séance 1 · L'énergie dans le bâtiment</span><span class="car">E = m × 4,185 × Δθ en kilojoules, puis en kilowattheures ; c'est la seule formule de la séance.</span></li><li><b><a href="J5.html">Une puissance sur une durée</a></b><span class="ou">Séance 5 · Le besoin d'énergie</span><span class="car">le besoin journalier d'ECS est une énergie, la pointe du matin est une puissance ; les confondre est l'erreur classique.</span></li><li><b><a href="J7.html">Débit et perte de chaleur d'un circuit</a></b><span class="ou">Séance 7 · Les réseaux hydrauliques</span><span class="car">le bouclage est un circuit d'eau comme les autres, avec un débit, une longueur et une perte en ligne.</span></li></ul></aside>
-<nav class="somm"><div class="in"><a href="#objectifs-de-la-seance">Objectifs de la séance</a><a href="#l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</a><a href="#la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</a><a href="#le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#vous-verifier">Vous vérifier</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
+<aside class="prerequis"><p class="chapeau-p">Avant de commencer</p><ul><li><b><a href="J1.html">La puissance d'un circuit d'eau</a></b><span class="ou">Séance 1 · L'énergie dans le bâtiment</span><span class="car">P = 1,163 × Q × ΔT, vue en séance 1, donne ici l'énergie d'un volume d'eau, la puissance d'une production instantanée et le débit d'une boucle.</span></li><li><b><a href="J5.html">Une puissance sur une durée</a></b><span class="ou">Séance 5 · Le besoin d'énergie</span><span class="car">le besoin journalier d'eau chaude est une énergie, la pointe du matin est une puissance ; les confondre est l'erreur classique.</span></li><li><b><a href="J9.html">Le circulateur et la vanne d'équilibrage</a></b><span class="ou">Séance 9 · Le point de fonctionnement</span><span class="car">la boucle d'eau chaude est un circuit comme les autres, avec son circulateur et ses vannes de réglage.</span></li></ul></aside>
+<nav class="somm"><div class="in"><a href="#la-question-du-jour">La question du jour</a><a href="#trois-facons-de-produire-l-eau-chaude">Trois façons de produire l’eau chaude</a><a href="#combien-d-eau-chaude-et-a-quelle-heure">Combien d’eau chaude, et à quelle heure</a><a href="#produire-a-la-demande-ou-stocker">Produire à la demande, ou stocker ?</a><a href="#la-boucle-et-la-legionelle">La boucle et la légionelle</a><a href="#ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</a><a href="#sur-la-simulation">Sur la simulation</a><a href="#vous-verifier">Vous vérifier</a><a href="#apres-la-seance">Après la séance</a><a href="#pour-aller-plus-loin">Pour aller plus loin</a></div></nav>
 <div class="piege">
-<p><strong>Un savoir au niveau 3.</strong> Le référentiel classe B3-2 au niveau maîtrise d’outils pour l’option C : savoir faire, seul, sans guidage. L’ECS tombe presque à chaque session, souvent dans la même partie que la sous-station.</p>
+<p><strong>Un savoir au niveau 3.</strong> Le référentiel classe B3-2 au niveau maîtrise d’outils pour l’option C : savoir faire, seul, sans guidage. L’eau chaude tombe presque à chaque session, souvent dans la même partie que la sous-station.</p>
 </div>
-<h2 id="objectifs-de-la-seance">Objectifs de la séance</h2>
-<p>L’eau du chauffage tourne en boucle fermée. L’eau chaude sanitaire, elle, se consomme et ne revient pas : on la produit pour une pointe qu’on ne choisit pas, et sous des contraintes sanitaires qui ne se négocient pas.</p>
-<p>À la fin de la séance, vous savez <strong>calculer l’énergie d’une journée</strong> et <strong>la puissance d’une pointe</strong>, choisir entre production instantanée et accumulation, et <strong>justifier le bouclage</strong>.</p>
-<h2 id="l-energie-ne-depend-pas-de-l-heure">L’énergie ne dépend pas de l’heure</h2>
-<p>Chauffer un litre d’eau de 10 à 60 °C coûte la même chose, qu’on le fasse à six heures du matin ou étalé sur la journée. L’énergie d’une journée se calcule donc à partir du seul volume total.</p>
+<h2 id="la-question-du-jour">La question du jour</h2>
+<p>Dans un foyer de jeunes travailleurs, le laboratoire a trouvé des légionelles à la douche la plus éloignée. Le gestionnaire veut remplacer le ballon par une production instantanée : « plus rien ne stockera ».</p>
+<p>Pour lui répondre, il faut trois choses : combien d’eau chaude le bâtiment demande, et à quelle heure ; ce qu’on gagne et ce qu’on paie à la stocker ; ce que la boucle doit tenir. <strong>Le dossier est dans le polycopié</strong> : cette page rappelle le cours, pas les réponses.</p>
+<h2 id="trois-facons-de-produire-l-eau-chaude">Trois façons de produire l’eau chaude</h2>
+<p>En <strong>instantané</strong>, l’eau est chauffée au moment où l’on ouvre le robinet : pas de stock, mais une puissance qui suit le débit puisé. En <strong>accumulé</strong>, un ballon garde un stock, réchauffé entre deux puisages. Le <strong>semi-instantané</strong> est entre les deux.</p>
+<p><strong>Le préparateur à serpentin est le ballon des chaufferies.</strong> L’eau de la chaudière parcourt un serpentin noyé dans le bas de la cuve ; l’eau sanitaire ne la touche jamais. Une sonde dit quand recharger, et la régulation donne alors la <strong>priorité à l’eau chaude</strong>.</p>
+<div class="cle">
+<p>L’eau froide entre en bas, l’eau chaude sort en haut : plus légère, elle reste au-dessus. C’est la <strong>stratification</strong>, et c’est elle qui fait qu’un ballon donne de l’eau chaude jusqu’au bout, ou presque.</p>
+</div>
+<p><strong>L’arrivée d’eau froide porte un groupe de sécurité</strong> : un robinet, un clapet contre le reflux vers le réseau de la ville, et une soupape qui rejette l’eau dilatée pendant une chauffe. <strong>Dans un bâtiment à étages, l’eau chaude tourne en boucle</strong>, et un mitigeur thermostatique la tempère sur chaque piquage.</p>
+<p><strong>Pour suivre l’eau</strong> : <a href="https://forneris.fr/bts-fed-c/plan-chaufferie/PLAN-CHAUFFERIE.html">le plan de la chaufferie</a>, marche « Recharge du ballon », puis option « On puise de l’eau chaude ».</p>
+<p><strong>Les cartes de la séance</strong>, à relire avant le contrôle :</p>
+<ul>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-71">C-71 la chaudière mixte instantanée</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-73">C-73 le ballon séparé</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-74">C-74 la priorité à l’eau chaude</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-75">C-75 la légionelle</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-76">C-76 le mitigeur thermostatique</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-77">C-77 le débit et le confort</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-chaudiere/CARTES-CHAUDIERE.html#c-78">C-78 le bouclage</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-11">H-11 le circulateur</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-22">H-22 la vanne d’équilibrage</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-33">H-33 le clapet anti-retour</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-42">H-42 le thermomètre et le doigt de gant</a></li>
+<li><a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#h-43">H-43 la sonde de température</a></li>
+</ul>
+<h2 id="combien-d-eau-chaude-et-a-quelle-heure">Combien d’eau chaude, et à quelle heure</h2>
+<p><strong>Le besoin se lit sur un profil de puisage.</strong> Un compteur posé sur l’arrivée d’eau froide du préparateur compte l’eau chaude qui en sort, heure par heure. Le profil d’un logement ou d’un foyer a presque toujours deux pointes : le matin, avant de partir, et le soir.</p>
+<p><strong>On compte en litres d’eau à la température de production.</strong> Sous la douche, l’usager prend une eau mitigée vers 40 °C ; au préparateur, il a puisé moins d’eau, plus chaude.</p>
+<figure class="memo"><img src="img/J10/memo-ecs.png" alt="De l’eau à l’énergie, une seule relation." />
+<figcaption aria-hidden="true">De l’eau à l’énergie, une seule relation.</figcaption>
+</figure>
 <div class="formule">
 <p><strong>E = V × 1,163 × ΔT</strong></p>
 <ul>
-<li><strong>E</strong><span>: énergie, en Wh</span></li>
-<li><strong>V</strong><span>: volume puisé, en litres</span></li>
-<li><strong>ΔT</strong><span>: écart entre l’eau froide et l’eau chaude, en K</span></li>
+<li><strong>E</strong><span>: énergie pour chauffer l’eau, en Wh</span></li>
+<li><strong>V</strong><span>: volume d’eau chaude produite, en litres</span></li>
+<li><strong>ΔT</strong><span>: écart entre l’eau froide qui entre et l’eau chaude produite, en K</span></li>
 </ul>
 <blockquote>
-<p>Le 1,163 est le même qu’en chauffage (c’est ρ·Cp/3600) mais rapporté au litre et non au mètre cube.</p>
+<p>Un repère pour juger un résultat : <strong>une douche vaut à peu près 3 kWh</strong>.</p>
 </blockquote>
 </div>
-<figure>
-<img src="img/J10/fig1-profil-puisage.png" alt="Le profil de puisage d’un internat, heure par heure." />
-<figcaption aria-hidden="true">Le profil de puisage d’un internat, heure par heure.</figcaption>
-</figure>
-<h2 id="la-puissance-elle-depend-de-la-pointe">La puissance, elle, dépend de la pointe</h2>
-<p>C’est là que tout se joue. Si la production se fait <strong>au fil de l’eau</strong>, sans stockage, l’appareil doit couvrir seul l’heure la plus chargée. Sa puissance se calcule sur cette heure-là, pas sur la moyenne.</p>
-<p>Un ballon change la question. Il accumule pendant les heures creuses ce qui sera puisé pendant la pointe : la production peut alors être dimensionnée bien en dessous du maximum.</p>
-<div class="cle">
-<p><strong>Le stockage ne réduit pas l’énergie. Il réduit la puissance.</strong> La facture ne change pas ; l’appareil, si, et son prix, son encombrement, son abonnement.</p>
+<p><strong>Un exemple.</strong> Une résidence de 20 studios puise 900 L d’eau à 55 °C par jour, l’eau froide arrivant à 10 °C : E = 900 × 1,163 × 45 = 47 100 Wh, soit 47 kWh, une quinzaine de douches.</p>
+<section class="exo" id="J10-e1" data-exo="J10-e1" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgbWh0bHZ4LjU2eGBpdGp2eC94YHgxDTJ4Jw=="><p class="k">Exercice · B3-2</p><h4>L’énergie d’une journée</h4><div class="enonce">
+
+<p>Un internat puise <strong>1 200 L</strong> d’eau à <strong>60 °C</strong> par jour ; l’eau froide arrive à <strong>8 °C</strong>. Quelle énergie faut-il chaque jour pour produire cette eau chaude ?</p>
+</div><div class="indice" hidden>E = V × 1,163 × ΔT donne des Wh ; l’écart se lit entre l’eau froide et l’eau produite.</div></section>
+<h2 id="produire-a-la-demande-ou-stocker">Produire à la demande, ou stocker ?</h2>
+<p><strong>Sans stockage, la puissance suit le débit puisé.</strong> Une production instantanée doit chauffer l’eau aussi vite qu’on la tire. <strong>C’est le débit au moment le plus chargé qui fixe la puissance à installer</strong>, pas la consommation de la journée.</p>
+<div class="formule">
+<p><strong>P = Q × 1,163 × ΔT</strong></p>
+<ul>
+<li><strong>P</strong><span>: puissance de la production instantanée, en kW</span></li>
+<li><strong>Q</strong><span>: débit puisé au plus fort, en m³/h</span></li>
+<li><strong>ΔT</strong><span>: écart entre l’eau froide et l’eau produite, en K</span></li>
+</ul>
 </div>
+<p><strong>Avec un ballon, le volume couvre la pointe et la recharge s’étale.</strong> Le stock sert la pointe ; le serpentin le reconstitue ensuite à une puissance modeste, plus longtemps.</p>
+<figure>
+<img src="img/J10/fig-cours-puissance.png" alt="Sans stockage, la pointe fixe la puissance ; avec un ballon, c’est la journée." />
+<figcaption aria-hidden="true">Sans stockage, la pointe fixe la puissance ; avec un ballon, c’est la journée.</figcaption>
+</figure>
+<div class="cle">
+<p><strong>Le stockage ne change pas l’énergie, il change la puissance.</strong> Et on ne tire pas tout le ballon : son coefficient d’utilisation, de 0,75 à 0,85, dit la part vraiment chaude. Un ballon de 1 000 L en donne environ 800.</p>
+</div>
+<p><strong>La chaudière fait souvent aussi le chauffage.</strong> Une recharge courte, en priorité, ne gêne personne ; une production instantanée réclame sa pleine puissance à l’instant de la pointe, qui tombe souvent à la relance du chauffage, le matin.</p>
 <div class="outil" data-outil="ecs">
 
 </div>
-<p>Mettez le stockage à zéro : la puissance grimpe. Montez-le jusqu’à absorber toute la pointe : la puissance s’effondre, et l’énergie du jour ne bouge pas d’un kilowattheure.</p>
-<h2 id="le-bouclage-et-pourquoi-il-existe">Le bouclage, et pourquoi il existe</h2>
-<p>Entre le ballon et le point de puisage le plus éloigné, l’eau refroidit dans le tube. Sans rien, l’usager laisserait couler plusieurs litres avant d’avoir chaud.</p>
-<figure class="memo"><img src="img/J10/memo-ecs.png" alt="" /></figure>
-<p>Une <strong>boucle de circulation</strong> maintient l’eau en mouvement dans la distribution. Le prix à payer est double : les pertes du bouclage tournent toute l’année, et le circulateur consomme en permanence.</p>
-<p>C’est aussi une <strong>exigence sanitaire</strong> : la légionelle prolifère entre 25 et 45 °C dans une eau stagnante. Les températures retenues ne sont donc pas négociables, <strong>60 °C au ballon, 50 °C au moins en tout point de la boucle, 50 °C maximum au puisage</strong> pour éviter la brûlure.</p>
+<p>L’outil démarre sur un bâtiment voisin de celui du polycopié, pas sur le même : faites varier le stock et regardez ce que devient la puissance à installer.</p>
+<section class="exo" id="J10-e2" data-exo="J10-e2" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhgYml0b3Z4LjU2eGBpdGp2eC94YHgxDXgn"><p class="k">Exercice · B3-2</p><h4>La puissance d’une production instantanée</h4><div class="enonce">
+
+<p>Des vestiaires tirent au plus fort <strong>26 L/min</strong> d’eau à <strong>60 °C</strong> ; l’eau froide arrive à <strong>14 °C</strong>. Quelle puissance une production instantanée doit-elle fournir ?</p>
+</div><div class="indice" hidden>Passez le débit en m³/h avant d’appliquer P = Q × 1,163 × ΔT.</div></section>
+<h2 id="la-boucle-et-la-legionelle">La boucle et la légionelle</h2>
+<p><strong>Une boucle perd jour et nuit.</strong> Même sans un seul puisage, l’eau qui tourne cède sa chaleur aux locaux qu’elle traverse : 5 à 10 W par mètre pour un tube calorifugé, trois ou quatre fois plus pour un tube nu.</p>
+<p><strong>Le débit de la boucle se calcule sur ses pertes.</strong> On vise un écart d’environ 5 K entre le départ et le retour : Q = pertes ÷ (1 163 × ΔT), Q en m³/h, les pertes en W. Trop peu de débit, et l’eau refroidit trop avant de revenir.</p>
+<figure>
+<img src="img/J10/fig-cours-bouclage.png" alt="Une boucle, ses colonnes, et le mitigeur sur chaque piquage." />
+<figcaption aria-hidden="true">Une boucle, ses colonnes, et le mitigeur sur chaque piquage.</figcaption>
+</figure>
+<div class="cle">
+<p><strong>Trois températures se disputent le même réseau.</strong> Contre la légionelle : 55 °C au moins en sortie d’un stockage de plus de 400 L, et 50 °C au moins en tout point de la boucle. Contre la brûlure : 50 °C au plus au puisage, dans les pièces de toilette.</p>
+</div>
+<p><strong>La légionelle se développe entre 25 et 45 °C</strong>, dans l’eau tiède qui stagne, et se respire sous la douche. Une boucle mal calorifugée ou mal débitée lui offre exactement ce qu’elle cherche, loin du ballon.</p>
+<div class="piege">
+<p><strong>Le mitigeur se pose sur chaque piquage, jamais en sortie du ballon</strong> : posé avant la boucle, il la mettrait tout entière sous 50 °C, dans la plage où la légionelle prolifère.</p>
+</div>
+<p><strong>Un exemple.</strong> Une boucle de 60 m perd 10 W par mètre, soit 600 W. Pour un écart de 5 K, son débit vaut 600 ÷ (1 163 × 5) = 0,103 m³/h, environ 100 L/h.</p>
+<section class="exo" id="J10-e3" data-exo="J10-e3" data-type="calcul" data-savoir="B3-2" data-a="IXgueGB4OTs2OS82eHZ4LHhga2ljdGp2eC41NnhgaXRqdngveGB4FnUyeCc="><p class="k">Exercice · B3-2</p><h4>Le débit d’une boucle</h4><div class="enonce">
+
+<p>Une boucle de <strong>90 m</strong> perd <strong>9 W par mètre</strong>. Quel débit faut-il pour que l’eau ne perde que <strong>5 K</strong> entre le départ et le retour ?</p>
+</div><div class="indice" hidden>Calculez d’abord les pertes de toute la boucle en W, puis Q = pertes ÷ (1 163 × ΔT), et passez en L/h.</div></section>
+<section class="exo" id="J10-e4" data-exo="J10-e4" data-type="justification" data-savoir="B3-2" data-a="IXgueGB4MC8pLjM8Mzk7LjM1NHgn"><p class="k">Exercice · B3-2</p><h4>Supprimer le ballon contre la légionelle ?</h4><div class="enonce">
+
+<p>Un gestionnaire veut remplacer le ballon par une production instantanée pour se débarrasser des légionelles trouvées loin de la chaufferie. Dites en trois lignes si cela suffit, et ce qu’il faut regarder d’abord.</p>
+</div><ul class="verifier" hidden><li>J’ai dit où se développe la légionelle, et à quelle température</li><li>J’ai parlé de la boucle : sa température de retour, son calorifuge ou son débit</li><li>J’ai dit ce que la production instantanée demande en puissance à la pointe</li></ul></section>
 <h2 id="ce-qu-on-a-fait-en-seance">Ce qu’on a fait en séance</h2>
 <div class="etapes">
 <ol type="1">
-<li>Lire le relevé horaire : volumes du soir, heure de pointe</li>
-<li>Expliquer l’écart entre la pointe du matin et celle du soir dans un internat</li>
-<li>Calculer l’énergie d’une journée complète</li>
-<li>Calculer la puissance d’une production instantanée, sur l’heure de pointe</li>
-<li>Comparer avec la solution à accumulation</li>
+<li>Lire le schéma d’une production d’eau chaude et nommer ses organes, avec les cartes</li>
+<li>Lire un profil de puisage, et calculer l’énergie d’une journée</li>
+<li>Calculer la puissance d’une production instantanée, et la comparer à ce que la chaudière peut donner</li>
+<li>Tracer les températures le long de la boucle, et trouver où elle passe sous 50 °C</li>
+<li>Calculer le débit de bouclage, et répondre au gestionnaire</li>
+<li>Passer une nuit avec la boucle d’un gymnase, sur la simulation</li>
 </ol>
 </div>
-<div class="mission">
-<p><strong>Mission chantier n° 3</strong></p>
-<p>Repérer le mode de production d’ECS du bâtiment de l’entreprise : instantané, accumulation, semi-accumulation. Relever le volume du ballon s’il y en a un, et la puissance de l’échangeur ou de la résistance.</p>
-<p>Vérifier la présence d’une boucle de circulation, et relever la température de consigne. Demander si un carnet sanitaire est tenu.</p>
-</div>
+<h2 id="sur-la-simulation">Sur la simulation</h2>
+<p>Le TD de la séance : <a href="https://forneris.fr/bts-fed-c/simulations/eau-chaude-sanitaire.html#u41">« L’eau chaude du gymnase »</a>, parties 3 et 4 : la boucle la nuit, puis la proposition de l’exploitant. Pour vous entraîner seul, <a href="https://forneris.fr/bts-fed-c/simulations/eau-chaude-sanitaire.html">le mode libre de la même simulation</a>.</p>
 <h2 id="vous-verifier">Vous vérifier</h2>
 <div class="quiz">
 <ul>
-<li>L’énergie d’une journée d’ECS dépend : <strong>du volume total</strong> | de l’heure de pointe</li>
-<li>La puissance d’une production instantanée se calcule sur : <strong>l’heure de pointe</strong> | la moyenne journalière</li>
-<li>Le stockage permet de réduire : <strong>la puissance</strong> | l’énergie</li>
-<li>Le coefficient 1,163 s’applique ici à un volume en : <strong>litres</strong> | mètres cubes</li>
+<li>Une production instantanée se dimensionne sur : <strong>le débit de pointe</strong> | la consommation de la journée</li>
+<li>Le stockage change : <strong>la puissance à installer</strong> | l’énergie consommée dans la journée</li>
+<li>Dans un ballon, l’eau froide entre : <strong>en bas</strong> | en haut</li>
 <li>Chauffer 100 L de 10 à 60 °C demande environ : <strong>5,8 kWh</strong> | 58 kWh</li>
+<li>Une douche représente à peu près : <strong>3 kWh</strong> | 30 kWh</li>
 <li>La légionelle prolifère surtout entre : <strong>25 et 45 °C</strong> | 55 et 70 °C</li>
-<li>La température minimale à maintenir en tout point du bouclage est de : <strong>50 °C</strong> | 45 °C</li>
-<li>Le bouclage sert à : <strong>éviter d’attendre l’eau chaude</strong> | augmenter la pression</li>
+<li>En tout point de la boucle, l’eau doit rester au moins à : <strong>50 °C</strong> | 45 °C</li>
+<li>Le mitigeur thermostatique se pose : <strong>sur chaque piquage</strong> | en sortie du ballon</li>
+<li>Une boucle se règle d’abord pour : <strong>limiter l’écart départ et retour</strong> | puiser plus vite</li>
+<li>Un tube nu dans des combles perd, par rapport à un tube calorifugé : <strong>trois ou quatre fois plus</strong> | à peu près autant</li>
 </ul>
 </div>
+<h2 id="apres-la-seance">Après la séance</h2>
+<p><strong>Le cas « La sous-station du gymnase »</strong>, dans <a href="https://forneris.fr/bts-fed-c/cartes-hydraulique/CARTES-HYDRAULIQUE.html#cas-3a">les cartes de l’hydraulique</a>, niveau 3, quarante-cinq minutes, seul, avant la séance 11. Puis « Je me teste », en mode révision, sur les cartes C-73, C-75, C-76 et C-78.</p>
 <h2 id="pour-aller-plus-loin">Pour aller plus loin</h2>
-<p><strong>La simulation de la séance</strong> : <a href="https://forneris.fr/bts-fed-c/simulations/eau-chaude-sanitaire.html">l’eau chaude sanitaire</a>, un préparateur dont on voit la stratification pendant la pointe des douches, puis une boucle qu’on mesure la nuit, quand plus personne ne puise.</p>
 <div class="replis"><p class="chapeau">Pour aller plus loin</p><details class="appro"><summary><span class="niv"></span><span class="titre-appro">Instantané, accumulation, semi-accumulation</span><span class="etiq">Pour aller plus loin</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Trois familles, trois compromis entre puissance et volume.</p>
 <div class="enveloppe-tbl"><table>
 <colgroup>
@@ -144,7 +208,7 @@
 </tbody>
 </table></div>
 <p>La semi-accumulation est le compromis le plus fréquent en tertiaire : un ballon modeste, une puissance d’échange soutenue, et une régulation qui reconstitue le stock entre deux pointes.</p>
-<p><strong>Le choix n’est pas seulement technique.</strong> Le sujet U41 2026 impose une production instantanée pour les douches des ateliers, non pas pour la performance mais pour supprimer tout volume stagnant, donc tout risque de légionelle. L’inconvénient est assumé : une puissance de pointe très élevée, et un appel de puissance sur le réseau de chaleur qui se paie à l’abonnement.</p></div></details>
+<p><strong>Le choix n’est pas seulement technique.</strong> Pour des douches collectives, on choisit parfois l’instantané non pour la performance, mais pour supprimer tout volume stagnant, donc tout risque de légionelle. L’inconvénient est assumé : une puissance de pointe très élevée, qui se paie à l’abonnement.</p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Ce que coûte vraiment un bouclage</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Une boucle de distribution perd de la chaleur en permanence, chauffage arrêté compris. L’ordre de grandeur se calcule simplement : une longueur de tube calorifugé, une déperdition linéique de 8 à 15 W/m selon le diamètre et l’isolant, et <strong>8 760 heures par an</strong>.</p>
 <p>Cent mètres de boucle à 10 W/m, c’est 1 kW en continu, soit près de <strong>8 800 kWh par an</strong>, souvent davantage que l’eau chaude réellement puisée dans un petit tertiaire.</p>
 <p>Trois leviers, dans cet ordre :</p>
@@ -186,9 +250,9 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>60 °C</strong></td>
-<td>au ballon</td>
-<td>détruire la légionelle, qui prolifère entre 25 et 45 °C</td>
+<td><strong>55 °C min</strong></td>
+<td>en sortie d’un stockage de plus de 400 L</td>
+<td>détruire la légionelle, qui prolifère entre 25 et 45 °C ; on règle souvent le ballon à 60 °C</td>
 </tr>
 <tr>
 <td><strong>50 °C min</strong></td>
@@ -204,9 +268,9 @@
 </table></div>
 <p><strong>Les deux premières s’opposent à la troisième</strong>, et c’est tout le problème : on stocke chaud pour la sécurité sanitaire, on distribue tiède pour la sécurité physique. La conciliation se fait par un <strong>mitigeur thermostatique</strong>, posé au plus près du point de puisage, jamais au départ du ballon, sinon toute la distribution retombe dans la plage à risque.</p>
 <div class="piege">
-<p>Baisser la consigne du ballon pour économiser est un raisonnement qui se tient sur le plan énergétique et qui est <strong>interdit</strong> sur le plan sanitaire. À l’épreuve comme en entreprise, une réponse qui propose de descendre sous 60 °C au stockage est fausse, quel que soit le gain calculé.</p>
+<p>Baisser la consigne du ballon pour économiser est un raisonnement qui se tient sur le plan énergétique et qui est <strong>interdit</strong> sur le plan sanitaire. À l’épreuve comme en entreprise, une réponse qui propose de descendre sous 55 °C en sortie du stockage est fausse, quel que soit le gain calculé.</p>
 </div>
-<p><strong>Ce qu’un brûlure coûte en secondes</strong>, et qui explique le 50 °C : plus l’eau est chaude, plus la brûlure est rapide. C’est ce qui rend la protection indispensable dans les établissements accueillant des enfants, des personnes âgées ou handicapées, et ces établissements sont précisément ceux qu’on rencontre dans les sujets d’épreuve.</p>
+<p><strong>Ce qu’une brûlure coûte en secondes</strong>, et qui explique le 50 °C : plus l’eau est chaude, plus la brûlure est rapide. C’est ce qui rend la protection indispensable dans les établissements accueillant des enfants, des personnes âgées ou handicapées, et ces établissements sont précisément ceux qu’on rencontre dans les sujets d’épreuve.</p>
 <blockquote>
 <p>Les valeurs exactes et les locaux concernés sont fixés par la réglementation sanitaire ; <strong>elles se lisent au CCTP ou dans le texte que le sujet cite</strong>, jamais de mémoire. Ce qui se retient, c’est le triangle des trois températures et la raison de chacune.</p>
 </blockquote></div></details>
@@ -265,7 +329,7 @@
 <p><strong>Le montage type.</strong> Des capteurs, un ballon à <strong>deux échangeurs</strong>, le solaire en bas, où l’eau est la plus froide et où l’échange est donc le meilleur, l’appoint en haut, et une régulation différentielle : le circulateur solaire démarre quand le capteur est plus chaud que le bas du ballon d’un écart donné, et s’arrête sinon. Deux sondes, un comparateur : c’est la boucle la plus simple du programme, et c’est de la régulation, savoir B11.</p>
 <p><strong>Le taux de couverture.</strong> On ne dimensionne jamais le solaire pour tout couvrir : au-delà d’environ 60 % du besoin annuel, les capteurs surproduisent l’été, le ballon monte en surchauffe, et le surcoût ne se rentabilise plus. <strong>L’appoint n’est pas un aveu d’échec, c’est le dimensionnement juste.</strong></p>
 <p><strong>La pompe à chaleur sur ECS</strong>, elle, pose un problème inverse et intéressant : son COP chute quand la température de production monte, or l’ECS demande 60 °C , la température la plus défavorable de tout le bâtiment. C’est le lien avec la séance 13 : plus l’écart entre l’évaporateur et le condenseur est grand, plus le COP s’effondre.</p>
-<p>Deux réponses de bureau d’études : produire à 50 °C par la PAC et <strong>finir à 60 °C par un appoint électrique</strong>, ce qui préserve le COP sur l’essentiel de l’énergie ; ou choisir un fluide et un compresseur haute température, plus chers. Le sujet 2025 pose exactement cette question sous la forme du préchauffage de l’ECS par récupération sur les eaux grises, même logique : <strong>on préchauffe avec ce qui est gratuit, on finit avec ce qui est cher.</strong></p></div></details>
+<p>Deux réponses de bureau d’études : produire à 50 °C par la PAC et <strong>finir à 60 °C par un appoint électrique</strong>, ce qui préserve le COP sur l’essentiel de l’énergie ; ou choisir un fluide et un compresseur haute température, plus chers. Le préchauffage de l’ECS par récupération de chaleur suit la même logique : <strong>on préchauffe avec ce qui est gratuit, on finit avec ce qui est cher.</strong></p></div></details>
 <details class="appro be"><summary><span class="niv"></span><span class="titre-appro">Habilitation fluides, la pompe à chaleur à CO₂, faite pour l&#39;eau chaude</span><span class="etiq">Bureau d'études</span><span class="chev">&rsaquo;</span></summary><div class="corps"><p>Cette séance a montré que l’eau chaude sanitaire se prépare à <strong>60 °C</strong> et que le bouclage doit rester au-dessus de 50. C’est une contrainte sévère pour une pompe à chaleur, sauf pour une, qui est faite pour ça.</p>
 <p>Le <strong>R744</strong>, c’est-à-dire le CO₂, a un GWP de <strong>1</strong> et travaille entre <strong>80 et 120 bar</strong>. Au-dessus de 31 °C, il ne condense plus : il se refroidit sans changer d’état. On parle de cycle <strong>transcritique</strong>, et le condenseur devient un <strong>refroidisseur de gaz</strong>.</p>
 <div class="cle">
